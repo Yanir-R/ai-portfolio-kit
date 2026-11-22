@@ -2,7 +2,7 @@ name: Backend Deploy v2
 
 on:
   push:
-    branches: [main, prod]
+    branches: [main]
     paths:
       - "backend/**"
       - ".github/workflows/backend-deploy.yml"
@@ -63,9 +63,10 @@ jobs:
           pip install pip-audit
           pip-audit -r requirements.txt
 
-  # Deploys only on push to main/prod. Both branches target the same fixed Cloud
-  # Run service names, so running this for a pull request would overwrite the
-  # shared environment with unreviewed code.
+  # Deploys only on push to main. The deploy targets fixed Cloud Run service
+  # names, so running it for a pull request, or from the stale prod branch
+  # (removed from the triggers), would overwrite the shared environment with
+  # unreviewed or old code.
   deploy:
     if: github.event_name == 'push'
     needs: verify
@@ -80,11 +81,8 @@ jobs:
       - name: Set up environment variables
         id: env
         run: |
-          if [[ ${{ github.ref }} == 'refs/heads/prod' ]]; then
-            echo "ENVIRONMENT=production" >> $GITHUB_ENV
-          else
-            echo "ENVIRONMENT=development" >> $GITHUB_ENV
-          fi
+          # Only main deploys, and main has always deployed with this value.
+          echo "ENVIRONMENT=development" >> $GITHUB_ENV
           echo "GCP_PROJECT=${{ secrets.GCP_DEV_PROJECT_ID }}" >> $GITHUB_ENV
 
       - name: Set up Python
