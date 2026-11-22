@@ -69,7 +69,7 @@ Cloudflare Pages uses **Direct Upload**: GitHub Actions builds and `wrangler pag
 
 `deploy-pages` runs its own build rather than reusing `verify`'s output because jobs get separate runners and no artifact is passed between them. Both builds produce the same bundle: every build value is committed in `frontend/site.config.ts`.
 
-`--branch` drives Pages' production vs preview split, and is set from the pushed branch. Set the Pages project's production branch to `prod` to mirror the Cloud Run flow.
+`--branch` drives Pages' production vs preview split, and is set from the pushed branch. Only `main` triggers deploys, so the Pages project's production branch must be `main`.
 
 ## Backend deploy specifics
 

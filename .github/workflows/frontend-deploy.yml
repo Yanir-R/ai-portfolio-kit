@@ -2,7 +2,7 @@ name: Frontend Deploy v2
 
 on:
   push:
-    branches: [main, prod]
+    branches: [main]
     paths:
       - "frontend/**"
       - ".github/workflows/frontend-deploy.yml"
@@ -115,8 +115,9 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: ${{ env.FRONTEND_DIR }}
-          # --branch drives Pages' production vs preview split; set the Pages
-          # project's production branch to `prod` to mirror the Cloud Run flow.
+          # --branch drives Pages' production vs preview split. Only main
+          # triggers this workflow, so the Pages project's production branch
+          # must be `main` for these deploys to reach production.
           command: >-
             pages deploy dist
             --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }}
