@@ -25,7 +25,7 @@ def test_a_refused_model_is_not_retried_while_cooling():
     assert gemini_helper._model_is_cooling("gemini-flash-latest", now) is True
     # Untouched models stay available; one model refusing must not sideline the
     # rest of the fallback chain.
-    assert gemini_helper._model_is_cooling("gemini-3.5-flash", now) is False
+    assert gemini_helper._model_is_cooling("gemini-3.8-flash", now) is False
 
 
 def test_cooldown_expires_and_its_entry_is_discarded():

@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # alias itself starts misbehaving.
 MODELS = (
     "gemini-flash-latest",
-    "gemini-3.5-flash",
+    "gemini-3.8-flash",
     "gemini-flash-lite-latest",
 )
 
