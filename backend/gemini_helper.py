@@ -96,10 +96,6 @@ def _start_cooldown(model_id: str, now: float) -> None:
     with _cooldown_lock:
         _model_cooldowns[model_id] = now + MODEL_COOLDOWN_SECONDS
 
-# Low but not zero: answers should be stable and factual across reloads, while
-# still reading as conversation rather than a canned response.
-TEMPERATURE = 0.3
-
 # A hard stop on cost per request. It is NOT a length control, and sizing it as
 # one truncates answers: on Gemini 3.x this budget is shared with the model's
 # internal thinking tokens, which are spent first. At a 400-token budget the
@@ -207,7 +203,6 @@ def get_gemini_response(
     )
     config = types.GenerateContentConfig(
         system_instruction=build_system_instruction(knowledge),
-        temperature=TEMPERATURE,
         max_output_tokens=MAX_OUTPUT_TOKENS,
     )
     contents = build_contents(user_question, conversation_history)
