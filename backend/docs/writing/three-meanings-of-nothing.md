@@ -88,9 +88,6 @@ article
 ## Source
 Company blog
 
-## URL
-https://daltonhq.ai/blog/three-meanings-of-nothing
-
 ## Date
 2026-04-05
 

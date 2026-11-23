@@ -14,7 +14,7 @@ export interface WritingEntry {
     /** Where it was first published, shown as the attribution. */
     source: string;
     /** Canonical link to the original. */
-    url: string;
+    url?: string;
     /** ISO date, so it sorts as text. */
     date: string;
     /** Root-relative paths under public/writing, in the order they appear. */
