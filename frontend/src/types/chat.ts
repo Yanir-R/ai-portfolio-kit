@@ -54,7 +54,7 @@ export interface AnswerTrace {
      * notes went; 'unfocused' means nothing distinguished one document from
      * another, so all of them did. Rendering the last as a plain count would
      * claim a selectivity it does not have, so it reads differently.
-     * 'core_only' (only with RETRIEVAL_MODE=lexical) means the question had
+     * 'core_only' (RETRIEVAL_MODE=lexical or hybrid) means the question had
      * topical words but no document passed the relevance gate, so only his
      * notes went; it renders as the plain count, which is exactly what it is.
      */
