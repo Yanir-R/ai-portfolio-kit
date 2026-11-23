@@ -1,12 +1,18 @@
 # Knowledge retrieval upgrade plan (RAG)
 
-Status: **PLAN ONLY** for R2–R4. No dependency is installed, nothing is pushed, and no GCP or
+Status: **PLAN ONLY** for R3–R4. No dependency is installed, nothing is pushed, and no GCP or
 Cloudflare setting changes. Each phase below needs Yanir's explicit go-ahead before work starts.
 **Phase R0 was approved by Yanir on 2026-11-23** (offline eval set and baseline against the current
 selector only; no new retrieval code, no live Gemini calls). **Phase R1 was approved by Yanir on
 2026-11-23 and is implemented on the local branch only, behind `RETRIEVAL_MODE=lexical` (default
 unchanged). Its gate is NOT met:** held-out `paraphrase` and `multi_doc` recall fell below R0; every
 other class is equal or better. Results and open questions: `docs/plans/RAG-R1-RESULTS.md`.
+**Phase R2 (offline parts) and R3 preparation were approved by Yanir on 2026-11-23** (voice, 15:09
+Asia/Jerusalem; R1 accepted as is, R2 treated as the fix for the paraphrase miss). **R2 is
+implemented on the local branch only, behind `RETRIEVAL_MODE=hybrid` (default unchanged). Its gate
+is NOT yet evaluated:** that needs the real index (live embedding build, Yanir's OK on quota) and
+live query embeddings. No live call has been made. Results: `docs/plans/RAG-R2-RESULTS.md`; R3
+steps: `docs/plans/RAG-R3-PREP.md`.
 
 Prepared 2026-11-23 against `origin/main` at `e9215c1`. Research sources were read on 2026-11-23.
 Anything a source did not state is marked **(unverified)**. Updated the same day with metadata
@@ -734,8 +740,8 @@ questions, focus, a precise trace and growth headroom, not cost.
 |---|---|---|---|
 | **R0: Measure** — **approved by Yanir 2026-11-23** | Author `questions.v1.json`; offline harness against the *current* `context.get_knowledge` + `selection.select` (no new retrieval code, no installs, no live Gemini calls); write `docs/plans/RAG-R0-BASELINE.md` plus a JSON results file. Production logging of cached tokens is *not* in this slice. | None | Baseline numbers: question counts per category, recall and precision by category, token estimates, selection latency (median / p95), Hebrew behaviour of today's Latin-only tokenizer |
 | **R1: Chunks + BM25** — **approved 2026-11-23; implemented locally; gate not met** (see `RAG-R1-RESULTS.md`) | `chunking.py`, BM25 in pure Python, English stemmer kept, Hebrew normaliser added, chunk-level lexical retrieval behind a flag (`RETRIEVAL_MODE=lexical`), grouping by document, `CORE_ONLY` miss path | None | Eval ≥ baseline; all tests green, including Hebrew fixtures |
-| **R2: Dense + RRF** | `tools/build_index.py`, committed `chunks.v1.json` with the section 5.1 schema, CI staleness check, query embedding with LRU, timeout and BM25 fallback, RRF; flag `RETRIEVAL_MODE=hybrid`; index verification and perf tests | Uses the existing google-genai and key. **Live embed calls during build need Yanir's OK** (quota). CI change is in-repo only | Eval: better on paraphrases and Hebrew, no regression; p95 added latency measured against section 6.2 |
-| **R3: Default on** | Flip the default flag; README limitation update; optional "more detail" offset; retire `selection.py` or keep it as a comparison baseline (not a send-all fallback) | Deploy (Tier 3) | Live spot checks OK; rollback = flag |
+| **R2: Dense + RRF** — **approved 2026-11-23 (offline parts); implemented locally; gate not yet evaluated** (see `RAG-R2-RESULTS.md`) | `tools/build_index.py`, `chunks.v1.json` with the section 5.1 schema (builder built; **real index pending**), CI staleness check (pytest in backend `verify`), query embedding with LRU, timeout and BM25 fallback, RRF; flag `RETRIEVAL_MODE=hybrid`; index verification and perf tests (fake embedding client only) | Uses the existing google-genai and key. **Live embed calls during build need Yanir's OK** (quota); the builder refuses without `--allow-live-embedding` and a key in env. CI change is in-repo only | Eval: better on paraphrases and Hebrew, no regression; p95 added latency measured against section 6.2. **Pending:** real index, `measure_r2.py --real` on the held-out half, `RRF_K` / `MIN_COSINE` fitted on the tune half |
+| **R3: Default on** — steps prepared in `RAG-R3-PREP.md`, not started | Flip the default flag; README limitation update; optional "more detail" offset; retire `selection.py` or keep it as a comparison baseline (not a send-all fallback) | Deploy (Tier 3) | Live spot checks OK; rollback = flag |
 | **R4 (only if corpus > ~20k tokens / ~40 docs, or the Hebrew / latency eval demands it)** | Revisit numpy or sqlite-vec, the Batch API, explicit caching on a paid tier, File Search, or a heavier Hebrew analyzer | Would need a security check and approval | n/a |
 
 Push, PR, merge and deploy at every phase follow the standing rule: nothing without Yanir's yes.
