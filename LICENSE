@@ -19,3 +19,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Scope: the MIT license above applies to the source code only. The owner's personal
+content is not covered by it and is all rights reserved, (c) Yanir Rot:
+
+- backend/docs/profile/ (profile and resume text)
+- backend/docs/projects/ and backend/docs/writing/ (project and writing documents)
+- frontend/public/og-image.png, frontend/public/projects/ and frontend/public/writing/ (images)
+- the owner's photo and the owner's name
+
+The example files in backend/docs/templates/ are part of the MIT-licensed code.
+See TRADEMARK.md for how the project name and personal content may be used.
