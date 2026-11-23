@@ -1,5 +1,7 @@
 # YANIR ROT - FULL-STACK AI ENGINEER
 
+Last verified: 2026-11-23
+
 ## CONTACT
 
 <!-- This file is published: it ships in a public repository and is served over the
@@ -16,14 +18,18 @@ Full-stack engineer specializing in production LLM and multi-agent systems. Work
 
 ## WORK EXPERIENCE
 
-### Founding Engineer - seed-stage AI SRE platform _Aug 2025 - present_
+### Founder & AI Engineer - PersonaKit _since Sep 2026_
+
+Building PersonaKit (https://personakit.me): accountable, source-linked, user-controlled AI memory.
+
+### Founding Engineer - Stealth _Aug 2025 – Sep 2026_
 
 <!-- The company is not named here, matching the public LinkedIn entry. This file
      is published and is also read by the site's chat, so it describes what was
      built and why it mattered - not the employer's internal topology, component
      inventory or incident metrics. Keep new bullets to that standard. -->
 
-Multi-agent LLM investigations over Kubernetes, AWS and observability telemetry, producing evidence-cited root-cause analysis.
+Built multi-agent LLM investigations over Kubernetes, AWS and observability telemetry that produced evidence-cited root-cause analysis. The role ended in Sep 2026.
 
 -   Designed an evidence-provenance architecture that binds citations to retrieved evidence rather than letting the synthesizing model choose them - removing a structural class of hallucinated citations instead of filtering them after the fact
 -   Cut multi-agent token cost and latency by root-causing runaway fan-out and context bloat, through agent decomposition, context compaction and circuit-breaker enforcement
