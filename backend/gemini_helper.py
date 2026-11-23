@@ -24,14 +24,16 @@ from prompt import NO_KNOWLEDGE_MESSAGE, build_contents, build_system_instructio
 
 logger = logging.getLogger(__name__)
 
-# Fallback models in order of preference. The "-latest" aliases track the
-# current generation, so a retirement upstream does not take chat down the way a
-# pinned name would; the pinned entry in the middle is the escape hatch if an
-# alias itself starts misbehaving.
+# Fallback models in order of preference. Only pinned stable model codes, no
+# "-latest" aliases: Google documents that a "-latest" alias is hot-swapped on
+# every new release and recommends that production apps use a specific stable
+# model (https://ai.google.dev/gemini-api/docs/models). A model change is
+# therefore a reviewed code change, and the cheaper stable models further down
+# the chain cover quota exhaustion or a retirement of the first entry.
 MODELS = (
-    "gemini-flash-latest",
     "gemini-3.8-flash",
-    "gemini-flash-lite-latest",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash-lite",
 )
 
 # Status codes that mean "this model is not usable for us right now", so the next

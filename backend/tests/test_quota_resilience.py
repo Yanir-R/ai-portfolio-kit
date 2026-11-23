@@ -20,23 +20,23 @@ from gemini_helper import BUSY_MESSAGE
 
 def test_a_refused_model_is_not_retried_while_cooling():
     now = time.monotonic()
-    gemini_helper._start_cooldown("gemini-flash-latest", now)
+    gemini_helper._start_cooldown("gemini-3.8-flash", now)
 
-    assert gemini_helper._model_is_cooling("gemini-flash-latest", now) is True
+    assert gemini_helper._model_is_cooling("gemini-3.8-flash", now) is True
     # Untouched models stay available; one model refusing must not sideline the
     # rest of the fallback chain.
-    assert gemini_helper._model_is_cooling("gemini-3.8-flash", now) is False
+    assert gemini_helper._model_is_cooling("gemini-3.6-flash", now) is False
 
 
 def test_cooldown_expires_and_its_entry_is_discarded():
     now = time.monotonic()
-    gemini_helper._start_cooldown("gemini-flash-latest", now)
+    gemini_helper._start_cooldown("gemini-3.8-flash", now)
     later = now + gemini_helper.MODEL_COOLDOWN_SECONDS + 1
 
-    assert gemini_helper._model_is_cooling("gemini-flash-latest", later) is False
+    assert gemini_helper._model_is_cooling("gemini-3.8-flash", later) is False
     # The entry is cleaned up rather than accumulating one per model per
     # refusal for the life of the process.
-    assert "gemini-flash-latest" not in gemini_helper._model_cooldowns
+    assert "gemini-3.8-flash" not in gemini_helper._model_cooldowns
 
 
 def test_429_puts_every_attempted_model_on_cooldown(stub_gemini, stub_knowledge):
@@ -119,3 +119,13 @@ def test_the_per_call_timeout_leaves_room_for_a_real_answer():
     # spend it entirely.
     assert gemini_helper.REQUEST_TIMEOUT_MS >= 40_000
     assert gemini_helper.TOTAL_DEADLINE_SECONDS * 1000 > gemini_helper.REQUEST_TIMEOUT_MS
+
+
+def test_models_are_pinned_stable_codes_without_aliases():
+    """Production uses pinned stable model codes only, stable model first."""
+    assert gemini_helper.MODELS, "at least one model is configured"
+    assert len(set(gemini_helper.MODELS)) == len(gemini_helper.MODELS), "no duplicates"
+    for model_id in gemini_helper.MODELS:
+        assert not model_id.endswith("-latest"), f"alias in MODELS: {model_id}"
+        assert "preview" not in model_id and "exp" not in model_id, model_id
+    assert gemini_helper.MODELS[0] == "gemini-3.8-flash"

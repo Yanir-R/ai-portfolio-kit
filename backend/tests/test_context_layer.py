@@ -380,7 +380,7 @@ def test_a_model_answer_reports_the_corpus_it_was_given():
     chosen = _whole_corpus_selection()
     answer = gemini_helper.Answer(
         text="an answer",
-        model="gemini-flash-latest",
+        model="gemini-3.8-flash",
         prompt_tokens=8_000,
         output_tokens=90,
         latency_ms=3_200,
@@ -389,7 +389,7 @@ def test_a_model_answer_reports_the_corpus_it_was_given():
 
     trace = main._answer_trace(answer, chosen)
 
-    assert trace["model"] == "gemini-flash-latest"
+    assert trace["model"] == "gemini-3.8-flash"
     # Every document is accounted for under some kind, so the breakdown a
     # visitor reads adds up to what was sent rather than to a subset of it.
     assert sum(entry["count"] for entry in trace["context"]) == len(
@@ -403,7 +403,7 @@ def test_the_corpus_estimate_is_never_shown_beside_the_measured_count():
     """`approx_tokens` is a chars-over-four guess at what `prompt_tokens`
     measures exactly. Publishing both invites a reader to pick one."""
     chosen = _whole_corpus_selection()
-    answer = gemini_helper.Answer(text="an answer", model="gemini-flash-latest")
+    answer = gemini_helper.Answer(text="an answer", model="gemini-3.8-flash")
 
     trace = main._answer_trace(answer, chosen)
 
