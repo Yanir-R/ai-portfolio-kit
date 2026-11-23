@@ -1,0 +1,3392 @@
+{
+  "schema_version": "1",
+  "measured_at": "2026-11-23T12:51:50+0200",
+  "selector": "backend/selection.py:select on origin/main behaviour (this worktree, no retrieval changes)",
+  "corpus_labels": [
+    "Profile / about-me",
+    "Profile / resume",
+    "Project / AI Chat Portfolio",
+    "Project / ReelSensei - AI Gaming Highlights",
+    "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+    "Writing / \"Nothing found.\"",
+    "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+    "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+    "Writing / 22.7 million tokens. One session. $340 burned.",
+    "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+  ],
+  "corpus_section_count": 10,
+  "corpus_approx_tokens": 8770,
+  "send_all_system_prompt_token_estimate": 9789,
+  "chars_per_token": 4,
+  "corpus_load_ms": 0.948425999013125,
+  "repeats_per_question": 51,
+  "warmup_per_question": 3,
+  "generation_latency": "not measured; no live Gemini calls",
+  "metric_notes": {
+    "recall": "fraction of expected_doc_labels present in the selected PROFILE",
+    "precision": "selected labels that are in expected_doc_labels or the always-allowed core, divided by selected count",
+    "unneeded": "selected labels that are neither expected nor the two core profile documents",
+    "tokens": "len(text) // CHARS_PER_TOKEN (repo constant 4), not provider usage",
+    "latency": "time.perf_counter around selection.select only, after warmup; median and p95 over repeats"
+  },
+  "n_questions": 55,
+  "overall": {
+    "n": 55,
+    "recall_macro": 0.8727272727272727,
+    "precision_macro": 0.7541558441558441,
+    "unneeded_docs_mean": 1.5272727272727273,
+    "full_recall_rate": 0.8545454545454545,
+    "desired_outcome_rate": 0.6545454545454545,
+    "actual_outcomes": {
+      "unfocused": 6,
+      "narrowed": 41,
+      "conversational": 8
+    },
+    "profile_tokens_median": 4103,
+    "profile_tokens_mean": 4006.7272727272725,
+    "profile_tokens_min": 1658,
+    "profile_tokens_max": 8770,
+    "system_prompt_tokens_median": 5121,
+    "system_prompt_tokens_mean": 5025.254545454545,
+    "system_prompt_tokens_min": 2677,
+    "system_prompt_tokens_max": 9789,
+    "select_latency_ms_median_of_medians": 0.008023000191315077,
+    "select_latency_ms_max_p95": 0.0188804997378611,
+    "select_latency_ms_p95_of_medians": 0.011836300109280266
+  },
+  "by_category": {
+    "direct_keyword": {
+      "n": 6,
+      "recall_macro": 1.0,
+      "precision_macro": 0.7583333333333333,
+      "unneeded_docs_mean": 1.6666666666666667,
+      "full_recall_rate": 1.0,
+      "desired_outcome_rate": 0.8333333333333334,
+      "actual_outcomes": {
+        "unfocused": 1,
+        "narrowed": 5
+      },
+      "profile_tokens_median": 3432.0,
+      "profile_tokens_mean": 3987.0,
+      "profile_tokens_min": 1658,
+      "profile_tokens_max": 8770,
+      "system_prompt_tokens_median": 4450.0,
+      "system_prompt_tokens_mean": 5005.5,
+      "system_prompt_tokens_min": 2677,
+      "system_prompt_tokens_max": 9789,
+      "select_latency_ms_median_of_medians": 0.007636000191268977,
+      "select_latency_ms_max_p95": 0.009788001079868991,
+      "select_latency_ms_p95_of_medians": 0.009234749086317606
+    },
+    "hebrew": {
+      "n": 10,
+      "recall_macro": 0.5,
+      "precision_macro": 0.975,
+      "unneeded_docs_mean": 0.1,
+      "full_recall_rate": 0.5,
+      "desired_outcome_rate": 0.5,
+      "actual_outcomes": {
+        "conversational": 8,
+        "narrowed": 2
+      },
+      "profile_tokens_median": 1658.0,
+      "profile_tokens_mean": 2005.5,
+      "profile_tokens_min": 1658,
+      "profile_tokens_max": 4103,
+      "system_prompt_tokens_median": 2677.0,
+      "system_prompt_tokens_mean": 3024.4,
+      "system_prompt_tokens_min": 2677,
+      "system_prompt_tokens_max": 5121,
+      "select_latency_ms_median_of_medians": 0.0026895004339166917,
+      "select_latency_ms_max_p95": 0.008154000170179643,
+      "select_latency_ms_p95_of_medians": 0.006730249515385367
+    },
+    "multi_doc": {
+      "n": 5,
+      "recall_macro": 0.9,
+      "precision_macro": 0.74,
+      "unneeded_docs_mean": 1.8,
+      "full_recall_rate": 0.8,
+      "desired_outcome_rate": 0.8,
+      "actual_outcomes": {
+        "unfocused": 1,
+        "narrowed": 4
+      },
+      "profile_tokens_median": 4522,
+      "profile_tokens_mean": 5268.6,
+      "profile_tokens_min": 3743,
+      "profile_tokens_max": 8770,
+      "system_prompt_tokens_median": 5540,
+      "system_prompt_tokens_mean": 6287.0,
+      "system_prompt_tokens_min": 4762,
+      "system_prompt_tokens_max": 9789,
+      "select_latency_ms_median_of_medians": 0.010685000233934261,
+      "select_latency_ms_max_p95": 0.01546949988551205,
+      "select_latency_ms_p95_of_medians": 0.013671200213138945
+    },
+    "no_word_match": {
+      "n": 5,
+      "recall_macro": 1.0,
+      "precision_macro": 0.5066666666666666,
+      "unneeded_docs_mean": 2.8,
+      "full_recall_rate": 1.0,
+      "desired_outcome_rate": 0.0,
+      "actual_outcomes": {
+        "narrowed": 4,
+        "unfocused": 1
+      },
+      "profile_tokens_median": 4696,
+      "profile_tokens_mean": 4771.6,
+      "profile_tokens_min": 2077,
+      "profile_tokens_max": 8770,
+      "system_prompt_tokens_median": 5714,
+      "system_prompt_tokens_mean": 5790.0,
+      "system_prompt_tokens_min": 3095,
+      "system_prompt_tokens_max": 9789,
+      "select_latency_ms_median_of_medians": 0.008184000762412325,
+      "select_latency_ms_max_p95": 0.01106650051951874,
+      "select_latency_ms_p95_of_medians": 0.008582399823353626
+    },
+    "off_topic": {
+      "n": 5,
+      "recall_macro": 1.0,
+      "precision_macro": 0.6,
+      "unneeded_docs_mean": 2.8,
+      "full_recall_rate": 1.0,
+      "desired_outcome_rate": 0.4,
+      "actual_outcomes": {
+        "unfocused": 1,
+        "narrowed": 4
+      },
+      "profile_tokens_median": 5133,
+      "profile_tokens_mean": 4522.0,
+      "profile_tokens_min": 1658,
+      "profile_tokens_max": 8770,
+      "system_prompt_tokens_median": 6151,
+      "system_prompt_tokens_mean": 5540.6,
+      "system_prompt_tokens_min": 2677,
+      "system_prompt_tokens_max": 9789,
+      "select_latency_ms_median_of_medians": 0.007980001100804657,
+      "select_latency_ms_max_p95": 0.009936000424204394,
+      "select_latency_ms_p95_of_medians": 0.009207000039168634
+    },
+    "paraphrase": {
+      "n": 7,
+      "recall_macro": 0.7857142857142857,
+      "precision_macro": 0.7357142857142858,
+      "unneeded_docs_mean": 1.5714285714285714,
+      "full_recall_rate": 0.7142857142857143,
+      "desired_outcome_rate": 0.8571428571428571,
+      "actual_outcomes": {
+        "unfocused": 1,
+        "narrowed": 6
+      },
+      "profile_tokens_median": 4522,
+      "profile_tokens_mean": 4883.857142857143,
+      "profile_tokens_min": 2096,
+      "profile_tokens_max": 8770,
+      "system_prompt_tokens_median": 5540,
+      "system_prompt_tokens_mean": 5902.285714285715,
+      "system_prompt_tokens_min": 3114,
+      "system_prompt_tokens_max": 9789,
+      "select_latency_ms_median_of_medians": 0.0109329994302243,
+      "select_latency_ms_max_p95": 0.0188804997378611,
+      "select_latency_ms_p95_of_medians": 0.016860199502843894
+    },
+    "profile": {
+      "n": 6,
+      "recall_macro": 1.0,
+      "precision_macro": 0.7111111111111111,
+      "unneeded_docs_mean": 2.0,
+      "full_recall_rate": 1.0,
+      "desired_outcome_rate": 0.5,
+      "actual_outcomes": {
+        "narrowed": 5,
+        "unfocused": 1
+      },
+      "profile_tokens_median": 2880.5,
+      "profile_tokens_mean": 3703.5,
+      "profile_tokens_min": 1658,
+      "profile_tokens_max": 8770,
+      "system_prompt_tokens_median": 3899.0,
+      "system_prompt_tokens_mean": 4722.166666666667,
+      "system_prompt_tokens_min": 2677,
+      "system_prompt_tokens_max": 9789,
+      "select_latency_ms_median_of_medians": 0.007106000339263119,
+      "select_latency_ms_max_p95": 0.009716000022308435,
+      "select_latency_ms_p95_of_medians": 0.008431000424025115
+    },
+    "project": {
+      "n": 5,
+      "recall_macro": 1.0,
+      "precision_macro": 0.82,
+      "unneeded_docs_mean": 0.8,
+      "full_recall_rate": 1.0,
+      "desired_outcome_rate": 1.0,
+      "actual_outcomes": {
+        "narrowed": 5
+      },
+      "profile_tokens_median": 4522,
+      "profile_tokens_mean": 4695.0,
+      "profile_tokens_min": 4103,
+      "profile_tokens_max": 5788,
+      "system_prompt_tokens_median": 5540,
+      "system_prompt_tokens_mean": 5713.4,
+      "system_prompt_tokens_min": 5121,
+      "system_prompt_tokens_max": 6807,
+      "select_latency_ms_median_of_medians": 0.008452001566183753,
+      "select_latency_ms_max_p95": 0.015397000424854923,
+      "select_latency_ms_p95_of_medians": 0.009962199328583665
+    },
+    "writing": {
+      "n": 6,
+      "recall_macro": 1.0,
+      "precision_macro": 0.7380952380952381,
+      "unneeded_docs_mean": 1.5,
+      "full_recall_rate": 1.0,
+      "desired_outcome_rate": 1.0,
+      "actual_outcomes": {
+        "narrowed": 6
+      },
+      "profile_tokens_median": 3447.5,
+      "profile_tokens_mean": 3949.8333333333335,
+      "profile_tokens_min": 2058,
+      "profile_tokens_max": 6781,
+      "system_prompt_tokens_median": 4465.5,
+      "system_prompt_tokens_mean": 4968.0,
+      "system_prompt_tokens_min": 3076,
+      "system_prompt_tokens_max": 7799,
+      "select_latency_ms_median_of_medians": 0.009014999704959337,
+      "select_latency_ms_max_p95": 0.01829150005505653,
+      "select_latency_ms_p95_of_medians": 0.01036200092130457
+    }
+  },
+  "by_language": {
+    "en": {
+      "n": 45,
+      "recall_macro": 0.9555555555555556,
+      "precision_macro": 0.7050793650793651,
+      "unneeded_docs_mean": 1.8444444444444446,
+      "full_recall_rate": 0.9333333333333333,
+      "desired_outcome_rate": 0.6888888888888889,
+      "actual_outcomes": {
+        "unfocused": 6,
+        "narrowed": 39
+      },
+      "profile_tokens_median": 4368,
+      "profile_tokens_mean": 4451.444444444444,
+      "profile_tokens_min": 1658,
+      "profile_tokens_max": 8770,
+      "system_prompt_tokens_median": 5386,
+      "system_prompt_tokens_mean": 5469.888888888889,
+      "system_prompt_tokens_min": 2677,
+      "system_prompt_tokens_max": 9789,
+      "select_latency_ms_median_of_medians": 0.008452001566183753,
+      "select_latency_ms_max_p95": 0.0188804997378611,
+      "select_latency_ms_p95_of_medians": 0.013196800500736565
+    },
+    "he": {
+      "n": 10,
+      "recall_macro": 0.5,
+      "precision_macro": 0.975,
+      "unneeded_docs_mean": 0.1,
+      "full_recall_rate": 0.5,
+      "desired_outcome_rate": 0.5,
+      "actual_outcomes": {
+        "conversational": 8,
+        "narrowed": 2
+      },
+      "profile_tokens_median": 1658.0,
+      "profile_tokens_mean": 2005.5,
+      "profile_tokens_min": 1658,
+      "profile_tokens_max": 4103,
+      "system_prompt_tokens_median": 2677.0,
+      "system_prompt_tokens_mean": 3024.4,
+      "system_prompt_tokens_min": 2677,
+      "system_prompt_tokens_max": 5121,
+      "select_latency_ms_median_of_medians": 0.0026895004339166917,
+      "select_latency_ms_max_p95": 0.008154000170179643,
+      "select_latency_ms_p95_of_medians": 0.006730249515385367
+    }
+  },
+  "latency_all_questions": {
+    "median_of_medians_ms": 0.008023000191315077,
+    "p95_of_medians_ms": 0.011836300109280266,
+    "max_median_ms": 0.018196999008068815,
+    "max_p95_ms": 0.0188804997378611,
+    "min_median_ms": 0.0025610006559873
+  },
+  "miss_and_imprecision_count": 36,
+  "worst_misses": [
+    {
+      "id": "q-en-paraphrase-04",
+      "category": "paraphrase",
+      "language": "en",
+      "question": "How expensive can a single coding-assistant sitting get?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 0.0,
+      "precision": 0.5,
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "unneeded_count": 2,
+      "unneeded_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-he-01",
+      "category": "hebrew",
+      "language": "he",
+      "question": "ספר לי על והפרויקטים שלך בתחום ההיילייטים.",
+      "actual_outcome": "conversational",
+      "expected_outcome": "narrowed",
+      "recall": 0.0,
+      "precision": 1.0,
+      "expected_missing": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 0,
+      "unneeded_labels": [],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ]
+    },
+    {
+      "id": "q-he-02",
+      "category": "hebrew",
+      "language": "he",
+      "question": "כשכתבת על שריפת טוקנים, מה היו המספרים?",
+      "actual_outcome": "conversational",
+      "expected_outcome": "narrowed",
+      "recall": 0.0,
+      "precision": 1.0,
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "unneeded_count": 0,
+      "unneeded_labels": [],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ]
+    },
+    {
+      "id": "q-he-03",
+      "category": "hebrew",
+      "language": "he",
+      "question": "מה כתבת על כשלי הכלים של סוכנים?",
+      "actual_outcome": "conversational",
+      "expected_outcome": "narrowed",
+      "recall": 0.0,
+      "precision": 1.0,
+      "expected_missing": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_count": 0,
+      "unneeded_labels": [],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ]
+    },
+    {
+      "id": "q-he-06",
+      "category": "hebrew",
+      "language": "he",
+      "question": "מהם הפרויקטים שלך?",
+      "actual_outcome": "conversational",
+      "expected_outcome": "narrowed",
+      "recall": 0.0,
+      "precision": 1.0,
+      "expected_missing": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 0,
+      "unneeded_labels": [],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ]
+    },
+    {
+      "id": "q-he-07",
+      "category": "hebrew",
+      "language": "he",
+      "question": "למה העבודה שלך נעצרה ברילסנסיי?",
+      "actual_outcome": "conversational",
+      "expected_outcome": "narrowed",
+      "recall": 0.0,
+      "precision": 1.0,
+      "expected_missing": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 0,
+      "unneeded_labels": [],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ]
+    },
+    {
+      "id": "q-en-multi-05",
+      "category": "multi_doc",
+      "language": "en",
+      "question": "You have talked about what a single question costs in production, and also about a coding-assistant session that got very expensive. What are those two accounts?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 0.5,
+      "precision": 0.5,
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "unneeded_count": 2,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-paraphrase-06",
+      "category": "paraphrase",
+      "language": "en",
+      "question": "Why shouldn't a missing record and a failed call be reported the same way?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 0.5,
+      "precision": 0.75,
+      "expected_missing": [
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ]
+    },
+    {
+      "id": "q-en-nomatch-05",
+      "category": "no_word_match",
+      "language": "en",
+      "question": "Have you given a talk on WebAssembly SIMD?",
+      "actual_outcome": "unfocused",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.2,
+      "expected_missing": [],
+      "unneeded_count": 8,
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-offtopic-01",
+      "category": "off_topic",
+      "language": "en",
+      "question": "Can you give me a lasagna recipe?",
+      "actual_outcome": "unfocused",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.2,
+      "expected_missing": [],
+      "unneeded_count": 8,
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-profile-03",
+      "category": "profile",
+      "language": "en",
+      "question": "Tell me about Hermes.",
+      "actual_outcome": "unfocused",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.2,
+      "expected_missing": [],
+      "unneeded_count": 8,
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-direct-01",
+      "category": "direct_keyword",
+      "language": "en",
+      "question": "Tell me about ReelSensei.",
+      "actual_outcome": "unfocused",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.3,
+      "expected_missing": [],
+      "unneeded_count": 7,
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-multi-01",
+      "category": "multi_doc",
+      "language": "en",
+      "question": "Compare your two projects.",
+      "actual_outcome": "unfocused",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.4,
+      "expected_missing": [],
+      "unneeded_count": 6,
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-paraphrase-01",
+      "category": "paraphrase",
+      "language": "en",
+      "question": "What have you written about evals?",
+      "actual_outcome": "unfocused",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.4,
+      "expected_missing": [],
+      "unneeded_count": 6,
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-writing-01",
+      "category": "writing",
+      "language": "en",
+      "question": "What are the three meanings of nothing in tool calling?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.42857142857142855,
+      "expected_missing": [],
+      "unneeded_count": 4,
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-offtopic-02",
+      "category": "off_topic",
+      "language": "en",
+      "question": "Write a Python quicksort for my homework.",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.4,
+      "expected_missing": [],
+      "unneeded_count": 3,
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-offtopic-05",
+      "category": "off_topic",
+      "language": "en",
+      "question": "Help me debug my own React app's useEffect loop.",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.4,
+      "expected_missing": [],
+      "unneeded_count": 3,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ]
+    },
+    {
+      "id": "q-en-profile-01",
+      "category": "profile",
+      "language": "en",
+      "question": "Where do you work now?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.4,
+      "expected_missing": [],
+      "unneeded_count": 3,
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ]
+    },
+    {
+      "id": "q-en-writing-02",
+      "category": "writing",
+      "language": "en",
+      "question": "What is the advisor pattern you wrote about?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.5,
+      "expected_missing": [],
+      "unneeded_count": 3,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ]
+    },
+    {
+      "id": "q-en-nomatch-02",
+      "category": "no_word_match",
+      "language": "en",
+      "question": "Tell me about your Haskell typeclass work.",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.5,
+      "expected_missing": [],
+      "unneeded_count": 2,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ]
+    },
+    {
+      "id": "q-en-nomatch-03",
+      "category": "no_word_match",
+      "language": "en",
+      "question": "What's your take on COBOL modernization?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.5,
+      "expected_missing": [],
+      "unneeded_count": 2,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ]
+    },
+    {
+      "id": "q-en-project-01",
+      "category": "project",
+      "language": "en",
+      "question": "What is the tech stack of this portfolio site?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.6,
+      "expected_missing": [],
+      "unneeded_count": 2,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ]
+    },
+    {
+      "id": "q-en-direct-03",
+      "category": "direct_keyword",
+      "language": "en",
+      "question": "What happened with Bun and Claude CLI?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Writing / \"Nothing found.\""
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\"",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ]
+    },
+    {
+      "id": "q-en-direct-04",
+      "category": "direct_keyword",
+      "language": "en",
+      "question": "What did you write about callbacks, promises and async/await?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-direct-06",
+      "category": "direct_keyword",
+      "language": "en",
+      "question": "What was the 640:1 cache read ratio you wrote about?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ]
+    },
+    {
+      "id": "q-he-09",
+      "category": "hebrew",
+      "language": "he",
+      "question": "על מה כתבת בלינקדאין לגבי קריסת Claude?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ]
+    },
+    {
+      "id": "q-en-multi-02",
+      "category": "multi_doc",
+      "language": "en",
+      "question": "What have you written about agents that mishandle empty tool results?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.8,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ]
+    },
+    {
+      "id": "q-en-nomatch-01",
+      "category": "no_word_match",
+      "language": "en",
+      "question": "Have you published anything about quantum annealing?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.6666666666666666,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio"
+      ]
+    },
+    {
+      "id": "q-en-nomatch-04",
+      "category": "no_word_match",
+      "language": "en",
+      "question": "Did you write about PostgreSQL vacuum tuning?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.6666666666666666,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ]
+    },
+    {
+      "id": "q-en-paraphrase-03",
+      "category": "paraphrase",
+      "language": "en",
+      "question": "When should a cheap model hand a hard decision to a stronger one?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ]
+    },
+    {
+      "id": "q-en-paraphrase-07",
+      "category": "paraphrase",
+      "language": "en",
+      "question": "The site chat that refuses to invent a job title — how does it work?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ]
+    },
+    {
+      "id": "q-en-profile-05",
+      "category": "profile",
+      "language": "en",
+      "question": "What's your educational background?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "core_only",
+      "recall": 1.0,
+      "precision": 0.6666666666666666,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ]
+    },
+    {
+      "id": "q-en-project-04",
+      "category": "project",
+      "language": "en",
+      "question": "Where is the portfolio frontend deployed?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ]
+    },
+    {
+      "id": "q-en-project-05",
+      "category": "project",
+      "language": "en",
+      "question": "What does the ReelSensei authentication flow look like?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ]
+    },
+    {
+      "id": "q-en-writing-03",
+      "category": "writing",
+      "language": "en",
+      "question": "How did you crash Claude CLI?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Writing / \"Nothing found.\""
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\"",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ]
+    },
+    {
+      "id": "q-en-writing-04",
+      "category": "writing",
+      "language": "en",
+      "question": "What cache read ratio did you see in one Cursor session?",
+      "actual_outcome": "narrowed",
+      "expected_outcome": "narrowed",
+      "recall": 1.0,
+      "precision": 0.75,
+      "expected_missing": [],
+      "unneeded_count": 1,
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-en-direct-01",
+      "question": "Tell me about ReelSensei.",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "unfocused",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 35083,
+      "profile_token_estimate": 8770,
+      "system_prompt_chars": 39156,
+      "system_prompt_token_estimate": 9789,
+      "latency_ms_median": 0.004589001036947593,
+      "latency_ms_p95": 0.005866000719834119,
+      "latency_ms_min": 0.004165998689131811,
+      "latency_ms_max": 0.007979000656632707,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 7,
+      "recall": 1.0,
+      "precision": 0.3,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-direct-02",
+      "question": "What is PersonaKit?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.0066330012487014756,
+      "latency_ms_p95": 0.00708150037098676,
+      "latency_ms_min": 0.006106000000727363,
+      "latency_ms_max": 0.007618000381626189,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-direct-03",
+      "question": "What happened with Bun and Claude CLI?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\"",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 9984,
+      "profile_token_estimate": 2496,
+      "system_prompt_chars": 14057,
+      "system_prompt_token_estimate": 3514,
+      "latency_ms_median": 0.008400000297115184,
+      "latency_ms_p95": 0.00896399978955742,
+      "latency_ms_min": 0.007795999408699572,
+      "latency_ms_max": 0.009064999176189303,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-direct-04",
+      "question": "What did you write about callbacks, promises and async/await?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 19889,
+      "profile_token_estimate": 4972,
+      "system_prompt_chars": 23962,
+      "system_prompt_token_estimate": 5990,
+      "latency_ms_median": 0.00928499866859056,
+      "latency_ms_p95": 0.009788001079868991,
+      "latency_ms_min": 0.00879300023370888,
+      "latency_ms_max": 0.01040800088958349,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-direct-05",
+      "question": "What did you do at Moonsite?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.006872000085422769,
+      "latency_ms_p95": 0.007332500899792649,
+      "latency_ms_min": 0.006507998477900401,
+      "latency_ms_max": 0.0076409996836446226,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-direct-06",
+      "question": "What was the 640:1 cache read ratio you wrote about?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 17473,
+      "profile_token_estimate": 4368,
+      "system_prompt_chars": 21546,
+      "system_prompt_token_estimate": 5386,
+      "latency_ms_median": 0.009084000339498743,
+      "latency_ms_p95": 0.009670999133959413,
+      "latency_ms_min": 0.008725000952836126,
+      "latency_ms_max": 0.010121000741492026,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-01",
+      "question": "What have you written about evals?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "unfocused",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 35083,
+      "profile_token_estimate": 8770,
+      "system_prompt_chars": 39156,
+      "system_prompt_token_estimate": 9789,
+      "latency_ms_median": 0.006910000593052246,
+      "latency_ms_p95": 0.008303000868181698,
+      "latency_ms_min": 0.005220999810262583,
+      "latency_ms_max": 0.0100050001492491,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 6,
+      "recall": 1.0,
+      "precision": 0.4,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-02",
+      "question": "The service that turns long play sessions into short videos — what is that?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.018196999008068815,
+      "latency_ms_p95": 0.0188804997378611,
+      "latency_ms_min": 0.014078001186135225,
+      "latency_ms_max": 0.01949299985426478,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-03",
+      "question": "When should a cheap model hand a hard decision to a stronger one?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 18784,
+      "profile_token_estimate": 4696,
+      "system_prompt_chars": 22857,
+      "system_prompt_token_estimate": 5714,
+      "latency_ms_median": 0.013741000657319091,
+      "latency_ms_p95": 0.016755500837462023,
+      "latency_ms_min": 0.012218000847497024,
+      "latency_ms_max": 0.020632000087061897,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-04",
+      "question": "How expensive can a single coding-assistant sitting get?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16851,
+      "profile_token_estimate": 4212,
+      "system_prompt_chars": 20924,
+      "system_prompt_token_estimate": 5231,
+      "latency_ms_median": 0.010670999472495168,
+      "latency_ms_p95": 0.01288599924009759,
+      "latency_ms_min": 0.007844000720069744,
+      "latency_ms_max": 0.014019000445841812,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "unneeded_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 2,
+      "recall": 0.0,
+      "precision": 0.5,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-05",
+      "question": "A bug report that landed the day before a runtime was acquired — what was that about?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 8385,
+      "profile_token_estimate": 2096,
+      "system_prompt_chars": 12458,
+      "system_prompt_token_estimate": 3114,
+      "latency_ms_median": 0.010952999218716286,
+      "latency_ms_p95": 0.011408998943807092,
+      "latency_ms_min": 0.010375999409006909,
+      "latency_ms_max": 0.011780999557231553,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-06",
+      "question": "Why shouldn't a missing record and a failed call be reported the same way?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 23155,
+      "profile_token_estimate": 5788,
+      "system_prompt_chars": 27228,
+      "system_prompt_token_estimate": 6807,
+      "latency_ms_median": 0.0109329994302243,
+      "latency_ms_p95": 0.013057499927526806,
+      "latency_ms_min": 0.010182999176322483,
+      "latency_ms_max": 0.02517500070098322,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_missing": [
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 0.5,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-07",
+      "question": "The site chat that refuses to invent a job title — how does it work?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 18089,
+      "profile_token_estimate": 4522,
+      "system_prompt_chars": 22162,
+      "system_prompt_token_estimate": 5540,
+      "latency_ms_median": 0.010161000318475999,
+      "latency_ms_p95": 0.011118500879092608,
+      "latency_ms_min": 0.009724999472382478,
+      "latency_ms_max": 0.012069000149494968,
+      "repeats": 51,
+      "expected_found": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-nomatch-01",
+      "question": "Have you published anything about quantum annealing?",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 8310,
+      "profile_token_estimate": 2077,
+      "system_prompt_chars": 12383,
+      "system_prompt_token_estimate": 3095,
+      "latency_ms_median": 0.008184000762412325,
+      "latency_ms_p95": 0.008541999704902992,
+      "latency_ms_min": 0.0076859996624989435,
+      "latency_ms_max": 0.009854999007075094,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.6666666666666666,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-nomatch-02",
+      "question": "Tell me about your Haskell typeclass work.",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 18784,
+      "profile_token_estimate": 4696,
+      "system_prompt_chars": 22857,
+      "system_prompt_token_estimate": 5714,
+      "latency_ms_median": 0.008648999937577173,
+      "latency_ms_p95": 0.01106650051951874,
+      "latency_ms_min": 0.007872000423958525,
+      "latency_ms_max": 0.024869001208571717,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "unneeded_count": 2,
+      "recall": 1.0,
+      "precision": 0.5,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-nomatch-03",
+      "question": "What's your take on COBOL modernization?",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 23155,
+      "profile_token_estimate": 5788,
+      "system_prompt_chars": 27228,
+      "system_prompt_token_estimate": 6807,
+      "latency_ms_median": 0.008315999366459437,
+      "latency_ms_p95": 0.010979499165841844,
+      "latency_ms_min": 0.007872999049141072,
+      "latency_ms_max": 0.013294000382302329,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "unneeded_count": 2,
+      "recall": 1.0,
+      "precision": 0.5,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-nomatch-04",
+      "question": "Did you write about PostgreSQL vacuum tuning?",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 10110,
+      "profile_token_estimate": 2527,
+      "system_prompt_chars": 14183,
+      "system_prompt_token_estimate": 3545,
+      "latency_ms_median": 0.007950000508571975,
+      "latency_ms_p95": 0.009461499757890124,
+      "latency_ms_min": 0.007333001121878624,
+      "latency_ms_max": 0.009699000656837597,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.6666666666666666,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-nomatch-05",
+      "question": "Have you given a talk on WebAssembly SIMD?",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "unfocused",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 35083,
+      "profile_token_estimate": 8770,
+      "system_prompt_chars": 39156,
+      "system_prompt_token_estimate": 9789,
+      "latency_ms_median": 0.005490999683388509,
+      "latency_ms_p95": 0.005806999979540706,
+      "latency_ms_min": 0.005220999810262583,
+      "latency_ms_max": 0.005907000740990043,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 8,
+      "recall": 1.0,
+      "precision": 0.2,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-offtopic-01",
+      "question": "Can you give me a lasagna recipe?",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "unfocused",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 35083,
+      "profile_token_estimate": 8770,
+      "system_prompt_chars": 39156,
+      "system_prompt_token_estimate": 9789,
+      "latency_ms_median": 0.005083000360173173,
+      "latency_ms_p95": 0.005432000762084499,
+      "latency_ms_min": 0.004804998752661049,
+      "latency_ms_max": 0.005641000825562514,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 8,
+      "recall": 1.0,
+      "precision": 0.2,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-offtopic-02",
+      "question": "Write a Python quicksort for my homework.",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 21564,
+      "profile_token_estimate": 5391,
+      "system_prompt_chars": 25637,
+      "system_prompt_token_estimate": 6409,
+      "latency_ms_median": 0.007999000445124693,
+      "latency_ms_p95": 0.00905250089999754,
+      "latency_ms_min": 0.007550001100753434,
+      "latency_ms_max": 0.018570000975159928,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 3,
+      "recall": 1.0,
+      "precision": 0.4,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-offtopic-03",
+      "question": "What's the weather in Tel Aviv tomorrow?",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.007980001100804657,
+      "latency_ms_p95": 0.008507500751875341,
+      "latency_ms_min": 0.0075240004662191495,
+      "latency_ms_max": 0.008918001185520552,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-offtopic-04",
+      "question": "Who won the World Cup in 2022?",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.007806000212440267,
+      "latency_ms_p95": 0.008374999197258148,
+      "latency_ms_min": 0.007413000275846571,
+      "latency_ms_max": 0.010481000572326593,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-offtopic-05",
+      "question": "Help me debug my own React app's useEffect loop.",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 20534,
+      "profile_token_estimate": 5133,
+      "system_prompt_chars": 24607,
+      "system_prompt_token_estimate": 6151,
+      "latency_ms_median": 0.009508999937679619,
+      "latency_ms_p95": 0.009936000424204394,
+      "latency_ms_min": 0.00895000084710773,
+      "latency_ms_max": 0.010872001439565793,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "unneeded_count": 3,
+      "recall": 1.0,
+      "precision": 0.4,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-profile-01",
+      "question": "Where do you work now?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 17496,
+      "profile_token_estimate": 4374,
+      "system_prompt_chars": 21569,
+      "system_prompt_token_estimate": 5392,
+      "latency_ms_median": 0.007025000741123222,
+      "latency_ms_p95": 0.009716000022308435,
+      "latency_ms_min": 0.0066590000642463565,
+      "latency_ms_max": 0.011752999853342772,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "unneeded_count": 3,
+      "recall": 1.0,
+      "precision": 0.4,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-profile-02",
+      "question": "What did you do at Stealth?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.007106000339263119,
+      "latency_ms_p95": 0.007606000508530997,
+      "latency_ms_min": 0.006786000085412525,
+      "latency_ms_max": 0.007804999768268317,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-profile-03",
+      "question": "Tell me about Hermes.",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "unfocused",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 35083,
+      "profile_token_estimate": 8770,
+      "system_prompt_chars": 39156,
+      "system_prompt_token_estimate": 9789,
+      "latency_ms_median": 0.0045289998524822295,
+      "latency_ms_p95": 0.004776000423589721,
+      "latency_ms_min": 0.004306999471737072,
+      "latency_ms_max": 0.004908000846626237,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 8,
+      "recall": 1.0,
+      "precision": 0.2,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-profile-04",
+      "question": "What kind of work did you do between 2018 and 2025?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.008798000635579228,
+      "latency_ms_p95": 0.009395000233780593,
+      "latency_ms_min": 0.008347000402864069,
+      "latency_ms_max": 0.01013100154523272,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-profile-05",
+      "question": "What's your educational background?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.007106000339263119,
+      "latency_ms_p95": 0.007786999958625529,
+      "latency_ms_min": 0.006684000254608691,
+      "latency_ms_max": 0.007996999556780793,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.6666666666666666,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-profile-06",
+      "question": "Which languages do you speak?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.007329999789362773,
+      "latency_ms_p95": 0.008711499503988307,
+      "latency_ms_min": 0.006770000254618935,
+      "latency_ms_max": 0.020663999748649076,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-project-01",
+      "question": "What is the tech stack of this portfolio site?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 19839,
+      "profile_token_estimate": 4959,
+      "system_prompt_chars": 23912,
+      "system_prompt_token_estimate": 5978,
+      "latency_ms_median": 0.009274999683839269,
+      "latency_ms_p95": 0.009856499673333019,
+      "latency_ms_min": 0.008629000149085186,
+      "latency_ms_max": 0.010473999282112345,
+      "repeats": 51,
+      "expected_found": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "unneeded_count": 2,
+      "recall": 1.0,
+      "precision": 0.6,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-project-02",
+      "question": "Is ReelSensei available to sign up for?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.007587999789393507,
+      "latency_ms_p95": 0.00836200069898041,
+      "latency_ms_min": 0.007329001164180227,
+      "latency_ms_max": 0.010026000381913036,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-project-03",
+      "question": "How does ReelSensei keep video processing costs down?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.010133999239769764,
+      "latency_ms_p95": 0.015397000424854923,
+      "latency_ms_min": 0.008874998457031325,
+      "latency_ms_max": 0.0167520011018496,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-project-04",
+      "question": "Where is the portfolio frontend deployed?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 18089,
+      "profile_token_estimate": 4522,
+      "system_prompt_chars": 22162,
+      "system_prompt_token_estimate": 5540,
+      "latency_ms_median": 0.008023000191315077,
+      "latency_ms_p95": 0.00940549944061786,
+      "latency_ms_min": 0.007499998901039362,
+      "latency_ms_max": 0.12267900092410855,
+      "repeats": 51,
+      "expected_found": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-project-05",
+      "question": "What does the ReelSensei authentication flow look like?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 23155,
+      "profile_token_estimate": 5788,
+      "system_prompt_chars": 27228,
+      "system_prompt_token_estimate": 6807,
+      "latency_ms_median": 0.008452001566183753,
+      "latency_ms_p95": 0.009572999260853976,
+      "latency_ms_min": 0.007960999937495217,
+      "latency_ms_max": 0.009827999747358263,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-01",
+      "question": "What are the three meanings of nothing in tool calling?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 21879,
+      "profile_token_estimate": 5469,
+      "system_prompt_chars": 25952,
+      "system_prompt_token_estimate": 6488,
+      "latency_ms_median": 0.010556001143413596,
+      "latency_ms_p95": 0.01829150005505653,
+      "latency_ms_min": 0.009845000022323802,
+      "latency_ms_max": 0.03550700057530776,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 4,
+      "recall": 1.0,
+      "precision": 0.42857142857142855,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-02",
+      "question": "What is the advisor pattern you wrote about?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 27124,
+      "profile_token_estimate": 6781,
+      "system_prompt_chars": 31197,
+      "system_prompt_token_estimate": 7799,
+      "latency_ms_median": 0.008934999641496688,
+      "latency_ms_p95": 0.013216999832366128,
+      "latency_ms_min": 0.008446999345324002,
+      "latency_ms_max": 0.021081999875605106,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "unneeded_count": 3,
+      "recall": 1.0,
+      "precision": 0.5,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-03",
+      "question": "How did you crash Claude CLI?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\"",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 9984,
+      "profile_token_estimate": 2496,
+      "system_prompt_chars": 14057,
+      "system_prompt_token_estimate": 3514,
+      "latency_ms_median": 0.008408000212511979,
+      "latency_ms_p95": 0.008957499630923849,
+      "latency_ms_min": 0.007276999895111658,
+      "latency_ms_max": 0.00998599898593966,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-04",
+      "question": "What cache read ratio did you see in one Cursor session?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 17473,
+      "profile_token_estimate": 4368,
+      "system_prompt_chars": 21546,
+      "system_prompt_token_estimate": 5386,
+      "latency_ms_median": 0.009780000254977494,
+      "latency_ms_p95": 0.010295500032952987,
+      "latency_ms_min": 0.009334000424132682,
+      "latency_ms_max": 0.010720999853219837,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-05",
+      "question": "What did your JavaScript article say about the stack and the heap?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 10110,
+      "profile_token_estimate": 2527,
+      "system_prompt_chars": 14183,
+      "system_prompt_token_estimate": 3545,
+      "latency_ms_median": 0.008994000381790102,
+      "latency_ms_p95": 0.011876500138896517,
+      "latency_ms_min": 0.008520000847056508,
+      "latency_ms_max": 0.01425099981133826,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-06",
+      "question": "What's the short LinkedIn version of the nothing-found piece?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\""
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 8234,
+      "profile_token_estimate": 2058,
+      "system_prompt_chars": 12307,
+      "system_prompt_token_estimate": 3076,
+      "latency_ms_median": 0.009035999028128572,
+      "latency_ms_p95": 0.009575999683875125,
+      "latency_ms_min": 0.00849699972604867,
+      "latency_ms_max": 0.012028000128339045,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-01",
+      "question": "Compare your two projects.",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "unfocused",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 35083,
+      "profile_token_estimate": 8770,
+      "system_prompt_chars": 39156,
+      "system_prompt_token_estimate": 9789,
+      "latency_ms_median": 0.0047909998102113605,
+      "latency_ms_p95": 0.0051560000429162756,
+      "latency_ms_min": 0.004585001079249196,
+      "latency_ms_max": 0.005288999091135338,
+      "repeats": 51,
+      "expected_found": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 6,
+      "recall": 1.0,
+      "precision": 0.4,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-02",
+      "question": "What have you written about agents that mishandle empty tool results?",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 17345,
+      "profile_token_estimate": 4336,
+      "system_prompt_chars": 21418,
+      "system_prompt_token_estimate": 5354,
+      "latency_ms_median": 0.009994000720325857,
+      "latency_ms_p95": 0.010814999768626876,
+      "latency_ms_min": 0.009462999514653347,
+      "latency_ms_max": 0.011809999705292284,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.8,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-03",
+      "question": "How does the incident-investigation work at Stealth relate to what you published about empty tool responses?",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 14975,
+      "profile_token_estimate": 3743,
+      "system_prompt_chars": 19048,
+      "system_prompt_token_estimate": 4762,
+      "latency_ms_median": 0.011019999874406494,
+      "latency_ms_p95": 0.015158499991230201,
+      "latency_ms_min": 0.010382000255049206,
+      "latency_ms_max": 0.022247000742936507,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-04",
+      "question": "What frontend stacks have you used, across your jobs and your own projects?",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 18089,
+      "profile_token_estimate": 4522,
+      "system_prompt_chars": 22162,
+      "system_prompt_token_estimate": 5540,
+      "latency_ms_median": 0.010685000233934261,
+      "latency_ms_p95": 0.011516000085975975,
+      "latency_ms_min": 0.009162000424112193,
+      "latency_ms_max": 0.011832000382128172,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-05",
+      "question": "You have talked about what a single question costs in production, and also about a coding-assistant session that got very expensive. What are those two accounts?",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 19889,
+      "profile_token_estimate": 4972,
+      "system_prompt_chars": 23962,
+      "system_prompt_token_estimate": 5990,
+      "latency_ms_median": 0.014334000297822058,
+      "latency_ms_p95": 0.01546949988551205,
+      "latency_ms_min": 0.012516999049694277,
+      "latency_ms_max": 0.016796999261714518,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me"
+      ],
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 2,
+      "recall": 0.5,
+      "precision": 0.5,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-he-01",
+      "question": "ספר לי על והפרויקטים שלך בתחום ההיילייטים.",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "conversational",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.002755001332843676,
+      "latency_ms_p95": 0.0030925002647563815,
+      "latency_ms_min": 0.0026560010155662894,
+      "latency_ms_max": 0.0034880013117799535,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-02",
+      "question": "כשכתבת על שריפת טוקנים, מה היו המספרים?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "conversational",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.0027940004656556994,
+      "latency_ms_p95": 0.004168500709056389,
+      "latency_ms_min": 0.0026289999368600547,
+      "latency_ms_max": 0.004800000169780105,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-03",
+      "question": "מה כתבת על כשלי הכלים של סוכנים?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "conversational",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.002709000909817405,
+      "latency_ms_p95": 0.0029624989110743627,
+      "latency_ms_min": 0.002474998836987652,
+      "latency_ms_max": 0.0032059997465694323,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-04",
+      "question": "איפה עבדת לפני פרסונהקיט?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "conversational",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.002632999894558452,
+      "latency_ms_p95": 0.0028905005819979124,
+      "latency_ms_min": 0.0024820001272019,
+      "latency_ms_max": 0.0030660012271255255,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-05",
+      "question": "תספר על ReelSensei, האם אפשר להירשם?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.00670000008540228,
+      "latency_ms_p95": 0.007523000931541901,
+      "latency_ms_min": 0.006213000233401544,
+      "latency_ms_max": 0.008229999366449192,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-he-06",
+      "question": "מהם הפרויקטים שלך?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "conversational",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.0025610006559873,
+      "latency_ms_p95": 0.0028029999157297425,
+      "latency_ms_min": 0.002369999492657371,
+      "latency_ms_max": 0.003495000783004798,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-07",
+      "question": "למה העבודה שלך נעצרה ברילסנסיי?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "conversational",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.0026639991119736806,
+      "latency_ms_p95": 0.0028659997042268515,
+      "latency_ms_min": 0.0024709988792892545,
+      "latency_ms_max": 0.003897999704349786,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-08",
+      "question": "מה אתה בונה עכשיו?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "conversational",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.002613998731249012,
+      "latency_ms_p95": 0.002879499334085267,
+      "latency_ms_min": 0.002426000719424337,
+      "latency_ms_max": 0.0033540000003995374,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-09",
+      "question": "על מה כתבת בלינקדאין לגבי קריסת Claude?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 10755,
+      "profile_token_estimate": 2688,
+      "system_prompt_chars": 14828,
+      "system_prompt_token_estimate": 3707,
+      "latency_ms_median": 0.006754999049007893,
+      "latency_ms_p95": 0.008154000170179643,
+      "latency_ms_min": 0.006381000275723636,
+      "latency_ms_max": 0.008459999662591144,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-he-10",
+      "question": "האם יש לך ניסיון בחברות ישראליות?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "conversational",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.0026699999580159783,
+      "latency_ms_p95": 0.002894499630201608,
+      "latency_ms_min": 0.0025110002752626315,
+      "latency_ms_max": 0.003623999873525463,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    }
+  ]
+}

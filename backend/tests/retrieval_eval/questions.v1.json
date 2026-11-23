@@ -1,0 +1,644 @@
+{
+  "schema_version": "1",
+  "authored_by": "Trinity Grok",
+  "authored_at": "2026-11-23",
+  "corpus_ref": "origin/main e9215c1, ten documents under backend/docs/{profile,projects,writing}",
+  "notes": "Gold labels are document-level Section.label values from context.py. expected_outcome is the desired hybrid/core-only behaviour, not a transcript of today's selector. The always-included core is omitted from expected_doc_labels unless the question is about the profile or the desired outcome is core_only.",
+  "questions": [
+    {
+      "id": "q-en-direct-01",
+      "question": "Tell me about ReelSensei.",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Distinctive project name appears in the title and body of the ReelSensei write-up."
+    },
+    {
+      "id": "q-en-direct-02",
+      "question": "What is PersonaKit?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "PersonaKit is in about-me and the resume. No project or post is required."
+    },
+    {
+      "id": "q-en-direct-03",
+      "question": "What happened with Bun and Claude CLI?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Both 'Bun' and 'Claude CLI' are distinctive terms in that post."
+    },
+    {
+      "id": "q-en-direct-04",
+      "question": "What did you write about callbacks, promises and async/await?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "The 2022 JavaScript article is titled with those three terms."
+    },
+    {
+      "id": "q-en-direct-05",
+      "question": "What did you do at Moonsite?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Moonsite is named in the resume work history. about-me describes the sports-betting work without that company name; resume is the required source. Core is sufficient."
+    },
+    {
+      "id": "q-en-direct-06",
+      "question": "What was the 640:1 cache read ratio you wrote about?",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "'640:1' and the cache-read ratio appear only in the Cursor token-burn post."
+    },
+    {
+      "id": "q-en-paraphrase-01",
+      "question": "What have you written about evals?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Motivating example in the plan and in context.py. The word 'evals' never appears in the corpus (the current selector goes UNFOCUSED). Thematically the closest published pieces are the Cursor session cost write-up (measuring a run) and the long 'three meanings of nothing' article (judging tool outcomes). Dense retrieval is what should close this gap."
+    },
+    {
+      "id": "q-en-paraphrase-02",
+      "question": "The service that turns long play sessions into short videos — what is that?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Paraphrase of ReelSensei ('turns long gaming recordings into highlight reels') avoiding the name, 'gaming', 'highlight', and 'ReelSensei'. 'play sessions' / 'short videos' are not distinctive corpus terms."
+    },
+    {
+      "id": "q-en-paraphrase-03",
+      "question": "When should a cheap model hand a hard decision to a stronger one?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Paraphrase of the advisor post (cheap model drives, escalates at the moments that matter) avoiding 'advisor', 'Anthropic', and 'Opus'."
+    },
+    {
+      "id": "q-en-paraphrase-04",
+      "question": "How expensive can a single coding-assistant sitting get?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Paraphrase of the $340 / 22.7 million token Cursor session, avoiding 'Cursor', 'tokens', '$340', and '22.7'."
+    },
+    {
+      "id": "q-en-paraphrase-05",
+      "question": "A bug report that landed the day before a runtime was acquired — what was that about?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Paraphrase of the Claude CLI crash / Bun acquisition post, avoiding 'Bun', 'Claude', 'Anthropic', and 'segfault'."
+    },
+    {
+      "id": "q-en-paraphrase-06",
+      "question": "Why shouldn't a missing record and a failed call be reported the same way?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Paraphrase of the three-meanings-of-nothing argument (tool failure vs empty results vs not found). Avoids 'nothing', 'tool-calling', and the post titles. Both the long article and the short LinkedIn version belong."
+    },
+    {
+      "id": "q-en-paraphrase-07",
+      "question": "The site chat that refuses to invent a job title — how does it work?",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Paraphrase of the AI Chat Portfolio overview (answers from markdown, says so rather than inventing an employer or a date). Avoids 'portfolio', 'Cloudflare', 'FastAPI', and the project title."
+    },
+    {
+      "id": "q-en-nomatch-01",
+      "question": "Have you published anything about quantum annealing?",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Neither 'quantum' nor 'annealing' appears in the corpus. Desired: core only, honest decline."
+    },
+    {
+      "id": "q-en-nomatch-02",
+      "question": "Tell me about your Haskell typeclass work.",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "'Haskell' and 'typeclass' are absent from the corpus."
+    },
+    {
+      "id": "q-en-nomatch-03",
+      "question": "What's your take on COBOL modernization?",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "'COBOL' does not appear in the corpus."
+    },
+    {
+      "id": "q-en-nomatch-04",
+      "question": "Did you write about PostgreSQL vacuum tuning?",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Neither PostgreSQL nor vacuum appears. Resume lists MongoDB/Redis/Memgraph, not Postgres."
+    },
+    {
+      "id": "q-en-nomatch-05",
+      "question": "Have you given a talk on WebAssembly SIMD?",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "'WebAssembly' and 'SIMD' are absent from the corpus."
+    },
+    {
+      "id": "q-en-offtopic-01",
+      "question": "Can you give me a lasagna recipe?",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Out of scope (prompt.py redirects recipes). Desired core only so the model declines from profile, without extra docs."
+    },
+    {
+      "id": "q-en-offtopic-02",
+      "question": "Write a Python quicksort for my homework.",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Out of scope: code for the visitor's own project. 'Python' appears in the resume skills, so today's selector may narrow or drag the resume in; desired outcome is still core only (no project/post needed, and the ask is off-topic)."
+    },
+    {
+      "id": "q-en-offtopic-03",
+      "question": "What's the weather in Tel Aviv tomorrow?",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Out of scope. 'Tel Aviv' appears in the resume (Technion, Tel Aviv), which may cause today's selector to keep the resume; still core_only is desired."
+    },
+    {
+      "id": "q-en-offtopic-04",
+      "question": "Who won the World Cup in 2022?",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Out of scope sports-trivia question. No World Cup content in the corpus."
+    },
+    {
+      "id": "q-en-offtopic-05",
+      "question": "Help me debug my own React app's useEffect loop.",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Out of scope (help with the visitor's own code). 'React' is in the corpus and may pull resume/projects; desired remains core only."
+    },
+    {
+      "id": "q-en-profile-01",
+      "question": "Where do you work now?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Current role is Founder & AI Engineer at PersonaKit (about-me and resume). Core is sufficient."
+    },
+    {
+      "id": "q-en-profile-02",
+      "question": "What did you do at Stealth?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Stealth founding-engineer work is in about-me and the resume. The nothing-found posts describe a pattern from that work but are not required to answer 'what did you do there'."
+    },
+    {
+      "id": "q-en-profile-03",
+      "question": "Tell me about Hermes.",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Hermes is in about-me and under resume side projects (Obsidian vault, Telegram)."
+    },
+    {
+      "id": "q-en-profile-04",
+      "question": "What kind of work did you do between 2018 and 2025?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "about-me summarises frontend/full-stack 2018–2025; the resume names Moonsite, Devforce, Bond Sports, Tauora."
+    },
+    {
+      "id": "q-en-profile-05",
+      "question": "What's your educational background?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Education is only in the resume: Practical Software Engineer, Technion, Tel Aviv, 2019–2020."
+    },
+    {
+      "id": "q-en-profile-06",
+      "question": "Which languages do you speak?",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "The resume LANGUAGES section lists English (fluent) and Hebrew (native). about-me does not."
+    },
+    {
+      "id": "q-en-project-01",
+      "question": "What is the tech stack of this portfolio site?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "AI Chat Portfolio technical details: React 19, TypeScript, Vite, TailwindCSS, Cloudflare Pages, FastAPI, Cloud Run."
+    },
+    {
+      "id": "q-en-project-02",
+      "question": "Is ReelSensei available to sign up for?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "The write-up states status is paused, not publicly available, repository private."
+    },
+    {
+      "id": "q-en-project-03",
+      "question": "How does ReelSensei keep video processing costs down?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Cost-engineering and performance sections of the ReelSensei write-up."
+    },
+    {
+      "id": "q-en-project-04",
+      "question": "Where is the portfolio frontend deployed?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Cloudflare Pages, demo URL https://yanir-portfolio.pages.dev."
+    },
+    {
+      "id": "q-en-project-05",
+      "question": "What does the ReelSensei authentication flow look like?",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "The write-up has an Authentication Flow section plus security/auth paragraphs."
+    },
+    {
+      "id": "q-en-writing-01",
+      "question": "What are the three meanings of nothing in tool calling?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Aimed at the long article. The short LinkedIn version is related but the question names the long piece's topic and title."
+    },
+    {
+      "id": "q-en-writing-02",
+      "question": "What is the advisor pattern you wrote about?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "The LinkedIn/advisor post: cheap model drives, escalates to a stronger model at three decision points."
+    },
+    {
+      "id": "q-en-writing-03",
+      "question": "How did you crash Claude CLI?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "The Bun / Anthropic acquisition post opens with the segfault."
+    },
+    {
+      "id": "q-en-writing-04",
+      "question": "What cache read ratio did you see in one Cursor session?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "640:1 cache-read ratio in the token-burn post."
+    },
+    {
+      "id": "q-en-writing-05",
+      "question": "What did your JavaScript article say about the stack and the heap?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "The callbacks/promises/async-await article has sections on stack memory and the memory heap."
+    },
+    {
+      "id": "q-en-writing-06",
+      "question": "What's the short LinkedIn version of the nothing-found piece?",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "which-nothing-did-you-get.md is the short LinkedIn post; it has a Related link to the long article. The question asks for the short version, so the short label is the required one."
+    },
+    {
+      "id": "q-en-multi-01",
+      "question": "Compare your two projects.",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "A comparison needs both project write-ups."
+    },
+    {
+      "id": "q-en-multi-02",
+      "question": "What have you written about agents that mishandle empty tool results?",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "The long article and the short LinkedIn recap cover the same argument at two lengths."
+    },
+    {
+      "id": "q-en-multi-03",
+      "question": "How does the incident-investigation work at Stealth relate to what you published about empty tool responses?",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Stealth work is in the profile docs; the published pattern is in both nothing posts. All four are needed for a joined answer."
+    },
+    {
+      "id": "q-en-multi-04",
+      "question": "What frontend stacks have you used, across your jobs and your own projects?",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Resume skills/experience plus both project write-ups (React/Vite vs Next.js)."
+    },
+    {
+      "id": "q-en-multi-05",
+      "question": "You have talked about what a single question costs in production, and also about a coding-assistant session that got very expensive. What are those two accounts?",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "about-me discusses token cost of a multi-agent incident question; the Cursor post is the coding-assistant session. Both are required. Avoids using the distinctive '$340' / '22.7' figures as the only hook, but 'coding-assistant' still points at that post."
+    },
+    {
+      "id": "q-he-01",
+      "question": "ספר לי על והפרויקטים שלך בתחום ההיילייטים.",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Prefixed form והפרויקטים (ו+ה+פרויקטים) plus היילייטים as a loanword for highlights. Targets ReelSensei. Today's Latin-only tokenizer will see no terms and take CONVERSATIONAL (core only) — a recall miss."
+    },
+    {
+      "id": "q-he-02",
+      "question": "כשכתבת על שריפת טוקנים, מה היו המספרים?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Prefixed כשכתבת (כש+כתבת) and the plural/loanword טוקנים. Targets the Cursor token-burn post. No Latin tokens."
+    },
+    {
+      "id": "q-he-03",
+      "question": "מה כתבת על כשלי הכלים של סוכנים?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Hebrew paraphrase of the nothing/tool-failure posts ('agent tool failures'), with definite/plural הכלים and סוכנים. No Latin tokens."
+    },
+    {
+      "id": "q-he-04",
+      "question": "איפה עבדת לפני פרסונהקיט?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Profile question. פרסונהקיט is a Hebrew transliteration of PersonaKit and will not match the Latin name in the docs. Desired: core (Stealth / earlier roles are in about-me and the resume)."
+    },
+    {
+      "id": "q-he-05",
+      "question": "תספר על ReelSensei, האם אפשר להירשם?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Mixed Hebrew+Latin. The Latin name should be enough for today's selector to find the project; the Hebrew asks whether one can sign up (status: paused)."
+    },
+    {
+      "id": "q-he-06",
+      "question": "מהם הפרויקטים שלך?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "הפרויקטים: definite prefix ה plus plural suffix ים. A correct answer needs both project write-ups. Hebrew-only, so today's selector will not see terms."
+    },
+    {
+      "id": "q-he-07",
+      "question": "למה העבודה שלך נעצרה ברילסנסיי?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "רילסנסיי is a Hebrew transliteration of ReelSensei (paused). No Latin tokens; possessive/agreement on העבודה."
+    },
+    {
+      "id": "q-he-08",
+      "question": "מה אתה בונה עכשיו?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Profile: current work is PersonaKit, from about-me and the resume. Hebrew-only."
+    },
+    {
+      "id": "q-he-09",
+      "question": "על מה כתבת בלינקדאין לגבי קריסת Claude?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "notes": "Mixed Hebrew+Latin. 'Claude' is a distinctive Latin term in the Bun/Claude CLI post; בלינקדאין is a prefixed/transliterated 'on LinkedIn'; קריסת is a feminine/construct form of 'crash'."
+    },
+    {
+      "id": "q-he-10",
+      "question": "האם יש לך ניסיון בחברות ישראליות?",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "notes": "Profile: about-me mentions finance applications for Israeli enterprises; the resume names those roles. בחברות is prefix ב + plural חברות. Hebrew-only."
+    }
+  ]
+}
