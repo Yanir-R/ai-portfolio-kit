@@ -168,16 +168,21 @@ const WritingDetail: React.FC = () => {
                     {/blog/i.test(entry.source)
                         ? `the ${entry.source.toLowerCase()}`
                         : entry.source}
-                    .{' '}
-                    <a
-                        href={entry.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline transition-colors text-content hover:text-signal underline-offset-4 decoration-border"
-                    >
-                        Read it there
-                    </a>{' '}
-                    <span aria-hidden="true">↗</span>
+                    .
+                    {entry.url && (
+                        <>
+                            {' '}
+                            <a
+                                href={entry.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline transition-colors text-content hover:text-signal underline-offset-4 decoration-border"
+                            >
+                                Read it there
+                            </a>{' '}
+                            <span aria-hidden="true">↗</span>
+                        </>
+                    )}
                 </p>
 
                 {entry.related && entry.related.length > 0 && (
