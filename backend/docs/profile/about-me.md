@@ -11,5 +11,3 @@ I tend to leave systems behind rather than patches, and I don't ship a fix until
 From 2018 to 2025 it was frontend and full-stack work: a sports betting platform at 500K daily users, finance applications for Israeli enterprises, automation testing before that. It is why I'm comfortable anywhere between a React component and a Helm chart.
 
 The question I keep circling: how far can you trust a system that writes its own reasons? Most of what I build outside work is some attempt to answer it. Hermes is one: a self-hosted agent that runs all day, keeps its memory in an Obsidian vault, and reaches me over Telegram. This site is another, and it will tell you when it doesn't know something rather than fill the gap.
-
-Last verified: 2026-11-23
