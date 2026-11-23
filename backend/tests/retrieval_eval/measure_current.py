@@ -120,44 +120,77 @@ def _metrics(selected: Iterable[str], expected: Sequence[str]) -> dict[str, Any]
     }
 
 
-def main() -> int:
-    _ensure_backend_on_path()
-    import context
+def aggregate(subset: list[dict[str, Any]]) -> dict[str, Any]:
+    if not subset:
+        return {}
+    n = len(subset)
+    recall_mean = sum(r["recall"] for r in subset) / n
+    precision_mean = sum(r["precision"] for r in subset) / n
+    unneeded_mean = sum(r["unneeded_count"] for r in subset) / n
+    outcome_rate = sum(1 for r in subset if r["outcome_matches_desired"]) / n
+    full_recall = sum(1 for r in subset if r["recall"] == 1.0) / n
+    profile_tokens = [r["profile_token_estimate"] for r in subset]
+    prompt_tokens = [r["system_prompt_token_estimate"] for r in subset]
+    med = [r["latency_ms_median"] for r in subset]
+    p95 = [r["latency_ms_p95"] for r in subset]
+    outcomes: dict[str, int] = {}
+    for r in subset:
+        outcomes[r["actual_outcome"]] = outcomes.get(r["actual_outcome"], 0) + 1
+    return {
+        "n": n,
+        "recall_macro": recall_mean,
+        "precision_macro": precision_mean,
+        "unneeded_docs_mean": unneeded_mean,
+        "full_recall_rate": full_recall,
+        "desired_outcome_rate": outcome_rate,
+        "actual_outcomes": outcomes,
+        "profile_tokens_median": statistics.median(profile_tokens),
+        "profile_tokens_mean": sum(profile_tokens) / n,
+        "profile_tokens_min": min(profile_tokens),
+        "profile_tokens_max": max(profile_tokens),
+        "system_prompt_tokens_median": statistics.median(prompt_tokens),
+        "system_prompt_tokens_mean": sum(prompt_tokens) / n,
+        "system_prompt_tokens_min": min(prompt_tokens),
+        "system_prompt_tokens_max": max(prompt_tokens),
+        "select_latency_ms_median_of_medians": statistics.median(med),
+        "select_latency_ms_max_p95": max(p95),
+        "select_latency_ms_p95_of_medians": _percentile(sorted(med), 95),
+    }
+
+
+def _outcome_matches(desired: str, actual: str, core_only_selected: bool) -> bool:
+    """Whether a typed outcome is the desired one.
+
+    `core_only` is met by the explicit CORE_ONLY outcome (R1 lexical), by
+    CONVERSATIONAL, or by a NARROWED result that holds only the core (the R0
+    selector has no core_only value). UNFOCUSED (send all) never meets it.
+    """
+    if desired == "core_only":
+        return actual in {"core_only", "conversational"} or (actual == "narrowed" and core_only_selected)
+    return actual == desired
+
+
+def evaluate(select, questions: Sequence[dict[str, Any]], knowledge) -> dict[str, Any]:
+    """Runs one selector over the eval set: per-question rows plus aggregates.
+
+    `select(question, knowledge)` must return an object with `.knowledge`,
+    `.outcome` and `.available` (selection.Selection). Shared by the R0
+    baseline (`main` below) and the R1 comparison (`measure_r1.py`), so both
+    phases are scored by exactly the same code.
+    """
     import prompt
-    import selection
     from context import CHARS_PER_TOKEN
 
-    questions = _load_questions()
-
-    t0 = time.perf_counter()
-    knowledge = context.get_knowledge()
-    load_ms = (time.perf_counter() - t0) * 1000.0
-    if knowledge.is_empty:
-        print("Corpus is empty; refusing to write a baseline.", file=sys.stderr)
-        return 1
-
-    corpus_labels = [s.label for s in knowledge.sections]
-    full_sent_all = prompt.build_system_instruction(knowledge)
     rows: list[dict[str, Any]] = []
-
     for case in questions:
-        measured = _measure_select(selection.select, case["question"], knowledge)
+        measured = _measure_select(select, case["question"], knowledge)
         chosen = measured["result"]
         selected_labels = [s.label for s in chosen.knowledge.sections]
         profile_text = chosen.knowledge.text
         system_prompt = prompt.build_system_instruction(chosen.knowledge)
         scores = _metrics(selected_labels, case["expected_doc_labels"])
         desired = case["expected_outcome"]
-        # Today's UNFOCUSED (send all) is not the desired core_only / narrowed path.
-        if desired == "core_only":
-            outcome_matches = chosen.outcome in {"conversational"} or (
-                chosen.outcome == "narrowed" and scores["core_only_selected"]
-            )
-            # A narrowed-to-core result would match; current code never emits core_only.
-        elif desired == "conversational":
-            outcome_matches = chosen.outcome == "conversational"
-        else:  # narrowed
-            outcome_matches = chosen.outcome == "narrowed"
+        outcome_matches = _outcome_matches(desired, chosen.outcome, scores["core_only_selected"])
         rows.append(
             {
                 "id": case["id"],
@@ -183,47 +216,10 @@ def main() -> int:
             }
         )
 
-    def _agg(subset: list[dict[str, Any]]) -> dict[str, Any]:
-        if not subset:
-            return {}
-        n = len(subset)
-        recall_mean = sum(r["recall"] for r in subset) / n
-        precision_mean = sum(r["precision"] for r in subset) / n
-        unneeded_mean = sum(r["unneeded_count"] for r in subset) / n
-        outcome_rate = sum(1 for r in subset if r["outcome_matches_desired"]) / n
-        full_recall = sum(1 for r in subset if r["recall"] == 1.0) / n
-        profile_tokens = [r["profile_token_estimate"] for r in subset]
-        prompt_tokens = [r["system_prompt_token_estimate"] for r in subset]
-        med = [r["latency_ms_median"] for r in subset]
-        p95 = [r["latency_ms_p95"] for r in subset]
-        outcomes: dict[str, int] = {}
-        for r in subset:
-            outcomes[r["actual_outcome"]] = outcomes.get(r["actual_outcome"], 0) + 1
-        return {
-            "n": n,
-            "recall_macro": recall_mean,
-            "precision_macro": precision_mean,
-            "unneeded_docs_mean": unneeded_mean,
-            "full_recall_rate": full_recall,
-            "desired_outcome_rate": outcome_rate,
-            "actual_outcomes": outcomes,
-            "profile_tokens_median": statistics.median(profile_tokens),
-            "profile_tokens_mean": sum(profile_tokens) / n,
-            "profile_tokens_min": min(profile_tokens),
-            "profile_tokens_max": max(profile_tokens),
-            "system_prompt_tokens_median": statistics.median(prompt_tokens),
-            "system_prompt_tokens_mean": sum(prompt_tokens) / n,
-            "system_prompt_tokens_min": min(prompt_tokens),
-            "system_prompt_tokens_max": max(prompt_tokens),
-            "select_latency_ms_median_of_medians": statistics.median(med),
-            "select_latency_ms_max_p95": max(p95),
-            "select_latency_ms_p95_of_medians": _percentile(sorted(med), 95),
-        }
-
     by_category = {}
     for row in rows:
         by_category.setdefault(row["category"], []).append(row)
-    category_summary = {cat: _agg(items) for cat, items in sorted(by_category.items())}
+    category_summary = {cat: aggregate(items) for cat, items in sorted(by_category.items())}
 
     misses = [
         {
@@ -251,6 +247,47 @@ def main() -> int:
     all_medians = [r["latency_ms_median"] for r in rows]
     all_p95 = [r["latency_ms_p95"] for r in rows]
 
+    return {
+        "n_questions": len(rows),
+        "overall": aggregate(rows),
+        "by_category": category_summary,
+        "by_language": {
+            lang: aggregate([r for r in rows if r["language"] == lang])
+            for lang in ("en", "he")
+        },
+        "latency_all_questions": {
+            "median_of_medians_ms": statistics.median(all_medians),
+            "p95_of_medians_ms": _percentile(sorted(all_medians), 95),
+            "max_median_ms": max(all_medians),
+            "max_p95_ms": max(all_p95),
+            "min_median_ms": min(all_medians),
+        },
+        "miss_and_imprecision_count": len(misses),
+        "worst_misses": worst,
+        "questions": rows,
+    }
+
+
+def main() -> int:
+    _ensure_backend_on_path()
+    import context
+    import prompt
+    import selection
+    from context import CHARS_PER_TOKEN
+
+    questions = _load_questions()
+
+    t0 = time.perf_counter()
+    knowledge = context.get_knowledge()
+    load_ms = (time.perf_counter() - t0) * 1000.0
+    if knowledge.is_empty:
+        print("Corpus is empty; refusing to write a baseline.", file=sys.stderr)
+        return 1
+
+    corpus_labels = [s.label for s in knowledge.sections]
+    full_sent_all = prompt.build_system_instruction(knowledge)
+    evaluated = evaluate(selection.select, questions, knowledge)
+
     results = {
         "schema_version": "1",
         "measured_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -271,24 +308,10 @@ def main() -> int:
             "tokens": "len(text) // CHARS_PER_TOKEN (repo constant 4), not provider usage",
             "latency": "time.perf_counter around selection.select only, after warmup; median and p95 over repeats",
         },
-        "n_questions": len(rows),
-        "overall": _agg(rows),
-        "by_category": category_summary,
-        "by_language": {
-            lang: _agg([r for r in rows if r["language"] == lang])
-            for lang in ("en", "he")
-        },
-        "latency_all_questions": {
-            "median_of_medians_ms": statistics.median(all_medians),
-            "p95_of_medians_ms": _percentile(sorted(all_medians), 95),
-            "max_median_ms": max(all_medians),
-            "max_p95_ms": max(all_p95),
-            "min_median_ms": min(all_medians),
-        },
-        "miss_and_imprecision_count": len(misses),
-        "worst_misses": worst,
-        "questions": rows,
+        **evaluated,
     }
+    rows = evaluated["questions"]
+    category_summary = evaluated["by_category"]
 
     RESULTS_JSON.parent.mkdir(parents=True, exist_ok=True)
     RESULTS_JSON.write_text(json.dumps(results, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
