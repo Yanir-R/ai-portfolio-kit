@@ -9,7 +9,17 @@ interface QuickMessageState {
     level: number;
 }
 
-export const useChat = () => {
+/*
+ * The bot check is handed in rather than imported, because the widget needs a
+ * DOM node and that belongs to the component. Both are optional so the hook
+ * still works with no widget at all, in which case messages go out untokened.
+ */
+interface UseChatOptions {
+    getTurnstileToken?: () => Promise<string | null>;
+    resetTurnstile?: () => void;
+}
+
+export const useChat = ({ getTurnstileToken, resetTurnstile }: UseChatOptions = {}) => {
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [hasFiles, setHasFiles] = useState<boolean | null>(null);
@@ -130,7 +140,13 @@ export const useChat = () => {
                 },
             ]);
 
-            const result = await chatService.sendMessage(finalMessage, chatHistory);
+            // Asked for at the last moment: a token is short-lived and
+            // single-use, so one fetched any earlier could expire in hand. A
+            // null here is not a failure to handle - the message goes out
+            // without one and the Worker's reply says what happened.
+            const token = getTurnstileToken ? await getTurnstileToken() : null;
+
+            const result = await chatService.sendMessage(finalMessage, chatHistory, token);
 
             if (result.success) {
                 if (result.email_collected) {
@@ -207,6 +223,10 @@ export const useChat = () => {
             // rather than the value just set.
             setIsLoading(false);
             setMessage('');
+
+            // The token was spent by this send whether it succeeded or not, so
+            // the widget is cleared for the next one either way.
+            resetTurnstile?.();
         }
     };
 

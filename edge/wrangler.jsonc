@@ -4,6 +4,7 @@
     // Deploy from this directory:
     //
     //   npx wrangler secret put EDGE_SECRET     # once, and on rotation
+    //   npx wrangler secret put TURNSTILE_SECRET_KEY     # once, and on rotation
     //   npx wrangler deploy
     //
     // `custom_domain: true` makes Cloudflare create and manage the DNS record
@@ -31,5 +32,7 @@
     // EDGE_SECRET is deliberately absent. It is set with `wrangler secret put`
     // and lives only in Cloudflare; a value committed here would be readable
     // in this repository's history forever, which for a shared secret means it
-    // was never secret.
+    // was never secret. TURNSTILE_SECRET_KEY is absent for the same reason:
+    // like EDGE_SECRET it is set only with `wrangler secret put` and is never
+    // committed.
 }
