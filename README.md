@@ -50,7 +50,35 @@ npm install
 npm run dev
 ```
 
-> Fork setup (the values to change and the deploy order): see docs (pending).
+## Fork setup
+
+Three committed values tie this repository to yanirrot.com. None of them is a
+secret, and a fork must change all three:
+
+| Value | File | This repository | In a fork |
+|---|---|---|---|
+| Site URL | `frontend/site.config.ts` → `url` | `https://yanirrot.com` | Your site's public origin |
+| API URL | `frontend/site.config.ts` → `backendUrl` | `https://api.yanirrot.com` | `https://api.<your-domain>`; must equal the Worker route below |
+| Worker route | `edge/wrangler.jsonc` → `routes[0].pattern` | `api.yanirrot.com` | `api.<your-domain>` (the zone must already be on Cloudflare) |
+| Origin URL | `edge/wrangler.jsonc` → `vars.ORIGIN_URL` | the Cloud Run backend's `run.app` URL | Your own Cloud Run service URL |
+
+The API URL and the Worker route are one value written in two places; if they
+disagree, the browser calls a host the Worker does not serve. The public
+Turnstile site key in `frontend/src/constants/turnstile.ts` is also yours to
+replace (see the [edge README](edge/README.md#turnstile)).
+
+Deploy order, so no step strands the site:
+
+1. **Backend.** Deploy to Cloud Run with `ORIGIN_SHARED_SECRET` still unset, and
+   copy its `run.app` URL into `ORIGIN_URL`.
+2. **Worker.** From `edge/`, set `EDGE_SECRET` and `TURNSTILE_SECRET_KEY` with
+   `npx wrangler secret put`, then `npx wrangler deploy`.
+3. **Frontend.** With `url` and `backendUrl` set, deploy to Cloudflare Pages.
+   The site now reaches the API through the Worker.
+4. **Enforce.** Give the backend `ORIGIN_SHARED_SECRET` equal to `EDGE_SECRET`
+   and redeploy. Direct `run.app` calls now return 403.
+
+Details: [edge README](edge/README.md) and [frontend README](frontend/README.md).
 
 ## How it works
 
