@@ -1,55 +1,41 @@
-# Gemini AI Portfolio
+# AI Portfolio Kit
 
-A portfolio site with an AI assistant: React + TypeScript frontend on Cloudflare Pages, FastAPI backend on Google Cloud Run, answers grounded in local markdown via Google's Gemini API.
+**A portfolio site with an AI chat that answers only from your own markdown files.**
 
-## Architecture
+A React + TypeScript frontend on Cloudflare Pages, a Cloudflare Worker as the API front door,
+and a FastAPI backend on Google Cloud Run that calls the Gemini API and sends contact mail over
+SMTP. The repository is MIT licensed and meant to be forked.
 
-| Layer | Runs on | Why |
-| --- | --- | --- |
-| Frontend | Cloudflare Pages (static, global CDN) | It is a static bundle; serving it from a container would be a CDN's job done worse |
-| API front door | Cloudflare Worker (`edge/`) | Puts the API behind Cloudflare's rate limiting and bot handling, and adds the shared secret the backend requires |
-| Backend | Google Cloud Run (scale-to-zero) | Needs Python, calls Gemini, sends SMTP |
-| Secrets | Google Secret Manager | Never passed as plaintext Cloud Run env vars |
-| CI auth | Workload Identity Federation | Keyless — no service-account JSON exists anywhere |
+## Why it exists
 
-The browser never calls Cloud Run directly: it calls `api.<domain>`, the Worker
-forwards to the `run.app` URL with a shared secret, and the backend rejects
-anything arriving without it. See [edge/README.md](edge/README.md).
+- **A portfolio chat speaks for a real person.** It answers in the owner's first person, so an
+  invented employer or date is a false claim about someone, not just a wrong answer. The chat is
+  given the owner's markdown files and nothing else to answer from.
+- **No corpus means no answer.** If the profile documents are missing, the backend refuses to
+  call the model instead of answering from placeholders.
+- **A public API costs money per call.** The chat endpoint is unauthenticated and spends model
+  quota, so it sits behind an edge Worker with a shared secret and behind per-client and global
+  rate limits.
+- **Small enough to read.** One backend process, a folder of markdown, no database.
 
-## Prerequisites
-
--   Node.js >= 22.22.0 (react-router v8's floor) and npm >= 10.8.2
--   Python 3.12 (3.9 is EOL and cannot install the current requirements)
--   Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
--   Google Cloud project with billing enabled — Cloud Build and Artifact Registry refuse to run without it, even inside the free tier
--   Cloudflare account (free) for the frontend (Pages) and the API front door (Workers)
-
-## Quick Start
+## Quick start
 
 ```bash
-git clone https://github.com/Yanir-R/gemini-portfolio.git
-cd gemini-portfolio
+git clone https://github.com/Yanir-R/ai-portfolio-kit.git
+cd ai-portfolio-kit
 ```
 
-### Frontend
+Prerequisites:
+
+- Node.js >= 22.22.0 and npm >= 10.8.2 (see `engines` in [frontend/package.json](frontend/package.json))
+- Python 3.12
+- A Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey), placed in the
+  backend's local env file as described in [backend/README.md](backend/README.md#configuration)
+
+Run the backend first, then the frontend. The edge Worker is not needed locally.
 
 ```bash
-cd frontend
-npm install
-npm run dev          # http://localhost:3000
-```
-
-| Script | Does |
-| --- | --- |
-| `npm run dev` | Vite dev server on port 3000 |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | ESLint |
-| `npm run format` / `format:check` | Prettier |
-| `npm run build` | Typechecks first, then builds — a build cannot ship a type error |
-
-### Backend
-
-```bash
+# Terminal 1: backend on http://localhost:8000
 cd backend
 python3.12 -m venv venv
 source venv/bin/activate          # Windows: .\venv\Scripts\activate
@@ -57,169 +43,119 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-Run one process. The rate limiter (below) keeps its counters in-process, so multiple workers multiply the ceiling.
-
-## Configuration
-
-### Frontend
-
-The public build values are committed in **`frontend/site.config.ts`**: the site
-URL, the backend URL and an optional avatar URL. Forking? Change those three.
-
-None of them is a secret — all three are readable from the deployed site — and
-committing them is what keeps the deploy honest: Vite inlines them at build
-time, so a value held in a repository variable takes effect only on the next
-build, and changing one after a deploy does nothing at all.
-
-For local work, an environment variable of the same name overrides each:
-
 ```bash
-# frontend/.env.development
-VITE_BACKEND_URL=http://localhost:8000
-VITE_SITE_URL=http://localhost:3000
+# Terminal 2: frontend on http://localhost:3000
+cd frontend
+npm install
+npm run dev
 ```
 
-A **production build fails** if `url` or `backendUrl` resolves to empty, rather
-than shipping a bundle pointing at localhost. `VITE_ALLOW_UNCONFIGURED_BUILD=true`
-opts out for a deliberately config-less build; never set it on a build you
-intend to deploy. Never hardcode a domain in the markup — `index.html` uses a
-`%VITE_SITE_URL%` placeholder that the build substitutes.
+> Fork setup (the values to change and the deploy order): see docs (pending).
 
-### Backend
+## How it works
 
-```bash
-# backend/.env  (gitignored — never commit this)
-GEMINI_API_KEY=...
-EMAIL_ADDRESS=your_gmail@gmail.com
-EMAIL_PASSWORD=...            # Gmail App Password, not your account password
-YOUR_EMAIL=where_contact_mail_lands@gmail.com
-
-# optional
-ALLOWED_ORIGINS=https://your-frontend.example      # comma-separated, added to the CORS allowlist
-FRONTEND_PROD_URL=https://your-frontend.example
-ORIGIN_SHARED_SECRET=...   # must match the edge Worker's EDGE_SECRET
+```mermaid
+flowchart LR
+  B["Visitor's browser"]
+  P["Cloudflare Pages<br/>frontend"]
+  W["Edge Worker<br/>API front door"]
+  R["Cloud Run backend<br/>FastAPI"]
+  G["Gemini API"]
+  M[("Markdown corpus<br/>backend/docs")]
+  S["SMTP<br/>contact mail"]
+  K["Secret Manager"]
+  B -->|loads the site| P
+  B -->|API calls| W
+  W -->|adds shared secret| R
+  R -->|question and selected documents| G
+  R -->|reads| M
+  R -->|contact mail| S
+  K -.->|secrets at runtime| R
 ```
 
-`ORIGIN_SHARED_SECRET` unset means "do not enforce", which is what lets the
-Worker be rolled out before the backend starts requiring it. Once set, every
-request that does not carry the matching header gets a 403 — including a direct
-call to the `run.app` URL. Leave it unset for local development.
+<p align="center">
+  <img src="docs/assets/architecture.svg" width="760" alt="Architecture: the visitor's browser loads the frontend from Cloudflare Pages and sends API calls to the edge Worker, which adds a shared secret and forwards them to the FastAPI backend on Cloud Run. The backend reads the markdown corpus, calls the Gemini API, sends contact mail over SMTP and receives its secrets from Secret Manager.">
+</p>
 
-### Rate limiting
+1. The browser loads a static bundle from Cloudflare Pages.
+2. API calls go to the API hostname, served by the Worker in `edge/`. The Worker adds a shared
+   secret header and forwards the request to the backend.
+3. The backend checks the header, applies rate limits, picks the documents the question needs
+   from the markdown corpus and calls the Gemini API with them.
+4. An email address left in the chat, or a message sent to the contact endpoint, is delivered to
+   the owner's inbox over SMTP.
 
-`/chat-with-files` and `/api/contact` are unauthenticated and cost money or quota per call, so both a per-client and a global window are enforced. Defaults:
+The design is described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-```bash
-RATE_LIMIT_CHAT_PER_IP_PER_DAY=10
-RATE_LIMIT_CHAT_GLOBAL_PER_DAY=12
-RATE_LIMIT_CHAT_WINDOW_SECONDS=86400
-RATE_LIMIT_CONTACT_PER_IP_PER_MINUTE=3
-RATE_LIMIT_CONTACT_GLOBAL_PER_MINUTE=15
-```
+## Limitations
 
-The two limiters use different windows because they answer different questions. Contact is a rate — how often may somebody send. Chat is a budget: Gemini's free tier grants 20 requests per **day** per model, so a per-minute window would renew 1,440 times a day and cap nothing that matters.
+Stated plainly, so you know what you are forking:
 
-The global window is the cost guard: a per-IP limit alone is defeated by spoofing or a botnet. See `backend/rate_limit.py`.
+- **Rate-limit counters live in the backend process.** Run one process per instance; every
+  extra process or instance multiplies the global ceiling (`backend/rate_limit.py`).
+- **The edge Worker is deployed by hand, not by CI.** Neither workflow in `.github/workflows/`
+  touches `edge/`; see [edge/README.md](edge/README.md).
+- **The edge secret is enforced only when it is set.** With `ORIGIN_SHARED_SECRET` unset the
+  backend accepts direct requests (`backend/main.py`).
+- **The chat answers only from the committed markdown, so it declines what is not there.** The
+  corpus is the files under `backend/docs/` and nothing else (`backend/context.py`). Whether the
+  model always follows that instruction cannot be proven offline (unverified).
+- **The profile documents are public.** Everything under `backend/docs/` is tracked in this
+  repository and sent to the Gemini API; the profile folder is also served by `/api/content/`.
+- **The answer trace reports what the model was given, not what it used.** No step attributes an
+  answer to a document (`backend/main.py`, `backend/context.py`).
+- **Document selection is word overlap with an English stopword list.** When no term
+  distinguishes a document, every document is sent (`backend/selection.py`).
+- **The SMTP host is fixed in code** to one mail provider (`backend/main.py`).
+- **The frontend has no automated tests.** `frontend/package.json` defines typecheck, lint,
+  format and build scripts, and no test script.
 
-## Deployment
+## What works today
 
-Both workflows split into a `verify` job (runs on pull requests, needs no cloud credentials) and a `deploy` job gated on `github.event_name == 'push'`. Deploys never run for a pull request — both target fixed service names, so a PR deploy would overwrite the shared environment with unreviewed code.
+Each item names the file or test that shows it. Tests are in `backend/tests/` and run offline.
 
-### Required GitHub configuration
+| What | Proof |
+|---|---|
+| The corpus is built from profile, project and writing documents and cached until a file changes | `backend/context.py`; `test_context_layer.py::test_corpus_loads_profile_and_projects`, `::test_corpus_is_cached_between_calls` |
+| A corpus with no profile is treated as empty, and template placeholders never reach the model | `test_context_layer.py::test_corpus_without_profile_fails_closed`, `::test_corpus_never_falls_back_to_template_placeholders` |
+| With an empty corpus the model is not called | `test_context_layer.py::test_empty_corpus_is_refused_without_calling_the_model` |
+| The instruction given to the model states the grounding rules and fences the corpus | `test_context_layer.py::test_system_instruction_states_the_grounding_rules`, `::test_system_instruction_fences_the_corpus` |
+| Each question gets only the documents it needs; profile documents are always kept; an unknown subject gets everything | `backend/selection.py`; `test_selection.py` |
+| Oversized or empty chat requests are rejected | `backend/main.py`; `test_context_layer.py::test_oversized_message_is_rejected`, `::test_empty_message_is_rejected`, `::test_unbounded_history_is_rejected` |
+| Interface banners are not replayed to the model as conversation | `test_context_layer.py::test_ui_chrome_is_not_replayed_as_conversation` |
+| Per-client and global rate limits, answering 429 with `Retry-After` | `backend/rate_limit.py` (code; no limiter test was read for this list) |
+| The client identity used for rate limiting cannot be claimed by a forged header | `test_client_identity.py` |
+| The backend rejects guarded requests without the edge secret when one is configured | `backend/main.py` (`require_edge_secret`) |
+| The Worker replaces any client-sent secret header, refuses to run unconfigured, and answers 502 when the backend is unreachable | `edge/src/index.js` (code; no test) |
+| An invalid address or oversized message never reaches mail delivery or spends a rate-limit slot | `test_contact_endpoint.py` |
+| An address left in the chat is emailed, and a failed send tells the visitor so | `test_email_delivery.py` (mail transport stubbed) |
+| When the upstream API refuses, the chat falls back through its model list and then answers "busy" without queueing | `test_quota_resilience.py`; `test_context_layer.py::test_quota_exhaustion_advances_through_every_model` |
+| `/api/content/` is confined to the profile folder | `backend/main.py` (`get_content`; code, no test was read) |
+| Usage figures are shown only for answers a model produced | `test_context_layer.py::test_a_reply_the_model_never_produced_carries_no_trace` |
+| Pull requests run verify jobs; deploys run only on a push to `main` | `.github/workflows/backend-deploy.yml`, `.github/workflows/frontend-deploy.yml` |
+| Frontend typecheck, lint, format check and build | scripts in `frontend/package.json`, run by `frontend-deploy.yml` |
+| The model follows the grounding rules for every question | (unverified) |
+| Real mail delivery through an SMTP server | (unverified) |
+| Frontend behaviour in a browser | (unverified) |
+| A full deployment working end to end | (unverified) |
 
-Secrets:
+## Documentation
 
-| Name | What |
-| --- | --- |
-| `GCP_DEV_PROJECT_ID` | Target GCP project |
-| `GCP_SA_EMAIL` | Deploy service account |
-| `GCP_WORKLOAD_IDENTITY_PROVIDER` | WIF provider resource path |
-| `EMAIL_ADDRESS`, `YOUR_EMAIL` | SMTP sender / recipient |
-| `CLOUDFLARE_API_TOKEN` | Scope: Account → Cloudflare Pages → Edit |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account |
-
-Variables:
-
-| Name | What |
-| --- | --- |
-| `CLOUDFLARE_PAGES_PROJECT` | Pages project name |
-| `CLOUDFLARE_PAGES_ENABLED` | `true` arms the Pages deploy — set this **last** |
-| `GCP_RUNTIME_SA` | Identity the Cloud Run container runs as, distinct from the deploy account |
-| `ALLOWED_ORIGINS` | Extra CORS origins for the backend |
-
-The frontend's URLs are not in this list: they live in `frontend/site.config.ts`
-for the reason given above.
-
-There is deliberately **no `GCP_SA_KEY`**. Authentication uses Workload Identity Federation, and the OIDC provider carries an attribute condition restricting it to this repository, so no long-lived JSON key is ever created or stored.
-
-`GEMINI_API_KEY`, `EMAIL_PASSWORD` and `ORIGIN_SHARED_SECRET` are **not** GitHub secrets for the backend deploy — they live in Secret Manager and are attached with `--set-secrets`, keeping them out of Cloud Run revision metadata.
-
-The Worker in `edge/` is deployed by hand (`npx wrangler deploy`), not by CI, and
-its `EDGE_SECRET` lives only in Cloudflare.
-
-## API
-
-| Endpoint | Purpose |
-| --- | --- |
-| `GET /` · `GET /health` | Health check |
-| `GET /api/chat/status` | Whether the chat has a corpus to answer from |
-| `GET /api/content/{file_name}` | Read a markdown doc (path-confined to the profile dir) |
-| `GET /api/projects` · `GET /api/projects/{slug}` | Project data |
-| `POST /chat-with-files` | Context-aware chat — rate limited |
-| `POST /api/contact` | Contact email — rate limited |
-
-## The context layer
-
-What the chat knows about Yanir, and how it is allowed to answer, lives in three files:
-
-| File | Responsibility |
-| --- | --- |
-| `backend/docs/profile/` | The source content — published, see the note below |
-| `backend/context.py` | Assembles and caches the corpus; reports its token cost |
-| `backend/prompt.py` | The behavioural contract: grounding, voice, boundaries |
-
-The corpus is small (~3.6k tokens), so all of it is sent on every request and cached
-against file mtimes rather than re-read per call. `context.py` logs the token estimate
-on load and warns past a review threshold — the point at which selecting sections per
-question would start to be worth building.
-
-**Grounding is the reason the prompt layer exists.** The chat answers in Yanir's first
-person on a page recruiters read, so an invented employer or date is a false claim
-attributed to a real person. The model is instructed to answer only from the profile,
-to decline and offer email follow-up when a question is not covered, and to treat both
-the corpus and visitor messages as data rather than instructions.
-
-```
-backend/docs/
-├── profile/     # markdown the chat answers from — published
-├── projects/    # per-project markdown, drives /api/projects and the chat
-├── writing/     # published articles, drives /api/writing and the chat
-└── templates/   # placeholders for forks; never sent to the model
-```
-
-> **Note:** `backend/docs/profile/` is **tracked in this public repository** and served
-> over `/api/content/`. Everything in it is world-readable on GitHub and reaches the
-> Gemini API on every chat message. Treat it as published: it is for what belongs on a
-> public portfolio, and nothing else.
-
-### Changing what the chat says
-
-Prompt and profile changes are validated against a golden question set — grounded answers,
-questions the corpus does not cover, false premises, injection and extraction — which is
-kept outside this repository and run by hand before shipping a change. `backend/tests/`
-covers what can be asserted offline and runs in CI on every pull request.
-
-## Further reading
-
--   [Frontend README](frontend/README.md)
--   [Backend README](backend/README.md)
--   [Edge Worker README](edge/README.md)
--   [Workflows README](.github/workflows/README.md)
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): components, request path, configuration, API, context layer, CI.
+- [docs/PRIVACY.md](docs/PRIVACY.md): what a visitor's message touches and what is kept.
+- [docs/ROADMAP.md](docs/ROADMAP.md): ideas for next steps, not commitments.
+- [docs/REVIEW-LOG.md](docs/REVIEW-LOG.md): the per-file review record.
+- [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [TRADEMARK.md](TRADEMARK.md).
+- Component READMEs: [frontend/](frontend/README.md), [backend/](backend/README.md),
+  [edge/](edge/README.md), [.github/workflows/](.github/workflows/README.md).
 
 ## Contributing
 
-Fork, branch, commit, open a PR. CI runs typecheck, lint, format check, build and a dependency audit on every pull request; all must pass.
+Issues and small pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first;
+commits are signed off under the [DCO](DCO). To report a security problem, see
+[SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT License](LICENSE)
+MIT. See [LICENSE](LICENSE). The project name and the owner's personal content are covered by
+[TRADEMARK.md](TRADEMARK.md).

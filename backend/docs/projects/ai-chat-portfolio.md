@@ -35,7 +35,7 @@ production
 https://yanir-portfolio.pages.dev
 
 ## Repository
-https://github.com/Yanir-R/gemini-portfolio
+https://github.com/Yanir-R/ai-portfolio-kit
 
 ## Media
 /projects/portfolio-home.png

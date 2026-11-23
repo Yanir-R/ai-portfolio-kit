@@ -1,0 +1,14 @@
+# Allowlist for .github/scripts/check_hygiene.sh
+#
+# Format: one POSIX extended regular expression (grep -E) per line.
+# Blank lines and lines starting with "#" are ignored.
+#
+# Each hit is reported as "path:line:text". A hit is dropped when that whole
+# string matches any entry here, so an entry can pin a file, a line or the text.
+#
+# Every entry needs a reason comment on the line above it, saying why the match
+# is safe to publish (for example: an invented value in a test). Keep entries
+# as narrow as possible, and anchor them to a path with "^".
+
+# Invented shared-secret value used only by the backend tests; never a real credential.
+^backend/tests/test_(client_identity|edge_secret)\.py:[0-9]+:SECRET = "test-secret-value"$
