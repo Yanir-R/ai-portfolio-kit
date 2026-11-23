@@ -41,7 +41,7 @@ Greetings never call the embedder. One `Retrieval: {json}` line per request gain
 
 ## Tests
 
-Run with `/workspace/a7-test-venv` (pinned dev requirements; nothing installed), from `backend/`.
+Run from `backend/` in a local virtualenv with the pinned dev requirements (nothing installed).
 
 | `RETRIEVAL_MODE` | Result |
 |---|---|
