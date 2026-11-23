@@ -6,6 +6,7 @@ import { QuickMessages } from '@/components/QuickMessages';
 import { QuickMessageOption } from '@/types/chat';
 import { FINAL_QUESTION } from '@/constants/chat';
 import { useScreenSize } from '@/hooks/useScreenSize';
+import { createTurnstileController, TurnstileController } from '@/services/turnstile';
 
 /*
  * The transcript.
@@ -19,6 +20,29 @@ import { useScreenSize } from '@/hooks/useScreenSize';
  * worth reading matters more than any hover effect would.
  */
 const Chat: React.FC = () => {
+    // The Turnstile widget lives in a ref rather than state: nothing renders
+    // from it, and the hook only needs to reach whichever controller is current
+    // at the moment a message is sent.
+    const turnstileContainerRef = useRef<HTMLDivElement>(null);
+    const turnstileRef = useRef<TurnstileController | null>(null);
+
+    useEffect(() => {
+        const container = turnstileContainerRef.current;
+        if (!container) return;
+
+        // Each mount gets its own controller and destroys it on the way out,
+        // so StrictMode's double-invoke leaves one widget rather than two.
+        const controller = createTurnstileController(container);
+        turnstileRef.current = controller;
+
+        return () => {
+            controller.destroy();
+            if (turnstileRef.current === controller) {
+                turnstileRef.current = null;
+            }
+        };
+    }, []);
+
     const {
         message,
         setMessage,
@@ -29,7 +53,10 @@ const Chat: React.FC = () => {
         showQuickMessages,
         quickMessageState,
         awaitingEmail,
-    } = useChat();
+    } = useChat({
+        getTurnstileToken: () => turnstileRef.current?.getToken() ?? Promise.resolve(null),
+        resetTurnstile: () => turnstileRef.current?.reset(),
+    });
 
     const [isTyping, setIsTyping] = useState(false);
     const [showScrollButton, setShowScrollButton] = useState(false);
@@ -247,6 +274,13 @@ const Chat: React.FC = () => {
                 questionLevel={quickMessageState.level}
                 hideOnType={isTyping}
             />
+
+            {/* Where Turnstile renders. Empty and without height almost always:
+                the check runs unseen, and a challenge appears here only when
+                Cloudflare wants a click before it will issue a token. It sits
+                directly above the composer because that is where the visitor
+                is looking when a send is waiting on it. */}
+            <div ref={turnstileContainerRef} className="flex justify-center bg-ink-800" />
 
             <form
                 onSubmit={handleSubmit}

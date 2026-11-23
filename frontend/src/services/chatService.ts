@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
+import { TURNSTILE_HEADER } from '@/constants/turnstile';
 import { AnswerTrace, ChatMessage } from '@/types/chat';
 
 /**
@@ -28,9 +29,13 @@ export const chatService = {
 
         return { ready: response.data?.knowledge_ready === true };
     },
-    sendMessage: async (message: string, conversationHistory: ChatMessage[]) => {
+    sendMessage: async (
+        message: string,
+        conversationHistory: ChatMessage[],
+        turnstileToken?: string | null
+    ) => {
         try {
-            const response = await apiClient.post<ChatResponse>(API_ENDPOINTS.CHAT, {
+            const body = {
                 message,
                 conversation_history: conversationHistory.slice(-MAX_HISTORY_SENT).map((msg) => ({
                     type: msg.type,
@@ -38,7 +43,17 @@ export const chatService = {
                     is_email_collection: msg.is_email_collection,
                     email_collected: msg.email_collected,
                 })),
-            });
+            };
+
+            // The Turnstile token rides in a header on this request alone, not
+            // on the client's defaults: it is single-use, and the status check
+            // is not a protected endpoint. With no token the header is left off
+            // rather than sent empty, and the Worker's reply explains the rest.
+            const config = turnstileToken
+                ? { headers: { [TURNSTILE_HEADER]: turnstileToken } }
+                : undefined;
+
+            const response = await apiClient.post<ChatResponse>(API_ENDPOINTS.CHAT, body, config);
 
             if (!response.data) {
                 throw new Error('No response received from server');

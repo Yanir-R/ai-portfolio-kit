@@ -111,6 +111,16 @@ const TRAINING_CRAWLERS = [
  *                       data block rather than executable script - the HTML
  *                       parser never prepares it for execution, so CSP does not
  *                       gate it and the structured data survives this policy.
+ *
+ *                       challenges.cloudflare.com is Turnstile, the bot check in
+ *                       front of the chat. Its api.js is fetched at runtime by
+ *                       services/turnstile.ts rather than bundled, so the host
+ *                       has to be named here or the check never loads.
+ *   frame-src           challenges.cloudflare.com only. Turnstile renders its
+ *                       challenge in an iframe from the same host as its script,
+ *                       and without this directive the frame would fall back to
+ *                       default-src 'self' and be refused. Nothing else on the
+ *                       site embeds a frame.
  *   style-src           'unsafe-inline' is required because components set a
  *                       `style` attribute - NavBar passes `--eat-x` that way,
  *                       and a style attribute counts as an inline style as far
@@ -144,6 +154,11 @@ const TRAINING_CRAWLERS = [
 const CF_ANALYTICS_SCRIPT = 'https://static.cloudflareinsights.com';
 const CF_ANALYTICS_REPORTING = 'https://cloudflareinsights.com';
 
+// Cloudflare Turnstile. One origin serves both halves of the check: api.js is
+// loaded from it as a script, and the challenge itself renders in an iframe
+// from it, so it is named in script-src and in frame-src.
+const TURNSTILE_ORIGIN = 'https://challenges.cloudflare.com';
+
 const emitSecurityHeaders = (backendUrl: string, avatarUrl: string) => {
     const originOf = (u: string) => {
         try {
@@ -165,7 +180,8 @@ const emitSecurityHeaders = (backendUrl: string, avatarUrl: string) => {
         "form-action 'self'",
         "frame-ancestors 'none'",
         "object-src 'none'",
-        `script-src 'self' ${CF_ANALYTICS_SCRIPT}`,
+        `script-src 'self' ${CF_ANALYTICS_SCRIPT} ${TURNSTILE_ORIGIN}`,
+        `frame-src ${TURNSTILE_ORIGIN}`,
         "style-src 'self' 'unsafe-inline'",
         "font-src 'self'",
         `img-src ${imgSrc}`,
