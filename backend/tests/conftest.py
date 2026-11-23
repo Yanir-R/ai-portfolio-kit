@@ -1,11 +1,12 @@
 """Shared fixtures and stubs for the backend tests.
 
-Two pieces of module-level mutable state leak between tests unless they are
-reset: gemini_helper's model cooldown table and context's corpus cache. A test
-that exhausts the fallback chain leaves every model marked unusable, and the
-next test in the same process gets BUSY_MESSAGE for a request that should have
-reached the model - a failure with nothing to do with the behaviour under test,
-in a file that never mentions cooldowns.
+Three pieces of module-level mutable state leak between tests unless they are
+reset: gemini_helper's model cooldown table, context's corpus cache and
+retrieval's chunk index. A test that exhausts the fallback chain leaves every
+model marked unusable, and the next test in the same process gets
+BUSY_MESSAGE for a request that should have reached the model - a failure with
+nothing to do with the behaviour under test, in a file that never mentions
+cooldowns.
 
 Resetting centrally rather than in the file that introduced the state is the
 point: the next person to add a test should not have to know this exists.
@@ -16,6 +17,7 @@ from google.genai import errors as genai_errors
 
 import context
 import gemini_helper
+import retrieval
 
 
 class ApiError(genai_errors.APIError):
@@ -57,6 +59,14 @@ class StubModels:
         if callable(outcome):
             return outcome()
         return outcome
+
+
+@pytest.fixture(autouse=True)
+def reset_retrieval_index():
+    """retrieval's chunk index is cached against the corpus it was built from."""
+    retrieval._reset_cache()
+    yield
+    retrieval._reset_cache()
 
 
 @pytest.fixture(autouse=True)

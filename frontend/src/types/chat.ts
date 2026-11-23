@@ -54,8 +54,11 @@ export interface AnswerTrace {
      * notes went; 'unfocused' means nothing distinguished one document from
      * another, so all of them did. Rendering the last as a plain count would
      * claim a selectivity it does not have, so it reads differently.
+     * 'core_only' (only with RETRIEVAL_MODE=lexical) means the question had
+     * topical words but no document passed the relevance gate, so only his
+     * notes went; it renders as the plain count, which is exactly what it is.
      */
-    context_outcome?: 'narrowed' | 'conversational' | 'unfocused' | 'no_corpus' | null;
+    context_outcome?: 'narrowed' | 'conversational' | 'unfocused' | 'core_only' | 'no_corpus' | null;
     /** The whole corpus, so a narrowed set can be reported as a share of it. */
     context_available?: number | null;
 }

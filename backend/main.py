@@ -5,7 +5,9 @@ from hmac import compare_digest
 from dotenv import load_dotenv
 from gemini_helper import Answer, get_gemini_response
 from context import get_knowledge
-from selection import Selection, select
+from selection import Selection
+# The configured retriever: today's selector unless RETRIEVAL_MODE=lexical.
+from retrieval import select
 from docs_helper import (
     read_markdown_file, PROFILE_DIR,
     get_all_projects, get_project_by_slug, get_featured_projects,
