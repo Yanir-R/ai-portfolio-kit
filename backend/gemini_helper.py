@@ -24,14 +24,16 @@ from prompt import NO_KNOWLEDGE_MESSAGE, build_contents, build_system_instructio
 
 logger = logging.getLogger(__name__)
 
-# Fallback models in order of preference. The "-latest" aliases track the
-# current generation, so a retirement upstream does not take chat down the way a
-# pinned name would; the pinned entry in the middle is the escape hatch if an
-# alias itself starts misbehaving.
+# Fallback models in order of preference. Only pinned stable model codes, no
+# "-latest" aliases: Google documents that a "-latest" alias is hot-swapped on
+# every new release and recommends that production apps use a specific stable
+# model (https://ai.google.dev/gemini-api/docs/models). A model change is
+# therefore a reviewed code change, and the cheaper stable models further down
+# the chain cover quota exhaustion or a retirement of the first entry.
 MODELS = (
-    "gemini-flash-latest",
-    "gemini-3.5-flash",
-    "gemini-flash-lite-latest",
+    "gemini-3.8-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash-lite",
 )
 
 # Status codes that mean "this model is not usable for us right now", so the next
@@ -95,10 +97,6 @@ def _model_is_cooling(model_id: str, now: float) -> bool:
 def _start_cooldown(model_id: str, now: float) -> None:
     with _cooldown_lock:
         _model_cooldowns[model_id] = now + MODEL_COOLDOWN_SECONDS
-
-# Low but not zero: answers should be stable and factual across reloads, while
-# still reading as conversation rather than a canned response.
-TEMPERATURE = 0.3
 
 # A hard stop on cost per request. It is NOT a length control, and sizing it as
 # one truncates answers: on Gemini 3.x this budget is shared with the model's
@@ -207,7 +205,6 @@ def get_gemini_response(
     )
     config = types.GenerateContentConfig(
         system_instruction=build_system_instruction(knowledge),
-        temperature=TEMPERATURE,
         max_output_tokens=MAX_OUTPUT_TOKENS,
     )
     contents = build_contents(user_question, conversation_history)
