@@ -42,6 +42,7 @@ with `wrangler secret put` and lives only in Cloudflare.
 ```sh
 npx wrangler login          # interactive; needs a real terminal
 npx wrangler secret put EDGE_SECRET
+npx wrangler secret put TURNSTILE_SECRET_KEY
 npx wrangler deploy
 ```
 
@@ -63,6 +64,47 @@ strand the site against an API that has already started rejecting it.
 
 Rotating the secret runs the same way: add the new value to both sides before
 removing the old one from either.
+
+## Turnstile
+
+The shared secret proves a request came through the Worker, not who sent it to
+the Worker. For the routes that cost something per call, the Worker also checks
+a [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) token: a
+per-request proof that a browser running the site sent the message.
+
+- **Routes:** `POST /chat-with-files` and `POST /api/contact`. Everything else
+  (GETs, CORS preflights, other paths) is forwarded as before.
+- **Header:** the frontend sends the token in `X-Turnstile-Token`. The Worker
+  verifies it against Turnstile's `siteverify` with `TURNSTILE_SECRET_KEY`, and
+  removes the header before forwarding to the backend.
+- **Keys:** the public site key lives in `frontend/src/constants/turnstile.ts`.
+  The secret key is a Worker secret, set with `wrangler secret put` and never
+  committed.
+
+The check fails closed. "Could not check" is never treated as "checked":
+
+| Situation | Reply |
+| --- | --- |
+| Token missing, empty, over 2048 characters, or rejected by `siteverify` | 403, "Couldn't confirm this message came from a browser. Reload the page and send it again." |
+| `TURNSTILE_SECRET_KEY` unset, or `siteverify` unreachable, timed out (5 s), non-2xx or unparseable | 503, "The chat can't take messages right this moment. Give it a minute and send it again." |
+
+Both replies are JSON `{ "detail": "..." }`, which the frontend shows to the
+visitor as-is, and carry `Access-Control-Allow-Origin` echoing the request's
+`Origin` so the browser lets it read them. An unset secret is also logged by
+name in the Worker's logs.
+
+Rollout order that avoids downtime:
+
+1. Deploy the frontend that sends the token. Harmless before the Worker checks
+   it.
+2. `npx wrangler secret put TURNSTILE_SECRET_KEY`.
+3. Deploy the Worker. Enforcement begins.
+
+Deploying the Worker before step 2 makes the protected routes answer 503 until
+the secret is set.
+
+The Cloudflare rate limiting rule is separate: it is configured in the
+dashboard and needs no code.
 
 ## The same secret in two places
 
