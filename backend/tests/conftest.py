@@ -1,8 +1,9 @@
 """Shared fixtures and stubs for the backend tests.
 
-Three pieces of module-level mutable state leak between tests unless they are
-reset: gemini_helper's model cooldown table, context's corpus cache and
-retrieval's chunk index. A test that exhausts the fallback chain leaves every
+Four pieces of module-level mutable state leak between tests unless they are
+reset: gemini_helper's model cooldown table, context's corpus cache,
+retrieval's chunk index (and aligned vectors) and embedding's shared query
+embedder. A test that exhausts the fallback chain leaves every
 model marked unusable, and the next test in the same process gets
 BUSY_MESSAGE for a request that should have reached the model - a failure with
 nothing to do with the behaviour under test, in a file that never mentions
@@ -16,6 +17,7 @@ import pytest
 from google.genai import errors as genai_errors
 
 import context
+import embedding
 import gemini_helper
 import retrieval
 
@@ -67,6 +69,23 @@ def reset_retrieval_index():
     retrieval._reset_cache()
     yield
     retrieval._reset_cache()
+
+
+@pytest.fixture(autouse=True)
+def no_live_embedding_client(monkeypatch):
+    """No test may build a real embedding client (plan R2: fake clients only).
+
+    `pytest.fail` raises outside `Exception`, so the retriever's own
+    degrade-on-error handling cannot swallow it: a test that reaches the live
+    factory fails loudly instead of quietly falling back to BM25.
+    """
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("a test tried to build a live embedding client")
+
+    monkeypatch.setattr(embedding, "gemini_client", forbidden)
+    embedding._reset_shared()
+    yield
+    embedding._reset_shared()
 
 
 @pytest.fixture(autouse=True)
