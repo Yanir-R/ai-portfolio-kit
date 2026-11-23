@@ -1,0 +1,5995 @@
+{
+  "schema_version": "1",
+  "measured_at": "2026-11-23T15:03:08+0200",
+  "phase": "R1",
+  "selectors": {
+    "r0": "selection.select (unchanged; per-question results verified against RAG-R0-BASELINE.json)",
+    "r1": "retrieval.retrieve, served when RETRIEVAL_MODE=lexical"
+  },
+  "parameters": {
+    "BM25_K1": 1.2,
+    "BM25_B": 0.75,
+    "MIN_COVERAGE": 0.25,
+    "MIN_SHARE_OF_BEST": 0.5,
+    "RETRIEVAL_TOKEN_BUDGET": 3000,
+    "TOP_K_MAX": 12,
+    "WHOLE_DOC_TOKENS": 500,
+    "TRIGRAM_MIN_SIMILARITY": 0.6
+  },
+  "unknown_word_weight": "log(2 * N_docs)",
+  "hebrew_min_stem_length": 2,
+  "fitted_on_tune_half": [
+    "MIN_SHARE_OF_BEST",
+    "unknown_word_weight"
+  ],
+  "chunker_version": "1",
+  "retrievable_chunks": 22,
+  "split": {
+    "file": "backend/tests/retrieval_eval/split.v1.json",
+    "gate_half": "held_out",
+    "tune": 25,
+    "held_out": 30
+  },
+  "gate_metrics": [
+    "recall_macro",
+    "precision_macro",
+    "desired_outcome_rate"
+  ],
+  "gate_rule": "per category, R1 >= R0 on every gate metric, held-out half",
+  "gate_held_out": {
+    "pass": false,
+    "by_category": {
+      "direct_keyword": {
+        "n": 3,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.8333333333333334,
+            "r1": 1.0,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "hebrew": {
+        "n": 5,
+        "checks": {
+          "recall_macro": {
+            "r0": 0.6,
+            "r1": 0.6,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.6,
+            "r1": 0.6,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "multi_doc": {
+        "n": 3,
+        "checks": {
+          "recall_macro": {
+            "r0": 0.8333333333333334,
+            "r1": 0.7222222222222222,
+            "pass": false
+          },
+          "precision_macro": {
+            "r0": 0.7666666666666666,
+            "r1": 0.7666666666666666,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": false
+      },
+      "no_word_match": {
+        "n": 3,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.45555555555555555,
+            "r1": 1.0,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.0,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "off_topic": {
+        "n": 3,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.5333333333333333,
+            "r1": 1.0,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.3333333333333333,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "paraphrase": {
+        "n": 4,
+        "checks": {
+          "recall_macro": {
+            "r0": 0.875,
+            "r1": 0.625,
+            "pass": false
+          },
+          "precision_macro": {
+            "r0": 0.725,
+            "r1": 1.0,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.75,
+            "r1": 0.75,
+            "pass": true
+          }
+        },
+        "pass": false
+      },
+      "profile": {
+        "n": 3,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.6222222222222222,
+            "r1": 0.8888888888888888,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.3333333333333333,
+            "r1": 0.6666666666666666,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "project": {
+        "n": 3,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.7000000000000001,
+            "r1": 0.7000000000000001,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "writing": {
+        "n": 3,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.75,
+            "r1": 1.0,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      }
+    }
+  },
+  "gate_full_set_including_tune": {
+    "pass": false,
+    "by_category": {
+      "direct_keyword": {
+        "n": 6,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.7583333333333333,
+            "r1": 1.0,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.8333333333333334,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "hebrew": {
+        "n": 10,
+        "checks": {
+          "recall_macro": {
+            "r0": 0.5,
+            "r1": 0.5,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.975,
+            "r1": 0.975,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.5,
+            "r1": 0.5,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "multi_doc": {
+        "n": 5,
+        "checks": {
+          "recall_macro": {
+            "r0": 0.9,
+            "r1": 0.7833333333333333,
+            "pass": false
+          },
+          "precision_macro": {
+            "r0": 0.74,
+            "r1": 0.86,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.8,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": false
+      },
+      "no_word_match": {
+        "n": 5,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.5066666666666666,
+            "r1": 1.0,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.0,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "off_topic": {
+        "n": 5,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.6,
+            "r1": 0.8800000000000001,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.4,
+            "r1": 0.8,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "paraphrase": {
+        "n": 7,
+        "checks": {
+          "recall_macro": {
+            "r0": 0.7857142857142857,
+            "r1": 0.6428571428571429,
+            "pass": false
+          },
+          "precision_macro": {
+            "r0": 0.7357142857142858,
+            "r1": 0.9166666666666667,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.8571428571428571,
+            "r1": 0.8571428571428571,
+            "pass": true
+          }
+        },
+        "pass": false
+      },
+      "profile": {
+        "n": 6,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.7111111111111111,
+            "r1": 0.8444444444444444,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 0.5,
+            "r1": 0.6666666666666666,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "project": {
+        "n": 5,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.82,
+            "r1": 0.82,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "writing": {
+        "n": 6,
+        "checks": {
+          "recall_macro": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          },
+          "precision_macro": {
+            "r0": 0.7380952380952381,
+            "r1": 0.9583333333333334,
+            "pass": true
+          },
+          "desired_outcome_rate": {
+            "r0": 1.0,
+            "r1": 1.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      }
+    }
+  },
+  "held_out": {
+    "r0": {
+      "n": 30,
+      "overall": {
+        "n": 30,
+        "recall_macro": 0.9,
+        "precision_macro": 0.7294444444444445,
+        "unneeded_docs_mean": 1.7333333333333334,
+        "full_recall_rate": 0.8666666666666667,
+        "desired_outcome_rate": 0.6666666666666666,
+        "actual_outcomes": {
+          "narrowed": 22,
+          "unfocused": 4,
+          "conversational": 4
+        },
+        "profile_tokens_median": 4445.0,
+        "profile_tokens_mean": 4313.666666666667,
+        "profile_tokens_min": 1658,
+        "profile_tokens_max": 8770,
+        "system_prompt_tokens_median": 5463.0,
+        "system_prompt_tokens_mean": 5332.133333333333,
+        "system_prompt_tokens_min": 2677,
+        "system_prompt_tokens_max": 9789,
+        "select_latency_ms_median_of_medians": 0.00905150045582559,
+        "select_latency_ms_max_p95": 0.01588849954714533,
+        "select_latency_ms_p95_of_medians": 0.01205274984386051
+      },
+      "by_category": {
+        "direct_keyword": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 0.8333333333333334,
+          "unneeded_docs_mean": 0.6666666666666666,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 3
+          },
+          "profile_tokens_median": 4368,
+          "profile_tokens_mean": 3666.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4972,
+          "system_prompt_tokens_median": 5386,
+          "system_prompt_tokens_mean": 4684.333333333333,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5990,
+          "select_latency_ms_median_of_medians": 0.010161000318475999,
+          "select_latency_ms_max_p95": 0.014856499547022395,
+          "select_latency_ms_p95_of_medians": 0.010570498852757737
+        },
+        "hebrew": {
+          "n": 5,
+          "recall_macro": 0.6,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 0.6,
+          "desired_outcome_rate": 0.6,
+          "actual_outcomes": {
+            "conversational": 4,
+            "narrowed": 1
+          },
+          "profile_tokens_median": 1658,
+          "profile_tokens_mean": 2147.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4103,
+          "system_prompt_tokens_median": 2677,
+          "system_prompt_tokens_mean": 3165.8,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5121,
+          "select_latency_ms_median_of_medians": 0.0030379997042473406,
+          "select_latency_ms_max_p95": 0.0082949991337955,
+          "select_latency_ms_p95_of_medians": 0.00677600000926759
+        },
+        "multi_doc": {
+          "n": 3,
+          "recall_macro": 0.8333333333333334,
+          "precision_macro": 0.7666666666666666,
+          "unneeded_docs_mean": 1.0,
+          "full_recall_rate": 0.6666666666666666,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 3
+          },
+          "profile_tokens_median": 4522,
+          "profile_tokens_mean": 4610.0,
+          "profile_tokens_min": 4336,
+          "profile_tokens_max": 4972,
+          "system_prompt_tokens_median": 5540,
+          "system_prompt_tokens_mean": 5628.0,
+          "system_prompt_tokens_min": 5354,
+          "system_prompt_tokens_max": 5990,
+          "select_latency_ms_median_of_medians": 0.011571999493753538,
+          "select_latency_ms_max_p95": 0.01588849954714533,
+          "select_latency_ms_p95_of_medians": 0.014962299246690236
+        },
+        "no_word_match": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 0.45555555555555555,
+          "unneeded_docs_mean": 3.6666666666666665,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.0,
+          "actual_outcomes": {
+            "narrowed": 2,
+            "unfocused": 1
+          },
+          "profile_tokens_median": 4696,
+          "profile_tokens_mean": 5181.0,
+          "profile_tokens_min": 2077,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 5714,
+          "system_prompt_tokens_mean": 6199.333333333333,
+          "system_prompt_tokens_min": 3095,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.008623001122032292,
+          "select_latency_ms_max_p95": 0.012838499969802797,
+          "select_latency_ms_p95_of_medians": 0.009361001502838917
+        },
+        "off_topic": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 0.5333333333333333,
+          "unneeded_docs_mean": 3.6666666666666665,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.3333333333333333,
+          "actual_outcomes": {
+            "unfocused": 1,
+            "narrowed": 2
+          },
+          "profile_tokens_median": 5391,
+          "profile_tokens_mean": 5273.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 6409,
+          "system_prompt_tokens_mean": 6291.666666666667,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.00910400012799073,
+          "select_latency_ms_max_p95": 0.013932000001659617,
+          "select_latency_ms_p95_of_medians": 0.009148100070888177
+        },
+        "paraphrase": {
+          "n": 4,
+          "recall_macro": 0.875,
+          "precision_macro": 0.725,
+          "unneeded_docs_mean": 2.0,
+          "full_recall_rate": 0.75,
+          "desired_outcome_rate": 0.75,
+          "actual_outcomes": {
+            "unfocused": 1,
+            "narrowed": 3
+          },
+          "profile_tokens_median": 5242.0,
+          "profile_tokens_mean": 5337.5,
+          "profile_tokens_min": 2096,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 6260.5,
+          "system_prompt_tokens_mean": 6356.0,
+          "system_prompt_tokens_min": 3114,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.011457499567768537,
+          "select_latency_ms_max_p95": 0.013193500308261719,
+          "select_latency_ms_p95_of_medians": 0.012132250230934005
+        },
+        "profile": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 0.6222222222222222,
+          "unneeded_docs_mean": 3.0,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.3333333333333333,
+          "actual_outcomes": {
+            "narrowed": 2,
+            "unfocused": 1
+          },
+          "profile_tokens_median": 4103,
+          "profile_tokens_mean": 4843.666666666667,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 5121,
+          "system_prompt_tokens_mean": 5862.333333333333,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.0077549993875436485,
+          "select_latency_ms_max_p95": 0.008852999599184841,
+          "select_latency_ms_p95_of_medians": 0.00823740083433222
+        },
+        "project": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 0.7000000000000001,
+          "unneeded_docs_mean": 1.3333333333333333,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 3
+          },
+          "profile_tokens_median": 4959,
+          "profile_tokens_mean": 5089.666666666667,
+          "profile_tokens_min": 4522,
+          "profile_tokens_max": 5788,
+          "system_prompt_tokens_median": 5978,
+          "system_prompt_tokens_mean": 6108.333333333333,
+          "system_prompt_tokens_min": 5540,
+          "system_prompt_tokens_max": 6807,
+          "select_latency_ms_median_of_medians": 0.009416999091627076,
+          "select_latency_ms_max_p95": 0.010724999810918234,
+          "select_latency_ms_p95_of_medians": 0.009510599738860037
+        },
+        "writing": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 0.75,
+          "unneeded_docs_mean": 1.3333333333333333,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 3
+          },
+          "profile_tokens_median": 2496,
+          "profile_tokens_mean": 3778.3333333333335,
+          "profile_tokens_min": 2058,
+          "profile_tokens_max": 6781,
+          "system_prompt_tokens_median": 3514,
+          "system_prompt_tokens_mean": 4796.333333333333,
+          "system_prompt_tokens_min": 3076,
+          "system_prompt_tokens_max": 7799,
+          "select_latency_ms_median_of_medians": 0.009163000868284144,
+          "select_latency_ms_max_p95": 0.012582499948621262,
+          "select_latency_ms_p95_of_medians": 0.010379799459769856
+        }
+      },
+      "by_language": {
+        "en": {
+          "n": 25,
+          "recall_macro": 0.96,
+          "precision_macro": 0.6753333333333333,
+          "unneeded_docs_mean": 2.08,
+          "full_recall_rate": 0.92,
+          "desired_outcome_rate": 0.68,
+          "actual_outcomes": {
+            "narrowed": 21,
+            "unfocused": 4
+          },
+          "profile_tokens_median": 4696,
+          "profile_tokens_mean": 4747.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 5714,
+          "system_prompt_tokens_mean": 5765.4,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.009163000868284144,
+          "select_latency_ms_max_p95": 0.01588849954714533,
+          "select_latency_ms_p95_of_medians": 0.012119000166421756
+        },
+        "he": {
+          "n": 5,
+          "recall_macro": 0.6,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 0.6,
+          "desired_outcome_rate": 0.6,
+          "actual_outcomes": {
+            "conversational": 4,
+            "narrowed": 1
+          },
+          "profile_tokens_median": 1658,
+          "profile_tokens_mean": 2147.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4103,
+          "system_prompt_tokens_median": 2677,
+          "system_prompt_tokens_mean": 3165.8,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5121,
+          "select_latency_ms_median_of_medians": 0.0030379997042473406,
+          "select_latency_ms_max_p95": 0.0082949991337955,
+          "select_latency_ms_p95_of_medians": 0.00677600000926759
+        }
+      }
+    },
+    "r1": {
+      "n": 30,
+      "overall": {
+        "n": 30,
+        "recall_macro": 0.8555555555555556,
+        "precision_macro": 0.9355555555555556,
+        "unneeded_docs_mean": 0.26666666666666666,
+        "full_recall_rate": 0.8,
+        "desired_outcome_rate": 0.8666666666666667,
+        "actual_outcomes": {
+          "narrowed": 16,
+          "core_only": 14
+        },
+        "profile_tokens_median": 1919.0,
+        "profile_tokens_mean": 2396.8333333333335,
+        "profile_tokens_min": 1658,
+        "profile_tokens_max": 4546,
+        "system_prompt_tokens_median": 2937.0,
+        "system_prompt_tokens_mean": 3415.3,
+        "system_prompt_tokens_min": 2677,
+        "system_prompt_tokens_max": 5564,
+        "select_latency_ms_median_of_medians": 0.07722850114078028,
+        "select_latency_ms_max_p95": 0.15566149977530586,
+        "select_latency_ms_p95_of_medians": 0.10833114947672584
+      },
+      "by_category": {
+        "direct_keyword": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 2,
+            "core_only": 1
+          },
+          "profile_tokens_median": 1923,
+          "profile_tokens_mean": 2036.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 2527,
+          "system_prompt_tokens_median": 2941,
+          "system_prompt_tokens_mean": 3054.3333333333335,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 3545,
+          "select_latency_ms_median_of_medians": 0.08872999933373649,
+          "select_latency_ms_max_p95": 0.11134049964311998,
+          "select_latency_ms_p95_of_medians": 0.09100250026676804
+        },
+        "hebrew": {
+          "n": 5,
+          "recall_macro": 0.6,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 0.6,
+          "desired_outcome_rate": 0.6,
+          "actual_outcomes": {
+            "core_only": 4,
+            "narrowed": 1
+          },
+          "profile_tokens_median": 1658,
+          "profile_tokens_mean": 2147.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4103,
+          "system_prompt_tokens_median": 2677,
+          "system_prompt_tokens_mean": 3165.8,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5121,
+          "select_latency_ms_median_of_medians": 0.07199200081231538,
+          "select_latency_ms_max_p95": 0.10792000011861091,
+          "select_latency_ms_p95_of_medians": 0.08662419932079501
+        },
+        "multi_doc": {
+          "n": 3,
+          "recall_macro": 0.7222222222222222,
+          "precision_macro": 0.7666666666666666,
+          "unneeded_docs_mean": 1.0,
+          "full_recall_rate": 0.3333333333333333,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 3
+          },
+          "profile_tokens_median": 4336,
+          "profile_tokens_mean": 4283.666666666667,
+          "profile_tokens_min": 4103,
+          "profile_tokens_max": 4412,
+          "system_prompt_tokens_median": 5354,
+          "system_prompt_tokens_mean": 5301.666666666667,
+          "system_prompt_tokens_min": 5121,
+          "system_prompt_tokens_max": 5430,
+          "select_latency_ms_median_of_medians": 0.10284100062563084,
+          "select_latency_ms_max_p95": 0.15566149977530586,
+          "select_latency_ms_p95_of_medians": 0.13210269935370889
+        },
+        "no_word_match": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "core_only": 3
+          },
+          "profile_tokens_median": 1658,
+          "profile_tokens_mean": 1658.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 1658,
+          "system_prompt_tokens_median": 2677,
+          "system_prompt_tokens_mean": 2677.0,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 2677,
+          "select_latency_ms_median_of_medians": 0.0597079997533001,
+          "select_latency_ms_max_p95": 0.08923950008465908,
+          "select_latency_ms_p95_of_medians": 0.07486580070690252
+        },
+        "off_topic": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "core_only": 3
+          },
+          "profile_tokens_median": 1658,
+          "profile_tokens_mean": 1658.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 1658,
+          "system_prompt_tokens_median": 2677,
+          "system_prompt_tokens_mean": 2677.0,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 2677,
+          "select_latency_ms_median_of_medians": 0.06533300074806903,
+          "select_latency_ms_max_p95": 0.09384999975736719,
+          "select_latency_ms_p95_of_medians": 0.0740594001399586
+        },
+        "paraphrase": {
+          "n": 4,
+          "recall_macro": 0.625,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 0.5,
+          "desired_outcome_rate": 0.75,
+          "actual_outcomes": {
+            "core_only": 1,
+            "narrowed": 3
+          },
+          "profile_tokens_median": 2173.5,
+          "profile_tokens_mean": 2337.25,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 3344,
+          "system_prompt_tokens_median": 3191.5,
+          "system_prompt_tokens_mean": 3355.5,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 4362,
+          "select_latency_ms_median_of_medians": 0.10167849995923461,
+          "select_latency_ms_max_p95": 0.12875250013166806,
+          "select_latency_ms_p95_of_medians": 0.1081824997527292
+        },
+        "profile": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 0.8888888888888888,
+          "unneeded_docs_mean": 0.3333333333333333,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.6666666666666666,
+          "actual_outcomes": {
+            "core_only": 2,
+            "narrowed": 1
+          },
+          "profile_tokens_median": 1658,
+          "profile_tokens_mean": 1743.6666666666667,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 1915,
+          "system_prompt_tokens_median": 2677,
+          "system_prompt_tokens_mean": 2762.3333333333335,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 2933,
+          "select_latency_ms_median_of_medians": 0.057191000450984575,
+          "select_latency_ms_max_p95": 0.096896500508592,
+          "select_latency_ms_p95_of_medians": 0.07157119980547577
+        },
+        "project": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 0.7000000000000001,
+          "unneeded_docs_mean": 1.3333333333333333,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 3
+          },
+          "profile_tokens_median": 3567,
+          "profile_tokens_mean": 3759.3333333333335,
+          "profile_tokens_min": 3165,
+          "profile_tokens_max": 4546,
+          "system_prompt_tokens_median": 4585,
+          "system_prompt_tokens_mean": 4777.333333333333,
+          "system_prompt_tokens_min": 4183,
+          "system_prompt_tokens_max": 5564,
+          "select_latency_ms_median_of_medians": 0.09089899867831264,
+          "select_latency_ms_max_p95": 0.12495999999373453,
+          "select_latency_ms_p95_of_medians": 0.10590829915599898
+        },
+        "writing": {
+          "n": 3,
+          "recall_macro": 1.0,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 3
+          },
+          "profile_tokens_median": 2096,
+          "profile_tokens_mean": 2135.0,
+          "profile_tokens_min": 2058,
+          "profile_tokens_max": 2251,
+          "system_prompt_tokens_median": 3114,
+          "system_prompt_tokens_mean": 3153.0,
+          "system_prompt_tokens_min": 3076,
+          "system_prompt_tokens_max": 3269,
+          "select_latency_ms_median_of_medians": 0.08082599924819078,
+          "select_latency_ms_max_p95": 0.09210899952449836,
+          "select_latency_ms_p95_of_medians": 0.0860477988680941
+        }
+      },
+      "by_language": {
+        "en": {
+          "n": 25,
+          "recall_macro": 0.9066666666666667,
+          "precision_macro": 0.9226666666666666,
+          "unneeded_docs_mean": 0.32,
+          "full_recall_rate": 0.84,
+          "desired_outcome_rate": 0.92,
+          "actual_outcomes": {
+            "narrowed": 15,
+            "core_only": 10
+          },
+          "profile_tokens_median": 2058,
+          "profile_tokens_mean": 2446.8,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4546,
+          "system_prompt_tokens_median": 3076,
+          "system_prompt_tokens_mean": 3465.2,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5564,
+          "select_latency_ms_median_of_medians": 0.08082599924819078,
+          "select_latency_ms_max_p95": 0.15566149977530586,
+          "select_latency_ms_p95_of_medians": 0.10867439959838521
+        },
+        "he": {
+          "n": 5,
+          "recall_macro": 0.6,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 0.6,
+          "desired_outcome_rate": 0.6,
+          "actual_outcomes": {
+            "core_only": 4,
+            "narrowed": 1
+          },
+          "profile_tokens_median": 1658,
+          "profile_tokens_mean": 2147.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4103,
+          "system_prompt_tokens_median": 2677,
+          "system_prompt_tokens_mean": 3165.8,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5121,
+          "select_latency_ms_median_of_medians": 0.07199200081231538,
+          "select_latency_ms_max_p95": 0.10792000011861091,
+          "select_latency_ms_p95_of_medians": 0.08662419932079501
+        }
+      }
+    }
+  },
+  "full_set_including_tune": {
+    "r0": {
+      "n": 55,
+      "overall": {
+        "n": 55,
+        "recall_macro": 0.8727272727272727,
+        "precision_macro": 0.7541558441558441,
+        "unneeded_docs_mean": 1.5272727272727273,
+        "full_recall_rate": 0.8545454545454545,
+        "desired_outcome_rate": 0.6545454545454545,
+        "actual_outcomes": {
+          "unfocused": 6,
+          "narrowed": 41,
+          "conversational": 8
+        },
+        "profile_tokens_median": 4103,
+        "profile_tokens_mean": 4006.7272727272725,
+        "profile_tokens_min": 1658,
+        "profile_tokens_max": 8770,
+        "system_prompt_tokens_median": 5121,
+        "system_prompt_tokens_mean": 5025.254545454545,
+        "system_prompt_tokens_min": 2677,
+        "system_prompt_tokens_max": 9789,
+        "select_latency_ms_median_of_medians": 0.008999000783660449,
+        "select_latency_ms_max_p95": 0.01588849954714533,
+        "select_latency_ms_p95_of_medians": 0.012405100278556345
+      },
+      "by_category": {
+        "direct_keyword": {
+          "n": 6,
+          "recall_macro": 1.0,
+          "precision_macro": 0.7583333333333333,
+          "unneeded_docs_mean": 1.6666666666666667,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.8333333333333334,
+          "actual_outcomes": {
+            "unfocused": 1,
+            "narrowed": 5
+          },
+          "profile_tokens_median": 3432.0,
+          "profile_tokens_mean": 3987.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 4450.0,
+          "system_prompt_tokens_mean": 5005.5,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.008731000889383722,
+          "select_latency_ms_max_p95": 0.014856499547022395,
+          "select_latency_ms_p95_of_medians": 0.010502249097044114
+        },
+        "hebrew": {
+          "n": 10,
+          "recall_macro": 0.5,
+          "precision_macro": 0.975,
+          "unneeded_docs_mean": 0.1,
+          "full_recall_rate": 0.5,
+          "desired_outcome_rate": 0.5,
+          "actual_outcomes": {
+            "conversational": 8,
+            "narrowed": 2
+          },
+          "profile_tokens_median": 1658.0,
+          "profile_tokens_mean": 2005.5,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4103,
+          "system_prompt_tokens_median": 2677.0,
+          "system_prompt_tokens_mean": 3024.4,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5121,
+          "select_latency_ms_median_of_medians": 0.003012500201293733,
+          "select_latency_ms_max_p95": 0.008470499778923113,
+          "select_latency_ms_p95_of_medians": 0.007735500548733398
+        },
+        "multi_doc": {
+          "n": 5,
+          "recall_macro": 0.9,
+          "precision_macro": 0.74,
+          "unneeded_docs_mean": 1.8,
+          "full_recall_rate": 0.8,
+          "desired_outcome_rate": 0.8,
+          "actual_outcomes": {
+            "unfocused": 1,
+            "narrowed": 4
+          },
+          "profile_tokens_median": 4522,
+          "profile_tokens_mean": 5268.6,
+          "profile_tokens_min": 3743,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 5540,
+          "system_prompt_tokens_mean": 6287.0,
+          "system_prompt_tokens_min": 4762,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.011571999493753538,
+          "select_latency_ms_max_p95": 0.01588849954714533,
+          "select_latency_ms_p95_of_medians": 0.014860999363008887
+        },
+        "no_word_match": {
+          "n": 5,
+          "recall_macro": 1.0,
+          "precision_macro": 0.5066666666666666,
+          "unneeded_docs_mean": 2.8,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.0,
+          "actual_outcomes": {
+            "narrowed": 4,
+            "unfocused": 1
+          },
+          "profile_tokens_median": 4696,
+          "profile_tokens_mean": 4771.6,
+          "profile_tokens_min": 2077,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 5714,
+          "system_prompt_tokens_mean": 5790.0,
+          "system_prompt_tokens_min": 3095,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.008623001122032292,
+          "select_latency_ms_max_p95": 0.012838499969802797,
+          "select_latency_ms_p95_of_medians": 0.00929440138861537
+        },
+        "off_topic": {
+          "n": 5,
+          "recall_macro": 1.0,
+          "precision_macro": 0.6,
+          "unneeded_docs_mean": 2.8,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.4,
+          "actual_outcomes": {
+            "unfocused": 1,
+            "narrowed": 4
+          },
+          "profile_tokens_median": 5133,
+          "profile_tokens_mean": 4522.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 6151,
+          "system_prompt_tokens_mean": 5540.6,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.009114999556913972,
+          "select_latency_ms_max_p95": 0.013932000001659617,
+          "select_latency_ms_p95_of_medians": 0.01039140006469097
+        },
+        "paraphrase": {
+          "n": 7,
+          "recall_macro": 0.7857142857142857,
+          "precision_macro": 0.7357142857142858,
+          "unneeded_docs_mean": 1.5714285714285714,
+          "full_recall_rate": 0.7142857142857143,
+          "desired_outcome_rate": 0.8571428571428571,
+          "actual_outcomes": {
+            "unfocused": 1,
+            "narrowed": 6
+          },
+          "profile_tokens_median": 4522,
+          "profile_tokens_mean": 4883.857142857143,
+          "profile_tokens_min": 2096,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 5540,
+          "system_prompt_tokens_mean": 5902.285714285715,
+          "system_prompt_tokens_min": 3114,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.01190699913422577,
+          "select_latency_ms_max_p95": 0.015130000065255444,
+          "select_latency_ms_p95_of_medians": 0.013015499462198932
+        },
+        "profile": {
+          "n": 6,
+          "recall_macro": 1.0,
+          "precision_macro": 0.7111111111111111,
+          "unneeded_docs_mean": 2.0,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.5,
+          "actual_outcomes": {
+            "narrowed": 5,
+            "unfocused": 1
+          },
+          "profile_tokens_median": 2880.5,
+          "profile_tokens_mean": 3703.5,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 3899.0,
+          "system_prompt_tokens_mean": 4722.166666666667,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.00800199995865114,
+          "select_latency_ms_max_p95": 0.012443000741768628,
+          "select_latency_ms_p95_of_medians": 0.009993500043492531
+        },
+        "project": {
+          "n": 5,
+          "recall_macro": 1.0,
+          "precision_macro": 0.82,
+          "unneeded_docs_mean": 0.8,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 5
+          },
+          "profile_tokens_median": 4522,
+          "profile_tokens_mean": 4695.0,
+          "profile_tokens_min": 4103,
+          "profile_tokens_max": 5788,
+          "system_prompt_tokens_median": 5540,
+          "system_prompt_tokens_mean": 5713.4,
+          "system_prompt_tokens_min": 5121,
+          "system_prompt_tokens_max": 6807,
+          "select_latency_ms_median_of_medians": 0.009416999091627076,
+          "select_latency_ms_max_p95": 0.011242499567742925,
+          "select_latency_ms_p95_of_medians": 0.010284199743182398
+        },
+        "writing": {
+          "n": 6,
+          "recall_macro": 1.0,
+          "precision_macro": 0.7380952380952381,
+          "unneeded_docs_mean": 1.5,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 6
+          },
+          "profile_tokens_median": 3447.5,
+          "profile_tokens_mean": 3949.8333333333335,
+          "profile_tokens_min": 2058,
+          "profile_tokens_max": 6781,
+          "system_prompt_tokens_median": 4465.5,
+          "system_prompt_tokens_mean": 4968.0,
+          "system_prompt_tokens_min": 3076,
+          "system_prompt_tokens_max": 7799,
+          "select_latency_ms_median_of_medians": 0.01052699917636346,
+          "select_latency_ms_max_p95": 0.012582499948621262,
+          "select_latency_ms_p95_of_medians": 0.01100725012292969
+        }
+      },
+      "by_language": {
+        "en": {
+          "n": 45,
+          "recall_macro": 0.9555555555555556,
+          "precision_macro": 0.7050793650793651,
+          "unneeded_docs_mean": 1.8444444444444446,
+          "full_recall_rate": 0.9333333333333333,
+          "desired_outcome_rate": 0.6888888888888889,
+          "actual_outcomes": {
+            "unfocused": 6,
+            "narrowed": 39
+          },
+          "profile_tokens_median": 4368,
+          "profile_tokens_mean": 4451.444444444444,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 8770,
+          "system_prompt_tokens_median": 5386,
+          "system_prompt_tokens_mean": 5469.888888888889,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 9789,
+          "select_latency_ms_median_of_medians": 0.00930500027607195,
+          "select_latency_ms_max_p95": 0.01588849954714533,
+          "select_latency_ms_p95_of_medians": 0.01279360003536567
+        },
+        "he": {
+          "n": 10,
+          "recall_macro": 0.5,
+          "precision_macro": 0.975,
+          "unneeded_docs_mean": 0.1,
+          "full_recall_rate": 0.5,
+          "desired_outcome_rate": 0.5,
+          "actual_outcomes": {
+            "conversational": 8,
+            "narrowed": 2
+          },
+          "profile_tokens_median": 1658.0,
+          "profile_tokens_mean": 2005.5,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4103,
+          "system_prompt_tokens_median": 2677.0,
+          "system_prompt_tokens_mean": 3024.4,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5121,
+          "select_latency_ms_median_of_medians": 0.003012500201293733,
+          "select_latency_ms_max_p95": 0.008470499778923113,
+          "select_latency_ms_p95_of_medians": 0.007735500548733398
+        }
+      }
+    },
+    "r1": {
+      "n": 55,
+      "overall": {
+        "n": 55,
+        "recall_macro": 0.8439393939393939,
+        "precision_macro": 0.9233333333333333,
+        "unneeded_docs_mean": 0.32727272727272727,
+        "full_recall_rate": 0.8,
+        "desired_outcome_rate": 0.8363636363636363,
+        "actual_outcomes": {
+          "narrowed": 31,
+          "core_only": 24
+        },
+        "profile_tokens_median": 2058,
+        "profile_tokens_mean": 2520.1272727272726,
+        "profile_tokens_min": 1658,
+        "profile_tokens_max": 4546,
+        "system_prompt_tokens_median": 3076,
+        "system_prompt_tokens_mean": 3538.6545454545453,
+        "system_prompt_tokens_min": 2677,
+        "system_prompt_tokens_max": 5564,
+        "select_latency_ms_median_of_medians": 0.07904999984020833,
+        "select_latency_ms_max_p95": 0.15566149977530586,
+        "select_latency_ms_p95_of_medians": 0.10798789935506647
+      },
+      "by_category": {
+        "direct_keyword": {
+          "n": 6,
+          "recall_macro": 1.0,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 4,
+            "core_only": 2
+          },
+          "profile_tokens_median": 2009.5,
+          "profile_tokens_mean": 2327.5,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4103,
+          "system_prompt_tokens_median": 3027.5,
+          "system_prompt_tokens_mean": 3345.8333333333335,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5121,
+          "select_latency_ms_median_of_medians": 0.07812600051693153,
+          "select_latency_ms_max_p95": 0.11134049964311998,
+          "select_latency_ms_p95_of_medians": 0.09062375011126278
+        },
+        "hebrew": {
+          "n": 10,
+          "recall_macro": 0.5,
+          "precision_macro": 0.975,
+          "unneeded_docs_mean": 0.1,
+          "full_recall_rate": 0.5,
+          "desired_outcome_rate": 0.5,
+          "actual_outcomes": {
+            "core_only": 8,
+            "narrowed": 2
+          },
+          "profile_tokens_median": 1658.0,
+          "profile_tokens_mean": 2005.5,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4103,
+          "system_prompt_tokens_median": 2677.0,
+          "system_prompt_tokens_mean": 3024.4,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5121,
+          "select_latency_ms_median_of_medians": 0.07223600005090702,
+          "select_latency_ms_max_p95": 0.11993499992968282,
+          "select_latency_ms_p95_of_medians": 0.09543119940644827
+        },
+        "multi_doc": {
+          "n": 5,
+          "recall_macro": 0.7833333333333333,
+          "precision_macro": 0.86,
+          "unneeded_docs_mean": 0.6,
+          "full_recall_rate": 0.4,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 5
+          },
+          "profile_tokens_median": 4336,
+          "profile_tokens_mean": 4143.4,
+          "profile_tokens_min": 3344,
+          "profile_tokens_max": 4522,
+          "system_prompt_tokens_median": 5354,
+          "system_prompt_tokens_mean": 5161.4,
+          "system_prompt_tokens_min": 4362,
+          "system_prompt_tokens_max": 5540,
+          "select_latency_ms_median_of_medians": 0.10284100062563084,
+          "select_latency_ms_max_p95": 0.15566149977530586,
+          "select_latency_ms_p95_of_medians": 0.1297109993174672
+        },
+        "no_word_match": {
+          "n": 5,
+          "recall_macro": 1.0,
+          "precision_macro": 1.0,
+          "unneeded_docs_mean": 0.0,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "core_only": 5
+          },
+          "profile_tokens_median": 1658,
+          "profile_tokens_mean": 1658.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 1658,
+          "system_prompt_tokens_median": 2677,
+          "system_prompt_tokens_mean": 2677.0,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 2677,
+          "select_latency_ms_median_of_medians": 0.07391600047412794,
+          "select_latency_ms_max_p95": 0.10139800087927142,
+          "select_latency_ms_p95_of_medians": 0.07606220060552005
+        },
+        "off_topic": {
+          "n": 5,
+          "recall_macro": 1.0,
+          "precision_macro": 0.8800000000000001,
+          "unneeded_docs_mean": 0.6,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.8,
+          "actual_outcomes": {
+            "core_only": 4,
+            "narrowed": 1
+          },
+          "profile_tokens_median": 1658,
+          "profile_tokens_mean": 2152.2,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4129,
+          "system_prompt_tokens_median": 2677,
+          "system_prompt_tokens_mean": 3171.2,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5148,
+          "select_latency_ms_median_of_medians": 0.06533300074806903,
+          "select_latency_ms_max_p95": 0.1140354997914983,
+          "select_latency_ms_p95_of_medians": 0.09719459958432708
+        },
+        "paraphrase": {
+          "n": 7,
+          "recall_macro": 0.6428571428571429,
+          "precision_macro": 0.9166666666666667,
+          "unneeded_docs_mean": 0.2857142857142857,
+          "full_recall_rate": 0.5714285714285714,
+          "desired_outcome_rate": 0.8571428571428571,
+          "actual_outcomes": {
+            "core_only": 1,
+            "narrowed": 6
+          },
+          "profile_tokens_median": 2527,
+          "profile_tokens_mean": 2708.4285714285716,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 3637,
+          "system_prompt_tokens_median": 3545,
+          "system_prompt_tokens_mean": 3726.8571428571427,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 4656,
+          "select_latency_ms_median_of_medians": 0.1038390000758227,
+          "select_latency_ms_max_p95": 0.13762750040768879,
+          "select_latency_ms_p95_of_medians": 0.11353329991834471
+        },
+        "profile": {
+          "n": 6,
+          "recall_macro": 1.0,
+          "precision_macro": 0.8444444444444444,
+          "unneeded_docs_mean": 0.6666666666666666,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 0.6666666666666666,
+          "actual_outcomes": {
+            "narrowed": 2,
+            "core_only": 4
+          },
+          "profile_tokens_median": 1658.0,
+          "profile_tokens_mean": 1963.0,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 3231,
+          "system_prompt_tokens_median": 2677.0,
+          "system_prompt_tokens_mean": 2981.6666666666665,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 4249,
+          "select_latency_ms_median_of_medians": 0.06672249946859665,
+          "select_latency_ms_max_p95": 0.096896500508592,
+          "select_latency_ms_p95_of_medians": 0.07847699953345
+        },
+        "project": {
+          "n": 5,
+          "recall_macro": 1.0,
+          "precision_macro": 0.82,
+          "unneeded_docs_mean": 0.8,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 5
+          },
+          "profile_tokens_median": 4103,
+          "profile_tokens_mean": 3896.8,
+          "profile_tokens_min": 3165,
+          "profile_tokens_max": 4546,
+          "system_prompt_tokens_median": 5121,
+          "system_prompt_tokens_mean": 4914.8,
+          "system_prompt_tokens_min": 4183,
+          "system_prompt_tokens_max": 5564,
+          "select_latency_ms_median_of_medians": 0.09089899867831264,
+          "select_latency_ms_max_p95": 0.13238249994174112,
+          "select_latency_ms_p95_of_medians": 0.10751159934443422
+        },
+        "writing": {
+          "n": 6,
+          "recall_macro": 1.0,
+          "precision_macro": 0.9583333333333334,
+          "unneeded_docs_mean": 0.16666666666666666,
+          "full_recall_rate": 1.0,
+          "desired_outcome_rate": 1.0,
+          "actual_outcomes": {
+            "narrowed": 6
+          },
+          "profile_tokens_median": 2173.5,
+          "profile_tokens_mean": 2433.0,
+          "profile_tokens_min": 1923,
+          "profile_tokens_max": 3743,
+          "system_prompt_tokens_median": 3191.5,
+          "system_prompt_tokens_mean": 3451.1666666666665,
+          "system_prompt_tokens_min": 2941,
+          "system_prompt_tokens_max": 4762,
+          "select_latency_ms_median_of_medians": 0.08909149892133428,
+          "select_latency_ms_max_p95": 0.12040000092383707,
+          "select_latency_ms_p95_of_medians": 0.09594775110599585
+        }
+      },
+      "by_language": {
+        "en": {
+          "n": 45,
+          "recall_macro": 0.9203703703703703,
+          "precision_macro": 0.9118518518518518,
+          "unneeded_docs_mean": 0.37777777777777777,
+          "full_recall_rate": 0.8666666666666667,
+          "desired_outcome_rate": 0.9111111111111111,
+          "actual_outcomes": {
+            "narrowed": 29,
+            "core_only": 16
+          },
+          "profile_tokens_median": 2096,
+          "profile_tokens_mean": 2634.488888888889,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4546,
+          "system_prompt_tokens_median": 3114,
+          "system_prompt_tokens_mean": 3652.9333333333334,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5564,
+          "select_latency_ms_median_of_medians": 0.08116800017887726,
+          "select_latency_ms_max_p95": 0.15566149977530586,
+          "select_latency_ms_p95_of_medians": 0.10867439959838521
+        },
+        "he": {
+          "n": 10,
+          "recall_macro": 0.5,
+          "precision_macro": 0.975,
+          "unneeded_docs_mean": 0.1,
+          "full_recall_rate": 0.5,
+          "desired_outcome_rate": 0.5,
+          "actual_outcomes": {
+            "core_only": 8,
+            "narrowed": 2
+          },
+          "profile_tokens_median": 1658.0,
+          "profile_tokens_mean": 2005.5,
+          "profile_tokens_min": 1658,
+          "profile_tokens_max": 4103,
+          "system_prompt_tokens_median": 2677.0,
+          "system_prompt_tokens_mean": 3024.4,
+          "system_prompt_tokens_min": 2677,
+          "system_prompt_tokens_max": 5121,
+          "select_latency_ms_median_of_medians": 0.07223600005090702,
+          "select_latency_ms_max_p95": 0.11993499992968282,
+          "select_latency_ms_p95_of_medians": 0.09543119940644827
+        }
+      }
+    }
+  },
+  "latency_ms": {
+    "r0": {
+      "median_of_medians_ms": 0.008999000783660449,
+      "p95_of_medians_ms": 0.012405100278556345,
+      "max_median_ms": 0.015338999219238758,
+      "max_p95_ms": 0.01588849954714533,
+      "min_median_ms": 0.002607001079013571
+    },
+    "r1": {
+      "median_of_medians_ms": 0.07904999984020833,
+      "p95_of_medians_ms": 0.10798789935506647,
+      "max_median_ms": 0.13535399921238422,
+      "max_p95_ms": 0.15566149977530586,
+      "min_median_ms": 0.053325999033404514
+    },
+    "note": "time.perf_counter around the select call only, after warm-up; no model latency"
+  },
+  "generation_latency": "not measured; no live Gemini calls",
+  "r1_diagnostics": {
+    "q-en-direct-01": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "7d1d83af36f342d1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 0,
+          "bm25": 1.4549,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f37d74633d9ab625",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 5,
+          "bm25": 1.0676,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 1.0129,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 0.9934,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 0.9529,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "4294078e9911e396",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 6,
+          "bm25": 0.9355,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 0.9188,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 0.8219,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 0.7413,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 9,
+      "words": {
+        "total": 1,
+        "matched": 1,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 4103,
+      "retrieved_tokens": 2430
+    },
+    "q-en-direct-02": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 1,
+        "matched": 0,
+        "trigram": 0,
+        "core": 1,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-direct-03": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "58bd80d15506c43b",
+          "doc_label": "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+          "chunk_index": 0,
+          "bm25": 13.6799,
+          "coverage": 0.7161
+        }
+      ],
+      "candidates": 1,
+      "words": {
+        "total": 4,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 2096,
+      "retrieved_tokens": 418
+    },
+    "q-en-direct-04": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "530f95373742e40d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 0,
+          "bm25": 12.3924,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "67f5ce02c8edbf3d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 1,
+          "bm25": 8.5737,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 2,
+      "words": {
+        "total": 5,
+        "matched": 5,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 2527,
+      "retrieved_tokens": 848
+    },
+    "q-en-direct-05": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 1,
+        "matched": 0,
+        "trigram": 0,
+        "core": 1,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-direct-06": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "912f579dfebfbd81",
+          "doc_label": "Writing / 22.7 million tokens. One session. $340 burned.",
+          "chunk_index": 0,
+          "bm25": 13.3406,
+          "coverage": 0.6975
+        }
+      ],
+      "candidates": 1,
+      "words": {
+        "total": 5,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 1
+      },
+      "framed_from_history": false,
+      "token_estimate": 1923,
+      "retrieved_tokens": 249
+    },
+    "q-en-paraphrase-01": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 2,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-paraphrase-02": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "7d1d83af36f342d1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 0,
+          "bm25": 10.9249,
+          "coverage": 0.8221
+        },
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 4.2655,
+          "coverage": 0.8221
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 4.1891,
+          "coverage": 0.8221
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 4.1196,
+          "coverage": 0.8221
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 3.7665,
+          "coverage": 0.8221
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 2.2724,
+          "coverage": 0.8221
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 1.4197,
+          "coverage": 0.8221
+        }
+      ],
+      "candidates": 7,
+      "words": {
+        "total": 7,
+        "matched": 7,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 3637,
+      "retrieved_tokens": 1963
+    },
+    "q-en-paraphrase-03": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "a3aef140d3c63cba",
+          "doc_label": "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+          "chunk_index": 0,
+          "bm25": 9.0265,
+          "coverage": 0.4341
+        }
+      ],
+      "candidates": 1,
+      "words": {
+        "total": 6,
+        "matched": 5,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 1
+      },
+      "framed_from_history": false,
+      "token_estimate": 2251,
+      "retrieved_tokens": 573
+    },
+    "q-en-paraphrase-04": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "530f95373742e40d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 0,
+          "bm25": 3.7433,
+          "coverage": 0.3692
+        },
+        {
+          "chunk_id": "67f5ce02c8edbf3d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 1,
+          "bm25": 2.1407,
+          "coverage": 0.3692
+        }
+      ],
+      "candidates": 2,
+      "words": {
+        "total": 4,
+        "matched": 2,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 2527,
+      "retrieved_tokens": 848
+    },
+    "q-en-paraphrase-05": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "58bd80d15506c43b",
+          "doc_label": "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+          "chunk_index": 0,
+          "bm25": 10.2201,
+          "coverage": 0.4332
+        }
+      ],
+      "candidates": 1,
+      "words": {
+        "total": 6,
+        "matched": 4,
+        "trigram": 0,
+        "core": 1,
+        "other_script": 0,
+        "unknown": 1
+      },
+      "framed_from_history": false,
+      "token_estimate": 2096,
+      "retrieved_tokens": 418
+    },
+    "q-en-paraphrase-06": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "c331ac0cb5cf0a87",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 4,
+          "bm25": 8.5167,
+          "coverage": 0.812
+        },
+        {
+          "chunk_id": "7102bb68c11b13dd",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 5,
+          "bm25": 6.3877,
+          "coverage": 0.812
+        },
+        {
+          "chunk_id": "929959b43891b7a2",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 3,
+          "bm25": 5.2672,
+          "coverage": 0.812
+        },
+        {
+          "chunk_id": "c539a41554d9754f",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 1,
+          "bm25": 4.5184,
+          "coverage": 0.812
+        },
+        {
+          "chunk_id": "e0c950e45471a1c6",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 0,
+          "bm25": 1.6171,
+          "coverage": 0.812
+        },
+        {
+          "chunk_id": "9f18b3fd91b2fb24",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 2,
+          "bm25": 1.3085,
+          "coverage": 0.812
+        }
+      ],
+      "candidates": 6,
+      "words": {
+        "total": 7,
+        "matched": 7,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 3344,
+      "retrieved_tokens": 1664
+    },
+    "q-en-paraphrase-07": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "dd5b09f99c0cb57e",
+          "doc_label": "Project / AI Chat Portfolio",
+          "chunk_index": 0,
+          "bm25": 8.4932,
+          "coverage": 0.3478
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 3.0601,
+          "coverage": 0.2531
+        },
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 2.4974,
+          "coverage": 0.2531
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 2.2936,
+          "coverage": 0.2531
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 2.1556,
+          "coverage": 0.2531
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 1.6074,
+          "coverage": 0.2531
+        }
+      ],
+      "candidates": 6,
+      "words": {
+        "total": 6,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 3446,
+      "retrieved_tokens": 1763
+    },
+    "q-en-nomatch-01": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "below_coverage_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 4,
+        "matched": 1,
+        "trigram": 0,
+        "core": 1,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-nomatch-02": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 2,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-nomatch-03": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "below_coverage_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 3,
+        "matched": 1,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-nomatch-04": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "below_coverage_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 4,
+        "matched": 1,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 3
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-nomatch-05": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 3,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 3
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-offtopic-01": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 2,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-offtopic-02": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "below_coverage_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 4,
+        "matched": 2,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-offtopic-03": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 4,
+        "matched": 0,
+        "trigram": 0,
+        "core": 2,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-offtopic-04": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 4,
+        "matched": 0,
+        "trigram": 0,
+        "core": 1,
+        "other_script": 0,
+        "unknown": 3
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-offtopic-05": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "f37d74633d9ab625",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 5,
+          "bm25": 5.8025,
+          "coverage": 0.2697
+        },
+        {
+          "chunk_id": "67f5ce02c8edbf3d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 1,
+          "bm25": 4.6173,
+          "coverage": 0.3157
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 3.99,
+          "coverage": 0.2697
+        },
+        {
+          "chunk_id": "a3aef140d3c63cba",
+          "doc_label": "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+          "chunk_index": 0,
+          "bm25": 2.9324,
+          "coverage": 0.2533
+        },
+        {
+          "chunk_id": "530f95373742e40d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 0,
+          "bm25": 1.8763,
+          "coverage": 0.3157
+        },
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 1.3618,
+          "coverage": 0.2697
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 1.1746,
+          "coverage": 0.2697
+        }
+      ],
+      "candidates": 7,
+      "words": {
+        "total": 6,
+        "matched": 5,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 1
+      },
+      "framed_from_history": false,
+      "token_estimate": 4129,
+      "retrieved_tokens": 2414
+    },
+    "q-en-profile-01": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "929959b43891b7a2",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 3,
+          "bm25": 1.8913,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "9f18b3fd91b2fb24",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 2,
+          "bm25": 1.6892,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "58bd80d15506c43b",
+          "doc_label": "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+          "chunk_index": 0,
+          "bm25": 1.3878,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "a3aef140d3c63cba",
+          "doc_label": "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+          "chunk_index": 0,
+          "bm25": 1.2424,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 4,
+      "words": {
+        "total": 1,
+        "matched": 1,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 3231,
+      "retrieved_tokens": 1512
+    },
+    "q-en-profile-02": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 1,
+        "matched": 0,
+        "trigram": 0,
+        "core": 1,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-profile-03": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 1,
+        "matched": 0,
+        "trigram": 0,
+        "core": 1,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-profile-04": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "below_coverage_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 3,
+        "matched": 1,
+        "trigram": 0,
+        "core": 2,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-profile-05": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "4294078e9911e396",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 6,
+          "bm25": 2.8885,
+          "coverage": 0.4346
+        }
+      ],
+      "candidates": 1,
+      "words": {
+        "total": 2,
+        "matched": 1,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 1
+      },
+      "framed_from_history": false,
+      "token_estimate": 1915,
+      "retrieved_tokens": 242
+    },
+    "q-en-profile-06": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 2,
+        "matched": 0,
+        "trigram": 0,
+        "core": 1,
+        "other_script": 0,
+        "unknown": 1
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-en-project-01": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "dd5b09f99c0cb57e",
+          "doc_label": "Project / AI Chat Portfolio",
+          "chunk_index": 0,
+          "bm25": 5.4745,
+          "coverage": 0.5
+        },
+        {
+          "chunk_id": "58bd80d15506c43b",
+          "doc_label": "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+          "chunk_index": 0,
+          "bm25": 3.7101,
+          "coverage": 0.5
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 2.458,
+          "coverage": 0.2847
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 1.8606,
+          "coverage": 0.2847
+        }
+      ],
+      "candidates": 4,
+      "words": {
+        "total": 4,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 3165,
+      "retrieved_tokens": 1463
+    },
+    "q-en-project-02": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "7d1d83af36f342d1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 0,
+          "bm25": 6.3099,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 2.6019,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f37d74633d9ab625",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 5,
+          "bm25": 1.0676,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 1.0129,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 0.9934,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 0.9529,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "4294078e9911e396",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 6,
+          "bm25": 0.9355,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 0.9188,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 0.8219,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 9,
+      "words": {
+        "total": 3,
+        "matched": 3,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 4103,
+      "retrieved_tokens": 2430
+    },
+    "q-en-project-03": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "7d1d83af36f342d1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 0,
+          "bm25": 6.0479,
+          "coverage": 0.8885
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 5.6431,
+          "coverage": 0.8885
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 4.4725,
+          "coverage": 0.8885
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 4.2206,
+          "coverage": 0.8885
+        },
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 3.9246,
+          "coverage": 0.8885
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 3.3767,
+          "coverage": 0.8885
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 3.1051,
+          "coverage": 0.8885
+        },
+        {
+          "chunk_id": "4294078e9911e396",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 6,
+          "bm25": 2.8329,
+          "coverage": 0.8885
+        },
+        {
+          "chunk_id": "f37d74633d9ab625",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 5,
+          "bm25": 2.1352,
+          "coverage": 0.8885
+        }
+      ],
+      "candidates": 9,
+      "words": {
+        "total": 5,
+        "matched": 5,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 4103,
+      "retrieved_tokens": 2430
+    },
+    "q-en-project-04": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "dd5b09f99c0cb57e",
+          "doc_label": "Project / AI Chat Portfolio",
+          "chunk_index": 0,
+          "bm25": 7.9237,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 4.2286,
+          "coverage": 0.5231
+        },
+        {
+          "chunk_id": "f37d74633d9ab625",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 5,
+          "bm25": 1.9703,
+          "coverage": 0.5231
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 1.4477,
+          "coverage": 0.5231
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 1.3132,
+          "coverage": 0.5231
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 1.1746,
+          "coverage": 0.5231
+        }
+      ],
+      "candidates": 6,
+      "words": {
+        "total": 3,
+        "matched": 3,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 3567,
+      "retrieved_tokens": 1883
+    },
+    "q-en-project-05": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 5.7231,
+          "coverage": 0.8004
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 2.4606,
+          "coverage": 0.8004
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 2.4131,
+          "coverage": 0.8004
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 2.232,
+          "coverage": 0.8004
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 1.9965,
+          "coverage": 0.8004
+        },
+        {
+          "chunk_id": "c539a41554d9754f",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 1,
+          "bm25": 1.9954,
+          "coverage": 0.4664
+        },
+        {
+          "chunk_id": "929959b43891b7a2",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 3,
+          "bm25": 1.6587,
+          "coverage": 0.4664
+        },
+        {
+          "chunk_id": "e0c950e45471a1c6",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 0,
+          "bm25": 1.5362,
+          "coverage": 0.4664
+        },
+        {
+          "chunk_id": "7d1d83af36f342d1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 0,
+          "bm25": 1.4549,
+          "coverage": 0.8004
+        },
+        {
+          "chunk_id": "7102bb68c11b13dd",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 5,
+          "bm25": 1.2947,
+          "coverage": 0.4664
+        },
+        {
+          "chunk_id": "f37d74633d9ab625",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 5,
+          "bm25": 1.0676,
+          "coverage": 0.8004
+        }
+      ],
+      "candidates": 13,
+      "words": {
+        "total": 4,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 4546,
+      "retrieved_tokens": 2848
+    },
+    "q-en-writing-01": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "e0c950e45471a1c6",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 0,
+          "bm25": 6.6324,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "929959b43891b7a2",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 3,
+          "bm25": 6.3794,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "c539a41554d9754f",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 1,
+          "bm25": 5.8685,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "7102bb68c11b13dd",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 5,
+          "bm25": 5.5333,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "b347fa42efc146df",
+          "doc_label": "Writing / \"Nothing found.\"",
+          "chunk_index": 0,
+          "bm25": 4.3946,
+          "coverage": 0.7409
+        },
+        {
+          "chunk_id": "9f18b3fd91b2fb24",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 2,
+          "bm25": 4.127,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "c331ac0cb5cf0a87",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 4,
+          "bm25": 3.6239,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 7,
+      "words": {
+        "total": 4,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 3743,
+      "retrieved_tokens": 2055
+    },
+    "q-en-writing-02": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "a3aef140d3c63cba",
+          "doc_label": "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+          "chunk_index": 0,
+          "bm25": 4.7298,
+          "coverage": 0.3541
+        }
+      ],
+      "candidates": 1,
+      "words": {
+        "total": 3,
+        "matched": 2,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 1
+      },
+      "framed_from_history": false,
+      "token_estimate": 2251,
+      "retrieved_tokens": 573
+    },
+    "q-en-writing-03": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "58bd80d15506c43b",
+          "doc_label": "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+          "chunk_index": 0,
+          "bm25": 12.5257,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 1,
+      "words": {
+        "total": 3,
+        "matched": 3,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 2096,
+      "retrieved_tokens": 418
+    },
+    "q-en-writing-04": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "912f579dfebfbd81",
+          "doc_label": "Writing / 22.7 million tokens. One session. $340 burned.",
+          "chunk_index": 0,
+          "bm25": 16.4362,
+          "coverage": 0.7726
+        }
+      ],
+      "candidates": 1,
+      "words": {
+        "total": 6,
+        "matched": 6,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1923,
+      "retrieved_tokens": 249
+    },
+    "q-en-writing-05": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "67f5ce02c8edbf3d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 1,
+          "bm25": 11.9637,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "530f95373742e40d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 0,
+          "bm25": 8.4038,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 2,
+      "words": {
+        "total": 4,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 2527,
+      "retrieved_tokens": 848
+    },
+    "q-en-writing-06": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\""
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "b347fa42efc146df",
+          "doc_label": "Writing / \"Nothing found.\"",
+          "chunk_index": 0,
+          "bm25": 8.9109,
+          "coverage": 0.6975
+        }
+      ],
+      "candidates": 1,
+      "words": {
+        "total": 5,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 1
+      },
+      "framed_from_history": false,
+      "token_estimate": 2058,
+      "retrieved_tokens": 391
+    },
+    "q-en-multi-01": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "dd5b09f99c0cb57e",
+          "doc_label": "Project / AI Chat Portfolio",
+          "chunk_index": 0,
+          "bm25": 1.163,
+          "coverage": 0.2867
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 0.952,
+          "coverage": 0.2867
+        },
+        {
+          "chunk_id": "f37d74633d9ab625",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 5,
+          "bm25": 0.9468,
+          "coverage": 0.2867
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 0.8983,
+          "coverage": 0.2867
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 0.8809,
+          "coverage": 0.2867
+        },
+        {
+          "chunk_id": "7d1d83af36f342d1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 0,
+          "bm25": 0.8577,
+          "coverage": 0.2867
+        },
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 0.845,
+          "coverage": 0.2867
+        },
+        {
+          "chunk_id": "4294078e9911e396",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 6,
+          "bm25": 0.8296,
+          "coverage": 0.2867
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 0.8148,
+          "coverage": 0.2867
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 0.7289,
+          "coverage": 0.2867
+        }
+      ],
+      "candidates": 10,
+      "words": {
+        "total": 2,
+        "matched": 1,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 1
+      },
+      "framed_from_history": false,
+      "token_estimate": 4522,
+      "retrieved_tokens": 2840
+    },
+    "q-en-multi-02": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "c539a41554d9754f",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 1,
+          "bm25": 7.8829,
+          "coverage": 0.4462
+        },
+        {
+          "chunk_id": "929959b43891b7a2",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 3,
+          "bm25": 7.7982,
+          "coverage": 0.4462
+        },
+        {
+          "chunk_id": "7102bb68c11b13dd",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 5,
+          "bm25": 5.295,
+          "coverage": 0.4462
+        },
+        {
+          "chunk_id": "e0c950e45471a1c6",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 0,
+          "bm25": 5.2287,
+          "coverage": 0.4462
+        },
+        {
+          "chunk_id": "9f18b3fd91b2fb24",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 2,
+          "bm25": 4.9954,
+          "coverage": 0.4462
+        },
+        {
+          "chunk_id": "b347fa42efc146df",
+          "doc_label": "Writing / \"Nothing found.\"",
+          "chunk_index": 0,
+          "bm25": 4.8064,
+          "coverage": 0.2975
+        },
+        {
+          "chunk_id": "c331ac0cb5cf0a87",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 4,
+          "bm25": 4.149,
+          "coverage": 0.4462
+        },
+        {
+          "chunk_id": "a3aef140d3c63cba",
+          "doc_label": "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+          "chunk_index": 0,
+          "bm25": 3.9236,
+          "coverage": 0.2975
+        }
+      ],
+      "candidates": 8,
+      "words": {
+        "total": 6,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 4336,
+      "retrieved_tokens": 2628
+    },
+    "q-en-multi-03": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "7102bb68c11b13dd",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 5,
+          "bm25": 5.8667,
+          "coverage": 0.2946
+        },
+        {
+          "chunk_id": "c539a41554d9754f",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 1,
+          "bm25": 3.5168,
+          "coverage": 0.2946
+        },
+        {
+          "chunk_id": "929959b43891b7a2",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 3,
+          "bm25": 3.4161,
+          "coverage": 0.2946
+        },
+        {
+          "chunk_id": "e0c950e45471a1c6",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 0,
+          "bm25": 3.3647,
+          "coverage": 0.2946
+        },
+        {
+          "chunk_id": "c331ac0cb5cf0a87",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 4,
+          "bm25": 2.332,
+          "coverage": 0.2946
+        },
+        {
+          "chunk_id": "9f18b3fd91b2fb24",
+          "doc_label": "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+          "chunk_index": 2,
+          "bm25": 1.5183,
+          "coverage": 0.2946
+        }
+      ],
+      "candidates": 6,
+      "words": {
+        "total": 7,
+        "matched": 3,
+        "trigram": 0,
+        "core": 2,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 3344,
+      "retrieved_tokens": 1664
+    },
+    "q-en-multi-04": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 4.8039,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "7d1d83af36f342d1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 0,
+          "bm25": 4.1005,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 3.2366,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f37d74633d9ab625",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 5,
+          "bm25": 2.9171,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 2.4863,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 2.128,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 1.9035,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 0.8809,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "4294078e9911e396",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 6,
+          "bm25": 0.8296,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 9,
+      "words": {
+        "total": 4,
+        "matched": 4,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 4103,
+      "retrieved_tokens": 2430
+    },
+    "q-en-multi-05": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 4.4839,
+          "coverage": 0.3009
+        },
+        {
+          "chunk_id": "67f5ce02c8edbf3d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 1,
+          "bm25": 3.8809,
+          "coverage": 0.3077
+        },
+        {
+          "chunk_id": "530f95373742e40d",
+          "doc_label": "Writing / What the heck are callbacks? Promises? Async/await? What a MESS",
+          "chunk_index": 0,
+          "bm25": 3.7433,
+          "coverage": 0.3077
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 2.9512,
+          "coverage": 0.3009
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 2.0341,
+          "coverage": 0.3009
+        },
+        {
+          "chunk_id": "4294078e9911e396",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 6,
+          "bm25": 1.8974,
+          "coverage": 0.3009
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 1.6391,
+          "coverage": 0.3009
+        },
+        {
+          "chunk_id": "7d1d83af36f342d1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 0,
+          "bm25": 1.4545,
+          "coverage": 0.3009
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 1.0344,
+          "coverage": 0.3009
+        }
+      ],
+      "candidates": 10,
+      "words": {
+        "total": 9,
+        "matched": 7,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 0,
+        "unknown": 2
+      },
+      "framed_from_history": false,
+      "token_estimate": 4412,
+      "retrieved_tokens": 2716
+    },
+    "q-he-01": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 3,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 3,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-he-02": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 4,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 4,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-he-03": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 3,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 3,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-he-04": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 1,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 1,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-he-05": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "7d1d83af36f342d1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 0,
+          "bm25": 1.4549,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f37d74633d9ab625",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 5,
+          "bm25": 1.0676,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f5f7b275891db8ec",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 2,
+          "bm25": 1.0129,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "43d952e5997e8d63",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 7,
+          "bm25": 0.9934,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "9e40df091f50821f",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 4,
+          "bm25": 0.9529,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "4294078e9911e396",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 6,
+          "bm25": 0.9355,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "be503aef280a77c2",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 3,
+          "bm25": 0.9188,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "c0c20e818902202e",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 1,
+          "bm25": 0.8219,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "f75bf0cca9de50f1",
+          "doc_label": "Project / ReelSensei - AI Gaming Highlights",
+          "chunk_index": 8,
+          "bm25": 0.7413,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 9,
+      "words": {
+        "total": 3,
+        "matched": 1,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 2,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 4103,
+      "retrieved_tokens": 2430
+    },
+    "q-he-06": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 1,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 1,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-he-07": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 2,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 2,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-he-08": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 2,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 2,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    },
+    "q-he-09": {
+      "mode": "lexical",
+      "outcome": "narrowed",
+      "reason": "passed_gate",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "chunks_sent": [
+        {
+          "chunk_id": "58bd80d15506c43b",
+          "doc_label": "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today.",
+          "chunk_index": 0,
+          "bm25": 4.0744,
+          "coverage": 1.0
+        },
+        {
+          "chunk_id": "a3aef140d3c63cba",
+          "doc_label": "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+          "chunk_index": 0,
+          "bm25": 1.69,
+          "coverage": 1.0
+        }
+      ],
+      "candidates": 2,
+      "words": {
+        "total": 4,
+        "matched": 1,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 3,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 2688,
+      "retrieved_tokens": 991
+    },
+    "q-he-10": {
+      "mode": "lexical",
+      "outcome": "core_only",
+      "reason": "no_term_in_index",
+      "available": 10,
+      "docs_sent": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "chunks_sent": [],
+      "candidates": 0,
+      "words": {
+        "total": 3,
+        "matched": 0,
+        "trigram": 0,
+        "core": 0,
+        "other_script": 3,
+        "unknown": 0
+      },
+      "framed_from_history": false,
+      "token_estimate": 1658,
+      "retrieved_tokens": 0
+    }
+  },
+  "r1_questions": [
+    {
+      "id": "q-en-direct-01",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.07533000098192133,
+      "latency_ms_p95": 0.0831614997878205,
+      "latency_ms_min": 0.06763999954273459,
+      "latency_ms_max": 0.0923509996937355,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-direct-02",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.0562149998586392,
+      "latency_ms_p95": 0.06780100102332653,
+      "latency_ms_min": 0.04926699875795748,
+      "latency_ms_max": 0.08069499926932622,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-direct-03",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 8385,
+      "profile_token_estimate": 2096,
+      "system_prompt_chars": 12458,
+      "system_prompt_token_estimate": 3114,
+      "latency_ms_median": 0.08092200005194172,
+      "latency_ms_p95": 0.08970050021162024,
+      "latency_ms_min": 0.07027599895081948,
+      "latency_ms_max": 0.09367299935547635,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-direct-04",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 10110,
+      "profile_token_estimate": 2527,
+      "system_prompt_chars": 14183,
+      "system_prompt_token_estimate": 3545,
+      "latency_ms_median": 0.09125500037043821,
+      "latency_ms_p95": 0.11134049964311998,
+      "latency_ms_min": 0.07963600000948645,
+      "latency_ms_max": 0.11812999946414493,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-direct-05",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.05456600047182292,
+      "latency_ms_p95": 0.06917900009284494,
+      "latency_ms_min": 0.04896300015388988,
+      "latency_ms_max": 0.07794399971317034,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-direct-06",
+      "language": "en",
+      "category": "direct_keyword",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 7694,
+      "profile_token_estimate": 1923,
+      "system_prompt_chars": 11767,
+      "system_prompt_token_estimate": 2941,
+      "latency_ms_median": 0.08872999933373649,
+      "latency_ms_p95": 0.1050690007105004,
+      "latency_ms_min": 0.08303300091938581,
+      "latency_ms_max": 0.13134300024830736,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-01",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.05383499956224114,
+      "latency_ms_p95": 0.06060999930923572,
+      "latency_ms_min": 0.05057499947724864,
+      "latency_ms_max": 0.06638100057898555,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-paraphrase-02",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 14551,
+      "profile_token_estimate": 3637,
+      "system_prompt_chars": 18624,
+      "system_prompt_token_estimate": 4656,
+      "latency_ms_median": 0.11549800001375843,
+      "latency_ms_p95": 0.13762750040768879,
+      "latency_ms_min": 0.10245300109090749,
+      "latency_ms_max": 0.14031099999556318,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-03",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 9005,
+      "profile_token_estimate": 2251,
+      "system_prompt_chars": 13078,
+      "system_prompt_token_estimate": 3269,
+      "latency_ms_median": 0.09951799984264653,
+      "latency_ms_p95": 0.11820249983429676,
+      "latency_ms_min": 0.08174399954441469,
+      "latency_ms_max": 0.12300100024731364,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-04",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 10110,
+      "profile_token_estimate": 2527,
+      "system_prompt_chars": 14183,
+      "system_prompt_token_estimate": 3545,
+      "latency_ms_median": 0.083199000073364,
+      "latency_ms_p95": 0.09328600026492495,
+      "latency_ms_min": 0.07913999979791697,
+      "latency_ms_max": 0.10364300032961182,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "unneeded_labels": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 1,
+      "recall": 0.0,
+      "precision": 0.6666666666666666,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-05",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 8385,
+      "profile_token_estimate": 2096,
+      "system_prompt_chars": 12458,
+      "system_prompt_token_estimate": 3114,
+      "latency_ms_median": 0.1038390000758227,
+      "latency_ms_p95": 0.12656099988817004,
+      "latency_ms_min": 0.09179900007438846,
+      "latency_ms_max": 0.14286700024968013,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-06",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 13376,
+      "profile_token_estimate": 3344,
+      "system_prompt_chars": 17449,
+      "system_prompt_token_estimate": 4362,
+      "latency_ms_median": 0.1089489996957127,
+      "latency_ms_p95": 0.12875250013166806,
+      "latency_ms_min": 0.10211100016022101,
+      "latency_ms_max": 0.17407599989383016,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_missing": [
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.5,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-paraphrase-07",
+      "language": "en",
+      "category": "paraphrase",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 13787,
+      "profile_token_estimate": 3446,
+      "system_prompt_chars": 17860,
+      "system_prompt_token_estimate": 4465,
+      "latency_ms_median": 0.10643300083756912,
+      "latency_ms_p95": 0.11354500020388514,
+      "latency_ms_min": 0.10093000128108542,
+      "latency_ms_max": 0.12563299969770014,
+      "repeats": 51,
+      "expected_found": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-nomatch-01",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.07655000081285834,
+      "latency_ms_p95": 0.08923950008465908,
+      "latency_ms_min": 0.06695699994452298,
+      "latency_ms_max": 0.10300800022378098,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-nomatch-02",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.05824999971082434,
+      "latency_ms_p95": 0.06372000007104361,
+      "latency_ms_min": 0.051817998610204086,
+      "latency_ms_max": 0.20800199854420498,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-nomatch-03",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.07391600047412794,
+      "latency_ms_p95": 0.09769200005393941,
+      "latency_ms_min": 0.06523999945784453,
+      "latency_ms_max": 0.10023600043496117,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-nomatch-04",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.07411099977616686,
+      "latency_ms_p95": 0.10139800087927142,
+      "latency_ms_min": 0.070404001235147,
+      "latency_ms_max": 0.10776699855341576,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-nomatch-05",
+      "language": "en",
+      "category": "no_word_match",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.0597079997533001,
+      "latency_ms_p95": 0.06261149974307045,
+      "latency_ms_min": 0.05337900074664503,
+      "latency_ms_max": 0.08696300028532278,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-offtopic-01",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.05849399894941598,
+      "latency_ms_p95": 0.07116100096027367,
+      "latency_ms_min": 0.05739399966842029,
+      "latency_ms_max": 0.0732039989088662,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-offtopic-02",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.07502900007239077,
+      "latency_ms_p95": 0.09384999975736719,
+      "latency_ms_min": 0.07197500053734984,
+      "latency_ms_max": 0.10200300130236428,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-offtopic-03",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.06533300074806903,
+      "latency_ms_p95": 0.07078149974404369,
+      "latency_ms_min": 0.0617260011495091,
+      "latency_ms_max": 0.07939900024211966,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-offtopic-04",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.0634379994153278,
+      "latency_ms_p95": 0.07217349957500119,
+      "latency_ms_min": 0.054785999964224175,
+      "latency_ms_max": 0.08279400026367512,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-offtopic-05",
+      "language": "en",
+      "category": "off_topic",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 16519,
+      "profile_token_estimate": 4129,
+      "system_prompt_chars": 20592,
+      "system_prompt_token_estimate": 5148,
+      "latency_ms_median": 0.10273599946231116,
+      "latency_ms_p95": 0.1140354997914983,
+      "latency_ms_min": 0.09103099910134915,
+      "latency_ms_max": 0.12018199959129561,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 3,
+      "recall": 1.0,
+      "precision": 0.4,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-profile-01",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 12924,
+      "profile_token_estimate": 3231,
+      "system_prompt_chars": 16997,
+      "system_prompt_token_estimate": 4249,
+      "latency_ms_median": 0.07904999984020833,
+      "latency_ms_p95": 0.09422499897482339,
+      "latency_ms_min": 0.06778699935239274,
+      "latency_ms_max": 0.10920000022451859,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "unneeded_count": 3,
+      "recall": 1.0,
+      "precision": 0.4,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-profile-02",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.057191000450984575,
+      "latency_ms_p95": 0.0705265001670341,
+      "latency_ms_min": 0.053433999710250646,
+      "latency_ms_max": 0.0769260004744865,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-profile-03",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.053325999033404514,
+      "latency_ms_p95": 0.05796799996460322,
+      "latency_ms_min": 0.05161499939276837,
+      "latency_ms_max": 0.06574199869646691,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-profile-04",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.076757998613175,
+      "latency_ms_p95": 0.09085449983103899,
+      "latency_ms_min": 0.06837399996584281,
+      "latency_ms_max": 0.12503899961302523,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-profile-05",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 7661,
+      "profile_token_estimate": 1915,
+      "system_prompt_chars": 11734,
+      "system_prompt_token_estimate": 2933,
+      "latency_ms_median": 0.07316899973375257,
+      "latency_ms_p95": 0.096896500508592,
+      "latency_ms_min": 0.0645990003249608,
+      "latency_ms_max": 0.10159300109080505,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.6666666666666666,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-profile-06",
+      "language": "en",
+      "category": "profile",
+      "expected_doc_labels": [
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.06027599920344073,
+      "latency_ms_p95": 0.06182400011311984,
+      "latency_ms_min": 0.056860999393393286,
+      "latency_ms_max": 0.07143000038922764,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-en-project-01",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 12661,
+      "profile_token_estimate": 3165,
+      "system_prompt_chars": 16734,
+      "system_prompt_token_estimate": 4183,
+      "latency_ms_median": 0.09089899867831264,
+      "latency_ms_p95": 0.10618950091156876,
+      "latency_ms_min": 0.0847549999889452,
+      "latency_ms_max": 0.11721299961209297,
+      "repeats": 51,
+      "expected_found": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "unneeded_count": 2,
+      "recall": 1.0,
+      "precision": 0.6,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-project-02",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.08537600115232635,
+      "latency_ms_p95": 0.08964550033851992,
+      "latency_ms_min": 0.0757550005801022,
+      "latency_ms_max": 0.09763599882717244,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-project-03",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.10725399988587014,
+      "latency_ms_p95": 0.13238249994174112,
+      "latency_ms_min": 0.09608899927115999,
+      "latency_ms_max": 0.13946900071459822,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-project-04",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 14269,
+      "profile_token_estimate": 3567,
+      "system_prompt_chars": 18342,
+      "system_prompt_token_estimate": 4585,
+      "latency_ms_median": 0.08966099994722754,
+      "latency_ms_p95": 0.11510449894558406,
+      "latency_ms_min": 0.08658300066599622,
+      "latency_ms_max": 0.1632410003367113,
+      "repeats": 51,
+      "expected_found": [
+        "Project / AI Chat Portfolio"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-project-05",
+      "language": "en",
+      "category": "project",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 18186,
+      "profile_token_estimate": 4546,
+      "system_prompt_chars": 22259,
+      "system_prompt_token_estimate": 5564,
+      "latency_ms_median": 0.10757599920907523,
+      "latency_ms_p95": 0.12495999999373453,
+      "latency_ms_min": 0.09866199980024248,
+      "latency_ms_max": 0.13218599997344427,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-01",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 14975,
+      "profile_token_estimate": 3743,
+      "system_prompt_chars": 19048,
+      "system_prompt_token_estimate": 4762,
+      "latency_ms_median": 0.09737200161907822,
+      "latency_ms_p95": 0.12040000092383707,
+      "latency_ms_min": 0.09005399988382123,
+      "latency_ms_max": 0.14186099906510208,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-02",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 9005,
+      "profile_token_estimate": 2251,
+      "system_prompt_chars": 13078,
+      "system_prompt_token_estimate": 3269,
+      "latency_ms_median": 0.08082599924819078,
+      "latency_ms_p95": 0.08820299990475178,
+      "latency_ms_min": 0.07603499943797942,
+      "latency_ms_max": 0.10260800081596244,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-03",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 8385,
+      "profile_token_estimate": 2096,
+      "system_prompt_chars": 12458,
+      "system_prompt_token_estimate": 3114,
+      "latency_ms_median": 0.07790700146870222,
+      "latency_ms_p95": 0.09210899952449836,
+      "latency_ms_min": 0.072658998760744,
+      "latency_ms_max": 0.09954800043487921,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-04",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 7694,
+      "profile_token_estimate": 1923,
+      "system_prompt_chars": 11767,
+      "system_prompt_token_estimate": 2941,
+      "latency_ms_median": 0.09155499901680741,
+      "latency_ms_p95": 0.09783400037122192,
+      "latency_ms_min": 0.08527499994670507,
+      "latency_ms_max": 0.1063920008164132,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-05",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 10110,
+      "profile_token_estimate": 2527,
+      "system_prompt_chars": 14183,
+      "system_prompt_token_estimate": 3545,
+      "latency_ms_median": 0.09167499956674874,
+      "latency_ms_p95": 0.10449099954712437,
+      "latency_ms_min": 0.07909899977676105,
+      "latency_ms_max": 0.11232999895582907,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-writing-06",
+      "language": "en",
+      "category": "writing",
+      "expected_doc_labels": [
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / \"Nothing found.\""
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 8234,
+      "profile_token_estimate": 2058,
+      "system_prompt_chars": 12307,
+      "system_prompt_token_estimate": 3076,
+      "latency_ms_median": 0.08662799882586114,
+      "latency_ms_p95": 0.09183400015899679,
+      "latency_ms_min": 0.07689200174354482,
+      "latency_ms_max": 0.09776000115380157,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-01",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 18089,
+      "profile_token_estimate": 4522,
+      "system_prompt_chars": 22162,
+      "system_prompt_token_estimate": 5540,
+      "latency_ms_median": 0.08116800017887726,
+      "latency_ms_p95": 0.08430050093011232,
+      "latency_ms_min": 0.07318600000871811,
+      "latency_ms_max": 0.08525100020051468,
+      "repeats": 51,
+      "expected_found": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-02",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / \"Nothing found.\"",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 17345,
+      "profile_token_estimate": 4336,
+      "system_prompt_chars": 21418,
+      "system_prompt_token_estimate": 5354,
+      "latency_ms_median": 0.10284100062563084,
+      "latency_ms_p95": 0.10723849936766783,
+      "latency_ms_min": 0.09254200085706543,
+      "latency_ms_max": 0.10823100092238747,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.8,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-03",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 13376,
+      "profile_token_estimate": 3344,
+      "system_prompt_chars": 17449,
+      "system_prompt_token_estimate": 4362,
+      "latency_ms_median": 0.10713899973779917,
+      "latency_ms_p95": 0.11541450021468336,
+      "latency_ms_min": 0.0997909992292989,
+      "latency_ms_max": 0.13287799993122462,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling"
+      ],
+      "expected_missing": [
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.75,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-04",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Profile / resume",
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.0951490001170896,
+      "latency_ms_p95": 0.10350599950470496,
+      "latency_ms_min": 0.0866960017447127,
+      "latency_ms_max": 0.1177989997813711,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [
+        "Project / AI Chat Portfolio"
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.6666666666666666,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-en-multi-05",
+      "language": "en",
+      "category": "multi_doc",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 17650,
+      "profile_token_estimate": 4412,
+      "system_prompt_chars": 21723,
+      "system_prompt_token_estimate": 5430,
+      "latency_ms_median": 0.13535399921238422,
+      "latency_ms_p95": 0.15566149977530586,
+      "latency_ms_min": 0.12086999959137756,
+      "latency_ms_max": 0.17520399887871463,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me"
+      ],
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "unneeded_labels": [
+        "Project / ReelSensei - AI Gaming Highlights",
+        "Writing / What the heck are callbacks? Promises? Async/await? What a MESS"
+      ],
+      "unneeded_count": 2,
+      "recall": 0.5,
+      "precision": 0.5,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-he-01",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.07247999928949866,
+      "latency_ms_p95": 0.0778814992372645,
+      "latency_ms_min": 0.065222999182879,
+      "latency_ms_max": 0.0973879996308824,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-02",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.07595699935336597,
+      "latency_ms_p95": 0.08664350025355816,
+      "latency_ms_min": 0.06805700104450807,
+      "latency_ms_max": 0.109184000393725,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Writing / 22.7 million tokens. One session. $340 burned."
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-03",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.07199200081231538,
+      "latency_ms_p95": 0.09543000032863347,
+      "latency_ms_min": 0.06440699871745892,
+      "latency_ms_max": 0.1218130000779638,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Writing / The Three Meanings of \"Nothing\" in AI Agent Tool-Calling",
+        "Writing / \"Nothing found.\""
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-04",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.061220000134198926,
+      "latency_ms_p95": 0.06755400045221904,
+      "latency_ms_min": 0.05725700066250283,
+      "latency_ms_max": 0.09746599971549585,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-05",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 16414,
+      "profile_token_estimate": 4103,
+      "system_prompt_chars": 20487,
+      "system_prompt_token_estimate": 5121,
+      "latency_ms_median": 0.08929099931265227,
+      "latency_ms_p95": 0.10792000011861091,
+      "latency_ms_min": 0.0872349992278032,
+      "latency_ms_max": 0.11490100041555706,
+      "repeats": 51,
+      "expected_found": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-he-06",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.06019099964760244,
+      "latency_ms_p95": 0.06806200053688372,
+      "latency_ms_min": 0.05605400110653136,
+      "latency_ms_max": 0.08260000140580814,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Project / AI Chat Portfolio",
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-07",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": false,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.07533200005127583,
+      "latency_ms_p95": 0.09833549938775832,
+      "latency_ms_min": 0.06001700057822745,
+      "latency_ms_max": 0.09927500104822684,
+      "repeats": 51,
+      "expected_found": [],
+      "expected_missing": [
+        "Project / ReelSensei - AI Gaming Highlights"
+      ],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 0.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-08",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.06409699926734902,
+      "latency_ms_p95": 0.08271549904748099,
+      "latency_ms_min": 0.06058699909772258,
+      "latency_ms_max": 0.08498900024278555,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    },
+    {
+      "id": "q-he-09",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_outcome": "narrowed",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume",
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor.",
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "actual_outcome": "narrowed",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 10755,
+      "profile_token_estimate": 2688,
+      "system_prompt_chars": 14828,
+      "system_prompt_token_estimate": 3707,
+      "latency_ms_median": 0.10045499948319048,
+      "latency_ms_p95": 0.11993499992968282,
+      "latency_ms_min": 0.08917699960875325,
+      "latency_ms_max": 0.1267830011784099,
+      "repeats": 51,
+      "expected_found": [
+        "Writing / I crashed Claude CLI yesterday. Anthropic bought Bun today."
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [
+        "Writing / Your agent doesn't need a smarter model. It needs an advisor."
+      ],
+      "unneeded_count": 1,
+      "recall": 1.0,
+      "precision": 0.75,
+      "core_only_selected": false
+    },
+    {
+      "id": "q-he-10",
+      "language": "he",
+      "category": "hebrew",
+      "expected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_outcome": "core_only",
+      "selected_doc_labels": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "actual_outcome": "core_only",
+      "outcome_matches_desired": true,
+      "available": 10,
+      "profile_chars": 6635,
+      "profile_token_estimate": 1658,
+      "system_prompt_chars": 10708,
+      "system_prompt_token_estimate": 2677,
+      "latency_ms_median": 0.0704970007063821,
+      "latency_ms_p95": 0.09760050033946754,
+      "latency_ms_min": 0.06498100083263125,
+      "latency_ms_max": 0.09850999958871398,
+      "repeats": 51,
+      "expected_found": [
+        "Profile / about-me",
+        "Profile / resume"
+      ],
+      "expected_missing": [],
+      "unneeded_labels": [],
+      "unneeded_count": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "core_only_selected": true
+    }
+  ]
+}
