@@ -6,8 +6,9 @@
  * change that - CORS is enforced by browsers, on browsers, so curl and a
  * for-loop ignore it entirely. What that costs is not stolen data, since
  * everything the API returns is already public. It is Gemini quota per chat
- * request, and a 40/minute global rate limit that is shared with real
- * visitors, so anyone who wants to can leave the site answering 429s.
+ * request, and a small daily chat budget (see backend/rate_limit.py) that is
+ * shared with real visitors, so anyone who wants to can leave the site
+ * answering 429s.
  *
  * This Worker is what closes that. It sits on api.yanirrot.com, so every
  * request reaching the backend has already passed Cloudflare's DDoS
@@ -55,7 +56,11 @@ function isProtected(request, pathname) {
     return request.method === 'POST' && PROTECTED_PATHS.has(pathname);
 }
 
-function turnstileReply(request, status, detail) {
+/**
+ * A JSON reply produced by this Worker itself, for every case where the
+ * request never reaches the backend or the backend never answers.
+ */
+function edgeReply(request, status, detail) {
     const headers = new Headers({
         'content-type': 'application/json',
         // The reply differs by Origin, so a cache must not hand one origin's
@@ -84,13 +89,13 @@ async function verifyTurnstile(request, env) {
         // silently turn the check off. Forwarding here would look like
         // everything works while the protection is simply gone.
         console.error('TURNSTILE_SECRET_KEY is not set; refusing protected request');
-        return turnstileReply(request, 503, UNAVAILABLE_DETAIL);
+        return edgeReply(request, 503, UNAVAILABLE_DETAIL);
     }
 
     const token = request.headers.get(TURNSTILE_HEADER);
     if (!token || token.length > TURNSTILE_MAX_TOKEN_LENGTH) {
         // Nothing siteverify could say yes to, so it is not asked.
-        return turnstileReply(request, 403, UNVERIFIED_DETAIL);
+        return edgeReply(request, 403, UNVERIFIED_DETAIL);
     }
 
     const payload = { secret: env.TURNSTILE_SECRET_KEY, response: token };
@@ -118,7 +123,7 @@ async function verifyTurnstile(request, env) {
         // not check" must not be treated as "checked", or taking siteverify
         // out of the picture would be a way around it.
         console.error('turnstile siteverify failed', err);
-        return turnstileReply(request, 503, UNAVAILABLE_DETAIL);
+        return edgeReply(request, 503, UNAVAILABLE_DETAIL);
     }
 
     if (outcome?.success === true) {
@@ -128,11 +133,11 @@ async function verifyTurnstile(request, env) {
         // The error codes name what was wrong with the token (expired, already
         // used, ...). They contain no secret, so they are safe to log.
         console.warn('turnstile token rejected', outcome['error-codes']);
-        return turnstileReply(request, 403, UNVERIFIED_DETAIL);
+        return edgeReply(request, 403, UNVERIFIED_DETAIL);
     }
     // Valid JSON, but not a siteverify answer. Same as unparseable.
     console.error('turnstile siteverify returned an unexpected body');
-    return turnstileReply(request, 503, UNAVAILABLE_DETAIL);
+    return edgeReply(request, 503, UNAVAILABLE_DETAIL);
 }
 
 export default {
@@ -141,7 +146,7 @@ export default {
             // Failing loudly beats forwarding unauthenticated: a missing
             // secret would otherwise silently become an open proxy to the
             // origin, which is the exact thing this Worker exists to prevent.
-            return new Response('Edge proxy is not configured', { status: 500 });
+            return edgeReply(request, 500, 'Edge proxy is not configured');
         }
 
         const incoming = new URL(request.url);
@@ -190,13 +195,11 @@ export default {
             // rejection escapes and Cloudflare answers with its own 1101 error
             // page - an HTML block the frontend cannot parse, arriving with no
             // CORS headers, so the browser reports it as a CORS failure and the
-            // chat's "could not reach my notes" path never runs. A plain 502
-            // is a status the caller can actually act on.
+            // chat's "could not reach my notes" path never runs. A 502 sent
+            // through edgeReply carries the CORS header, so the browser lets
+            // the frontend read the status and act on it.
             console.error('origin fetch failed', err);
-            return new Response(JSON.stringify({ detail: 'Bad gateway' }), {
-                status: 502,
-                headers: { 'content-type': 'application/json' },
-            });
+            return edgeReply(request, 502, 'Bad gateway');
         }
     },
 };

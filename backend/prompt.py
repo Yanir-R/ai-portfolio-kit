@@ -129,7 +129,11 @@ def build_contents(
     Real turns rather than a "Previous conversation:" string pasted into the
     prompt: flattened history leaves the model inferring turn boundaries from
     text it could equally read as content, and lets a visitor forge an assistant
-    turn by typing one. Here the roles are set by the server.
+    turn by typing one inside a message.
+
+    The history itself still comes from the browser, so a caller who writes
+    their own request can label any text as an earlier assistant turn. The
+    rules in the system instruction outrank every turn for that reason.
 
     Roles arrive already normalised to "user"/"model" by the caller; anything
     else is dropped rather than guessed at.

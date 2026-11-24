@@ -15,9 +15,15 @@ State is per-process and in-memory, so the effective global ceiling is
 
 Both deployment paths run a single process per instance (the workflow's
 generated Dockerfile and backend/Dockerfile both use plain uvicorn), and Cloud
-Run is capped at 4 instances, so the chat ceiling is 12 x 4 = 48 answers a day.
-Switching to gunicorn with multiple workers would multiply it again - see the
-note in backend/Dockerfile.
+Run is capped at 4 instances, so the chat ceiling is 12 x 4 = 48 answers a day
+for as long as those instances stay up. Switching to gunicorn with multiple
+workers would multiply it again - see the note in backend/Dockerfile.
+
+That ceiling is not a hard daily cap. The service scales to zero, and a new
+instance starts with empty windows, so the count restarts on every cold start.
+The limit that does hold across restarts is the upstream one: the Gemini quota
+itself, which on the free tier cannot bill. Before moving to a paid tier, back
+this with a shared counter or a billing budget alert.
 
 Keeping the state in-process is intentional: a shared counter would mean running
 Redis for a portfolio site.
@@ -42,7 +48,7 @@ import time
 from collections import deque
 from typing import Deque, Dict, Tuple
 
-from fastapi import Request
+from fastapi import HTTPException, Request
 
 logger = logging.getLogger(__name__)
 
@@ -186,8 +192,6 @@ def client_key(request: Request) -> str:
 
 def enforce_rate_limit(request: Request, limiter: "SlidingWindowLimiter", label: str) -> None:
     """Raises 429 with Retry-After when the caller is over budget."""
-    # Imported here to keep this module importable without FastAPI's app wiring.
-    from fastapi import HTTPException
 
     key = client_key(request)
     allowed, retry_after = limiter.check(key)
