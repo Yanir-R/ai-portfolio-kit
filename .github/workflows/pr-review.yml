@@ -1,0 +1,45 @@
+# AI review on pull requests with the open-source PR-Agent and the Gemini free tier.
+# Cost guardrails:
+# - GEMINI_API_KEY must come from a Google AI Studio project with no billing account,
+#   so quota exhaustion fails the run (HTTP 429) instead of charging.
+# - Comment commands run only for the repository owner, so other people cannot
+#   spend the quota from a public PR.
+# - Auto describe is off so PR descriptions are never rewritten.
+name: pr-review
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+concurrency:
+  group: pr-review-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+jobs:
+  pr_agent:
+    if: >-
+      github.event.sender.type != 'Bot' &&
+      (
+        (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
+        (github.event_name == 'issue_comment' && github.event.issue.pull_request &&
+         github.event.comment.author_association == 'OWNER' &&
+         startsWith(github.event.comment.body, '/'))
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      # PR-Agent runtime image, pinned by digest (tag github_action, 2026-11-08).
+      - uses: docker://pragent/pr-agent@sha256:548e894a88071180832b2f4233f734d0acd0db1a879e2fcbaa70bac8b8372ebe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOOGLE_AI_STUDIO.GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          config.model: "gemini/gemini-3.8-flash"
+          config.fallback_models: '["gemini/gemini-3.5-flash-lite"]'
+          github_action_config.auto_review: "true"
+          github_action_config.auto_describe: "false"
+          github_action_config.auto_improve: "false"
