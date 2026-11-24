@@ -60,6 +60,9 @@ https://www.linkedin.com/feed/update/urn:li:activity:7504523383544496128/
 ## Date
 2026-09-12
 
+## Media
+/writing/personakit-day-2.jpg
+
 ## Summary
 AI assistants are starting to remember us. The next layer is accountable memory: inspectable, sourced, correctable and restricted by context.
 

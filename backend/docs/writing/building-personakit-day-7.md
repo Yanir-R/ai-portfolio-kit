@@ -90,6 +90,9 @@ https://www.linkedin.com/feed/update/urn:li:activity:7506224664277499904/
 ## Date
 2026-09-17
 
+## Media
+/writing/personakit-day-7.jpg
+
 ## Summary
 Cold start for AI memory: when nothing is reviewed yet, the assistant should hear an honest absence, not a confident empty result.
 

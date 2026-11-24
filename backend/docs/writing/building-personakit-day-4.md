@@ -151,6 +151,9 @@ https://www.linkedin.com/feed/update/urn:li:activity:7505251849743237123/
 ## Date
 2026-09-14
 
+## Media
+/writing/personakit-day-4.jpg
+
 ## Summary
 שיחה עם ספר שמנהל תורים ביומן כתוב, ומה היא לימדה על זיכרון: הוא נהיה מוצר רק כשהוא משנה החלטה בזמן הנכון.
 

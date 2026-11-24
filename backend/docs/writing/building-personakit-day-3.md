@@ -45,6 +45,9 @@ https://www.linkedin.com/feed/update/urn:li:activity:7504888007477567489/
 ## Date
 2026-09-13
 
+## Media
+/writing/personakit-day-3.jpg
+
 ## Summary
 Approve or reject was the wrong review model for memory. People judge memory as future behaviour, so it needs permissions, not just facts.
 

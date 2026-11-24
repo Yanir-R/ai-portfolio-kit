@@ -109,6 +109,9 @@ https://www.linkedin.com/feed/update/urn:li:activity:7505548334540107776/
 ## Date
 2026-09-15
 
+## Media
+/writing/personakit-day-5.jpg
+
 ## Summary
 Building PersonaKit solo and becoming its first real user through MCP: memory has to earn its place inside real work, not in a dashboard.
 

@@ -76,6 +76,9 @@ https://www.linkedin.com/feed/update/urn:li:activity:7505898279000342528/
 ## Date
 2026-09-16
 
+## Media
+/writing/personakit-day-6.jpg
+
 ## Summary
 Restraint as a memory feature: knowing when memory should stay out of the answer, and treating "nothing relevant here" as a first-class behaviour.
 
