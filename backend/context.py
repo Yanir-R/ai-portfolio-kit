@@ -115,6 +115,10 @@ class Section:
     # One sentence saying what the document is, taken from the document. It is
     # what the model is shown in place of the body when the body is not sent.
     summary: str = ""
+    # Publication date of a piece of writing (ISO, so it sorts as text), taken
+    # from its `## Date` section. Empty for profile and project documents.
+    # Questions like "what did you post lately?" are answered by it.
+    date: str = ""
 
     @property
     def kind(self) -> str:
@@ -349,15 +353,28 @@ def _in_hebrew(document: _Document) -> _Document:
     return (source, slug, title, hebrew)
 
 
+_DATE_RE = re.compile(r"^## Date[ \t]*\n+(\d{4}-\d{2}-\d{2})", re.MULTILINE)
+
+
 def _section(document: _Document) -> Section:
     source, slug, title, body = document
+    summary = summary_of(body)
+    date = ""
+    if source == WRITING:
+        match = _DATE_RE.search(body)
+        date = match.group(1) if match else ""
+        # A listed post carries its date, so "what have you written?" can be
+        # answered in order and with dates from the one-line entries alone.
+        if date and summary:
+            summary = f"({date}) {summary}"
     return Section(
         label=f"{_LABEL_PREFIX[source]}{title}",
         body=body,
         source=source,
         slug=slug,
         title=title,
-        summary=summary_of(body),
+        summary=summary,
+        date=date,
     )
 
 

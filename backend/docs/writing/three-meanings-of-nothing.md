@@ -86,7 +86,7 @@ When a tool returns nothing, does your system know which nothing it got?
 article
 
 ## Source
-Company blog
+Company engineering blog
 
 ## Date
 2026-04-05
@@ -95,4 +95,4 @@ Company blog
 /writing/three-meanings-of-nothing.jpg
 
 ## Summary
-An agent that treats every empty tool response as the same condition will retry things that already answered, report errors on queries that worked, and chase resources that never existed. Three states, three different next steps.
+An article I wrote for the engineering blog of the company I worked at. An agent that treats every empty tool response as the same condition will retry things that already answered, report errors on queries that worked, and chase resources that never existed. Three states, three different next steps.

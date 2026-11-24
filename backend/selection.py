@@ -364,6 +364,13 @@ class Selection:
     knowledge: Knowledge
     outcome: str
     available: int
+    # Set when the question is about Yanir's writing as such ("what have you
+    # written about X?", "your latest posts"). `writing` holds the slugs of the
+    # pieces that answer it, best first, at most MAX_WRITING_ITEMS; the site
+    # draws them as cards without asking the model which ones it meant.
+    writing_intent: str = ""
+    writing: Tuple[str, ...] = ()
+    writing_total: int = 0
 
     @property
     def narrowed(self) -> bool:
@@ -395,6 +402,135 @@ def _profile_only(knowledge: Knowledge, available: int, outcome: str) -> Selecti
         knowledge=_with_the_rest_listed(profile, knowledge),
         outcome=outcome,
         available=available,
+    )
+
+
+# --- questions about the writing itself -------------------------------------
+#
+# "What have you written about memory?" is two questions in one: which of
+# Yanir's documents are *writing*, and which of those are about memory. Scored
+# like any other question, the first half poisons the second: "written",
+# "post" and "article" are words some documents happen to contain, so the
+# closest match was whichever post said "post" most distinctively, and in
+# Hebrew "פוסט" pointed at the one Hebrew post that used it.
+#
+# So words that say *this is about the writing* are taken out of the question
+# and turned into a filter instead: only writing competes, and only on the
+# words that are left. They are a closed set (the names of the forms and of
+# the places they were published), which is why a list is safe here when a
+# list of topics would not be.
+WRITING_INTENT_WORDS = """
+    article articles post posts posted blog blogs written write writing
+    publish published publication linkedin medium series piece pieces essay
+    מאמר מאמרים פוסט פוסטים בלוג כתבת כתבתי כתיבה פרסמת פרסום פרסומים
+    לינקדאין לינקדין מדיום סדרה סדרת
+"""
+# Asking for the newest rather than for a subject. Read only together with a
+# writing word: "your latest project" is not about the writing.
+RECENCY_WORDS = """
+    latest recent recently newest new lately
+    אחרון האחרון אחרונים האחרונים לאחרונה חדש החדש
+"""
+# How a visitor asks for a list, as opposed to what it should be about. Only
+# removed from a question already known to be about the writing; elsewhere
+# "show" can be a subject.
+REQUEST_WORDS = """
+    show list summarize summarise summary share send give find anything something everything
+    תראה הראה תראי תציג הצג תסכם סכם סיכום תשתף שתף משהו כלום הכל
+"""
+_REQUEST_TERMS: FrozenSet[str] = frozenset()
+_WRITING_TERMS: FrozenSet[str] = frozenset()
+_RECENCY_TERMS: FrozenSet[str] = frozenset()
+
+# How far the best piece may fall behind the best other document on the same
+# subject before the question is treated as not really about the writing.
+WRITING_DEFERS_BELOW = 0.5
+
+# The most pieces a writing answer names. Matches the site's list card.
+MAX_WRITING_ITEMS = 5
+
+# What a writing question turned out to be. The site draws each differently.
+WRITING_TOPIC = "topic"      # about a subject: the pieces on it
+WRITING_RECENT = "recent"    # the newest pieces
+WRITING_ALL = "all"          # the writing as a whole: what exists
+WRITING_RELATED = "related"  # not asked about the writing, but a piece answers it
+
+
+def _intent_terms() -> Tuple[FrozenSet[str], FrozenSet[str]]:
+    global _WRITING_TERMS, _RECENCY_TERMS, _REQUEST_TERMS
+    if not _WRITING_TERMS:
+        _WRITING_TERMS = frozenset(_terms(WRITING_INTENT_WORDS))
+        _RECENCY_TERMS = frozenset(_terms(RECENCY_WORDS))
+        _REQUEST_TERMS = frozenset(_terms(REQUEST_WORDS))
+    return _WRITING_TERMS, _RECENCY_TERMS
+
+
+def _writing_selection(
+    asked: Set[str], knowledge: Knowledge, index: "_Index", available: int
+) -> "Selection | None":
+    """The answer to a question about the writing, or None if it is not one."""
+    writing_words, recency_words = _intent_terms()
+    if not asked & writing_words:
+        return None
+
+    pieces = [s for s in knowledge.sections if s.source == "writing"]
+    if not pieces:
+        return None
+    newest_first = sorted(pieces, key=lambda s: s.date, reverse=True)
+    topic = asked - writing_words - recency_words - _REQUEST_TERMS
+
+    if topic:
+        terms_of = dict(index.terms)
+        scores = {
+            s.label: sum(index.weights.get(t, 0.0) for t in topic & terms_of.get(s.label, frozenset()))
+            for s in pieces
+        }
+        best = max(scores.values(), default=0.0)
+        # The best any other document does on the same subject. "Did you write
+        # the code for Trinity Legal?" says "write" but is about a project, and
+        # the project answers it far better than any post that mentions code.
+        elsewhere = max(
+            (
+                sum(index.weights.get(t, 0.0) for t in topic & terms)
+                for label, terms in index.terms
+                if not label.startswith(("Writing / ", "Profile / "))
+            ),
+            default=0.0,
+        )
+        if best <= 0 or best < elsewhere * WRITING_DEFERS_BELOW:
+            # The subject is not one the writing covers, or something else
+            # covers it much better. Let the ordinary search have it.
+            return None
+        threshold = sum(index.weights.get(t, 0.0) for t in topic) * QUERY_COVERAGE
+        matching = sorted(
+            (s for s in pieces if scores[s.label] > 0 and (scores[s.label] >= threshold or scores[s.label] == best)),
+            key=lambda s: (scores[s.label], s.date),
+            reverse=True,
+        )
+        intent, ordered = WRITING_TOPIC, matching
+    elif asked & recency_words:
+        intent, ordered = WRITING_RECENT, newest_first
+    else:
+        intent, ordered = WRITING_ALL, newest_first
+
+    # Bodies for the few that answer it; one dated line for every other piece,
+    # which is enough to list the rest without sending them.
+    send = () if intent == WRITING_ALL else tuple(ordered[:MAX_DOCUMENTS])
+    kept = set(send)
+    chosen = tuple(s for s in knowledge.sections if s.is_profile or s in kept)
+    items = tuple(s.slug for s in ordered[:MAX_WRITING_ITEMS] if s.slug)
+
+    logger.info(
+        "Selection: writing/%s, %d of %d documents, %d pieces matched",
+        intent, len(chosen), available, len(ordered),
+    )
+    return Selection(
+        knowledge=_with_the_rest_listed(chosen, knowledge),
+        outcome=NARROWED,
+        available=available,
+        writing_intent=intent,
+        writing=items,
+        writing_total=len(ordered),
     )
 
 
@@ -431,6 +567,10 @@ def select(
         asked = _terms("\n".join(list(history or [])[-FRAMING_TURNS:]))
         if not asked:
             return _profile_only(knowledge, available, CONVERSATIONAL)
+
+    writing = _writing_selection(asked, knowledge, index, available)
+    if writing is not None:
+        return writing
 
     scores: Dict[str, float] = {}
     for label, terms in index.terms:
@@ -481,10 +621,19 @@ def select(
         available,
         ", ".join(s.label for s in chosen),
     )
+    # A question that was not about the writing can still be answered by it:
+    # "what do you think about agents asking for approval?" is an opinion, and
+    # the post where he wrote it is the evidence. Those pieces travel with the
+    # answer as cards, best first, without the model being asked to pick them.
+    related = tuple(s.slug for s in ranked if s.source == "writing" and s.slug)[:2]
+
     return Selection(
         knowledge=_with_the_rest_listed(chosen, knowledge),
         outcome=outcome,
         available=available,
+        writing_intent=WRITING_RELATED if related else "",
+        writing=related,
+        writing_total=len(related),
     )
 
 
