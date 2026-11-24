@@ -1,8 +1,8 @@
 I work on the half of AI engineering that starts after the demo works.
 
-Since Sep 2026 I have been building PersonaKit (https://personakit.me) as Founder & AI Engineer: accountable, source-linked, user-controlled AI memory.
+Since Sep 2026 I have been building PersonaKit (https://personakit.me) as its creator and lead developer: accountable, source-linked, user-controlled AI memory.
 
-Before that, from Aug 2025 to Sep 2026, I was a founding engineer at Stealth, building a multi-agent system that investigated production incidents: agents reading Kubernetes, AWS and observability telemetry, then writing up what actually broke. I came in on the chat frontend and ended up owning whether the pipeline was right: where a citation comes from, why a model would fake one, what a single question costs.
+Before that, from Aug 2025 to Sep 2026, I was the founding engineer, and first employee, at Stealth, building a multi-agent system that investigated production incidents: agents reading Kubernetes, AWS and observability telemetry, then writing up what actually broke. I came in on the chat frontend and ended up owning whether the pipeline was right: where a citation comes from, why a model would fake one, what a single question costs.
 
 That last part is less abstract than it sounds. A single question could fan out across far more agents than it needed and burn a fortune in tokens reaching an answer nobody could check. The fixes were unglamorous: agent decomposition, context compaction, a circuit breaker, and a linter that reads generated queries before they run.
 
