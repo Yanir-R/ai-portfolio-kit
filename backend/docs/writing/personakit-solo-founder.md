@@ -32,7 +32,6 @@
 הקישור ל-GitHub בתגובה הראשונה.
 אשמח לקרוא מה דעתכם חשוב שסוכני ai ייזכרו עליכם, ומה תחליטו לא לשתף?
 
-#בינה_מלאכותית #AIAgents #AIMemory #Privacy
 
 PersonaKit ב-48 שניות: [לצפייה בסרטון](/writing/personakit-explainer.mp4)
 

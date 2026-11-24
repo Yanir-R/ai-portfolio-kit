@@ -1,0 +1,264 @@
+{
+  "_about": "Curation for backend/docs/writing: topics (closed list), Hebrew one-line summaries, verbatim quotes, dated notes on pieces that went out of date, media kinds, and series. Prose stays in the .md files. tests/test_writing_index.py checks every piece has an entry and every quote is verbatim.",
+  "topics": [
+    {
+      "id": "memory",
+      "en": "AI memory and control",
+      "he": "זיכרון AI ושליטה"
+    },
+    {
+      "id": "tools",
+      "en": "Tools for working with agents",
+      "he": "כלים לעבודה עם סוכנים"
+    },
+    {
+      "id": "agents",
+      "en": "Agents in real work",
+      "he": "סוכנים בעבודה אמיתית"
+    },
+    {
+      "id": "review",
+      "en": "Code review and quality",
+      "he": "סקירת קוד ואיכות"
+    },
+    {
+      "id": "reliability",
+      "en": "Reliable tool calls",
+      "he": "אמינות קריאות כלים"
+    },
+    {
+      "id": "cost",
+      "en": "Cost and tokens",
+      "he": "עלויות וטוקנים"
+    },
+    {
+      "id": "crm",
+      "en": "CRM for small business",
+      "he": "CRM לעסק קטן"
+    },
+    {
+      "id": "fundamentals",
+      "en": "Development fundamentals",
+      "he": "יסודות פיתוח"
+    }
+  ],
+  "series": [
+    {
+      "id": "building-personakit",
+      "title": "Building PersonaKit",
+      "title_he": "בונים את PersonaKit",
+      "summary": "The build log, from why I started to release 0.2.",
+      "summary_he": "יומן הבנייה, מהסיבה שהתחלתי ועד גרסה 0.2.",
+      "video": {
+        "src": "/writing/personakit-explainer.mp4",
+        "poster": "/writing/personakit-explainer-poster.jpg",
+        "duration_s": 48
+      },
+      "links": [
+        "https://personakit.me",
+        "https://personakit.me/docs"
+      ],
+      "parts": [
+        {
+          "slug": "why-i-started-personakit",
+          "label": "The start",
+          "label_he": "ההתחלה"
+        },
+        {
+          "slug": "building-personakit-day-2",
+          "label": "Day 2",
+          "label_he": "יום 2"
+        },
+        {
+          "slug": "building-personakit-day-3",
+          "label": "Day 3",
+          "label_he": "יום 3"
+        },
+        {
+          "slug": "building-personakit-day-4",
+          "label": "Day 4",
+          "label_he": "יום 4"
+        },
+        {
+          "slug": "building-personakit-day-5",
+          "label": "Day 5",
+          "label_he": "יום 5"
+        },
+        {
+          "slug": "building-personakit-day-6",
+          "label": "Day 6",
+          "label_he": "יום 6"
+        },
+        {
+          "slug": "building-personakit-day-7",
+          "label": "Day 7",
+          "label_he": "יום 7"
+        },
+        {
+          "slug": "personakit-solo-founder",
+          "label": "Release 0.1",
+          "label_he": "גרסה 0.1"
+        },
+        {
+          "slug": "personakit-memory-like-production",
+          "label": "Release 0.2",
+          "label_he": "גרסה 0.2"
+        }
+      ]
+    }
+  ],
+  "pieces": {
+    "agent-advisor": {
+      "topics": [
+        "agents",
+        "cost"
+      ],
+      "summary_he": "מודל זול נוהג, ומודל חזק נכנס רק בשלושה רגעים שמכריעים אם הריצה תצליח."
+    },
+    "agent-memory-custody": {
+      "topics": [
+        "memory",
+        "agents"
+      ],
+      "summary_he": "ברגע שסוכן לא רק עונה אלא עובד ברקע, הבעיה משתנה."
+    },
+    "agent-threads-are-the-artifact": {
+      "topics": [
+        "tools",
+        "review"
+      ],
+      "summary_he": "למה ה־diff לבדו כבר לא מספיק."
+    },
+    "agents-ask-approval": {
+      "topics": [
+        "agents"
+      ],
+      "summary_he": "בשבוע מדגם הסוכן ביקש אישור לפני כ־16% מהפעולות, והמשתמשים אישרו 97% מהבקשות."
+    },
+    "building-personakit-day-2": {
+      "topics": [
+        "memory"
+      ],
+      "summary_he": "עוזרי AI מתחילים לזכור אותנו."
+    },
+    "building-personakit-day-3": {
+      "topics": [
+        "memory"
+      ],
+      "summary_he": "מעבר לאישור או דחייה של כל זיכרון."
+    },
+    "building-personakit-day-4": {
+      "topics": [
+        "memory",
+        "crm"
+      ],
+      "summary_he": "משהו שהתחדד לי דווקא אצל הספר."
+    },
+    "building-personakit-day-5": {
+      "topics": [
+        "memory"
+      ],
+      "summary_he": "החלק הלא נוח."
+    },
+    "building-personakit-day-6": {
+      "topics": [
+        "memory"
+      ],
+      "summary_he": "אולי התכונה הכי לא מוערכת בזיכרון AI היא איפוק."
+    },
+    "building-personakit-day-7": {
+      "topics": [
+        "memory",
+        "reliability"
+      ],
+      "summary_he": "הרגע שלפני שיש זיכרון."
+    },
+    "callbacks-promises-async-await": {
+      "topics": [
+        "fundamentals"
+      ],
+      "summary_he": "JavaScript מריץ דבר אחד בכל רגע, וסביבת הריצה שלו לא. למה ההבדל הזה הוא מה שמאפשר קוד אסינכרוני."
+    },
+    "claude-code-mods": {
+      "topics": [
+        "tools"
+      ],
+      "summary_he": "זה מתחיל לשנות את הדרך שבה עובדים עם סוכני קוד."
+    },
+    "crashed-claude-cli": {
+      "topics": [
+        "tools"
+      ],
+      "summary_he": "קריסה ב־Claude CLI, דיווח לצוות של Bun, ורכישה של Bun יום אחר כך. צירוף מקרים סביב אותה תלות."
+    },
+    "cursor-token-burn": {
+      "topics": [
+        "cost",
+        "tools"
+      ],
+      "summary_he": "סשן אחד ב־Cursor: 22.7 מיליון טוקנים, יחס קריאות מטמון של 640 ל־1, ו־340 דולר במחירי API.",
+      "quote": "Each switch means complete re-contextualization. Zero user control."
+    },
+    "ninety-prs-review-engine": {
+      "topics": [
+        "review",
+        "tools"
+      ],
+      "summary_he": "בשלב הזה כבר אי אפשר להתייחס ל־CI כאל עוד בדיקה שרצה לפני מיזוג."
+    },
+    "personakit-memory-like-production": {
+      "topics": [
+        "memory"
+      ],
+      "summary_he": "גרסה 0.2: איחוד כפילויות ושקיפות בזיכרון."
+    },
+    "personakit-solo-founder": {
+      "topics": [
+        "memory",
+        "review"
+      ],
+      "summary_he": "ביום מנוע ביקורת מסמן מה מסוכן בכל שינוי בקוד, ובלילה סוכן אחר עובר על העבודה כמו ארכיטקט.",
+      "media": [
+        {
+          "kind": "video",
+          "src": "/writing/personakit-explainer.mp4",
+          "poster": "/writing/personakit-explainer-poster.jpg",
+          "duration_s": 48
+        }
+      ]
+    },
+    "three-meanings-of-nothing": {
+      "topics": [
+        "reliability",
+        "agents"
+      ],
+      "summary_he": "כשכלי מחזיר ״כלום״ זה אחד משלושה מצבים שונים, ולכל אחד מהם צעד הבא אחר.",
+      "quote": "Never treat this as \"no data available.\""
+    },
+    "whatsapp-business-mcp": {
+      "topics": [
+        "tools",
+        "agents"
+      ],
+      "summary_he": "הרשאות ואישור לפני שליחה: המקום שבו MCP מתחיל להיות הגיוני."
+    },
+    "which-nothing-did-you-get": {
+      "topics": [
+        "reliability"
+      ],
+      "summary_he": "הגרסה הקצרה: תשובה ריקה אחת, שלוש סיבות שונות, וסוכן שרודף אחרי רוחות.",
+      "quote": "`NULL` is not `0`, and `0` is not an error."
+    },
+    "why-i-started-personakit": {
+      "topics": [
+        "memory"
+      ],
+      "summary_he": "השאלה היא לא רק כמה טוב הזיכרון, אלא מי שולט בו.",
+      "note": {
+        "date": "2026-11",
+        "en": "The post mentions a private pilot and a waitlist. Since November 2026 PersonaKit is open source and free to use.",
+        "he": "בפוסט מוזכרים פיילוט פרטי ורשימת המתנה. מאז נובמבר 2026 PersonaKit בקוד פתוח וחינמית לשימוש."
+      }
+    }
+  }
+}

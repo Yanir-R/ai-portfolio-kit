@@ -13,7 +13,9 @@
  */
 @layer base {
     html {
-        font-family: Charter, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+        font-family:
+            Charter, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Assistant Hebrew',
+            serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         scroll-behavior: smooth;

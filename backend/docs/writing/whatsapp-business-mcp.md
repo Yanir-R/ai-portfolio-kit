@@ -47,7 +47,7 @@ Not more tools in the prompt.
 Safer ways for agents to operate real systems.
 
 Meta’s WhatsApp Business MCP:
-https://lnkd.in/dJnbDRe5
+<https://lnkd.in/dJnbDRe5>
 
 ## Kind
 post

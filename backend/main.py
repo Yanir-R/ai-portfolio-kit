@@ -11,7 +11,7 @@ from selection import Selection, select
 from docs_helper import (
     read_markdown_file, PROFILE_DIR,
     get_all_projects, get_project_by_slug, get_featured_projects,
-    get_all_writing, get_writing_by_slug
+    get_all_writing, get_writing_by_slug, get_writing_index, writing_overview
 )
 from rate_limit import chat_limiter, contact_limiter, enforce_rate_limit
 from pydantic import BaseModel, EmailStr, Field
@@ -165,6 +165,10 @@ logger.info("CORS allowed origins: %s", allowed_origins)
 # the schema means FastAPI answers 422 before any of that happens.
 MAX_MESSAGE_CHARS = 2_000
 MAX_HISTORY_MESSAGES = 40
+
+# How many already-shown pieces a request may name. More than the corpus holds
+# is never needed.
+MAX_SHOWN_SLUGS = 40
 MAX_HISTORY_CONTENT_CHARS = 4_000
 
 # Frontend message types that represent something the visitor actually said.
@@ -188,6 +192,20 @@ class ChatRequest(BaseModel):
         default=None, max_length=MAX_HISTORY_MESSAGES
     )
     collected_email: Optional[EmailStr] = None
+    # Asked from a piece's own page: that piece is sent first, whatever the
+    # question's words match. A slug that does not exist is simply ignored.
+    context: Optional["ChatContext"] = None
+    # Pieces already shown as cards in this conversation, so a follow-up does
+    # not show them again. Slugs only, checked against the corpus.
+    shown: List[str] = Field(default_factory=list, max_length=MAX_SHOWN_SLUGS)
+
+
+class ChatContext(BaseModel):
+    type: Literal["writing"]
+    ref: str = Field(min_length=1, max_length=120, pattern=r"^[a-z0-9-]+$")
+
+
+ChatRequest.model_rebuild()
 
 class ContactRequest(BaseModel):
     # EmailStr rather than str, matching the chat paths, and a length ceiling on
@@ -289,32 +307,101 @@ class Block(BaseModel):
     - `writing`: one piece, `ref` is its slug.
     - `writing_list`: several pieces, `items` are slugs best first (at most
       five), `total` is how many matched, `ref` says what the list is
-      ("all", "recent" or "topic").
+      ("all", "recent", "topic", or a topic id when it continues one).
+    - `writing_series`: a series as one card, `ref` is its id, `items` the
+      parts that matched. Shown instead of several cards from the same series.
+    - `writing_topics`: the subjects written about, `items` are topic ids
+      with most pieces first. Beside the whole list, or when nothing matched.
+
+    A card's quote, note, media and Hebrew summary come from the writing index,
+    which the site reads from /api/writing, so they are never generated text.
     """
 
-    type: Literal["writing", "writing_list"]
+    type: Literal["writing", "writing_list", "writing_series", "writing_topics"]
     ref: str
     items: Optional[List[str]] = None
     total: Optional[int] = None
 
 
-def _writing_blocks(selection: Selection) -> List[Block]:
-    """The cards a writing answer carries, from what selection found."""
-    if not selection.writing:
+# At most this many blocks beside one answer, so the answer stays the main thing.
+MAX_BLOCKS = 2
+
+
+def _series_with(slugs: List[str]) -> Optional[str]:
+    """The series most of `slugs` belong to, when at least two do."""
+    counts: Dict[str, int] = {}
+    for series in get_writing_index()["series"]:
+        members = {part["slug"] for part in series.get("parts", [])}
+        counts[series["id"]] = sum(1 for slug in slugs if slug in members)
+    best = max(counts, key=lambda sid: counts[sid], default=None)
+    return best if best and counts[best] >= 2 else None
+
+
+def _series_of_slug(slug: str) -> Optional[str]:
+    for series in get_writing_index()["series"]:
+        if any(part["slug"] == slug for part in series.get("parts", [])):
+            return series["id"]
+    return None
+
+
+def _topic_ids() -> List[str]:
+    """Topic ids with at least one piece, most pieces first."""
+    return [topic["id"] for topic in writing_overview(get_all_writing())["topics"]]
+
+
+def _writing_blocks(selection: Selection, reading: Optional[str] = None) -> List[Block]:
+    """The cards a writing answer carries, from what selection found.
+
+    `reading` is the piece the visitor asked from. It is already open in front
+    of them, so it is never offered back as a card.
+    """
+    intent = selection.writing_intent
+    slugs = [slug for slug in selection.writing if slug != reading]
+    if reading and not slugs:
         return []
-    # A single piece, or pieces brought in as evidence for an answer that was
-    # not about the writing, are shown as cards of their own. At most two, so
-    # the answer stays the main thing.
-    if selection.writing_intent == "related" or len(selection.writing) == 1:
-        return [Block(type="writing", ref=slug) for slug in selection.writing[:2]]
-    return [
+    if not slugs:
+        if selection.writing_unmatched:
+            return [Block(type="writing_topics", ref="all", items=_topic_ids())]
+        return []
+
+    if intent in ("related", "context"):
+        # Evidence for an answer that was not about the writing. Two parts of
+        # one series are one card rather than two; the build log of a project
+        # is one thing to a visitor, not nine.
+        series = _series_with(slugs) if intent == "related" else None
+        if series:
+            return [Block(type="writing_series", ref=series, items=slugs)]
+        return [Block(type="writing", ref=slug) for slug in slugs[:MAX_BLOCKS]]
+
+    if len(slugs) == 1:
+        return [Block(type="writing", ref=slugs[0])]
+
+    series = _series_with(slugs) if intent in ("topic", "more") else None
+    if series and all(_series_of_slug(slug) == series for slug in slugs):
+        return [
+            Block(type="writing_series", ref=series, items=slugs)
+        ]
+
+    blocks = [
         Block(
             type="writing_list",
-            ref=selection.writing_intent,
-            items=list(selection.writing),
+            ref=selection.writing_ref or intent,
+            items=slugs,
             total=selection.writing_total,
         )
     ]
+    if intent == "all":
+        blocks.append(Block(type="writing_topics", ref="all", items=_topic_ids()))
+    return blocks[:MAX_BLOCKS]
+
+
+# "What are your latest posts?" needs no model: the answer is the index, sorted
+# by date. Answering it from the index saves a call from the daily quota and
+# cannot get a date wrong.
+RECENT_REPLY = {
+    "en": "My latest pieces, newest first.",
+    "he": "הקטעים האחרונים שלי, מהחדש לישן.",
+}
 
 
 class ChatResponse(BaseModel):
@@ -337,6 +424,45 @@ class ChatResponse(BaseModel):
     trace: Optional[AnswerTrace] = None
     # Cards drawn beside the answer. Empty when the reply has nothing to show.
     blocks: List[Block] = []
+    # "model" when Gemini wrote the text, "index" when it was answered from the
+    # writing index without a model call, absent for the contact flow.
+    answered_by: Optional[Literal["model", "index"]] = None
+    # The language the question was read as, so the cards can match the answer.
+    language: Optional[Literal["en", "he"]] = None
+
+
+def _log_chat_audit(
+    language: str,
+    selection: Selection,
+    blocks: List[Block],
+    answered_by: Optional[str],
+    context: Optional[str] = None,
+    shown: int = 0,
+) -> None:
+    """One structured line per answer.
+
+    What was asked for (by kind, never the visitor's words), what was sent and
+    what was shown. Enough to ask later which posts get read and which
+    questions found nothing.
+    """
+    logger.info(
+        "chat_audit %s",
+        json.dumps(
+            {
+                "language": language,
+                "outcome": selection.outcome,
+                "writing_intent": selection.writing_intent or None,
+                "writing_unmatched": selection.writing_unmatched or None,
+                "context": context,
+                "shown": shown or None,
+                "sent": [f"{d['kind']}/{d['slug']}" for d in selection.knowledge.documents],
+                "listed": len(selection.knowledge.listed),
+                "blocks": [b.model_dump(exclude_none=True) for b in blocks],
+                "answered_by": answered_by,
+            },
+            ensure_ascii=False,
+        ),
+    )
 
 
 def _chat_reply(
@@ -345,6 +471,8 @@ def _chat_reply(
     is_email_collection: bool = False,
     trace: Optional[AnswerTrace] = None,
     blocks: Optional[List[Block]] = None,
+    answered_by: Optional[str] = None,
+    language: Optional[str] = None,
 ) -> ChatResponse:
     return ChatResponse(
         response=response,
@@ -352,6 +480,8 @@ def _chat_reply(
         is_email_collection=is_email_collection,
         trace=trace,
         blocks=blocks or [],
+        answered_by=answered_by,
+        language=language,
     )
 
 
@@ -608,43 +738,54 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             chat_request.message,
             get_knowledge(language),
             history=[turn["content"] for turn in turns],
+            pinned=chat_request.context.ref if chat_request.context else None,
+            shown=chat_request.shown,
         )
+
+        if selection.writing_intent == "recent" and not chat_request.context:
+            blocks = _writing_blocks(selection)
+            _log_chat_audit(language, selection, blocks, answered_by="index")
+            return _chat_reply(
+                RECENT_REPLY[language], blocks=blocks, answered_by="index", language=language
+            )
+
+        # Asked from a piece's page: the model is told which piece "it" and
+        # "this" mean. The title comes from the corpus, never from the request.
+        question_for_model = chat_request.message
+        if chat_request.context:
+            reading_entry = get_writing_by_slug(chat_request.context.ref)
+            if reading_entry and reading_entry.get("title"):
+                question_for_model = (
+                    f'(Asked while reading your post "{reading_entry["title"]}" on the site.)\n'
+                    f"{chat_request.message}"
+                )
+
         # The SDK call is synchronous and can take over a minute. Run in the
         # threadpool so it does not block the event loop, which would stall
         # every other request, health checks included, until it returned.
         answer = await run_in_threadpool(
             get_gemini_response,
             GEMINI_API_KEY,
-            chat_request.message,
+            question_for_model,
             selection.knowledge,
             turns,
         )
 
-        blocks = _writing_blocks(selection) if answer.from_model else []
-
-        # One structured line per answer: what was asked for (by kind, never the
-        # visitor's words), what was sent and what was shown. Enough to ask
-        # later which posts get read and which questions found nothing.
-        logger.info(
-            "chat_audit %s",
-            json.dumps(
-                {
-                    "language": language,
-                    "outcome": selection.outcome,
-                    "writing_intent": selection.writing_intent or None,
-                    "sent": [f"{d['kind']}/{d['slug']}" for d in selection.knowledge.documents],
-                    "listed": len(selection.knowledge.listed),
-                    "blocks": [b.model_dump(exclude_none=True) for b in blocks],
-                    "from_model": answer.from_model,
-                },
-                ensure_ascii=False,
-            ),
+        reading = chat_request.context.ref if chat_request.context else None
+        blocks = _writing_blocks(selection, reading) if answer.from_model else []
+        _log_chat_audit(
+            language, selection, blocks,
+            answered_by="model" if answer.from_model else None,
+            context=chat_request.context.ref if chat_request.context else None,
+            shown=len(chat_request.shown),
         )
 
         return _chat_reply(
             answer.text,
             trace=_answer_trace(answer, selection, language),
             blocks=blocks,
+            answered_by="model" if answer.from_model else None,
+            language=language,
         )
 
     except HTTPException:
@@ -766,7 +907,8 @@ async def list_writing():
     returns is already public on the site it links back to.
     """
     try:
-        return {"writing": get_all_writing()}
+        entries = get_all_writing()
+        return {"writing": entries, "overview": writing_overview(entries)}
     except Exception:
         logger.exception("Error listing writing")
         raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
