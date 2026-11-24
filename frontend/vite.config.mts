@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { siteConfig } from './site.config';
+import { buildPages, renderPage, sitemap, llmsTxt } from './seo/prerender.mjs';
+import { siteGraph } from './seo/facts.mjs';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -28,14 +31,9 @@ const DEFAULT_SITE_URL = {
     development: 'http://localhost:3000',
 } as const;
 
-// Routes the router serves from the bundle. Detail pages (/projects/:slug,
-// /blog/:slug) are deliberately absent: their slugs come from the backend at
-// runtime, so nothing at build time knows them. Fetching the API here would
-// make every deploy depend on the backend being up, and a sitemap silently
-// truncated by a failed request is worse than one that never claimed to be
-// complete. Listing the index pages lets a crawler reach the detail pages by
-// following links instead.
-const STATIC_ROUTES = ['/', '/about', '/projects', '/blog'] as const;
+// The markdown the backend serves. Read at build time to emit one HTML file
+// per route, the sitemap and llms.txt - see seo/prerender.mts.
+const DOCS_ROOT = path.resolve(__dirname, '../backend/docs');
 
 // The AI crawlers split in two, because being read and being trained on are
 // different things and this site wants one without the other.
@@ -66,6 +64,7 @@ const ANSWER_TIME_CRAWLERS = [
     'OAI-SearchBot',
     'ChatGPT-User',
     'Claude-SearchBot',
+    'Claude-User',
     'PerplexityBot',
     'Perplexity-User',
     'DuckAssistBot',
@@ -78,7 +77,6 @@ const ANSWER_TIME_CRAWLERS = [
 const TRAINING_CRAWLERS = [
     'GPTBot',
     'ClaudeBot',
-    'Claude-User',
     'anthropic-ai',
     'Claude-Web',
     'CCBot',
@@ -230,7 +228,8 @@ const emitBuildInfo = (siteUrl: string, backendUrl: string, avatarUrl: string) =
     ) + '\n';
 
 /**
- * robots.txt, sitemap.xml and llms.txt, emitted rather than committed.
+ * robots.txt, sitemap.xml and llms.txt, emitted rather than committed, plus one
+ * prerendered HTML file per route (written after the bundle, see writeBundle).
  *
  * All three have to state absolute URLs - the sitemap protocol requires them,
  * and a robots `Sitemap:` line is ignored without one - so none can be a static
@@ -263,77 +262,27 @@ const emitDiscoveryFiles = (siteUrl: string, backendUrl: string, avatarUrl: stri
             '',
         ].join('\n');
 
-        const sitemap = [
-            '<?xml version="1.0" encoding="UTF-8"?>',
-            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-            ...STATIC_ROUTES.map(
-                (route) =>
-                    `    <url><loc>${siteUrl}${route}</loc>` +
-                    `<priority>${route === '/' ? '1.0' : '0.8'}</priority></url>`
-            ),
-            '</urlset>',
-            '',
-        ].join('\n');
-
-        // llms.txt is a convention, not a standard: a plain-prose summary at a
-        // predictable path for an assistant that has fetched the site and found
-        // an empty <div id="root">. It says what the rendered pages say, which
-        // is the only thing that makes it worth serving - a summary that drifts
-        // from the site is a liability, so it is deliberately short enough to
-        // keep true.
-        const llms = [
-            '# Yanir Rot - Full-Stack AI Engineer',
-            '',
-            '> Portfolio and AI assistant. The assistant answers questions about Yanir Rot',
-            "> from his own notes and project write-ups, and says so when they don't cover",
-            '> the question rather than guessing.',
-            '',
-            '## About',
-            '',
-            'Yanir Rot works on the half of AI engineering that starts after the demo works.',
-            'Since Sep 2026 he has been Founder & AI Engineer at PersonaKit',
-            '(https://personakit.me), building accountable, source-linked, user-controlled AI',
-            'memory. From Aug 2025 to Sep 2026, as a founding engineer at Stealth, he built a',
-            'multi-agent system that investigated production incidents: agents reading',
-            'Kubernetes, AWS and observability telemetry, then writing up what actually broke.',
-            'He owned whether the pipeline was right - where a citation comes from, why a model',
-            'would fake one, and what a single question costs. From 2018',
-            'to 2025 he did frontend and full-stack work, including a sports betting platform at',
-            '500K daily users and finance applications for Israeli enterprises.',
-            '',
-            'Works across React, TypeScript, Python, FastAPI, Kubernetes and AWS.',
-            '',
-            '## Pages',
-            '',
-            ...STATIC_ROUTES.map(
-                (route) =>
-                    `- [${
-                        {
-                            '/': 'Home',
-                            '/about': 'About',
-                            '/projects': 'Projects',
-                            '/blog': 'Writing',
-                        }[route]
-                    }](${siteUrl}${route})`
-            ),
-            '',
-            '## Elsewhere',
-            '',
-            '- [GitHub](https://github.com/Yanir-R)',
-            '- [LinkedIn](https://www.linkedin.com/in/yanirrot/)',
-            '',
-            'To make contact, use the assistant or the Email button on the site.',
-            '',
-        ].join('\n');
+        const pages = buildPages(DOCS_ROOT, siteUrl);
 
         for (const [fileName, source] of [
             ['robots.txt', robots],
-            ['sitemap.xml', sitemap],
-            ['llms.txt', llms],
+            ['sitemap.xml', sitemap(siteUrl, pages)],
+            ['llms.txt', llmsTxt(siteUrl, pages)],
             ['_headers', emitSecurityHeaders(backendUrl, avatarUrl)],
             ['build-info.json', emitBuildInfo(siteUrl, backendUrl, avatarUrl)],
         ] as const) {
             this.emitFile({ type: 'asset', fileName, source });
+        }
+    },
+    // After index.html is written with its hashed asset links, copy it once per
+    // route with that route's head and text. See seo/prerender.mts.
+    writeBundle(options: { dir?: string }) {
+        const dir = options.dir || path.resolve(__dirname, 'dist');
+        const indexHtml = readFileSync(path.join(dir, 'index.html'), 'utf8');
+        for (const page of buildPages(DOCS_ROOT, siteUrl)) {
+            const out = path.join(dir, page.file);
+            mkdirSync(path.dirname(out), { recursive: true });
+            writeFileSync(out, renderPage(indexHtml, page, siteUrl));
         }
     },
 });
@@ -386,7 +335,18 @@ export default defineConfig(({ mode, command }) => {
                 name: 'inject-site-url',
                 transformIndexHtml: {
                     order: 'pre' as const,
-                    handler: (html: string) => html.replaceAll('%VITE_SITE_URL%', resolvedSiteUrl),
+                    handler: (html: string) =>
+                        html
+                            .replace(
+                                '<!-- seo:jsonld -->',
+                                () =>
+                                    `<script type="application/ld+json">\n${JSON.stringify(
+                                        siteGraph(resolvedSiteUrl),
+                                        null,
+                                        2
+                                    ).replace(/</g, '\\u003c')}\n</script>`
+                            )
+                            .replaceAll('%VITE_SITE_URL%', resolvedSiteUrl),
                 },
             },
             emitDiscoveryFiles(resolvedSiteUrl, resolvedBackendUrl, avatarUrl),

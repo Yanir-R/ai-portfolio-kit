@@ -7,12 +7,27 @@
              or user-scalable: either one blocks pinch zoom. -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-        <title>Yanir Rot - Full-Stack AI Engineer</title>
-        <meta name="title" content="Yanir Rot - Full-Stack AI Engineer" />
+        <!-- Icons. favicon.svg is the mark; the PNGs are for what cannot read
+             SVG: Google's search results want a square of a multiple of 48px,
+             and iOS home screens use apple-touch-icon. Source and how to
+             regenerate the PNGs: tools/favicon.html. -->
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="theme-color" content="#0C1A44" />
+
+        <!-- Everything between the seo:head markers is per-route. This copy is
+             the home page's; at build time seo/prerender.mts writes one HTML
+             file per route (about, projects, blog and every post and project)
+             with this block replaced. Keep the markers. -->
+        <!-- seo:head:start -->
+        <title>Yanir Rot | AI agents and systems for businesses</title>
+        <meta name="title" content="Yanir Rot | AI agents and systems for businesses" />
         <meta
             name="description"
             content="The assistant answers as me, from my notes and project write-ups. When they don’t cover your question it says so rather than guessing."
         />
+        <meta name="author" content="Yanir Rot" />
 
         <!-- %VITE_SITE_URL% is substituted at build time by vite.config.mts,
              from `url` in site.config.ts. Change it there rather than
@@ -23,7 +38,7 @@
         <meta property="og:site_name" content="Yanir Rot" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:url" content="%VITE_SITE_URL%/" />
-        <meta property="og:title" content="Yanir Rot - Full-Stack AI Engineer" />
+        <meta property="og:title" content="Yanir Rot | AI agents and systems for businesses" />
         <meta
             property="og:description"
             content="The assistant answers as me, from my notes and project write-ups. When they don’t cover your question it says so rather than guessing."
@@ -43,95 +58,30 @@
         <meta property="og:image:height" content="630" />
         <meta
             property="og:image:alt"
-            content="Yanir Rot, full-stack AI engineer: I build AI products end to end, then make them trustworthy."
+            content="Yanir Rot, AI agent developer: I build AI products end to end, then make them trustworthy."
         />
 
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content="%VITE_SITE_URL%/" />
-        <meta property="twitter:title" content="Yanir Rot - Full-Stack AI Engineer" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="%VITE_SITE_URL%/" />
+        <meta name="twitter:title" content="Yanir Rot | AI agents and systems for businesses" />
         <meta
-            property="twitter:description"
+            name="twitter:description"
             content="The assistant answers as me, from my notes and project write-ups. When they don’t cover your question it says so rather than guessing."
         />
-        <meta property="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
+        <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
 
         <!-- Structured data, and the only description of Yanir that a crawler
-             which does not run JavaScript will ever see.
+             which does not run JavaScript sees on this page. Built from
+             seo/facts.mts at build time so the facts live in one place; the
+             per-route files carry their own graph for the post or project.
 
-             That is not a hypothetical. This is a client-rendered SPA: every
-             route ships the same empty <div id="root">, and the page's real
-             prose is fetched from the backend after boot. Googlebot renders JS
-             and gets the whole site; the assistant crawlers - GPTBot,
-             ClaudeBot, PerplexityBot, OAI-SearchBot - largely do not, so
-             without this block they index a blank page and can answer nothing
-             about him. Everything below is therefore stated here rather than
-             left to the app to render.
-
-             Keep it to claims the site itself makes. sameAs is for profiles
-             whose identity is verifiable by following the link, which is what
-             lets a search engine reconcile this page with the GitHub and
-             LinkedIn accounts and treat them as one person - the entire
-             mechanism by which a search for a name reaches this site.
-
-             No `email` property, deliberately. schema.org allows one and it
-             would be trivial to add, but a structured-data block is the most
-             machine-readable place on the internet to publish an address: it
-             is parsed by everything, including the scrapers that exist purely
-             to harvest addresses. Someone who wants to make contact has the
-             assistant and the Email button, both of which reach the same
-             inbox, so the only thing an `email` here would add is the spam. -->
-
-        <script type="application/ld+json">
-            {
-                "@context": "https://schema.org",
-                "@graph": [
-                    {
-                        "@type": "Person",
-                        "@id": "%VITE_SITE_URL%/#person",
-                        "name": "Yanir Rot",
-                        "url": "%VITE_SITE_URL%/",
-                        "image": "%VITE_SITE_URL%/og-image.png",
-                        "jobTitle": "Full-Stack AI Engineer",
-                        "description": "Full-stack engineer working on the half of AI engineering that starts after the demo works. Founder & AI Engineer at PersonaKit since Sep 2026, building accountable, source-linked, user-controlled AI memory. From Aug 2025 to Sep 2026, founding engineer at Stealth on multi-agent systems for production incident investigation: grounding and citation correctness, context compaction and token cost. Before that, seven years of frontend and full-stack work, including a sports betting platform at 500K daily users and finance applications for Israeli enterprises.",
-                        "knowsAbout": [
-                            "Multi-agent AI systems",
-                            "Large language model applications",
-                            "Retrieval-augmented generation",
-                            "Grounding and citation correctness",
-                            "React",
-                            "TypeScript",
-                            "Python",
-                            "FastAPI",
-                            "Kubernetes",
-                            "AWS",
-                            "Observability"
-                        ],
-                        "sameAs": [
-                            "https://github.com/Yanir-R",
-                            "https://www.linkedin.com/in/yanirrot/"
-                        ]
-                    },
-                    {
-                        "@type": "WebSite",
-                        "@id": "%VITE_SITE_URL%/#website",
-                        "url": "%VITE_SITE_URL%/",
-                        "name": "Yanir Rot - Full-Stack AI Engineer",
-                        "description": "Portfolio and AI assistant for Yanir Rot. The assistant answers questions about his work from his own notes and project write-ups, and declines when they do not cover the question.",
-                        "inLanguage": "en",
-                        "author": { "@id": "%VITE_SITE_URL%/#person" },
-                        "publisher": { "@id": "%VITE_SITE_URL%/#person" }
-                    },
-                    {
-                        "@type": "ProfilePage",
-                        "@id": "%VITE_SITE_URL%/#profilepage",
-                        "url": "%VITE_SITE_URL%/",
-                        "isPartOf": { "@id": "%VITE_SITE_URL%/#website" },
-                        "about": { "@id": "%VITE_SITE_URL%/#person" },
-                        "name": "Yanir Rot - Full-Stack AI Engineer"
-                    }
-                ]
-            }
-        </script>
+             No `email` property, deliberately. A structured-data block is the
+             most machine-readable place on the internet to publish an address,
+             parsed by everything including the scrapers that harvest them.
+             Someone who wants to make contact has the assistant and the Email
+             button, which reach the same inbox. -->
+        <!-- seo:jsonld -->
+        <!-- seo:head:end -->
     </head>
     <body>
         <div id="root"></div>

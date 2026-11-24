@@ -5,11 +5,15 @@ on:
     branches: [main]
     paths:
       - "frontend/**"
+      # The build reads the markdown to emit per-post pages, the sitemap and
+      # llms.txt, so a new post has to rebuild the site. See seo/prerender.mts.
+      - "backend/docs/**"
       - ".github/workflows/frontend-deploy.yml"
   pull_request:
     branches: [main]
     paths:
       - "frontend/**"
+      - "backend/docs/**"
 
 env:
   FRONTEND_DIR: frontend

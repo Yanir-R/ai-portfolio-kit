@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import NavBar from '@/components/NavBar';
+import RouteMeta from '@/components/RouteMeta';
 import Home from '@/pages/Home';
 import About from '@/pages/About';
 import Blog from '@/pages/Blog';
@@ -11,6 +12,7 @@ import ProjectDetail from '@/pages/ProjectDetail';
 const App: React.FC = () => {
     return (
         <Router>
+            <RouteMeta />
             <div className="min-h-screen text-content">
                 <div className="relative z-10">
                     <NavBar />
