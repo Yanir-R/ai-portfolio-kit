@@ -1,6 +1,6 @@
-# YANIR ROT - FULL-STACK AI ENGINEER
+# YANIR ROT - FULL-STACK AI DEVELOPER
 
-Last verified: 2026-11-23
+Last verified: 2026-11-24
 
 ## CONTACT
 
@@ -14,15 +14,15 @@ Last verified: 2026-11-23
 
 ## PROFILE
 
-Full-stack engineer specializing in production LLM and multi-agent systems. Works across the whole range, from a React component to a Helm chart, and is most useful on the correctness of an agent pipeline: evidence provenance, hallucination prevention, and token economics. Reproduces a failure against production data before shipping a fix.
+Full-stack developer specializing in production LLM and multi-agent systems. Works across the whole range, from a React component to a Helm chart, and is most useful on the correctness of an agent pipeline: evidence provenance, hallucination prevention, and token economics. Reproduces a failure against production data before shipping a fix.
 
 ## WORK EXPERIENCE
 
-### Founder & AI Engineer - PersonaKit _since Sep 2026_
+### Creator & Lead Developer - PersonaKit (open source) _since Sep 2026_
 
 Building PersonaKit (https://personakit.me): accountable, source-linked, user-controlled AI memory.
 
-### Founding Engineer - Stealth _Aug 2025 – Sep 2026_
+### Founding Engineer (employee #1) - Stealth _Aug 2025 – Sep 2026_
 
 <!-- The company is not named here, matching the public LinkedIn entry. This file
      is published and is also read by the site's chat, so it describes what was
@@ -63,7 +63,9 @@ Built multi-agent LLM investigations over Kubernetes, AWS and observability tele
 
 ## SIDE PROJECTS
 
--   **Hermes** - a self-hosted agent running continuously with a custom persona, Obsidian-vault memory and a Telegram interface
+-   **Hermes** - a self-hosted agent running continuously with a custom persona, Obsidian-vault memory and a Telegram interface, built on the open-source Hermes Agent
+-   **catchup** - an open-source Claude Code mod that summarizes the agent messages you have not read
+-   **Review Engine** - one AI code review engine shared by many repositories
 -   **This site** - a document-grounded assistant on Gemini, hardened against prompt injection, with a golden-question set covering grounding, refusal and injection cases
 -   **ReelSensei** - an AI video highlight service; built, shipped, and currently paused
 
