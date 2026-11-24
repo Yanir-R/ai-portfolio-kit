@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import Markdown from '@/components/Markdown';
-import ReturnHome from '@/components/ReturnHome';
 import Chat from '@/components/Chat';
 import MediaView from '@/components/writing/MediaView';
 import { useWritingIndex } from '@/hooks/useWritingIndex';
@@ -27,7 +26,7 @@ const WritingDetail: React.FC = () => {
     const [entry, setEntry] = useState<WritingEntry | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const index = useWritingIndex();
+    const writingIndex = useWritingIndex();
 
     // The state resets live inside the async function rather than the effect
     // body, which is what keeps `react-hooks/set-state-in-effect` satisfied:
@@ -83,7 +82,7 @@ const WritingDetail: React.FC = () => {
                     to="/blog"
                     className="inline-block px-3 py-1.5 mt-5 font-mono text-xs tracking-wider uppercase rounded border transition-colors duration-200 text-content border-border hover:border-border-hover"
                 >
-                    All writing
+                    Blog
                 </Link>
             </div>
         );
@@ -96,7 +95,7 @@ const WritingDetail: React.FC = () => {
 
     // The neighbours in its series, so a reader can go on to the next day.
     const series = entry.series
-        ? index?.overview.series.find((s) => s.id === entry.series?.id)
+        ? writingIndex?.overview.series.find((s) => s.id === entry.series?.id)
         : undefined;
     const position = entry.series ? entry.series.position - 1 : -1;
     const previous = series && position > 0 ? series.parts[position - 1] : undefined;
@@ -120,7 +119,7 @@ const WritingDetail: React.FC = () => {
                 to="/blog"
                 className="font-mono text-xs tracking-wider uppercase transition-colors duration-200 text-muted hover:text-content"
             >
-                <span aria-hidden="true">←</span> All writing
+                <span aria-hidden="true">←</span> Blog
             </Link>
 
             <header className="mt-6">
@@ -193,11 +192,9 @@ const WritingDetail: React.FC = () => {
                         correctly straight after "on". A descriptive label like
                         "Engineering blog" needs an article in front of it to
                         scan as English. */}
-                    Originally published on{' '}
                     {/blog/i.test(entry.source)
-                        ? `the ${entry.source.toLowerCase()}`
-                        : entry.source}
-                    .
+                        ? "Written for my workplace's blog."
+                        : `Originally published on ${entry.source}.`}
                     {entry.url && (
                         <>
                             {' '}
@@ -224,7 +221,8 @@ const WritingDetail: React.FC = () => {
                                     to={`/blog/${related}`}
                                     className="underline transition-colors text-content hover:text-signal underline-offset-4 decoration-border"
                                 >
-                                    {related.replace(/-/g, ' ')}
+                                    {writingIndex?.bySlug[related]?.title ??
+                                        related.replace(/-/g, ' ')}
                                 </Link>
                             </React.Fragment>
                         ))}
@@ -274,8 +272,6 @@ const WritingDetail: React.FC = () => {
                     initialMessage="Ask anything about this piece, in English or Hebrew. The answer comes from what I wrote here and in my other notes."
                 />
             </section>
-
-            <ReturnHome />
         </article>
     );
 };

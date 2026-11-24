@@ -349,10 +349,16 @@ def _topic_ids() -> List[str]:
     return [topic["id"] for topic in writing_overview(get_all_writing())["topics"]]
 
 
-def _writing_blocks(selection: Selection) -> List[Block]:
-    """The cards a writing answer carries, from what selection found."""
+def _writing_blocks(selection: Selection, reading: Optional[str] = None) -> List[Block]:
+    """The cards a writing answer carries, from what selection found.
+
+    `reading` is the piece the visitor asked from. It is already open in front
+    of them, so it is never offered back as a card.
+    """
     intent = selection.writing_intent
-    slugs = list(selection.writing)
+    slugs = [slug for slug in selection.writing if slug != reading]
+    if reading and not slugs:
+        return []
     if not slugs:
         if selection.writing_unmatched:
             return [Block(type="writing_topics", ref="all", items=_topic_ids())]
@@ -754,7 +760,8 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             turns,
         )
 
-        blocks = _writing_blocks(selection) if answer.from_model else []
+        reading = chat_request.context.ref if chat_request.context else None
+        blocks = _writing_blocks(selection, reading) if answer.from_model else []
         _log_chat_audit(
             language, selection, blocks,
             answered_by="model" if answer.from_model else None,

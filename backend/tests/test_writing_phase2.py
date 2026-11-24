@@ -166,9 +166,9 @@ def test_a_question_from_a_piece_page_is_about_that_piece(calls):
     )
     knowledge = calls[0][2]
     assert "ninety-prs-review-engine" in {d["slug"] for d in knowledge.documents}
-    assert reply["blocks"] == [{"type": "writing", "ref": "ninety-prs-review-engine"}] or all(
-        b.get("ref") == "ninety-prs-review-engine" for b in reply["blocks"] if b["type"] == "writing"
-    )
+    # The piece is open in front of the visitor, so it is not offered back.
+    for block in reply["blocks"]:
+        assert "ninety-prs-review-engine" not in (block.get("items") or [block["ref"]])
 
 
 def test_an_unknown_context_is_ignored(calls):

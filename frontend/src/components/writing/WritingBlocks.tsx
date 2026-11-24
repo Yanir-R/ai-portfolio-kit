@@ -119,7 +119,9 @@ const WritingCard: React.FC<{ entry: WritingEntry; lang: Lang }> = ({ entry, lan
                 )}
             </div>
             {summaryOf(entry, lang) && (
-                <p className="mt-2 text-sm leading-relaxed text-muted">{summaryOf(entry, lang)}</p>
+                <p className="mt-2 text-sm leading-relaxed text-pretty text-muted">
+                    {summaryOf(entry, lang)}
+                </p>
             )}
             {entry.quote && (
                 <blockquote
@@ -139,7 +141,8 @@ const WritingCard: React.FC<{ entry: WritingEntry; lang: Lang }> = ({ entry, lan
             )}
             <p className="mt-2.5">
                 <Link to={`/blog/${entry.slug}`} className={linkClass}>
-                    {L[lang].read} {lang === 'he' ? '←' : '→'}
+                    {L[lang].read}
+                    {lang === 'he' ? '\u00a0←' : '\u00a0→'}
                 </Link>
             </p>
         </div>
@@ -189,7 +192,8 @@ const WritingList: React.FC<{ block: ChatBlock; index: WritingIndex; lang: Lang 
             </ul>
             <p className="mt-1">
                 <Link to={more} className={linkClass}>
-                    {topic ? L[lang].allTopic : L[lang].allBlog} {lang === 'he' ? '←' : '→'}
+                    {topic ? L[lang].allTopic : L[lang].allBlog}
+                    {lang === 'he' ? '\u00a0←' : '\u00a0→'}
                 </Link>
             </p>
         </div>
@@ -251,7 +255,8 @@ export const SeriesCard: React.FC<{ series: WritingSeries; lang: Lang; className
             </p>
             <p className="flex flex-wrap gap-x-4 gap-y-1 mt-2.5">
                 <Link to={`/blog?series=${series.id}`} className={linkClass}>
-                    {L[lang].toSeries} {lang === 'he' ? '←' : '→'}
+                    {L[lang].toSeries}
+                    {lang === 'he' ? '\u00a0←' : '\u00a0→'}
                 </Link>
                 {(series.links ?? []).map((href) => (
                     <a
@@ -261,7 +266,8 @@ export const SeriesCard: React.FC<{ series: WritingSeries; lang: Lang; className
                         rel="noopener noreferrer"
                         className={linkClass}
                     >
-                        {href.replace(/^https:\/\//, '')} ↗
+                        {href.replace(/^https:\/\//, '')}
+                        {'\u00a0'}↗
                     </a>
                 ))}
             </p>
@@ -285,7 +291,7 @@ export const TopicChips: React.FC<{ index: WritingIndex; lang: Lang; ids?: strin
                     <li key={topic.id}>
                         <Link
                             to={`/blog?topic=${topic.id}`}
-                            className="inline-flex gap-1.5 items-center px-2.5 py-1 text-sm rounded border transition-colors border-border bg-ink-700 text-content hover:border-signal focus:outline-none focus-visible:ring-2 focus-visible:ring-caution"
+                            className="inline-flex gap-1.5 items-center px-3 py-1 min-h-[40px] text-sm rounded border transition-colors border-border bg-ink-700 text-content hover:border-signal focus:outline-none focus-visible:ring-2 focus-visible:ring-caution"
                         >
                             {topic[lang]}
                             <span className="font-mono text-xs text-muted">{topic.count}</span>

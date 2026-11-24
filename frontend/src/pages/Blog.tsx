@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import ReturnHome from '@/components/ReturnHome';
 import { SeriesCard, TopicChips } from '@/components/writing/WritingBlocks';
 import { stripWritingMetadata, writingService } from '@/services/writingService';
-import { WritingIndex, WRITING_KIND_LABEL, WRITING_KIND_STYLE } from '@/types/writing';
+import { sourceLabel, WritingIndex, WRITING_KIND_LABEL, WRITING_KIND_STYLE } from '@/types/writing';
 import { formatIsoDate } from '@/utils/date';
 
 /*
@@ -86,12 +85,12 @@ const Blog: React.FC = () => {
     return (
         <div className="px-4 pt-8 pb-16 mx-auto max-w-3xl sm:pt-12">
             <header className="max-w-2xl">
-                <p className="label">Writing</p>
-                <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl text-content">
+                <p className="label">Blog</p>
+                <h1 className="text-balance mt-3 text-2xl font-semibold tracking-tight sm:text-3xl text-content">
                     Things I worked out in public.
                 </h1>
                 <p className="mt-3 leading-relaxed text-muted">
-                    Published on LinkedIn, Medium and an engineering blog, reproduced here in full
+                    Published on LinkedIn, Medium and my workplace's blog, reproduced here in full
                     with a link to each original. Every piece is also part of what the assistant on
                     the home page answers from, so you can read it here or ask about it there.
                 </p>
@@ -119,13 +118,13 @@ const Blog: React.FC = () => {
             {index && (
                 <div className="mt-8">
                     <label className="block">
-                        <span className="sr-only">Search the writing</span>
+                        <span className="sr-only">Search the blog</span>
                         <input
                             type="search"
                             dir="auto"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Search the writing"
+                            placeholder="Search the blog"
                             className="py-2 px-3 w-full text-base rounded border transition-colors bg-ink-700 text-content placeholder-muted border-border focus:outline-none focus:border-caution focus-visible:ring-2 focus-visible:ring-caution/60"
                         />
                     </label>
@@ -246,7 +245,7 @@ const Blog: React.FC = () => {
                                     )}
 
                                     <p className="mt-2 font-mono text-[0.68rem] text-muted/70">
-                                        {entry.source}
+                                        {sourceLabel(entry.source, 'en')}
                                         {entry.series && ` · ${entry.series.label}`}
                                         {entry.media_items?.some((m) => m.kind !== 'image') &&
                                             ' · video'}
@@ -257,8 +256,6 @@ const Blog: React.FC = () => {
                     ))}
                 </ul>
             )}
-
-            <ReturnHome />
         </div>
     );
 };

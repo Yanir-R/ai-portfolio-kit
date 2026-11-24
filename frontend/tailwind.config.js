@@ -47,8 +47,15 @@ module.exports = {
                 // Serif for prose, mono for instrumentation. The split is
                 // semantic: serif is Yanir speaking, mono is the machine
                 // reporting on itself, so a reader can always tell which is which.
-                sans: ['Charter', 'Iowan Old Style', 'Georgia', 'serif'],
-                mono: ['SF Mono', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+                sans: ['Charter', 'Iowan Old Style', 'Georgia', 'Assistant Hebrew', 'serif'],
+                mono: [
+                    'SF Mono',
+                    'SFMono-Regular',
+                    'Menlo',
+                    'Consolas',
+                    'Assistant Hebrew',
+                    'monospace',
+                ],
             },
             keyframes: {
                 // The only two animations. Motion here reports something true

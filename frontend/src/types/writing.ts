@@ -96,7 +96,7 @@ export interface WritingIndex {
 
 /** How a source is named to a reader, in each language. */
 export const sourceLabel = (source: string, lang: 'en' | 'he'): string => {
-    if (/blog/i.test(source)) return lang === 'he' ? 'בלוג מקום העבודה' : 'Company blog';
+    if (/blog/i.test(source)) return lang === 'he' ? 'בלוג מקום העבודה' : 'Workplace blog';
     if (/linkedin/i.test(source)) return lang === 'he' ? 'לינקדאין' : 'LinkedIn';
     return source;
 };

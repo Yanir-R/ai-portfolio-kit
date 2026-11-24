@@ -282,8 +282,8 @@ const Chat: React.FC<ChatProps> = ({
                                     className="mt-2 font-mono text-[0.65rem] tracking-wider uppercase text-muted"
                                 >
                                     {msg.language === 'he'
-                                        ? 'תשובה מוכנה מהאינדקס · בלי AI'
-                                        : 'Answered from the index · no AI'}
+                                        ? 'תשובה מוכנה מהאינדקס · בלי קריאה למודל'
+                                        : 'Answered from the index · no model call'}
                                 </p>
                             )}
                             {msg.trace && <TraceRail trace={msg.trace} />}
