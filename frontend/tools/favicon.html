@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!--
+  Source for the PNG icons next to public/favicon.svg.
+
+  favicon.svg is the mark itself: the agent chart drawn as the letter Y,
+  with the amber hub at the joint, on ink (#0C1A44, #FFC83D). Drawn by the
+  design thread; Yanir chose it on 2026-11-24. Browsers that read SVG
+  use it directly. The PNGs exist for what cannot:
+    favicon.ico           the default /favicon.ico request, wraps favicon-48.png
+    favicon-48.png        Google search results (a multiple of 48px, square)
+    apple-touch-icon.png  iOS home screen, 180x180
+
+  Regenerate after changing the SVG, from frontend/:
+    node -e "const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();
+      for (const [s,f] of [[48,'favicon-48.png'],[180,'apple-touch-icon.png']]){
+        const p=await b.newPage({viewport:{width:s,height:s}});
+        await p.goto('file://'+process.cwd()+'/tools/favicon.html?'+s);
+        await p.screenshot({path:'public/'+f, omitBackground:true});}
+      await b.close();})()"
+  then rebuild favicon.ico from favicon-48.png (an ICO header around the PNG).
+-->
+<html><head><meta charset="utf-8" />
+<style>html,body{margin:0;background:transparent}img{display:block;width:100vw;height:100vh}</style>
+</head><body><img src="../public/favicon.svg" alt="" /></body></html>

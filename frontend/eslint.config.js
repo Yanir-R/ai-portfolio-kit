@@ -29,7 +29,7 @@ export default tseslint.config(
     },
     {
         // Build/tooling config files run in Node, not the browser.
-        files: ['*.{js,mts}'],
+        files: ['*.{js,mts}', 'seo/**/*.mts'],
         extends: [js.configs.recommended],
         languageOptions: {
             ecmaVersion: 2022,
