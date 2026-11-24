@@ -243,9 +243,9 @@ class AnswerTrace(BaseModel):
     difference between a receipt and a guess.
 
     `context_outcome` travels with the counts because "these documents were
-    chosen for your question" and "nothing distinguished one document from
-    another, so all of them went" are different facts. Rendering both as a bare
-    number would collapse them into a claim of selectivity the second case
+    chosen for your question", "these were only the closest found" and "nothing
+    matched, so only his notes went" are different facts. Rendering them as a
+    bare number would collapse them into a claim of selectivity the last two
     cannot support.
 
     `Knowledge.approx_tokens` is deliberately absent. It is a chars-over-four
@@ -265,7 +265,9 @@ class AnswerTrace(BaseModel):
     # Pluralisation of `kind` is left to the frontend, which is where the
     # site's copy lives.
     context: List[ContextCount]
-    context_outcome: Literal["narrowed", "unfocused", "conversational", "no_corpus"]
+    context_outcome: Literal[
+        "narrowed", "closest", "unmatched", "conversational", "no_corpus", "unfocused"
+    ]
     context_available: int
     # The same documents `context` counts, by name. They are what the model was
     # given for this question, in the order it was given them - not the ones

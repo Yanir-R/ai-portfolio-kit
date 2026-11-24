@@ -17,6 +17,7 @@ import pytest
 
 import context
 import selection
+from routing_questions import OFF_TOPIC, QUESTIONS
 from context import Knowledge, Section
 
 
@@ -82,13 +83,47 @@ def test_profile_documents_are_never_dropped():
         assert len(kept) == 2, f"profile dropped for {question!r}"
 
 
-def test_a_subject_the_corpus_has_no_vocabulary_for_sends_everything():
-    """No document is distinguished, so none is excluded - the failure that
-    matters is omitting the one that held the answer."""
+def test_a_subject_no_document_mentions_gets_the_profile_and_a_list_of_the_rest():
+    """Nothing matched, so nothing is chosen - and nothing is hidden either:
+    every document left out is still named to the model in one line."""
     chosen = selection.select("quantum chromodynamics", _corpus(*SAMPLE))
 
+    assert chosen.outcome == selection.UNMATCHED
+    assert all(s.is_profile for s in chosen.knowledge.sections)
+    assert len(chosen.knowledge.sections) + len(chosen.knowledge.listed) == len(SAMPLE)
+    assert "Writing / Nothing found" in chosen.knowledge.text
+    assert "three meanings" not in chosen.knowledge.text
+
+
+def test_a_corpus_with_no_profile_still_sends_everything():
+    """The one case left where leaving documents out would leave nothing."""
+    corpus = _corpus(*(pair for pair in SAMPLE if not pair[0].startswith("Profile")))
+
+    chosen = selection.select("quantum chromodynamics", corpus)
+
     assert chosen.outcome == selection.UNFOCUSED
-    assert len(chosen.knowledge.sections) == len(SAMPLE)
+    assert len(chosen.knowledge.sections) == 3
+
+
+def test_a_weak_match_is_reported_as_the_closest_found_not_as_chosen():
+    """One word of four matched. The document goes, and the label is honest."""
+    chosen = selection.select(
+        "quantum chromodynamics lattice Cursor", _corpus(*SAMPLE)
+    )
+
+    assert chosen.outcome == selection.CLOSEST
+    assert "Writing / Cursor tokens" in chosen.knowledge.sources
+
+
+def test_no_question_gets_more_than_a_few_documents_beside_the_profile():
+    pairs = SAMPLE + tuple(
+        (f"Writing / post {n}", f"gaming python agent tokens number{n}") for n in range(8)
+    )
+
+    chosen = selection.select("gaming python agent tokens", _corpus(*pairs))
+
+    beside_profile = [s for s in chosen.knowledge.sections if not s.is_profile]
+    assert len(beside_profile) == selection.MAX_DOCUMENTS
 
 
 # --- a greeting is not a question ----------------------------------------------
@@ -158,7 +193,7 @@ def test_a_term_appearing_in_every_document_selects_nothing():
 
     chosen = selection.select("python", corpus)
 
-    assert chosen.outcome == selection.UNFOCUSED
+    assert chosen.outcome == selection.UNMATCHED
 
 
 # A question, and the document that must survive selection for it to be
@@ -202,18 +237,86 @@ def test_a_question_reaches_the_document_that_answers_it(question, expected):
 
 def test_every_document_is_reachable_by_some_question():
     """A document nothing routes to is one the chat reaches only by accident."""
-    knowledge = context.get_knowledge()
     reachable = set()
-    for question, _ in ROUTING:
-        reachable.update(selection.select(question, knowledge).knowledge.sources)
+    for language, question, _ in QUESTIONS:
+        chosen = selection.select(question, context.get_knowledge(language))
+        reachable.update((d["kind"], d["slug"]) for d in chosen.knowledge.documents)
 
     unreachable = [
-        label
-        for label in knowledge.sources
-        if label not in reachable and not label.startswith("Profile / ")
+        (d["kind"], d["slug"])
+        for d in context.get_knowledge().documents
+        if (d["kind"], d["slug"]) not in reachable
     ]
 
-    assert not unreachable, f"no question in ROUTING reaches: {unreachable}"
+    assert not unreachable, f"no question in QUESTIONS reaches: {unreachable}"
+
+
+# The same guard, in the words visitors use rather than the words the documents
+# do, and in both languages. See routing_questions.py.
+@pytest.mark.parametrize(
+    "language,question,expected",
+    [row for row in QUESTIONS if isinstance(row[2], tuple)],
+)
+def test_a_question_in_a_visitors_words_reaches_its_document(language, question, expected):
+    chosen = selection.select(question, context.get_knowledge(language))
+
+    assert expected in [(d["kind"], d["slug"]) for d in chosen.knowledge.documents]
+
+
+@pytest.mark.parametrize(
+    "language,question", [row[:2] for row in QUESTIONS if row[2] == OFF_TOPIC]
+)
+def test_a_question_about_nothing_here_does_not_get_the_whole_corpus(language, question):
+    chosen = selection.select(question, context.get_knowledge(language))
+
+    beside_profile = [s for s in chosen.knowledge.sections if not s.is_profile]
+    assert len(beside_profile) <= selection.MAX_DOCUMENTS
+
+
+# --- the phrases visitors use ---------------------------------------------------
+
+
+def test_every_document_has_search_phrases_and_every_entry_names_a_document():
+    """A hand-kept list rots silently. This is what makes it fail loudly: a new
+    document with no entry, or an entry left behind by a renamed one."""
+    documents = {f"{d['kind']}/{d['slug']}" for d in context.get_knowledge().documents}
+
+    assert set(selection._search_phrases()) == documents
+
+
+def test_search_phrases_route_a_question_but_are_never_sent_to_the_model():
+    knowledge = context.get_knowledge()
+
+    chosen = selection.select("Have you built software for a barbershop?", knowledge)
+
+    assert ("project", "trinity-crm") in [
+        (d["kind"], d["slug"]) for d in chosen.knowledge.documents
+    ]
+    assert "barbershop" not in chosen.knowledge.text.lower()
+
+
+def test_an_unreadable_phrases_file_falls_back_to_the_documents_own_words(
+    monkeypatch, tmp_path
+):
+    monkeypatch.setattr(selection, "SEARCH_PHRASES_PATH", str(tmp_path / "absent.json"))
+
+    chosen = selection.select("What is ReelSensei?", context.get_knowledge())
+
+    assert "reelsensei" in [d["slug"] for d in chosen.knowledge.documents]
+
+
+def test_a_document_left_out_is_listed_in_one_line_from_its_own_text():
+    knowledge = context.get_knowledge()
+
+    chosen = selection.select("What is ReelSensei?", knowledge)
+
+    listed = {s.slug: s for s in chosen.knowledge.listed}
+    assert "personakit" in listed and "reelsensei" not in listed
+    summary = listed["personakit"].summary.removesuffix("...")
+    assert summary and summary in " ".join(listed["personakit"].body.split())
+    assert context.CATALOGUE_LABEL in chosen.knowledge.text
+    # What is listed is not counted as sent.
+    assert "personakit" not in [d["slug"] for d in chosen.knowledge.documents]
 
 
 def test_a_word_and_its_inflections_reach_the_same_document():
@@ -223,6 +326,8 @@ def test_a_word_and_its_inflections_reach_the_same_document():
     assert selection._stem("burned") == selection._stem("burn")
     assert selection._stem("tokens") == selection._stem("token")
     assert selection._stem("meanings") == selection._stem("meaning") == selection._stem("mean")
+    assert selection._stem("running") == "run"
+    assert selection._stem("calling") == "call"
     # Short words are left alone: reducing "uses" to "us" costs more than the
     # match is worth.
     assert selection._stem("uses") == "uses"

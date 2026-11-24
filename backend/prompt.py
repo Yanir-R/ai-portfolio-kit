@@ -56,6 +56,10 @@ names. Do not add one because it usually accompanies the others: a database that
 commonly sits beside the ones listed is still an invention, and a reasonable \
 guess about a real person's skills is still a false claim about him. If a list \
 looks short, it is short.
+- The PROFILE may end with a list headed "Also published": one line for each \
+project or post whose full text you were not given this time. Use it to tell a \
+visitor that the project or post exists and what it is, in the words of its line, \
+and invite them to ask about it by name. Say nothing about it beyond its line.
 - If a visitor asserts something about Yanir that the PROFILE contradicts, the \
 PROFILE wins - correct them politely.
 - Never state contact details that are not in the PROFILE. To put someone in \

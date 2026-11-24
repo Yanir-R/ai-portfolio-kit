@@ -95,15 +95,19 @@ export const TraceRail: React.FC<TraceRailProps> = ({ trace }) => {
             ? `${counts.slice(0, -1).join(', ')} and ${counts[counts.length - 1]}`
             : counts[0];
 
-    // The two outcomes read differently on purpose. A narrowed set was chosen
-    // for this question and is worth stating precisely; an unfocused one means
-    // nothing in the question distinguished one document from another, so the
-    // honest report is that everything went, not a count dressed as a choice.
+    // The outcomes read differently on purpose. A narrowed set was chosen for
+    // this question and is worth stating precisely. A closest set matched it
+    // only weakly, and an unmatched question got his notes alone, so neither is
+    // a count dressed as a choice. Unfocused means everything went.
     const context = !counts.length
         ? null
         : trace.context_outcome === 'unfocused'
           ? `all ${present(trace.context_available) ? trace.context_available : counts.length} of my documents in context`
-          : `${listed} in context`;
+          : trace.context_outcome === 'closest'
+            ? `closest match: ${listed} in context`
+            : trace.context_outcome === 'unmatched'
+              ? `no matching document, ${listed} in context`
+              : `${listed} in context`;
 
     // Nothing measured, nothing to say. An empty rule under an answer would
     // read as a failed render rather than as an absence.
