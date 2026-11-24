@@ -1,6 +1,6 @@
 # This is why I started PersonaKit
 
-*Posted in September 2026, before PersonaKit was released. PersonaKit is now open source and free to use: [personakit.me](https://personakit.me), docs at [personakit.me/docs](https://personakit.me/docs).*
+*PersonaKit today: [personakit.me](https://personakit.me), docs at [personakit.me/docs](https://personakit.me/docs).*
 
 AI is beginning to remember us. I believe the important question isn’t just how good that memory becomes, but who controls it.
 
@@ -10,9 +10,7 @@ Your AI’s memory. Your say.
 
 We’re starting a small private pilot. Would love to hear what you think 👇
 
-PersonaKit
-
-2mo •
+---
 
 We started PersonaKit because AI memory is crossing a line.
 

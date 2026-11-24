@@ -76,10 +76,35 @@ export interface AnswerTrace {
     language?: 'en' | 'he' | null;
 }
 
+/*
+ * Something drawn beside an answer. Chosen by the server, never by the model,
+ * so every slug here exists in the writing index.
+ */
+export interface ChatBlock {
+    type: 'writing' | 'writing_list' | 'writing_series' | 'writing_topics';
+    /** A slug, a series id, "all"/"recent"/"topic", or a topic id. */
+    ref: string;
+    items?: string[] | null;
+    total?: number | null;
+}
+
+/** Asked from a piece's own page. */
+export interface ChatContext {
+    type: 'writing';
+    ref: string;
+    title: string;
+}
+
 export interface ChatMessage {
     type: MessageType;
     content: string;
     is_email_collection?: boolean;
     email_collected?: boolean;
     trace?: AnswerTrace | null;
+    blocks?: ChatBlock[];
+    /** "index" when answered straight from the writing index, with no model. */
+    answered_by?: 'model' | 'index' | null;
+    language?: 'en' | 'he' | null;
+    /** The piece the question was asked about, shown above the question. */
+    context?: ChatContext | null;
 }

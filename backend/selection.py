@@ -61,11 +61,11 @@ import logging
 import math
 import os
 import re
-from dataclasses import dataclass
-from typing import Dict, FrozenSet, Iterable, Set, Tuple
+from dataclasses import dataclass, replace
+from typing import Dict, FrozenSet, Iterable, Optional, Set, Tuple
 
 from context import Knowledge, Section
-from docs_helper import DOCS_DIR
+from docs_helper import DOCS_DIR, get_writing_index
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +136,7 @@ _HEBREW_STOPWORDS: FrozenSet[str] = frozenset(
     של שלי שלך שלו שלה שלנו שלכם שלהם על אל עם בלי בין לפני אחרי תחת מול אצל
     איתי איתך איתו איתה איתנו איתכם איתם
     אצלך אצלי כמו כדי בגלל למרות לגבי בשביל דרך לפי נגד ליד עד מאז
-    מה מי איך איפה מתי למה מדוע כמה איזה איזו אילו האם
+    מה מי איך איפה מתי למה מדוע כמה איזה איזו אילו האם ומה ומי ואיך ולמה
     גם רק עוד כבר אבל אולי כי אם או לא כן אין יש היה היתה הייתה היו יהיה
     כל כמה הרבה מעט יותר פחות מאוד קצת ממש בכלל תמיד לפעמים אף
     לי לך לו לה לנו לכם להם בי בך בו בה בנו בהם אותי אותך אותו אותה אותנו אותם
@@ -371,6 +371,12 @@ class Selection:
     writing_intent: str = ""
     writing: Tuple[str, ...] = ()
     writing_total: int = 0
+    # The topic id a follow-up list is about ("what else did you write about
+    # that?"), so the site can say which subject it continued.
+    writing_ref: str = ""
+    # Asked about the writing, on a subject it does not cover. The answer comes
+    # from the ordinary search; the site offers the subjects that are covered.
+    writing_unmatched: bool = False
 
     @property
     def narrowed(self) -> bool:
@@ -422,7 +428,7 @@ def _profile_only(knowledge: Knowledge, available: int, outcome: str) -> Selecti
 WRITING_INTENT_WORDS = """
     article articles post posts posted blog blogs written write writing
     publish published publication linkedin medium series piece pieces essay
-    מאמר מאמרים פוסט פוסטים בלוג כתבת כתבתי כתיבה פרסמת פרסום פרסומים
+    writes מאמר מאמרים פוסט פוסטים בלוג כתבת כתבתי כתיבה כותב כותבת לכתוב פרסמת פרסום פרסומים
     לינקדאין לינקדין מדיום סדרה סדרת
 """
 # Asking for the newest rather than for a subject. Read only together with a
@@ -438,6 +444,25 @@ REQUEST_WORDS = """
     show list summarize summarise summary share send give find anything something everything
     תראה הראה תראי תציג הצג תסכם סכם סיכום תשתף שתף משהו כלום הכל
 """
+# Asking to continue: "what else", "more on that". Read only together with a
+# writing word and a piece already shown.
+MORE_WORDS = """
+    more else another other others further
+    עוד נוסף נוספים נוספת אחר אחרים אחרת
+"""
+_MORE_TERMS: FrozenSet[str] = frozenset()
+# Most of these are stopwords, so they are read from the raw words of the
+# question rather than from its terms. A leading "and" (ו) is allowed.
+_MORE_WORDS_RAW: FrozenSet[str] = frozenset(MORE_WORDS.split())
+_WORD_RE = re.compile(r"[a-z]+|[\u05d0-\u05ea]+")
+
+
+def _asks_for_more(question: str) -> bool:
+    for word in _WORD_RE.findall(question.lower()):
+        if word in _MORE_WORDS_RAW or (word.startswith("ו") and word[1:] in _MORE_WORDS_RAW):
+            return True
+    return False
+
 _REQUEST_TERMS: FrozenSet[str] = frozenset()
 _WRITING_TERMS: FrozenSet[str] = frozenset()
 _RECENCY_TERMS: FrozenSet[str] = frozenset()
@@ -454,19 +479,49 @@ WRITING_TOPIC = "topic"      # about a subject: the pieces on it
 WRITING_RECENT = "recent"    # the newest pieces
 WRITING_ALL = "all"          # the writing as a whole: what exists
 WRITING_RELATED = "related"  # not asked about the writing, but a piece answers it
+WRITING_MORE = "more"        # a follow-up: the other pieces on what was shown
+WRITING_CONTEXT = "context"  # asked from a piece's own page
 
 
 def _intent_terms() -> Tuple[FrozenSet[str], FrozenSet[str]]:
-    global _WRITING_TERMS, _RECENCY_TERMS, _REQUEST_TERMS
+    global _WRITING_TERMS, _RECENCY_TERMS, _REQUEST_TERMS, _MORE_TERMS
     if not _WRITING_TERMS:
         _WRITING_TERMS = frozenset(_terms(WRITING_INTENT_WORDS))
         _RECENCY_TERMS = frozenset(_terms(RECENCY_WORDS))
         _REQUEST_TERMS = frozenset(_terms(REQUEST_WORDS))
+        _MORE_TERMS = frozenset(_terms(MORE_WORDS))
     return _WRITING_TERMS, _RECENCY_TERMS
 
 
+def _more_like_shown(pieces: list, shown: Tuple[str, ...]) -> Tuple[str, list]:
+    """The other pieces on what was last shown, and that topic's id.
+
+    "That" is the last piece shown, and its subject is the first topic the
+    index gives it. Only when nothing else is on that topic does the list widen
+    to the piece's other topics. Newest first.
+    """
+    topics_of = {
+        slug: list(entry.get("topics", []))
+        for slug, entry in get_writing_index()["pieces"].items()
+    }
+    last = next((slug for slug in reversed(shown) if topics_of.get(slug)), None)
+    if last is None:
+        return "", []
+    unseen = [s for s in pieces if s.slug not in shown]
+    for topic in topics_of[last]:
+        on_it = [s for s in unseen if topic in topics_of.get(s.slug, ())]
+        if on_it:
+            return topic, sorted(on_it, key=lambda s: s.date, reverse=True)
+    return topics_of[last][0], []
+
+
 def _writing_selection(
-    asked: Set[str], knowledge: Knowledge, index: "_Index", available: int
+    asked: Set[str],
+    knowledge: Knowledge,
+    index: "_Index",
+    available: int,
+    shown: Tuple[str, ...] = (),
+    more: bool = False,
 ) -> "Selection | None":
     """The answer to a question about the writing, or None if it is not one."""
     writing_words, recency_words = _intent_terms()
@@ -477,9 +532,18 @@ def _writing_selection(
     if not pieces:
         return None
     newest_first = sorted(pieces, key=lambda s: s.date, reverse=True)
-    topic = asked - writing_words - recency_words - _REQUEST_TERMS
+    topic = asked - writing_words - recency_words - _REQUEST_TERMS - _MORE_TERMS
+    ref = ""
 
-    if topic:
+    if not topic and shown and more:
+        # "What else did you write about that?" The subject is whatever was
+        # just shown, and what was shown is not shown again.
+        ref, ordered = _more_like_shown(pieces, shown)
+        intent = WRITING_MORE
+        topic = set()
+    if ref:
+        pass
+    elif topic:
         terms_of = dict(index.terms)
         scores = {
             s.label: sum(index.weights.get(t, 0.0) for t in topic & terms_of.get(s.label, frozenset()))
@@ -497,9 +561,13 @@ def _writing_selection(
             ),
             default=0.0,
         )
-        if best <= 0 or best < elsewhere * WRITING_DEFERS_BELOW:
-            # The subject is not one the writing covers, or something else
-            # covers it much better. Let the ordinary search have it.
+        if best <= 0:
+            # Asked about the writing, on a subject it does not cover. The
+            # ordinary search answers; the site offers what is covered.
+            return _UNMATCHED_WRITING
+        if best < elsewhere * WRITING_DEFERS_BELOW:
+            # Something else covers the subject much better. Let the ordinary
+            # search have it.
             return None
         threshold = sum(index.weights.get(t, 0.0) for t in topic) * QUERY_COVERAGE
         matching = sorted(
@@ -507,7 +575,7 @@ def _writing_selection(
             key=lambda s: (scores[s.label], s.date),
             reverse=True,
         )
-        intent, ordered = WRITING_TOPIC, matching
+        intent, ordered = WRITING_TOPIC, [s for s in matching if s.slug not in shown] or matching
     elif asked & recency_words:
         intent, ordered = WRITING_RECENT, newest_first
     else:
@@ -531,6 +599,54 @@ def _writing_selection(
         writing_intent=intent,
         writing=items,
         writing_total=len(ordered),
+        writing_ref=ref,
+    )
+
+
+# Returned by _writing_selection for "asked about the writing, nothing on it".
+# A sentinel rather than a Selection: the ordinary search still has to run.
+_UNMATCHED_WRITING = object()
+
+
+def _same_series(slugs: Tuple[str, ...]) -> bool:
+    """Whether at least two of `slugs` are parts of one series."""
+    for series in get_writing_index()["series"]:
+        members = {part["slug"] for part in series.get("parts", [])}
+        if sum(1 for slug in slugs if slug in members) >= 2:
+            return True
+    return False
+
+
+def _pinned_to(selection: Selection, knowledge: Knowledge, pinned: str) -> Selection:
+    """`selection` with the piece the visitor is reading always sent first.
+
+    Asked from a piece's own page, "what does the engine actually do?" is about
+    that piece whatever its words match. Whatever else the search chose still
+    goes, up to the usual limit, so a question that reaches past the piece can
+    still be answered.
+    """
+    piece = next(
+        (s for s in knowledge.sections if s.source == "writing" and s.slug == pinned), None
+    )
+    if piece is None:
+        return selection
+    others = [
+        s for s in selection.knowledge.sections
+        if not s.is_profile and s is not piece and s.slug != pinned
+    ][: MAX_DOCUMENTS - 1]
+    kept = set(others) | {piece}
+    chosen = tuple(s for s in knowledge.sections if s.is_profile or s in kept)
+    if selection.writing_intent in ("", WRITING_RELATED):
+        selection = replace(
+            selection,
+            writing_intent=WRITING_CONTEXT,
+            writing=(pinned,),
+            writing_total=1,
+        )
+    return replace(
+        selection,
+        knowledge=_with_the_rest_listed(chosen, knowledge),
+        outcome=NARROWED,
     )
 
 
@@ -538,6 +654,21 @@ def select(
     question: str,
     knowledge: Knowledge,
     history: Iterable[str] | None = None,
+    pinned: Optional[str] = None,
+    shown: Iterable[str] = (),
+) -> Selection:
+    """`_select`, then the piece the visitor is reading, when there is one."""
+    selection = _select(question, knowledge, history, tuple(shown or ()))
+    if pinned and not knowledge.is_empty:
+        selection = _pinned_to(selection, knowledge, pinned)
+    return selection
+
+
+def _select(
+    question: str,
+    knowledge: Knowledge,
+    history: Iterable[str] | None,
+    shown: Tuple[str, ...],
 ) -> Selection:
     """Picks the documents worth sending for `question`.
 
@@ -568,9 +699,17 @@ def select(
         if not asked:
             return _profile_only(knowledge, available, CONVERSATIONAL)
 
-    writing = _writing_selection(asked, knowledge, index, available)
-    if writing is not None:
+    writing = _writing_selection(
+        asked, knowledge, index, available, shown, more=bool(shown) and _asks_for_more(question)
+    )
+    unmatched_writing = writing is _UNMATCHED_WRITING
+    if writing is not None and not unmatched_writing:
         return writing
+    if unmatched_writing:
+        # The form words would only find the writing again, which has nothing
+        # on this. The rest of the corpus is searched on the subject alone.
+        writing_words, recency_words = _intent_terms()
+        asked = asked - writing_words - recency_words - _REQUEST_TERMS - _MORE_TERMS
 
     scores: Dict[str, float] = {}
     for label, terms in index.terms:
@@ -580,7 +719,8 @@ def select(
 
     # No word in the question is one that distinguishes any document.
     if best <= 0:
-        return _profile_only(knowledge, available, UNMATCHED)
+        selection = _profile_only(knowledge, available, UNMATCHED)
+        return replace(selection, writing_unmatched=unmatched_writing)
 
     # The weight of everything asked that this corpus recognises at all, which
     # is what a document's score is a share of.
@@ -625,7 +765,11 @@ def select(
     # "what do you think about agents asking for approval?" is an opinion, and
     # the post where he wrote it is the evidence. Those pieces travel with the
     # answer as cards, best first, without the model being asked to pick them.
+    # Pieces already shown are not shown again, except as part of a series
+    # card: the site decides that from the full list.
     related = tuple(s.slug for s in ranked if s.source == "writing" and s.slug)[:2]
+    if not _same_series(related):
+        related = tuple(slug for slug in related if slug not in shown)
 
     return Selection(
         knowledge=_with_the_rest_listed(chosen, knowledge),
@@ -634,6 +778,7 @@ def select(
         writing_intent=WRITING_RELATED if related else "",
         writing=related,
         writing_total=len(related),
+        writing_unmatched=unmatched_writing and not related,
     )
 
 

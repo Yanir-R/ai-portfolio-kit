@@ -3,7 +3,8 @@ import { MessageAvatar } from '@/components/MessageAvatar';
 import { TraceRail } from '@/components/TraceRail';
 import { useChat } from '@/hooks/useChat';
 import { QuickMessages } from '@/components/QuickMessages';
-import { QuickMessageOption } from '@/types/chat';
+import { ChatContext, QuickMessageOption } from '@/types/chat';
+import WritingBlocks from '@/components/writing/WritingBlocks';
 import { FINAL_QUESTION } from '@/constants/chat';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { createTurnstileController, TurnstileController } from '@/services/turnstile';
@@ -19,7 +20,27 @@ import { createTurnstileController, TurnstileController } from '@/services/turns
  * selectable and copyable, which on a page whose whole purpose is producing text
  * worth reading matters more than any hover effect would.
  */
-const Chat: React.FC = () => {
+interface ChatProps {
+    /*
+     * Asked from a piece's page. The piece is sent with every question and
+     * named above the composer, where the visitor can remove it to ask about
+     * anything else.
+     */
+    context?: ChatContext | null;
+    /** A shorter panel, for the foot of a reading page. */
+    compact?: boolean;
+    initialMessage?: string;
+    /** Questions offered first; the home page's ladder when absent. */
+    hideQuickMessages?: boolean;
+}
+
+const Chat: React.FC<ChatProps> = ({
+    context: initialContext = null,
+    compact = false,
+    initialMessage,
+    hideQuickMessages = false,
+}) => {
+    const [context, setContext] = useState<ChatContext | null>(initialContext);
     // The Turnstile widget lives in a ref rather than state: nothing renders
     // from it, and the hook only needs to reach whichever controller is current
     // at the moment a message is sent.
@@ -56,6 +77,8 @@ const Chat: React.FC = () => {
     } = useChat({
         getTurnstileToken: () => turnstileRef.current?.getToken() ?? Promise.resolve(null),
         resetTurnstile: () => turnstileRef.current?.reset(),
+        context,
+        initialMessage,
     });
 
     const [isTyping, setIsTyping] = useState(false);
@@ -135,8 +158,12 @@ const Chat: React.FC = () => {
     return (
         <div
             className={`flex flex-col ${
-                isKeyboardVisible ? 'h-[calc(var(--vh,1vh)*65)]' : 'h-[30rem]'
-            } sm:h-[36rem] lg:h-full relative overflow-hidden rounded border border-border bg-ink-800`}
+                isKeyboardVisible
+                    ? 'h-[calc(var(--vh,1vh)*65)]'
+                    : compact
+                      ? 'h-[28rem]'
+                      : 'h-[30rem]'
+            } ${compact ? 'sm:h-[30rem]' : 'sm:h-[36rem] lg:h-full'} relative overflow-hidden rounded border border-border bg-ink-800`}
         >
             {/* Header */}
             <div className="flex gap-2 justify-between items-center px-3 py-2.5 border-b sm:gap-4 sm:px-4 sm:py-3 border-border">
@@ -226,7 +253,13 @@ const Chat: React.FC = () => {
                                     : ''
                             }`}
                         >
+                            {msg.context && (msg.type === 'user' || msg.type === 'quick') && (
+                                <p className="mb-1 font-mono text-[0.65rem] text-muted">
+                                    Asking about: <bdi>{msg.context.title}</bdi>
+                                </p>
+                            )}
                             <p
+                                dir="auto"
                                 className={`whitespace-pre-wrap break-words leading-relaxed ${
                                     msg.type === 'user'
                                         ? 'text-[0.9rem] text-muted sm:text-[0.95rem]'
@@ -239,6 +272,20 @@ const Chat: React.FC = () => {
                                 The backend sends no trace for the contact flow
                                 or for a failure reply, so nothing here has to
                                 decide which replies deserve one. */}
+                            <WritingBlocks blocks={msg.blocks} lang={msg.language} />
+                            {/* Answered from the index alone: no model was
+                                called, so there is no trace to show, and saying
+                                so is the honest replacement for one. */}
+                            {msg.answered_by === 'index' && (
+                                <p
+                                    dir={msg.language === 'he' ? 'rtl' : 'ltr'}
+                                    className="mt-2 font-mono text-[0.65rem] tracking-wider uppercase text-muted"
+                                >
+                                    {msg.language === 'he'
+                                        ? 'תשובה מוכנה מהאינדקס · בלי AI'
+                                        : 'Answered from the index · no AI'}
+                                </p>
+                            )}
                             {msg.trace && <TraceRail trace={msg.trace} />}
                         </div>
                     </div>
@@ -267,7 +314,11 @@ const Chat: React.FC = () => {
             )}
 
             <QuickMessages
-                show={showQuickMessages && quickMessageState.currentQuestions.length > 0}
+                show={
+                    !hideQuickMessages &&
+                    showQuickMessages &&
+                    quickMessageState.currentQuestions.length > 0
+                }
                 isLoading={isLoading}
                 onMessageSelect={handleQuickMessageSelect}
                 currentQuestions={quickMessageState.currentQuestions}
@@ -286,9 +337,26 @@ const Chat: React.FC = () => {
                 onSubmit={handleSubmit}
                 className="relative z-10 p-3 border-t border-border bg-ink-800"
             >
+                {context && (
+                    <div className="flex gap-2 items-center mb-2 min-w-0 font-mono text-xs text-muted">
+                        <span className="flex-shrink-0">Asking about:</span>
+                        <span className="truncate text-content" dir="auto">
+                            {context.title}
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => setContext(null)}
+                            aria-label="Ask about anything instead"
+                            className="flex-shrink-0 px-1.5 rounded transition-colors hover:text-content focus:outline-none focus-visible:ring-2 focus-visible:ring-caution"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                )}
                 <div className="flex relative items-center">
                     <input
                         type="text"
+                        dir="auto"
                         value={message}
                         onChange={handleInputChange}
                         onFocus={scrollToBottom}

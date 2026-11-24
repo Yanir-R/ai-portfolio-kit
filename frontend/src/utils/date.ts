@@ -15,3 +15,10 @@ export const formatIsoDate = (iso: string, month: 'short' | 'long'): string => {
         timeZone: 'UTC',
     });
 };
+
+/** Seconds as m:ss, for a video's length. Empty when unknown. */
+export const formatDuration = (seconds?: number): string => {
+    if (!seconds) return '';
+    const s = Math.round(seconds);
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};

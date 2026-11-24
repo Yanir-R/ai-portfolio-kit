@@ -11,6 +11,7 @@ import pytest
 from starlette.testclient import TestClient
 
 import context
+import docs_helper
 import main
 import selection
 from gemini_helper import Answer
@@ -123,6 +124,9 @@ def test_an_opinion_he_wrote_about_brings_the_post_as_evidence(language, questio
     assert len(chosen.writing) <= 2
 
 
+TOPIC_IDS = {t["id"] for t in docs_helper.get_writing_index()["topics"]}
+
+
 # --- the cards on the reply --------------------------------------------------
 
 
@@ -167,7 +171,10 @@ def test_every_card_names_a_piece_that_exists(client):
     slugs = {s.slug for s in context.get_knowledge().sections if s.source == "writing"}
     for question in ("Do you have a blog?", "Your latest posts?", "Have you written about MCP?"):
         for block in _blocks(client, question):
-            assert set(block.get("items") or [block["ref"]]) <= slugs | {"all", "recent", "topic"}
+            if block["type"] == "writing_topics":
+                assert set(block["items"]) <= TOPIC_IDS
+                continue
+            assert set(block.get("items") or [block["ref"]]) <= slugs
             if block["type"] == "writing_list":
                 assert set(block["items"]) <= slugs
 

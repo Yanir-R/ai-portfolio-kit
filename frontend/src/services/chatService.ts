@@ -2,7 +2,7 @@ import axios from 'axios';
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
 import { TURNSTILE_HEADER } from '@/constants/turnstile';
-import { AnswerTrace, ChatMessage } from '@/types/chat';
+import { AnswerTrace, ChatBlock, ChatContext, ChatMessage } from '@/types/chat';
 
 /**
  * Kept well below the backend's MAX_HISTORY_MESSAGES (40), which rejects a
@@ -18,7 +18,25 @@ interface ChatResponse {
     is_email_collection?: boolean;
     email_collected?: boolean;
     trace?: AnswerTrace | null;
+    blocks?: ChatBlock[];
+    answered_by?: 'model' | 'index' | null;
+    language?: 'en' | 'he' | null;
 }
+
+/**
+ * The pieces already shown as cards, oldest first, so a follow-up ("what else
+ * did you write about that?") is not shown them again.
+ */
+export const shownSlugs = (history: ChatMessage[]): string[] => {
+    const slugs: string[] = [];
+    for (const msg of history) {
+        for (const block of msg.blocks ?? []) {
+            if (block.type === 'writing') slugs.push(block.ref);
+            else if (block.type !== 'writing_topics') slugs.push(...(block.items ?? []));
+        }
+    }
+    return [...new Set(slugs)].slice(-40);
+};
 
 export const chatService = {
     /** Whether the backend has content to ground its answers in. */
@@ -32,10 +50,13 @@ export const chatService = {
     sendMessage: async (
         message: string,
         conversationHistory: ChatMessage[],
-        turnstileToken?: string | null
+        turnstileToken?: string | null,
+        context?: ChatContext | null
     ) => {
         try {
             const body = {
+                ...(context ? { context: { type: context.type, ref: context.ref } } : {}),
+                shown: shownSlugs(conversationHistory),
                 message,
                 conversation_history: conversationHistory.slice(-MAX_HISTORY_SENT).map((msg) => ({
                     type: msg.type,
@@ -68,6 +89,9 @@ export const chatService = {
                 // not send this, or a reply produced without a model call, must
                 // render no rail rather than an empty one.
                 trace: response.data.trace ?? null,
+                blocks: response.data.blocks ?? [],
+                answered_by: response.data.answered_by ?? null,
+                language: response.data.language ?? null,
             };
         } catch (error) {
             let errorMessage = 'Failed to get response from server';

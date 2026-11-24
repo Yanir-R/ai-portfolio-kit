@@ -5,6 +5,7 @@ is assembled and cached, is context.py's job.
 """
 
 from pypdf import PdfReader
+import json
 import logging
 import os
 import re
@@ -253,6 +254,106 @@ def parse_writing_metadata(content: str) -> Dict[str, Any]:
     return metadata
 
 
+# Curation that is not prose: the closed list of topics, a Hebrew one-liner per
+# piece, a verbatim quote, a dated note on a piece that has gone out of date,
+# what kind each media file is, and series. Kept apart from the .md files so the
+# chat corpus stays the writing itself, and so the whole index can be checked in
+# one test (tests/test_writing_index.py).
+WRITING_INDEX_PATH = os.path.join(DOCS_DIR, "writing-index.json")
+
+_VIDEO_EXTENSIONS = (".mp4", ".webm")
+
+_writing_index_cache: Dict[str, Any] = {}
+
+
+def get_writing_index() -> Dict[str, Any]:
+    """The curation file, read once. Empty sections if it is missing."""
+    if not _writing_index_cache:
+        try:
+            with open(WRITING_INDEX_PATH, encoding="utf-8") as handle:
+                loaded = json.load(handle)
+        except FileNotFoundError:
+            logger.warning("Writing index %s does not exist", WRITING_INDEX_PATH)
+            loaded = {}
+        _writing_index_cache.update(
+            topics=loaded.get("topics", []),
+            series=loaded.get("series", []),
+            pieces=loaded.get("pieces", {}),
+        )
+    return _writing_index_cache
+
+
+def _media_items(entry: Dict[str, Any], curated: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Every media file with its kind: image, video, or clip (a short silent loop).
+
+    Curated media come first, then the plain paths of the `## Media` section that
+    are not already among them, typed by extension.
+    """
+    items = [dict(item) for item in curated.get("media", [])]
+    seen = {item.get("src") for item in items} | {item.get("poster") for item in items}
+    for path in entry.get("media", []):
+        if path in seen:
+            continue
+        kind = "video" if path.lower().endswith(_VIDEO_EXTENSIONS) else "image"
+        items.append({"kind": kind, "src": path})
+    return items
+
+
+def _series_of(slug: str) -> Optional[Dict[str, Any]]:
+    for series in get_writing_index()["series"]:
+        for position, part in enumerate(series.get("parts", [])):
+            if part["slug"] == slug:
+                return {
+                    "id": series["id"],
+                    "label": part.get("label", ""),
+                    "label_he": part.get("label_he", ""),
+                    "position": position + 1,
+                    "count": len(series["parts"]),
+                }
+    return None
+
+
+def _curated(entry: Dict[str, Any]) -> Dict[str, Any]:
+    """Adds the index's fields to one parsed piece."""
+    curated = get_writing_index()["pieces"].get(entry["slug"], {})
+    for field in ("topics", "summary_he", "quote", "note"):
+        if field in curated:
+            entry[field] = curated[field]
+    entry.setdefault("topics", [])
+    entry["media_items"] = _media_items(entry, curated)
+    series = _series_of(entry["slug"])
+    if series:
+        entry["series"] = series
+    return entry
+
+
+def writing_overview(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Counts by source and topic, and the series, for the blog page and the chat."""
+    sources: Dict[str, int] = {}
+    topic_counts: Dict[str, int] = {}
+    for entry in entries:
+        source = entry.get("source") or ""
+        sources[source] = sources.get(source, 0) + 1
+        for topic in entry.get("topics", []):
+            topic_counts[topic] = topic_counts.get(topic, 0) + 1
+    index = get_writing_index()
+    topics = [
+        {**topic, "count": topic_counts.get(topic["id"], 0)}
+        for topic in index["topics"]
+        if topic_counts.get(topic["id"])
+    ]
+    topics.sort(key=lambda topic: -topic["count"])
+    series = [
+        {
+            **{key: value for key, value in item.items() if key != "parts"},
+            "parts": item.get("parts", []),
+            "count": len(item.get("parts", [])),
+        }
+        for item in index["series"]
+    ]
+    return {"total": len(entries), "sources": sources, "topics": topics, "series": series}
+
+
 def get_all_writing() -> List[Dict[str, Any]]:
     """Every piece, newest first.
 
@@ -275,7 +376,7 @@ def get_all_writing() -> List[Dict[str, Any]]:
         entry = parse_writing_metadata(content)
         entry['slug'] = filename[:-3]
         entry['content'] = content
-        entries.append(entry)
+        entries.append(_curated(entry))
 
     return sorted(entries, key=lambda e: e.get('date') or '', reverse=True)
 
@@ -298,4 +399,4 @@ def get_writing_by_slug(slug: str) -> Optional[Dict[str, Any]]:
     entry = parse_writing_metadata(content)
     entry['slug'] = slug
     entry['content'] = content
-    return entry
+    return _curated(entry)

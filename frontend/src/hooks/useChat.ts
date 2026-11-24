@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChatMessage, QuickMessageOption } from '@/types/chat';
+import { ChatContext, ChatMessage, QuickMessageOption } from '@/types/chat';
 import { chatService } from '@/services/chatService';
 import { CHAT_CONFIG } from '@/constants/config';
 import { INITIAL_QUESTIONS, FINAL_QUESTION } from '@/constants/chat';
@@ -17,9 +17,18 @@ interface QuickMessageState {
 interface UseChatOptions {
     getTurnstileToken?: () => Promise<string | null>;
     resetTurnstile?: () => void;
+    /** Asked from a piece's page: sent with each question until removed. */
+    context?: ChatContext | null;
+    /** The opening line, when the panel is not the home page's. */
+    initialMessage?: string;
 }
 
-export const useChat = ({ getTurnstileToken, resetTurnstile }: UseChatOptions = {}) => {
+export const useChat = ({
+    getTurnstileToken,
+    resetTurnstile,
+    context,
+    initialMessage,
+}: UseChatOptions = {}) => {
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [hasFiles, setHasFiles] = useState<boolean | null>(null);
@@ -30,7 +39,7 @@ export const useChat = ({ getTurnstileToken, resetTurnstile }: UseChatOptions = 
     });
 
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
-        { type: 'initial', content: CHAT_CONFIG.INITIAL_MESSAGE },
+        { type: 'initial', content: initialMessage ?? CHAT_CONFIG.INITIAL_MESSAGE },
     ]);
 
     useEffect(() => {
@@ -137,6 +146,7 @@ export const useChat = ({ getTurnstileToken, resetTurnstile }: UseChatOptions = 
                 {
                     type: messageType,
                     content: finalMessage,
+                    context: context ?? null,
                 },
             ]);
 
@@ -146,7 +156,7 @@ export const useChat = ({ getTurnstileToken, resetTurnstile }: UseChatOptions = 
             // without one and the Worker's reply says what happened.
             const token = getTurnstileToken ? await getTurnstileToken() : null;
 
-            const result = await chatService.sendMessage(finalMessage, chatHistory, token);
+            const result = await chatService.sendMessage(finalMessage, chatHistory, token, context);
 
             if (result.success) {
                 if (result.email_collected) {
@@ -180,6 +190,9 @@ export const useChat = ({ getTurnstileToken, resetTurnstile }: UseChatOptions = 
                             // and a transcript of several answers needs each to
                             // keep its own.
                             trace: result.trace,
+                            blocks: result.blocks,
+                            answered_by: result.answered_by,
+                            language: result.language,
                         },
                     ]);
 

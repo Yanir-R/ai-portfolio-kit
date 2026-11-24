@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router';
 import ReturnHome from '@/components/ReturnHome';
-import { writingService } from '@/services/writingService';
-import { WritingEntry, WRITING_KIND_LABEL, WRITING_KIND_STYLE } from '@/types/writing';
+import { SeriesCard, TopicChips } from '@/components/writing/WritingBlocks';
+import { stripWritingMetadata, writingService } from '@/services/writingService';
+import { WritingIndex, WRITING_KIND_LABEL, WRITING_KIND_STYLE } from '@/types/writing';
 import { formatIsoDate } from '@/utils/date';
 
 /*
@@ -18,7 +19,11 @@ import { formatIsoDate } from '@/utils/date';
  * anyone who does.
  */
 const Blog: React.FC = () => {
-    const [entries, setEntries] = useState<WritingEntry[]>([]);
+    const [index, setIndex] = useState<WritingIndex | null>(null);
+    const [params, setParams] = useSearchParams();
+    const [query, setQuery] = useState('');
+    const topicId = params.get('topic');
+    const seriesId = params.get('series');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -27,8 +32,8 @@ const Blog: React.FC = () => {
 
         const fetchWriting = async () => {
             try {
-                const data = await writingService.getAll();
-                if (!cancelled) setEntries(data);
+                const data = await writingService.getIndex();
+                if (!cancelled) setIndex(data);
             } catch (err) {
                 if (!cancelled) {
                     setError(err instanceof Error ? err.message : 'The request failed.');
@@ -44,6 +49,39 @@ const Blog: React.FC = () => {
             cancelled = true;
         };
     }, []);
+
+    const topic = index?.overview.topics.find((t) => t.id === topicId);
+    const series = index?.overview.series.find((s) => s.id === seriesId);
+
+    /*
+     * Filtered by the topic or series in the address, so a chat card can link
+     * to "everything on memory" and the link can be shared. The search reads
+     * the full text, not just the titles, because a reader looking for "MCP"
+     * means the posts that discuss it.
+     */
+    const entries = useMemo(() => {
+        if (!index) return [];
+        let list = index.entries;
+        if (topic) list = list.filter((e) => e.topics?.includes(topic.id));
+        if (series) {
+            const order = series.parts.map((p) => p.slug);
+            list = list
+                .filter((e) => order.includes(e.slug))
+                .sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
+        }
+        const needle = query.trim().toLowerCase();
+        if (needle) {
+            list = list.filter((e) =>
+                [e.title, e.summary ?? '', e.summary_he ?? '', stripWritingMetadata(e.content)]
+                    .join('\n')
+                    .toLowerCase()
+                    .includes(needle)
+            );
+        }
+        return list;
+    }, [index, topic, series, query]);
+
+    const clearFilter = () => setParams({});
 
     return (
         <div className="px-4 pt-8 pb-16 mx-auto max-w-3xl sm:pt-12">
@@ -78,8 +116,74 @@ const Blog: React.FC = () => {
                 </div>
             )}
 
-            {!loading && !error && entries.length === 0 && (
-                <p className="mt-10 leading-relaxed text-muted">Nothing published yet.</p>
+            {index && (
+                <div className="mt-8">
+                    <label className="block">
+                        <span className="sr-only">Search the writing</span>
+                        <input
+                            type="search"
+                            dir="auto"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search the writing"
+                            className="py-2 px-3 w-full text-base rounded border transition-colors bg-ink-700 text-content placeholder-muted border-border focus:outline-none focus:border-caution focus-visible:ring-2 focus-visible:ring-caution/60"
+                        />
+                    </label>
+                    <div className="mt-4">
+                        <TopicChips index={index} lang="en" />
+                    </div>
+                    {(topic || series) && (
+                        <p className="flex flex-wrap gap-x-3 gap-y-1 items-baseline mt-4 font-mono text-xs text-muted">
+                            <span>
+                                Showing:{' '}
+                                <span className="text-content">
+                                    {topic ? topic.en : series?.title}
+                                </span>{' '}
+                                ({entries.length})
+                            </span>
+                            <button
+                                type="button"
+                                onClick={clearFilter}
+                                className="underline rounded transition-colors underline-offset-4 decoration-border hover:text-content focus:outline-none focus-visible:ring-2 focus-visible:ring-caution"
+                            >
+                                Show everything
+                            </button>
+                        </p>
+                    )}
+                    {series && (
+                        <SeriesCard
+                            series={series}
+                            lang="en"
+                            className="p-4 mt-5 rounded border border-border bg-ink-800"
+                        />
+                    )}
+                    {!topic && !series && !query && index.overview.series[0] && (
+                        <SeriesCard
+                            series={index.overview.series[0]}
+                            lang="en"
+                            className="p-4 mt-6 rounded border border-border bg-ink-800"
+                        />
+                    )}
+                </div>
+            )}
+
+            {!loading && !error && index && entries.length === 0 && (
+                <div className="mt-10 leading-relaxed text-muted">
+                    {query ? (
+                        <p>
+                            Nothing here mentions “{query}”.{' '}
+                            <Link
+                                to="/"
+                                className="underline transition-colors text-content hover:text-signal underline-offset-4 decoration-border"
+                            >
+                                Ask the assistant about it
+                            </Link>
+                            .
+                        </p>
+                    ) : (
+                        <p>Nothing published yet.</p>
+                    )}
+                </div>
             )}
 
             {!loading && !error && entries.length > 0 && (
@@ -125,18 +229,27 @@ const Blog: React.FC = () => {
                                 </div>
 
                                 <div className="min-w-0">
-                                    <h2 className="text-lg font-semibold leading-snug transition-colors duration-200 text-content group-hover:text-signal">
+                                    <h2
+                                        dir="auto"
+                                        className="text-lg font-semibold leading-snug transition-colors duration-200 text-content group-hover:text-signal"
+                                    >
                                         {entry.title}
                                     </h2>
 
                                     {entry.summary && (
-                                        <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                                        <p
+                                            dir="auto"
+                                            className="mt-1.5 text-sm leading-relaxed text-muted"
+                                        >
                                             {entry.summary}
                                         </p>
                                     )}
 
                                     <p className="mt-2 font-mono text-[0.68rem] text-muted/70">
                                         {entry.source}
+                                        {entry.series && ` · ${entry.series.label}`}
+                                        {entry.media_items?.some((m) => m.kind !== 'image') &&
+                                            ' · video'}
                                     </p>
                                 </div>
                             </Link>

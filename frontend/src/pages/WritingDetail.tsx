@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import Markdown from '@/components/Markdown';
 import ReturnHome from '@/components/ReturnHome';
+import Chat from '@/components/Chat';
+import MediaView from '@/components/writing/MediaView';
+import { useWritingIndex } from '@/hooks/useWritingIndex';
 import { writingService, stripWritingMetadata } from '@/services/writingService';
-import { WritingEntry, WRITING_KIND_LABEL, WRITING_KIND_STYLE } from '@/types/writing';
+import { MediaItem, WritingEntry, WRITING_KIND_LABEL, WRITING_KIND_STYLE } from '@/types/writing';
 import { formatIsoDate } from '@/utils/date';
 
 /*
@@ -24,6 +27,7 @@ const WritingDetail: React.FC = () => {
     const [entry, setEntry] = useState<WritingEntry | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const index = useWritingIndex();
 
     // The state resets live inside the async function rather than the effect
     // body, which is what keeps `react-hooks/set-state-in-effect` satisfied:
@@ -86,7 +90,17 @@ const WritingDetail: React.FC = () => {
     }
 
     const body = stripWritingMetadata(entry.content);
-    const allMedia = entry.media ?? [];
+    // Typed media from the index; plain paths as images for an older backend.
+    const allMedia: MediaItem[] =
+        entry.media_items ?? (entry.media ?? []).map((src) => ({ kind: 'image' as const, src }));
+
+    // The neighbours in its series, so a reader can go on to the next day.
+    const series = entry.series
+        ? index?.overview.series.find((s) => s.id === entry.series?.id)
+        : undefined;
+    const position = entry.series ? entry.series.position - 1 : -1;
+    const previous = series && position > 0 ? series.parts[position - 1] : undefined;
+    const next = series && position >= 0 ? series.parts[position + 1] : undefined;
 
     /*
      * An article's first image is its hero and belongs above the text, the way
@@ -110,7 +124,10 @@ const WritingDetail: React.FC = () => {
             </Link>
 
             <header className="mt-6">
-                <h1 className="text-3xl font-semibold tracking-tight leading-tight text-content sm:text-4xl">
+                <h1
+                    dir="auto"
+                    className="text-3xl font-semibold tracking-tight leading-tight text-content sm:text-4xl"
+                >
                     {entry.title}
                 </h1>
 
@@ -126,34 +143,46 @@ const WritingDetail: React.FC = () => {
                         {formatIsoDate(entry.date, 'long')}
                     </time>
                     <span className="text-muted">{entry.source}</span>
+                    {entry.series && series && (
+                        <Link
+                            to={`/blog?series=${entry.series.id}`}
+                            className="text-muted underline underline-offset-4 decoration-border transition-colors hover:text-content"
+                        >
+                            {series.title} · {entry.series.label}
+                        </Link>
+                    )}
                 </div>
             </header>
 
-            {hero && (
-                <img
-                    src={hero}
-                    alt=""
-                    className="mt-7 w-full h-auto rounded border border-border"
-                />
+            {/* Written once in the index, dated, and never by a model: what has
+                changed since this was published. Above the text, so it is read
+                before the part that is out of date. */}
+            {entry.note && (
+                <aside className="px-4 py-3 mt-6 rounded border border-caution/40">
+                    <p className="font-mono text-[0.65rem] tracking-wider uppercase text-caution">
+                        Updated since
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-content">{entry.note.en}</p>
+                </aside>
             )}
 
-            <div className="mt-8">
+            {hero && (
+                <div className="mt-7">
+                    <MediaView item={hero} title={entry.title} />
+                </div>
+            )}
+
+            <div className="mt-8" dir="auto">
                 <Markdown>{body}</Markdown>
             </div>
 
             {trailingMedia.length > 0 && (
                 <section className="flex flex-col gap-4 mt-10">
-                    {trailingMedia.map((src) => (
-                        <img
-                            key={src}
-                            src={src}
-                            // Decorative in the accessibility sense: each one
-                            // restates the argument the prose above already
-                            // makes, so describing them would repeat it.
-                            alt=""
-                            loading="lazy"
-                            className="w-full h-auto rounded border border-border"
-                        />
+                    {/* Decorative in the accessibility sense: each one restates
+                        the argument the prose above already makes, so
+                        describing them would repeat it. */}
+                    {trailingMedia.map((item) => (
+                        <MediaView key={item.src} item={item} title={entry.title} />
                     ))}
                 </section>
             )}
@@ -202,6 +231,49 @@ const WritingDetail: React.FC = () => {
                     </p>
                 )}
             </footer>
+
+            {series && (previous || next) && (
+                <nav aria-label={series.title} className="grid gap-3 mt-8 sm:grid-cols-2">
+                    {previous ? (
+                        <Link
+                            to={`/blog/${previous.slug}`}
+                            className="block p-3 rounded border transition-colors border-border hover:border-border-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-caution"
+                        >
+                            <span className="block font-mono text-[0.65rem] uppercase tracking-wider text-muted">
+                                ← Previous
+                            </span>
+                            <span className="text-content">{previous.label}</span>
+                        </Link>
+                    ) : (
+                        <span className="hidden sm:block" />
+                    )}
+                    {next && (
+                        <Link
+                            to={`/blog/${next.slug}`}
+                            className="block p-3 text-end rounded border transition-colors border-border hover:border-border-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-caution"
+                        >
+                            <span className="block font-mono text-[0.65rem] uppercase tracking-wider text-muted">
+                                Next →
+                            </span>
+                            <span className="text-content">{next.label}</span>
+                        </Link>
+                    )}
+                </nav>
+            )}
+
+            {/* Asking from here sends the piece with the question, so "what
+                does it actually do?" needs no subject. Keyed on the slug so
+                moving to the next piece starts a fresh conversation about it. */}
+            <section className="mt-12" aria-label="Ask about this piece">
+                <p className="mb-3 label">Ask about this piece</p>
+                <Chat
+                    key={entry.slug}
+                    compact
+                    hideQuickMessages
+                    context={{ type: 'writing', ref: entry.slug, title: entry.title }}
+                    initialMessage="Ask anything about this piece, in English or Hebrew. The answer comes from what I wrote here and in my other notes."
+                />
+            </section>
 
             <ReturnHome />
         </article>
