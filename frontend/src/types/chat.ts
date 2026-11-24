@@ -64,13 +64,7 @@ export interface AnswerTrace {
      * one plain count would claim a selectivity most of them do not have.
      */
     context_outcome?:
-        | 'narrowed'
-        | 'closest'
-        | 'unmatched'
-        | 'conversational'
-        | 'unfocused'
-        | 'no_corpus'
-        | null;
+        'narrowed' | 'closest' | 'unmatched' | 'conversational' | 'unfocused' | 'no_corpus' | null;
     /** The whole corpus, so a narrowed set can be reported as a share of it. */
     context_available?: number | null;
     /*
