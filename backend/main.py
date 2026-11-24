@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from hmac import compare_digest
@@ -103,6 +104,10 @@ CONTACT_INTENT_PHRASES = (
     "email address",
 )
 
+# Seconds one SMTP connection may take. Without a ceiling a stalled mail server
+# would hold a worker thread for as long as the socket stayed open.
+SMTP_TIMEOUT_SECONDS = 10
+
 load_dotenv()
 
 def validate_email_config():
@@ -189,7 +194,7 @@ class ContactRequest(BaseModel):
     # means it never spends a rate-limit slot, since FastAPI validates the body
     # before the endpoint runs.
     email: EmailStr
-    message: str = Field(max_length=MAX_MESSAGE_CHARS)
+    message: str = Field(min_length=1, max_length=MAX_MESSAGE_CHARS)
 
 
 def _to_model_turns(history: Optional[List[ChatMessage]]) -> List[Dict[str, str]]:
@@ -302,7 +307,9 @@ async def _deliver_collected_email(
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-app = FastAPI()
+# The interactive docs and the OpenAPI schema describe every route to anyone who
+# asks. Nothing on the site uses them, so they are not served.
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
 # Shared secret proving a request arrived through Cloudflare rather than by
 # calling the run.app URL directly.
@@ -352,8 +359,12 @@ async def require_edge_secret(request: Request, call_next):
         if request.method != "OPTIONS":
             presented = request.headers.get("x-edge-auth", "")
             # compare_digest rather than == so the comparison does not return
-            # early on the first differing byte.
-            if not compare_digest(presented, ORIGIN_SHARED_SECRET):
+            # early on the first differing byte. Compared as bytes because
+            # compare_digest raises on a non-ASCII str, which any caller can
+            # send.
+            if not compare_digest(
+                presented.encode("utf-8"), ORIGIN_SHARED_SECRET.encode("utf-8")
+            ):
                 logger.warning(
                     "Rejected request to %s without a valid edge secret", request.url.path
                 )
@@ -407,23 +418,18 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
         len(chat_request.conversation_history or []),
     )
     try:
-        enforce_rate_limit(request, chat_limiter, "chat-with-files")
-
-        if not GEMINI_API_KEY:
-            raise HTTPException(
-                status_code=500,
-                detail="GEMINI_API_KEY not found in environment variables"
-            )
-
         # A message that is nothing but an address: the visitor is leaving it,
         # whatever the conversation was doing before.
         message = chat_request.message.strip()
         if _EMAIL_ONLY_RE.match(message):
             try:
-                email = validate_email(message).email
+                email = _validated_address(message)
             except EmailNotValidError:
                 return _chat_reply(EMAIL_INVALID_MESSAGE, is_email_collection=True)
 
+            # Sending mail is a contact action, so it spends the contact
+            # budget, not a chat answer.
+            enforce_rate_limit(request, contact_limiter, "chat-with-files")
             return await _deliver_collected_email(
                 email,
                 "Address submitted in chat with no accompanying message",
@@ -442,15 +448,20 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             email_match = _EMAIL_IN_TEXT_RE.search(chat_request.message)
             if email_match:
                 try:
-                    email = validate_email(email_match.group(0)).email
+                    email = _validated_address(email_match.group(0))
                 except EmailNotValidError:
                     return _chat_reply(EMAIL_INVALID_MESSAGE, is_email_collection=True)
 
                 # Whatever they wrote around the address is the message itself.
-                message_content = chat_request.message.replace(email, '').strip()
+                # The address is removed as typed: validation lower-cases the
+                # domain, so the normalised form may not occur in the message.
+                message_content = chat_request.message.replace(
+                    email_match.group(0), ''
+                ).strip()
                 if not message_content:
                     message_content = "Email provided during chat interaction"
 
+                enforce_rate_limit(request, contact_limiter, "chat-with-files")
                 return await _deliver_collected_email(
                     email, message_content, "chat-collected address"
                 )
@@ -472,6 +483,16 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
         # Normal chat flow - answer from the cached corpus (profile, projects,
         # writing).
         #
+        # The chat budget is spent here and not at the top of the handler: every
+        # reply above this line is produced without calling the model, and a
+        # budget sized to the model's daily quota should only count model calls.
+        enforce_rate_limit(request, chat_limiter, "chat-with-files")
+
+        if not GEMINI_API_KEY:
+            logger.error("GEMINI_API_KEY is not set; chat cannot answer")
+            raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
+
+        #
         # Which documents this question needs, rather than all of them. The
         # selection is held in a local so the trace describes the request that
         # was actually made - calling select() again for the trace could
@@ -482,7 +503,11 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             get_knowledge(),
             history=[turn["content"] for turn in turns],
         )
-        answer = get_gemini_response(
+        # The SDK call is synchronous and can take over a minute. Run in the
+        # threadpool so it does not block the event loop, which would stall
+        # every other request, health checks included, until it returned.
+        answer = await run_in_threadpool(
+            get_gemini_response,
             GEMINI_API_KEY,
             chat_request.message,
             selection.knowledge,
@@ -520,6 +545,28 @@ async def get_content(file_name: str):
         logger.exception("get_content failed for %r", file_name)
         raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
 
+def _validated_address(candidate: str) -> str:
+    """Returns the normalised address, or raises EmailNotValidError.
+
+    Syntax only. The deliverability check is a DNS lookup, which is a blocking
+    network call on the request path for a result the SMTP send reports anyway.
+    """
+    return validate_email(candidate, check_deliverability=False).email
+
+
+def _smtp_send(msg: MIMEMultipart, sender_email: str, sender_password: str) -> None:
+    """Sends one prepared message over SMTP. Blocking; call from a worker thread."""
+    logger.info("Attempting to connect to SMTP server...")
+    with smtplib.SMTP_SSL(
+        'smtp.gmail.com', 465, timeout=SMTP_TIMEOUT_SECONDS
+    ) as server:
+        logger.info("Connected to SMTP server, attempting login...")
+        server.login(sender_email, sender_password)
+        logger.info("Logged in successfully, sending email...")
+        server.send_message(msg)
+        logger.info("Contact notification email sent")
+
+
 async def _send_contact_email(email: str, message: str) -> None:
     """Delivers a collected address to Yanir's inbox.
 
@@ -537,10 +584,7 @@ async def _send_contact_email(email: str, message: str) -> None:
 
         if not all([sender_email, sender_password, receiver_email]):
             logger.error("Missing email configuration")
-            raise HTTPException(
-                status_code=500,
-                detail="Email configuration is incomplete"
-            )
+            raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
 
         # Create message
         msg = MIMEMultipart()
@@ -559,14 +603,8 @@ async def _send_contact_email(email: str, message: str) -> None:
         msg.attach(MIMEText(body, 'plain'))
 
         try:
-            # Send email with explicit logging
-            logger.info("Attempting to connect to SMTP server...")
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-                logger.info("Connected to SMTP server, attempting login...")
-                server.login(sender_email, sender_password)
-                logger.info("Logged in successfully, sending email...")
-                server.send_message(msg)
-                logger.info("Contact notification email sent")
+            # smtplib is synchronous; see the note on the Gemini call.
+            await run_in_threadpool(_smtp_send, msg, sender_email, sender_password)
         except Exception:
             # The raw SMTP error names the sender account and the server, so it
             # stays server-side: returning it would reflect both back to anyone

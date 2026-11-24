@@ -134,7 +134,8 @@ def get_all_projects() -> List[Dict[str, Any]]:
     if not os.path.exists(PROJECTS_DIR):
         return projects
 
-    for filename in os.listdir(PROJECTS_DIR):
+    # Sorted so the order is the same on every filesystem.
+    for filename in sorted(os.listdir(PROJECTS_DIR)):
         if filename.endswith('.md'):
             file_path = os.path.join(PROJECTS_DIR, filename)
             content = read_markdown_file(file_path)
