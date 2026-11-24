@@ -261,9 +261,11 @@ def test_corpus_without_profile_fails_closed(tmp_path, monkeypatch, fresh_corpus
     """
     monkeypatch.setattr(context, "PROFILE_DIR", str(tmp_path / "absent-profile"))
 
-    knowledge = context._build()
+    built = context._build()
 
-    assert knowledge.is_empty, "a corpus with no profile section must be empty"
+    assert all(knowledge.is_empty for knowledge in built.values()), (
+        "a corpus with no profile section must be empty in every language"
+    )
 
 
 def test_partial_corpus_is_not_cached(monkeypatch, fresh_corpus_cache):
@@ -275,8 +277,10 @@ def test_partial_corpus_is_not_cached(monkeypatch, fresh_corpus_cache):
     real_build = context._build
 
     def build_missing_one():
-        full = real_build()
-        return context.Knowledge(sections=full.sections[:-1])
+        return {
+            language: context.Knowledge(sections=full.sections[:-1])
+            for language, full in real_build().items()
+        }
 
     monkeypatch.setattr(context, "_build", build_missing_one)
 
@@ -343,7 +347,7 @@ def test_a_reply_the_model_never_produced_carries_no_trace():
     chosen = _whole_corpus_selection()
 
     for message in (BUSY_MESSAGE, MISCONFIGURED_MESSAGE, NO_KNOWLEDGE_MESSAGE):
-        assert main._answer_trace(gemini_helper.Answer(text=message), chosen) is None
+        assert main._answer_trace(gemini_helper.Answer(text=message), chosen, "en") is None
 
 
 def test_an_empty_corpus_answers_without_a_model_attributed(monkeypatch):
@@ -387,16 +391,16 @@ def test_a_model_answer_reports_the_corpus_it_was_given():
         finish_reason="STOP",
     )
 
-    trace = main._answer_trace(answer, chosen)
+    trace = main._answer_trace(answer, chosen, "en")
 
-    assert trace["model"] == "gemini-3.8-flash"
+    assert trace.model == "gemini-3.8-flash"
     # Every document is accounted for under some kind, so the breakdown a
     # visitor reads adds up to what was sent rather than to a subset of it.
-    assert sum(entry["count"] for entry in trace["context"]) == len(
+    assert sum(entry.count for entry in trace.context) == len(
         chosen.knowledge.sections
     )
     # Not reported upstream in this response, so absent here rather than zero.
-    assert trace["thinking_tokens"] is None
+    assert trace.thinking_tokens is None
 
 
 def test_the_corpus_estimate_is_never_shown_beside_the_measured_count():
@@ -405,10 +409,11 @@ def test_the_corpus_estimate_is_never_shown_beside_the_measured_count():
     chosen = _whole_corpus_selection()
     answer = gemini_helper.Answer(text="an answer", model="gemini-3.8-flash")
 
-    trace = main._answer_trace(answer, chosen)
+    trace = main._answer_trace(answer, chosen, "en")
 
-    assert "context_tokens" not in trace
-    assert chosen.knowledge.approx_tokens not in trace.values()
+    reported = trace.model_dump()
+    assert "context_tokens" not in reported
+    assert chosen.knowledge.approx_tokens not in reported.values()
 
 
 def test_source_counts_name_every_document_kind_without_zeroes():

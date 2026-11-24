@@ -108,7 +108,42 @@ _STOPWORDS: FrozenSet[str] = frozenset(
     """.split()
 )
 
-_TERM_RE = re.compile(r"[a-z0-9][a-z0-9+.#-]*")
+# The same closed classes in Hebrew, for the same reason. Listed as people type
+# them, attached prefixes included, because stopwords are matched before any
+# prefix is removed.
+_HEBREW_STOPWORDS: FrozenSet[str] = frozenset(
+    """
+    אני אתה את אתם אתן הוא היא הם הן אנחנו אנו זה זאת זו אלה אלו
+    של שלי שלך שלו שלה שלנו שלכם שלהם על אל עם בלי בין לפני אחרי תחת מול אצל
+    איתי איתך איתו איתה איתנו איתכם איתם
+    אצלך אצלי כמו כדי בגלל למרות לגבי בשביל דרך לפי נגד ליד עד מאז
+    מה מי איך איפה מתי למה מדוע כמה איזה איזו אילו האם
+    גם רק עוד כבר אבל אולי כי אם או לא כן אין יש היה היתה הייתה היו יהיה
+    כל כמה הרבה מעט יותר פחות מאוד קצת ממש בכלל תמיד לפעמים אף
+    לי לך לו לה לנו לכם להם בי בך בו בה בנו בהם אותי אותך אותו אותה אותנו אותם
+    פה כאן שם אז עכשיו היום אחר אחרת אחרים כזה כזאת כאלה
+    יכול יכולה אפשר צריך צריכה רוצה רוצים עושה עשית עשה לעשות
+    ספר תספר ספרי תגיד תגידי אמר תן תני דבר דברים משהו
+
+    אחד אחת שתיים שניים שלוש ארבע חמש שש שבע שמונה תשע עשר
+    ראשון ראשונה שני שנייה שלישי אחרון אחרונה הבא הבאה הקודם הקודמת
+
+    שלום שלומך שלומכם נשמע קורה היי הי אהלן בוקר ערב לילה צהריים טוב טובה
+    תודה רבה בבקשה סליחה ביי להתראות בסדר אוקיי
+    """.split()
+)
+
+# A word starts with a Latin letter or digit, or is a run of Hebrew letters.
+# A Hebrew document names tools and projects in Latin letters, so both kinds
+# are read from every text whatever language it is in.
+_TERM_RE = re.compile(r"[a-z0-9][a-z0-9+.#-]*|[\u05d0-\u05ea]+")
+
+# One-letter particles Hebrew attaches to the front of a word: and, the, in,
+# to, from, that, as.
+_HEBREW_PREFIXES = "והבלמשכ"
+
+# Final letter forms and the regular form each reduces to.
+_HEBREW_FINALS = str.maketrans("ךםןףץ", "כמנפצ")
 
 # Shortest stem worth reducing to. Below this, stripping an ending does more
 # damage than the match is worth ("uses" would become "us").
@@ -129,6 +164,9 @@ def _stem(token: str) -> str:
     "meaning" and "mean" all arrive at the same place; doing it the other way
     round leaves the plural one suffix behind the singular.
     """
+    if "\u05d0" <= token[0] <= "\u05ea":
+        return _stem_hebrew(token)
+
     for suffix, replacement in (("ies", "y"), ("es", ""), ("s", "")):
         if token.endswith(suffix) and len(token) - len(suffix) + len(replacement) >= MIN_STEM_LENGTH:
             token = token[: -len(suffix)] + replacement
@@ -139,6 +177,29 @@ def _stem(token: str) -> str:
             return token[: -len(suffix)]
 
     return token
+
+
+def _stem_hebrew(token: str) -> str:
+    """The Hebrew counterpart of `_stem`, with the same goal: agreement.
+
+    Hebrew writes "and", "the", "in", "to" and "from" as letters attached to the
+    word, so "הסוכנים", "לסוכנים" and "סוכן" share no exact form. Up to two
+    attached particles and a plural ending ("סוכנים", "סוכני") are removed, and a final letter is
+    written in its regular form so a word matches itself with an ending on.
+
+    A word that merely starts with one of those letters loses it too. That is
+    harmless for the reason given above: it loses the same letter everywhere.
+    """
+    for _ in range(2):
+        if token[0] in _HEBREW_PREFIXES and len(token) - 1 >= MIN_TERM_LENGTH:
+            token = token[1:]
+
+    for suffix in ("ים", "ות", "י"):
+        if token.endswith(suffix) and len(token) - len(suffix) >= MIN_TERM_LENGTH:
+            token = token[: -len(suffix)]
+            break
+
+    return token.translate(_HEBREW_FINALS)
 
 
 def _terms(text: str) -> Set[str]:
@@ -154,7 +215,9 @@ def _terms(text: str) -> Set[str]:
     return {
         _stem(token)
         for token in _TERM_RE.findall(text.lower())
-        if len(token) >= MIN_TERM_LENGTH and token not in _STOPWORDS
+        if len(token) >= MIN_TERM_LENGTH
+        and token not in _STOPWORDS
+        and token not in _HEBREW_STOPWORDS
     }
 
 
@@ -166,9 +229,15 @@ class _Index:
     weights: Dict[str, float]
 
 
-# (sources, index) for the corpus this was last built from. The corpus is itself
-# cached against file mtimes, so this rebuilds only when that one does.
-_index_cache: Tuple[Tuple[str, ...], _Index] | None = None
+# The index of each corpus it was last built from, one per language. The corpus
+# is itself cached against file mtimes, so an entry is rebuilt only when its
+# corpus is. Keyed on the corpus rather than on its labels: the English and
+# Hebrew corpora can carry the same labels over different text.
+_index_cache: Dict[Knowledge, _Index] = {}
+
+# One entry per language is all that is ever current. A rebuilt corpus adds new
+# entries, so the cache is emptied rather than left to grow.
+_INDEX_CACHE_LIMIT = 4
 
 
 def _build_index(knowledge: Knowledge) -> _Index:
@@ -196,14 +265,11 @@ def _build_index(knowledge: Knowledge) -> _Index:
 
 
 def _index_for(knowledge: Knowledge) -> _Index:
-    global _index_cache
-
-    sources = knowledge.sources
-    if _index_cache is not None and _index_cache[0] == sources:
-        return _index_cache[1]
-
-    index = _build_index(knowledge)
-    _index_cache = (sources, index)
+    index = _index_cache.get(knowledge)
+    if index is None:
+        if len(_index_cache) >= _INDEX_CACHE_LIMIT:
+            _index_cache.clear()
+        index = _index_cache[knowledge] = _build_index(knowledge)
     return index
 
 
@@ -334,5 +400,4 @@ def select(
 
 def _reset_cache() -> None:
     """Drops the term index. For tests that rebuild the corpus underneath it."""
-    global _index_cache
-    _index_cache = None
+    _index_cache.clear()

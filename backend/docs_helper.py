@@ -23,6 +23,11 @@ PROFILE_DIR = os.path.join(DOCS_DIR, "profile")
 
 PROJECTS_DIR = os.path.join(DOCS_DIR, "projects")
 
+# Hebrew versions of the documents above, one file per English file with the
+# same name and in the same subdirectory. context.py reads them when a question
+# is asked in Hebrew; the pages are still built from the English files.
+HEBREW_DIR = os.path.join(DOCS_DIR, "he")
+
 # Two directories deliberately have no constant here.
 #
 # `docs/templates/` holds placeholder documents for anyone forking this repo.

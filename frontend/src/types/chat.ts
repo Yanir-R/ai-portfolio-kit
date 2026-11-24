@@ -28,15 +28,22 @@ export type MessageType = 'user' | 'system' | 'ai' | 'initial' | 'quick' | 'conf
  * a figure it does not have rather than printing a zero, because these are
  * displayed as evidence and a filled-in number would be a claim nothing backs.
  *
- * There is deliberately no confidence score and no per-answer source list. The
- * whole corpus is sent on every request and nothing attributes a sentence to a
- * section, so `context` reports what the model was given, not what it used.
+ * There is deliberately no confidence score and no claim about which document
+ * an answer came from. Nothing attributes a sentence to a document, so
+ * `context` and `sources` report what the model was given, not what it used.
  */
 
 /** How many documents of one kind went into the request. */
 export interface ContextCount {
     kind: string;
     count: number;
+}
+
+/** One document placed in front of the model. */
+export interface TraceSource {
+    kind: 'profile' | 'project' | 'writing';
+    slug: string;
+    title: string;
 }
 
 export interface AnswerTrace {
@@ -58,6 +65,13 @@ export interface AnswerTrace {
     context_outcome?: 'narrowed' | 'conversational' | 'unfocused' | 'no_corpus' | null;
     /** The whole corpus, so a narrowed set can be reported as a share of it. */
     context_available?: number | null;
+    /*
+     * The documents `context` counts, by name: what the model was given for
+     * this question. Not which of them the answer drew on.
+     */
+    sources?: TraceSource[] | null;
+    /** The language the question was read as; decides which documents went. */
+    language?: 'en' | 'he' | null;
 }
 
 export interface ChatMessage {
