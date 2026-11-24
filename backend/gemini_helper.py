@@ -109,6 +109,47 @@ def _start_cooldown(model_id: str, now: float) -> None:
 # is ~600 thinking + ~110 answer.
 MAX_OUTPUT_TOKENS = 1_500
 
+# How hard the model thinks before it answers.
+#
+# Left unset, Gemini 3.x thinks at its default level, and on this workload that
+# is where most of the wait goes: ~600 thinking tokens to write ~110 tokens of
+# answer, about 16 seconds end to end. The answers here are two to four
+# sentences restating a corpus the model was handed, which is not a reasoning
+# problem, so a low level should cut the wait without making them worse.
+#
+# Not every model accepts every level. A model that refuses the setting answers
+# 400, which would otherwise read as a misconfiguration and end the chain, so
+# that one model is asked again without it (see get_gemini_response).
+THINKING_LEVEL = types.ThinkingLevel.LOW
+
+# One client per API key for the life of the process.
+#
+# Building a client per request also builds a new HTTP connection pool per
+# request, so every question paid a fresh TLS handshake to Google before the
+# model saw it. The SDK client is safe to share between the threadpool workers
+# that call it.
+_clients: Dict[str, "genai.Client"] = {}
+_clients_lock = threading.Lock()
+
+
+def _client_for(api_key: str) -> "genai.Client":
+    with _clients_lock:
+        client = _clients.get(api_key)
+        if client is None:
+            # The per-call timeout is what keeps a hung upstream call from
+            # holding a worker. Cloud Run runs at most four instances, each a
+            # single uvicorn process, so a handful of stalled calls occupy the
+            # whole service and endpoints that never touch Gemini -
+            # /api/chat/status among them - start timing out behind them. Chat
+            # being unavailable is a degradation; taking the rest of the site
+            # with it is an outage.
+            client = genai.Client(
+                api_key=api_key,
+                http_options=types.HttpOptions(timeout=REQUEST_TIMEOUT_MS),
+            )
+            _clients[api_key] = client
+        return client
+
 # User-facing copy per failure category, so an auth or configuration problem is
 # not reported to visitors as if the service were merely busy.
 #
@@ -193,18 +234,17 @@ def get_gemini_response(
         logger.error("Refusing to answer: knowledge corpus is empty")
         return Answer(text=NO_KNOWLEDGE_MESSAGE)
 
-    # The per-call timeout is what keeps a hung upstream call from holding a
-    # worker. Cloud Run runs at most four instances, each a single uvicorn
-    # process, so a handful of stalled calls occupy the whole service and
-    # endpoints that never touch Gemini - /api/chat/status among them - start
-    # timing out behind them. Chat being unavailable is a degradation; taking the
-    # rest of the site with it is an outage.
-    client = genai.Client(
-        api_key=api_key,
-        http_options=types.HttpOptions(timeout=REQUEST_TIMEOUT_MS),
-    )
+    client = _client_for(api_key)
+    system_instruction = build_system_instruction(knowledge)
     config = types.GenerateContentConfig(
-        system_instruction=build_system_instruction(knowledge),
+        system_instruction=system_instruction,
+        max_output_tokens=MAX_OUTPUT_TOKENS,
+        thinking_config=types.ThinkingConfig(thinking_level=THINKING_LEVEL),
+    )
+    # The same request at the model's default thinking level, for a model that
+    # refuses the setting above.
+    plain_config = types.GenerateContentConfig(
+        system_instruction=system_instruction,
         max_output_tokens=MAX_OUTPUT_TOKENS,
     )
     contents = build_contents(user_question, conversation_history)
@@ -235,11 +275,30 @@ def get_gemini_response(
         skipped_all = False
         call_started = time.monotonic()
         try:
-            response = client.models.generate_content(
-                model=model_id,
-                contents=contents,
-                config=config,
-            )
+            try:
+                response = client.models.generate_content(
+                    model=model_id,
+                    contents=contents,
+                    config=config,
+                )
+            except genai_errors.APIError as e:
+                if e.code != 400:
+                    raise
+                # Possibly this model does not take the thinking level. Asking
+                # once more without it costs one round-trip; reporting the site
+                # as misconfigured over an optional setting costs the answer.
+                # A 400 for any other reason fails again here and is handled
+                # as before.
+                logger.warning(
+                    "Model %s answered 400 with thinking_level=%s; retrying without it",
+                    model_id,
+                    THINKING_LEVEL.name,
+                )
+                response = client.models.generate_content(
+                    model=model_id,
+                    contents=contents,
+                    config=plain_config,
+                )
             # Measured around the call itself rather than the whole function, so
             # it reports what the model took and not how long a cooling-down
             # model was skipped for.
@@ -347,10 +406,16 @@ def _read_usage(model_id: str, response) -> Dict[str, Optional[object]]:
     }
 
     if usage is not None:
+        # `cached` is how much of the prompt Gemini served from its implicit
+        # cache. The rules and the profile open every request, so a run of
+        # questions should show it climbing; if it stays empty, the start of
+        # the system instruction is varying and the free discount is being
+        # missed. Logged only, not part of the reply.
         logger.info(
-            "Gemini usage model=%s prompt=%s thinking=%s output=%s total=%s",
+            "Gemini usage model=%s prompt=%s cached=%s thinking=%s output=%s total=%s",
             model_id,
             fields["prompt_tokens"],
+            getattr(usage, "cached_content_token_count", None),
             fields["thinking_tokens"],
             fields["output_tokens"],
             fields["total_tokens"],

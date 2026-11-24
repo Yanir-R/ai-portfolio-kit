@@ -601,6 +601,29 @@ async def require_edge_secret(request: Request, call_next):
     return await call_next(request)
 
 
+# Read-only content that changes only when a new image is deployed. Without a
+# Cache-Control header every page view refetched the same JSON from Cloud Run,
+# and with min-instances=0 a first visit after a quiet spell paid a cold start
+# for data the browser already had. Five minutes fresh, then served from the
+# browser's copy while it refreshes in the background, so a new post appears at
+# most a few minutes after its deploy.
+_CACHEABLE_PREFIXES = ("/api/writing", "/api/projects", "/api/content/")
+READ_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600"
+
+
+@app.middleware("http")
+async def cache_read_only_content(request: Request, call_next):
+    response = await call_next(request)
+    if (
+        request.method == "GET"
+        and response.status_code == 200
+        and request.url.path.startswith(_CACHEABLE_PREFIXES)
+        and "cache-control" not in response.headers
+    ):
+        response.headers["Cache-Control"] = READ_CACHE_CONTROL
+    return response
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,

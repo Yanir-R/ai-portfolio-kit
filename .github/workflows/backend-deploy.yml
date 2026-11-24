@@ -88,16 +88,10 @@ jobs:
           echo "ENVIRONMENT=development" >> $GITHUB_ENV
           echo "GCP_PROJECT=${{ secrets.GCP_DEV_PROJECT_ID }}" >> $GITHUB_ENV
 
-      - name: Set up Python
-        uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c # v4.9.1
-        with:
-          python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: ${{ env.BACKEND_DIR }}/requirements.txt
-
-      - name: Install Dependencies
-        working-directory: ${{ env.BACKEND_DIR }}
-        run: pip install -r requirements.txt
+      # No Python setup here: the image is built by Cloud Build from the
+      # Dockerfile below, so installing the dependencies on this runner only
+      # spent CI minutes on packages nothing used. verify already installed and
+      # tested them.
 
       - name: Google Auth
         uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
@@ -183,6 +177,13 @@ jobs:
           # read every secret in the project. GCP_RUNTIME_SA can read the
           # secrets on the --set-secrets line and nothing else.
           #
+          # --cpu-boost gives a starting instance extra CPU until it is serving.
+          # With min-instances=0 most first visits after a quiet spell land on
+          # a cold start, and importing the Gemini SDK is the slow part of it.
+          # The extra CPU is billed only for those few seconds per start;
+          # min-instances=1 would remove cold starts entirely but bills an idle
+          # instance all month.
+          #
           # It is a variable rather than a secret because a service account
           # email is an identifier, not a credential; the deploy is authorised
           # by Workload Identity Federation, which is scoped to this repository.
@@ -194,6 +195,7 @@ jobs:
             --allow-unauthenticated \
             --port=8080 \
             --min-instances=0 \
+            --cpu-boost \
             --max-instances=4 \
             --memory=512Mi \
             --timeout=300 \
