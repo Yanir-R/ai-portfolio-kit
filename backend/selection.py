@@ -193,7 +193,13 @@ def _stem(token: str) -> str:
 
     for suffix in ("ing", "ed"):
         if token.endswith(suffix) and len(token) - len(suffix) >= MIN_STEM_LENGTH:
-            return token[: -len(suffix)]
+            stem = token[: -len(suffix)]
+            # "running" is "run" with its last letter doubled, and has to arrive
+            # where "run" does. Letters English doubles in the base
+            # word itself are left alone, so "calling" stays "call".
+            if stem[-1] == stem[-2] and stem[-1] not in "lsfz":
+                stem = stem[:-1]
+            return stem
 
     return token
 

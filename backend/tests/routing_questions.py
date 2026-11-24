@@ -43,6 +43,8 @@ QUESTIONS = (
     ("en", "Did you publish anything about JavaScript being asynchronous?", (W, "callbacks-promises-async-await")),
     ("en", "What was that story about a segfault?", (W, "crashed-claude-cli")),
     ("en", "When should a cheap model ask an expensive one for help?", (W, "agent-advisor")),
+    ("en", "How many AI agents do you run?", (P, "agent-fleet")),
+    ("en", "Do you have a multi-agent setup where a person signs off?", (P, "agent-fleet")),
     # --- about Yanir and the offer: the profile answers -----------------------
     ("en", "Can you build AI agents for my company?", None),
     ("en", "How much do you charge?", None),
@@ -73,6 +75,8 @@ QUESTIONS = (
     ("he", "לא הייתי ליד המחשב והסוכן כתב המון. יש דרך לקבל תקציר?", (P, "catchup")),
     ("he", "עשית משהו עם וידאו או משחקים?", (P, "reelsensei")),
     ("he", "כתבת משהו על עלויות של Cursor?", (W, "cursor-token-burn")),
+    ("he", "כמה סוכנים יש לך?", (P, "agent-fleet")),
+    ("he", "איך בנוי מערך הסוכנים שלך?", (P, "agent-fleet")),
     # --- Hebrew, about Yanir and the offer ------------------------------------
     ("he", "אתה בונה סוכני AI לעסקים?", None),
     ("he", "כמה זה עולה?", None),

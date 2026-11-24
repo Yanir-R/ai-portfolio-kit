@@ -326,6 +326,8 @@ def test_a_word_and_its_inflections_reach_the_same_document():
     assert selection._stem("burned") == selection._stem("burn")
     assert selection._stem("tokens") == selection._stem("token")
     assert selection._stem("meanings") == selection._stem("meaning") == selection._stem("mean")
+    assert selection._stem("running") == "run"
+    assert selection._stem("calling") == "call"
     # Short words are left alone: reducing "uses" to "us" costs more than the
     # match is worth.
     assert selection._stem("uses") == "uses"

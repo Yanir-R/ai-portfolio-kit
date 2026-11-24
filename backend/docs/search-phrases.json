@@ -24,6 +24,10 @@
     "rag", "retrieval", "prompt injection", "guardrails", "rate limit", "how were you built",
     "האתר הזה", "הצ'אט הזה", "הזיות", "ממציא", "להמציא", "איך אתה בנוי", "איך האתר בנוי", "הגנות"
   ],
+  "project/agent-fleet": [
+    "fleet", "agent fleet", "how many agents", "grok bot", "multi-agent", "permissions",
+    "צי", "מערך", "מערך הסוכנים", "כמה סוכנים", "הרשאות"
+  ],
   "project/catchup": [
     "recap", "summary", "summarise", "digest", "unread", "away", "catch up", "handoff", "plugin", "extension",
     "תקציר", "סיכום", "לסכם", "לא קראתי", "הודעות", "תוסף", "מסירה", "פספסתי"
