@@ -442,7 +442,8 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
 /** The <head> block that replaces the one between the seo:head markers. */
 export const headFor = (page: Page, siteUrl: string, defaultImage: string) => {
     const url = `${siteUrl}${page.path}`;
-    const title = `${page.title} | ${PERSON.siteName}`;
+    // A Hebrew page carries the Hebrew name, so the title reads in one script.
+    const title = `${page.title} | ${page.lang === 'he' ? PERSON.nameHe : PERSON.siteName}`;
     const image = absolute(siteUrl, page.image) || defaultImage;
     const isDefault = image === defaultImage;
     const e = escapeHtml;
