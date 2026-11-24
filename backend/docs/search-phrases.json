@@ -1,0 +1,82 @@
+{
+  "profile/work-with-me": [
+    "hire", "hiring", "freelance", "freelancer", "consultant", "consulting", "contractor",
+    "price", "pricing", "cost", "charge", "rate", "quote", "budget", "fee",
+    "company", "startup", "municipality", "municipalities", "council", "government", "nonprofit",
+    "chatbot", "automation", "automate", "services", "offer", "course", "workshop", "teach", "mentoring",
+    "available", "availability", "job", "position", "recruit",
+    "מחיר", "מחירון", "עולה", "עלות", "תעריף", "הצעת מחיר", "תקציב",
+    "פרילנס", "פרילנסר", "יועץ", "ייעוץ", "שכיר", "משרה", "פנוי", "זמין", "גיוס", "להעסיק",
+    "חברה", "סטארטאפ", "עירייה", "מועצה", "רשות", "עמותה", "עסק", "ארגון",
+    "צ'אטבוט", "בוט", "אוטומציה", "שירותים", "קורס", "סדנה", "הדרכה", "ליווי", "מתחילים"
+  ],
+  "profile/about-me": [
+    "background", "story", "yourself", "biography", "bio", "hobbies", "person",
+    "רקע", "סיפור", "עצמך", "ביוגרפיה", "תחביבים"
+  ],
+  "profile/resume": [
+    "cv", "career", "employers", "employer", "jobs", "education", "degree", "skills", "stack", "seniority", "years",
+    "קורות חיים", "קריירה", "מעסיקים", "עבדת", "השכלה", "תואר", "כישורים", "טכנולוגיות", "ותק", "ניסיון"
+  ],
+  "project/ai-chat-portfolio": [
+    "chatbot", "this website", "this chat", "hallucination", "hallucinate", "making things up", "invent", "grounded",
+    "rag", "retrieval", "prompt injection", "guardrails", "rate limit", "how were you built",
+    "האתר הזה", "הצ'אט הזה", "הזיות", "ממציא", "להמציא", "איך אתה בנוי", "איך האתר בנוי", "הגנות"
+  ],
+  "project/catchup": [
+    "recap", "summary", "summarise", "digest", "unread", "away", "catch up", "handoff", "plugin", "extension",
+    "תקציר", "סיכום", "לסכם", "לא קראתי", "הודעות", "תוסף", "מסירה", "פספסתי"
+  ],
+  "project/personakit": [
+    "remember", "remembers", "memory", "memories", "context", "forget", "preferences", "local", "privacy", "offline",
+    "open source", "download", "free", "mcp",
+    "זוכר", "לזכור", "זיכרון", "זיכרונות", "שוכח", "העדפות", "מקומי", "פרטיות", "קוד פתוח", "להוריד", "חינם"
+  ],
+  "project/reelsensei": [
+    "video", "videos", "gaming", "games", "gamer", "clips", "highlights", "streaming", "twitch", "editing", "footage",
+    "וידאו", "סרטונים", "משחקים", "גיימינג", "גיימרים", "קליפים", "היילייטס", "עריכה", "סטרימינג"
+  ],
+  "project/hermes": [
+    "personal assistant", "assistant", "always on", "around the clock", "24/7", "bot", "telegram", "obsidian",
+    "automations", "automation", "nightly", "scheduled",
+    "עוזר אישי", "עוזר", "מסביב לשעון", "כל הזמן", "בוט", "טלגרם", "אוטומציות", "אוטומציה", "לילי", "מתוזמן"
+  ],
+  "project/review-engine": [
+    "code review", "reviewer", "pull request", "pull requests", "pr", "merge", "checks", "ci", "quality", "automatically",
+    "בדיקת קוד", "בודק קוד", "סקירת קוד", "בקשת מיזוג", "מיזוג", "איכות", "אוטומטית", "אוטומטי"
+  ],
+  "project/trinity-crm": [
+    "crm", "barbershop", "barber", "hairdresser", "salon", "booking", "appointments", "scheduling", "customers",
+    "small business", "clients", "calendar",
+    "מספרה", "מספרות", "ספר", "תורים", "קביעת תורים", "יומן", "לקוחות", "ניהול לקוחות", "עסק קטן", "זימון"
+  ],
+  "project/trinity-legal": [
+    "lawyer", "lawyers", "attorney", "law firm", "legal", "office", "documents", "files", "archive", "migration",
+    "migrating", "cloud", "tenants", "pilot",
+    "עורך דין", "עורכי דין", "משרד", "משפטי", "מסמכים", "קבצים", "ארכיון", "העברה", "הגירה", "ענן", "תיקים", "פיילוט"
+  ],
+  "writing/agent-advisor": [
+    "advisor", "cheap model", "expensive model", "escalate", "orchestration", "opus", "model routing", "smarter model",
+    "מודל זול", "מודל יקר", "יועץ", "אורקסטרציה", "ניתוב מודלים"
+  ],
+  "writing/three-meanings-of-nothing": [
+    "empty results", "empty response", "no results", "tool calls", "tool calling", "retry", "not found",
+    "תוצאה ריקה", "תשובה ריקה", "אין תוצאות", "קריאות לכלים", "לא נמצא"
+  ],
+  "writing/which-nothing-did-you-get": [
+    "empty results", "empty response", "no results", "nothing found", "short version",
+    "תוצאה ריקה", "אין תוצאות", "לא נמצא", "גרסה קצרה"
+  ],
+  "writing/crashed-claude-cli": [
+    "crash", "crashed", "segfault", "bug report", "bun", "acquisition", "acquired",
+    "קריסה", "קרס", "באג", "רכישה", "רכשה"
+  ],
+  "writing/cursor-token-burn": [
+    "cursor", "editor", "ide", "spending", "bill", "expensive", "cost", "tokens", "cache",
+    "עלויות", "עלות", "חשבון", "יקר", "טוקנים", "בזבוז", "עורך"
+  ],
+  "writing/callbacks-promises-async-await": [
+    "javascript", "asynchronous", "async", "event loop", "promises", "callbacks", "node",
+    "אסינכרוני", "ג'אווהסקריפט", "לולאת אירועים"
+  ]
+}

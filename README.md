@@ -133,8 +133,11 @@ Stated plainly, so you know what you are forking:
 - **The answer trace reports what the model was given, not what it used.** No step attributes an
   answer to a document (`backend/main.py`, `backend/context.py`).
 - **Document selection is word overlap with English and Hebrew stopword lists.** A Hebrew
-  question is matched against the Hebrew documents in `backend/docs/he/`. When no term
-  distinguishes a document, every document is sent (`backend/selection.py`).
+  question is matched against the Hebrew documents in `backend/docs/he/`. Each document also
+  matches on a hand-kept list of the phrasings visitors use (`backend/docs/search-phrases.json`),
+  which a new document needs an entry in. At most three documents go beside the profile; every
+  other document is named to the model in one line. When no word matches, only the profile and
+  that list are sent (`backend/selection.py`).
 - **The SMTP host is fixed in code** to one mail provider (`backend/main.py`).
 - **The frontend has no automated tests.** `frontend/package.json` defines typecheck, lint,
   format and build scripts, and no test script.
@@ -149,7 +152,7 @@ Each item names the file or test that shows it. Tests are in `backend/tests/` an
 | A corpus with no profile is treated as empty, and template placeholders never reach the model | `test_context_layer.py::test_corpus_without_profile_fails_closed`, `::test_corpus_never_falls_back_to_template_placeholders` |
 | With an empty corpus the model is not called | `test_context_layer.py::test_empty_corpus_is_refused_without_calling_the_model` |
 | The instruction given to the model states the grounding rules and fences the corpus | `test_context_layer.py::test_system_instruction_states_the_grounding_rules`, `::test_system_instruction_fences_the_corpus` |
-| Each question gets only the documents it needs; profile documents are always kept; an unknown subject gets everything | `backend/selection.py`; `test_selection.py` |
+| Each question gets only the documents it needs; profile documents are always kept; an unknown subject gets the profile and a one-line list of the rest | `backend/selection.py`; `test_selection.py` |
 | Oversized or empty chat requests are rejected | `backend/main.py`; `test_context_layer.py::test_oversized_message_is_rejected`, `::test_empty_message_is_rejected`, `::test_unbounded_history_is_rejected` |
 | Interface banners are not replayed to the model as conversation | `test_context_layer.py::test_ui_chrome_is_not_replayed_as_conversation` |
 | Per-client and global rate limits, answering 429 with `Retry-After` | `backend/rate_limit.py` (code; no limiter test was read for this list) |

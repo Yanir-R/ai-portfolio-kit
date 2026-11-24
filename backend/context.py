@@ -112,6 +112,9 @@ class Section:
     source: str = ""
     slug: str = ""
     title: str = ""
+    # One sentence saying what the document is, taken from the document. It is
+    # what the model is shown in place of the body when the body is not sent.
+    summary: str = ""
 
     @property
     def kind(self) -> str:
@@ -133,6 +136,10 @@ class Knowledge:
     """The corpus, plus enough metadata to reason about its cost."""
 
     sections: Tuple[Section, ...]
+    # Documents that exist but whose bodies are not in `sections`. The model is
+    # shown one line for each, so it knows what else has been published and can
+    # point a visitor to it without being handed text the question did not need.
+    listed: Tuple[Section, ...] = ()
 
     @property
     def text(self) -> str:
@@ -142,7 +149,13 @@ class Knowledge:
         a source, and so injected text inside a document cannot pass itself off
         as the end of the corpus. prompt.py wraps the whole block again.
         """
-        return "\n\n".join(f"### {s.label}\n{s.body}" for s in self.sections)
+        text = "\n\n".join(f"### {s.label}\n{s.body}" for s in self.sections)
+        if self.listed:
+            text += f"\n\n### {CATALOGUE_LABEL}\n" + "\n".join(
+                f"- {s.label}: {s.summary}" if s.summary else f"- {s.label}"
+                for s in self.listed
+            )
+        return text
 
     @property
     def sources(self) -> Tuple[str, ...]:
@@ -187,6 +200,40 @@ class Knowledge:
             for s in self.sections
             if s.source and s.slug
         )
+
+
+# The heading over the one-line entries. prompt.py tells the model what an entry
+# under it may and may not be used for.
+CATALOGUE_LABEL = "Also published (one line each, full text not included here)"
+
+# A summary is whole sentences from the start of the overview: enough of them
+# to pass the minimum, because some overviews open with two words ("This
+# site."), and cut at the maximum if one sentence runs long.
+MIN_SUMMARY_CHARS = 80
+MAX_SUMMARY_CHARS = 220
+
+_SUMMARY_RE = re.compile(r"^## (?:Overview|Summary)[ \t]*\n+(.+?)(?=\n\s*\n|\n#|\Z)", re.MULTILINE | re.DOTALL)
+_SENTENCE_END_RE = re.compile(r"(?<=[.!?])\s")
+
+
+def summary_of(body: str) -> str:
+    """The opening of a document's `## Overview` or `## Summary`.
+
+    Taken from the document rather than written beside it, so the line the
+    model reads cannot say something the document does not.
+    """
+    match = _SUMMARY_RE.search(body)
+    if not match:
+        return ""
+    paragraph = " ".join(match.group(1).split())
+    summary = ""
+    for sentence in _SENTENCE_END_RE.split(paragraph):
+        summary = f"{summary} {sentence}".strip()
+        if len(summary) >= MIN_SUMMARY_CHARS:
+            break
+    if len(summary) > MAX_SUMMARY_CHARS:
+        summary = summary[:MAX_SUMMARY_CHARS].rsplit(" ", 1)[0] + "..."
+    return summary
 
 
 EMPTY = Knowledge(sections=())
@@ -310,6 +357,7 @@ def _section(document: _Document) -> Section:
         source=source,
         slug=slug,
         title=title,
+        summary=summary_of(body),
     )
 
 

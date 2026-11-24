@@ -17,36 +17,55 @@ model - it would halve the number of visitors the site can serve. This is the
 "mostly deterministic routing, model only when ambiguous" split, and here the
 deterministic half is sufficient.
 
-**The signal comes from the corpus, not from a list somebody maintains.** A
-hand-written map of keyword to document is wrong the day a document is added and
-nobody notices. Term weights are derived from the documents themselves: a word
-appearing in every document distinguishes nothing and scores zero, while a word
-appearing in one is decisive. "Build" is worthless and "Moonsite" is conclusive,
-and neither fact was written down by hand.
+**The signal comes from the corpus first.** Term weights are derived from the
+documents themselves: a word appearing in every document distinguishes nothing
+and scores zero, while a word appearing in one is decisive. "Build" is worthless
+and "Moonsite" is conclusive, and neither fact was written down by hand.
 
-**It fails open.** When no term carries signal the whole corpus is sent, exactly
-as before. For a chat whose entire claim is that it answers from its sources,
-silently omitting the document that held the answer is far worse than a larger
-prompt - the visitor gets "I haven't written about that" about something Yanir
-has written about, which is indistinguishable from an honest decline.
+**Each document also carries the words visitors use for it.** A visitor asks
+about "a barbershop" and the write-up says "hair salons"; no weighting of the
+document's own words can connect the two. `docs/search-phrases.json` lists, per
+document, the phrasings people reach for in English and in Hebrew. They are
+added to the document's terms for matching and are never sent to the model, so
+a phrase there can route a question but cannot become a claim. A test fails when
+a document has no entry or an entry names no document, which is what keeps the
+list from rotting quietly.
 
-That last case is why the result is typed rather than being a bare corpus.
-Yanir's own writing on tool-calling makes the point that "nothing" is several
-different conditions wearing one face, and collapsing them is the bug. The two
-that matter here are NARROWED ("we had reason to choose these") and UNFOCUSED
-("we had no basis to exclude anything, so we excluded nothing"), and the site
-must never show them as the same thing.
+**A miss is graded, not answered by sending everything.** The first version
+sent the whole corpus whenever nothing matched, on the reasoning that a larger
+prompt beats a dropped document. It also meant the least-understood questions
+got the least selective answer. Now there are three results:
+
+- NARROWED: a document accounts for a real share of the question. It and any
+  other document that does are sent, up to a small maximum.
+- CLOSEST: something matched, but weakly. The few best-scoring documents are
+  sent and reported as the closest found, not as chosen.
+- UNMATCHED: nothing in the question is a word any document uses. Only Yanir's
+  own notes are sent.
+
+In all three the model is also given one line for every document whose body was
+left out (`Knowledge.listed`). That line is what replaces sending everything: the
+model can still tell a visitor that a write-up on the subject exists and point
+them to it, and it does so from thirty words instead of three thousand.
+
+The result is typed rather than being a bare corpus because the site reports
+these differently. Yanir's own writing on tool-calling makes the point that
+"nothing" is several different conditions wearing one face, and collapsing them
+is the bug.
 """
 
 from __future__ import annotations
 
+import json
 import logging
 import math
+import os
 import re
 from dataclasses import dataclass
 from typing import Dict, FrozenSet, Iterable, Set, Tuple
 
 from context import Knowledge, Section
+from docs_helper import DOCS_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -240,6 +259,25 @@ _index_cache: Dict[Knowledge, _Index] = {}
 _INDEX_CACHE_LIMIT = 4
 
 
+SEARCH_PHRASES_PATH = os.path.join(DOCS_DIR, "search-phrases.json")
+
+
+def _search_phrases() -> Dict[str, Tuple[str, ...]]:
+    """The phrasings visitors use for each document, keyed by "kind/slug".
+
+    Read when an index is built, which is once per corpus. A missing or broken
+    file costs the extra matches and nothing else: selection falls back to the
+    documents' own words, as it worked before the file existed.
+    """
+    try:
+        with open(SEARCH_PHRASES_PATH, encoding="utf-8") as file:
+            loaded = json.load(file)
+        return {key: tuple(str(phrase) for phrase in value) for key, value in loaded.items()}
+    except (OSError, ValueError, AttributeError, TypeError):
+        logger.exception("Could not read %s; matching on document text only", SEARCH_PHRASES_PATH)
+        return {}
+
+
 def _build_index(knowledge: Knowledge) -> _Index:
     """Weighs every term by how many documents it fails to distinguish.
 
@@ -248,8 +286,17 @@ def _build_index(knowledge: Knowledge) -> _Index:
     is the whole reason no keyword list is needed: the corpus states its own
     distinctive vocabulary, and restates it whenever a document is added.
     """
+    phrases = _search_phrases()
     per_section = tuple(
-        (section.label, frozenset(_terms(f"{section.label}\n{section.body}")))
+        (
+            section.label,
+            frozenset(
+                _terms(
+                    f"{section.label}\n{section.body}\n"
+                    + "\n".join(phrases.get(f"{section.source}/{section.slug}", ()))
+                )
+            ),
+        )
         for section in knowledge.sections
     )
 
@@ -274,18 +321,34 @@ def _index_for(knowledge: Knowledge) -> _Index:
 
 
 # What the selection concluded. States rather than a bare corpus, because "we
-# chose these", "there was nothing to answer from a document" and "we could not
-# tell, so we sent everything" are different facts about an answer, and the site
-# reports them differently.
+# chose these", "these are only the closest we found" and "nothing matched" are
+# different facts about an answer, and the site reports them differently.
 NARROWED = "narrowed"
-UNFOCUSED = "unfocused"
+CLOSEST = "closest"
+UNMATCHED = "unmatched"
 CONVERSATIONAL = "conversational"
 NO_CORPUS = "no_corpus"
+# Everything was sent because there was no profile to fall back on. Selection
+# no longer chooses this for a question it could not place; it remains for the
+# one corpus shape where leaving documents out would leave nothing.
+UNFOCUSED = "unfocused"
 
 # How many recent turns are read when the message itself says nothing topical.
 # Matches the history the model is replayed, so what frames the search is what
 # the model can actually see.
 FRAMING_TURNS = 6
+
+# The most documents sent beside the profile. A question that five documents
+# each answer a quarter of is not asking about five documents, and the ones
+# left out are still named to the model in one line each.
+MAX_DOCUMENTS = 3
+
+# The share of the whole question the best document must account for to count
+# as a match rather than as the closest thing found. "The whole question"
+# includes words no document uses, each weighed as heavily as a word can be:
+# asked about the weather in Tel Aviv, a write-up that happens to contain one
+# of those words has matched a quarter of the question, not all of it.
+STRONG_COVERAGE = 0.3
 
 
 @dataclass(frozen=True)
@@ -301,7 +364,16 @@ class Selection:
         return self.outcome == NARROWED
 
 
-def _profile_only(knowledge: Knowledge, available: int) -> Selection:
+def _with_the_rest_listed(chosen: Tuple[Section, ...], knowledge: Knowledge) -> Knowledge:
+    """`chosen` in full, and one line for every other document."""
+    kept = set(chosen)
+    return Knowledge(
+        sections=chosen,
+        listed=tuple(section for section in knowledge.sections if section not in kept),
+    )
+
+
+def _profile_only(knowledge: Knowledge, available: int, outcome: str) -> Selection:
     """The least a reply can be built on without the corpus failing closed.
 
     Not an empty corpus: `get_gemini_response` refuses to answer at all without
@@ -312,10 +384,10 @@ def _profile_only(knowledge: Knowledge, available: int) -> Selection:
     if not profile:
         return Selection(knowledge=knowledge, outcome=UNFOCUSED, available=available)
 
-    logger.info("Selection: conversational, sending %d profile documents", len(profile))
+    logger.info("Selection: %s, sending %d profile documents", outcome, len(profile))
     return Selection(
-        knowledge=Knowledge(sections=profile),
-        outcome=CONVERSATIONAL,
+        knowledge=_with_the_rest_listed(profile, knowledge),
+        outcome=outcome,
         available=available,
     )
 
@@ -348,13 +420,11 @@ def select(
     # what the search gets framed with - the same turns the model is replayed,
     # so the framing cannot reach for something the model cannot see.
     #
-    # "Hi" is not a question at all. Sending ten documents to answer a greeting
-    # is the most expensive reply on the site for the exchange that needs it
-    # least.
+    # "Hi" is not a question at all, and gets the profile and nothing else.
     if not asked:
         asked = _terms("\n".join(list(history or [])[-FRAMING_TURNS:]))
         if not asked:
-            return _profile_only(knowledge, available)
+            return _profile_only(knowledge, available, CONVERSATIONAL)
 
     scores: Dict[str, float] = {}
     for label, terms in index.terms:
@@ -362,40 +432,54 @@ def select(
 
     best = max(scores.values(), default=0.0)
 
-    # A subject this corpus has no distinctive vocabulary for. There is no basis
-    # on which to exclude anything, so nothing is excluded.
+    # No word in the question is one that distinguishes any document.
     if best <= 0:
-        logger.info("Selection: no distinguishing terms, sending all %d documents", available)
-        return Selection(knowledge=knowledge, outcome=UNFOCUSED, available=available)
+        return _profile_only(knowledge, available, UNMATCHED)
 
     # The weight of everything asked that this corpus recognises at all, which
     # is what a document's score is a share of.
     asked_weight = sum(index.weights.get(term, 0.0) for term in asked)
     threshold = asked_weight * QUERY_COVERAGE
 
+    # The best match is kept whatever its share. Spread a question's terms
+    # across enough documents and every one of them falls under the threshold,
+    # which would drop the closest thing to an answer the corpus has.
+    ranked = sorted(
+        (
+            section
+            for section in knowledge.sections
+            if not section.is_profile
+            and scores[section.label] > 0
+            and (scores[section.label] >= threshold or scores[section.label] == best)
+        ),
+        key=lambda section: scores[section.label],
+        reverse=True,
+    )[:MAX_DOCUMENTS]
+
+    # Kept in corpus order, so the request reads the same whatever was asked.
+    kept = set(ranked)
     chosen = tuple(
-        section
-        for section in knowledge.sections
-        # The best match is kept whatever its share. Spread a question's terms
-        # across enough documents and every one of them falls under the
-        # threshold, which would drop the closest thing to an answer the corpus
-        # has - the one document guaranteed to be worth sending.
-        if section.is_profile
-        or scores[section.label] >= threshold
-        or scores[section.label] == best
+        section for section in knowledge.sections if section.is_profile or section in kept
     )
 
-    if len(chosen) == available:
-        return Selection(knowledge=knowledge, outcome=UNFOCUSED, available=available)
+    # A word no document uses weighs as much as a word can: log(N), the weight
+    # of a word found in exactly one.
+    unknown = sum(1 for term in asked if term not in index.weights)
+    whole_question = asked_weight + unknown * math.log(max(available, 2))
+    outcome = NARROWED if best >= whole_question * STRONG_COVERAGE else CLOSEST
 
-    selected = Knowledge(sections=chosen)
     logger.info(
-        "Selection: %d of %d documents (%s)",
+        "Selection: %s, %d of %d documents (%s)",
+        outcome,
         len(chosen),
         available,
         ", ".join(s.label for s in chosen),
     )
-    return Selection(knowledge=selected, outcome=NARROWED, available=available)
+    return Selection(
+        knowledge=_with_the_rest_listed(chosen, knowledge),
+        outcome=outcome,
+        available=available,
+    )
 
 
 def _reset_cache() -> None:
