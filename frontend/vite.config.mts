@@ -55,11 +55,13 @@ const DOCS_ROOT = path.resolve(__dirname, '../backend/docs');
 //
 // Two entries are directives rather than fetchers: Google-Extended and
 // Applebot-Extended have no crawler of their own, they only govern whether
-// Gemini and Apple Intelligence may use the content. They sit on the training
-// side for consistency. That has a real cost - Google-Extended also gates
-// Gemini's grounding, so declining it means Gemini is less likely to cite the
-// site - and it is the one line here worth revisiting if being found through
-// Gemini specifically matters more than staying out of its training set.
+// Gemini and Apple Intelligence may use the content. Google-Extended is
+// allowed: it also gates Gemini's grounding, so declining it made Gemini less
+// likely to cite the site, and for a site whose job is to be found by people
+// asking an assistant about AI agents, being cited by Gemini matters more than
+// staying out of its training set (Yanir's call, 2026-11-24). Cloudflare's AI
+// Crawler block does not cover it - it is a robots token, not a fetcher - so
+// robots.txt is where this decision lives. Applebot-Extended stays declined.
 const ANSWER_TIME_CRAWLERS = [
     'OAI-SearchBot',
     'ChatGPT-User',
@@ -72,6 +74,7 @@ const ANSWER_TIME_CRAWLERS = [
     'Applebot',
     'Googlebot',
     'Bingbot',
+    'Google-Extended',
 ] as const;
 
 const TRAINING_CRAWLERS = [
@@ -84,7 +87,6 @@ const TRAINING_CRAWLERS = [
     'Amazonbot',
     'Meta-ExternalAgent',
     'Google-CloudVertexBot',
-    'Google-Extended',
     'Applebot-Extended',
 ] as const;
 
