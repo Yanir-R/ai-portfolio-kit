@@ -24,7 +24,7 @@ I am looking into opening a course on developing with Claude, Grok Bot and Herme
 
 ## HOW AN ENGAGEMENT WORKS
 
-1.  A short call of 20 to 30 minutes to understand what you need
+1.  A short call of 20 to 30 minutes to understand what you need. You can book it yourself at https://cal.com/yanirrot/zoom-call
 2.  I come back with a proposal and a price
 3.  The work is done as a fixed-price project or by the hour, whichever fits you
 
@@ -40,6 +40,7 @@ Trinity is the name of my business. It is a name I connect with and have used fo
 
 ## GETTING IN TOUCH
 
+-   📅 Book a short call: https://cal.com/yanirrot/zoom-call
 -   📧 rotyanir@gmail.com
 -   💼 LinkedIn - Yanir Rot
 -   Or leave your email address in the chat on this site with a line about what you need
