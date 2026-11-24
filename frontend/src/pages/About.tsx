@@ -42,7 +42,7 @@ const About: React.FC = () => {
             {load.state === 'loading' && <LoadingNote text={t(PROJECTS).loading} />}
             {load.state === 'failed' && <LoadFailed copy={copy.failed} onRetry={retry} />}
             {load.state === 'ready' && (
-                <article className="w-post">
+                <article className="w-post about">
                     <div className="w-body" dir="auto">
                         <Markdown>{load.value}</Markdown>
                     </div>

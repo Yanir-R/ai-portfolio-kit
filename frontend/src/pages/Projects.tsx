@@ -51,7 +51,7 @@ const Projects: React.FC = () => {
                                 )}
                             </div>
                             <h3 dir="auto">{project.title}</h3>
-                            {project.overview && <p>{project.overview}</p>}
+                            {project.overview && <p dir="auto">{project.overview}</p>}
                             <div className="ft">
                                 <span className="rd" />
                                 <Link className="w-out" to={to(`/projects/${project.slug}`)}>

@@ -38,7 +38,7 @@ export const PROJECTS: Localized<ProjectsCopy> = {
     he: {
         tagline: 'פרויקטים',
         title: 'מה בניתי,',
-        em: 'ומה היה קשה בזה.',
+        em: 'ואיפה זה עובד.',
         lead: 'כל תיאור כאן הוא גם חלק ממה שהסוכן בעמוד הבית עונה ממנו, אז אפשר לקרוא כאן או לשאול שם.',
         status: {
             production: 'רץ בייצור',
@@ -95,7 +95,7 @@ export const PROJECTS: Localized<ProjectsCopy> = {
     en: {
         tagline: 'Projects',
         title: 'What I built,',
-        em: 'and what was hard about it.',
+        em: 'and where it works.',
         lead: 'Every write-up here is also part of what the agent on the home page answers from, so you can read it here or ask about it there.',
         status: {
             production: 'In production',

@@ -65,7 +65,7 @@
 /* A card shows the start of the overview; the page has the rest. */
 .w-arts.proj .w-art > p {
     display: -webkit-box;
-    -webkit-line-clamp: 6;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -77,4 +77,17 @@
 /* On a narrow screen the actions under a piece wrap instead of overflowing. */
 .w-end .ac {
     flex-wrap: wrap;
+}
+/* A line of about a post's length on the about page. */
+.w-post.about .w-body p {
+    max-width: 65ch;
+}
+/* A sheet's call to action stays on one line, arrow included. */
+#vis .btn {
+    white-space: nowrap;
+}
+@media (max-width: 480px) {
+    #vis .btn {
+        font-size: 0.85rem;
+    }
 }
