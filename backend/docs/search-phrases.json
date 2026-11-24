@@ -33,7 +33,7 @@
     "תקציר", "סיכום", "לסכם", "לא קראתי", "הודעות", "תוסף", "מסירה", "פספסתי"
   ],
   "project/personakit": [
-    "remember", "remembers", "memory", "memories", "context", "forget", "preferences", "local", "privacy", "offline",
+    "experience with memory", "ניסיון עם זיכרון", "remember", "remembers", "memory", "memories", "context", "forget", "preferences", "local", "privacy", "offline",
     "open source", "download", "free", "mcp",
     "זוכר", "לזכור", "זיכרון", "זיכרונות", "שוכח", "העדפות", "מקומי", "פרטיות", "קוד פתוח", "להוריד", "חינם"
   ],
@@ -85,5 +85,65 @@
   "writing/callbacks-promises-async-await": [
     "javascript", "asynchronous", "async", "event loop", "promises", "callbacks", "node",
     "אסינכרוני", "ג'אווהסקריפט", "לולאת אירועים"
+  ],
+  "writing/agents-ask-approval": [
+    "approval fatigue", "always approve", "human in the loop", "permission prompt", "what does the agent ask before acting", "kiro", "dangerous action",
+    "אישור לפני פעולה", "מאשרים תמיד", "בקשת אישור", "פעולה מסוכנת", "אדם בלולאה"
+  ],
+  "writing/personakit-memory-like-production": [
+    "duplicate memories", "memory deduplication", "merge memories", "personakit 0.2", "memory source quote",
+    "כפילויות בזיכרון", "איחוד זיכרונות", "גרסה 0.2", "מאיפה הגיע הזיכרון"
+  ],
+  "writing/personakit-solo-founder": [
+    "solo founder", "night agent", "architect agent", "personakit 0.1 release", "which agent may use my memories",
+    "סולו פאונדר", "סוכן לילה", "סוכן ארכיטקט", "גרסה 0.1", "מי מורשה להשתמש בזיכרון"
+  ],
+  "writing/ninety-prs-review-engine": [
+    "ninety pull requests in two days", "90 prs", "many pull requests", "duplicated ci", "shared ci rules", "engine-review", "warp factory",
+    "90 בקשות שינוי", "שכפול ci", "כללי ci משותפים", "מנוע סקירה"
+  ],
+  "writing/claude-code-mods": [
+    "claude code mods", "mods", "customize claude code", "coding agent workspace",
+    "מודים", "הרחבות לקלוד קוד", "סביבת עבודה לסוכן קוד"
+  ],
+  "writing/agent-memory-custody": [
+    "openai dots", "background agent", "memory custody", "context permission",
+    "דוטס", "סוכן ברקע", "משמורת זיכרון", "שכבת אמון"
+  ],
+  "writing/whatsapp-business-mcp": [
+    "whatsapp mcp", "meta mcp", "whatsapp business", "mcp hype", "mcp server",
+    "וואטסאפ עסקי", "שרת mcp"
+  ],
+  "writing/agent-threads-are-the-artifact": [
+    "delta", "zed", "agent transcript", "diff is not enough", "multiplayer coding", "code review of agent code",
+    "דלתא", "השיחה עם הסוכן", "הדיף לא מספיק"
+  ],
+  "writing/building-personakit-day-7": [
+    "cold start", "empty memory", "honest absence", "no reviewed memory",
+    "זיכרון ריק", "התחלה קרה", "היעדר כן"
+  ],
+  "writing/building-personakit-day-6": [
+    "memory stays out of the answer", "restraint", "when not to use memory", "nothing relevant", "forced personalization",
+    "איפוק", "מתי לא להשתמש בזיכרון", "שום דבר רלוונטי"
+  ],
+  "writing/building-personakit-day-5": [
+    "first real user", "dogfooding", "memory through mcp", "memory in real work",
+    "משתמש ראשון", "זיכרון בתוך העבודה"
+  ],
+  "writing/building-personakit-day-4": [
+    "barber", "barbershop appointments", "paper diary", "customers do not come back",
+    "ספר", "מספרה", "תורים", "יומן כתוב", "לקוחות לא חוזרים"
+  ],
+  "writing/building-personakit-day-3": [
+    "approve or reject", "memory permissions", "memory review model",
+    "לאשר או לדחות", "הרשאות לזיכרון"
+  ],
+  "writing/building-personakit-day-2": [
+    "accountable memory", "assistants remember us", "who decides what becomes memory",
+    "זיכרון אחראי", "מי מחליט מה נזכר"
+  ],
+  "writing/why-i-started-personakit": [
+    "first announcement", "why personakit", "personakit announcement", "your ai's memory your say",
+    "למה התחלת את personakit", "הכרזה על personakit"
   ]
 }
