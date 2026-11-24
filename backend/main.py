@@ -16,6 +16,7 @@ from docs_helper import (
 from rate_limit import chat_limiter, contact_limiter, enforce_rate_limit
 from pydantic import BaseModel, EmailStr, Field
 from typing import Dict, List, Literal, Optional
+import json
 import os
 import datetime
 from email.mime.text import MIMEText
@@ -278,6 +279,44 @@ class AnswerTrace(BaseModel):
     language: Literal["en", "he"]
 
 
+class Block(BaseModel):
+    """Something the site draws beside the answer text.
+
+    Chosen by the server from the selection, never by the model: a slug here is
+    one that exists, because it came out of the corpus rather than out of
+    generated text. Shapes agreed with the site's design:
+
+    - `writing`: one piece, `ref` is its slug.
+    - `writing_list`: several pieces, `items` are slugs best first (at most
+      five), `total` is how many matched, `ref` says what the list is
+      ("all", "recent" or "topic").
+    """
+
+    type: Literal["writing", "writing_list"]
+    ref: str
+    items: Optional[List[str]] = None
+    total: Optional[int] = None
+
+
+def _writing_blocks(selection: Selection) -> List[Block]:
+    """The cards a writing answer carries, from what selection found."""
+    if not selection.writing:
+        return []
+    # A single piece, or pieces brought in as evidence for an answer that was
+    # not about the writing, are shown as cards of their own. At most two, so
+    # the answer stays the main thing.
+    if selection.writing_intent == "related" or len(selection.writing) == 1:
+        return [Block(type="writing", ref=slug) for slug in selection.writing[:2]]
+    return [
+        Block(
+            type="writing_list",
+            ref=selection.writing_intent,
+            items=list(selection.writing),
+            total=selection.writing_total,
+        )
+    ]
+
+
 class ChatResponse(BaseModel):
     """One shape for every chat reply.
 
@@ -296,6 +335,8 @@ class ChatResponse(BaseModel):
     email_collected: bool = False
     is_email_collection: bool = False
     trace: Optional[AnswerTrace] = None
+    # Cards drawn beside the answer. Empty when the reply has nothing to show.
+    blocks: List[Block] = []
 
 
 def _chat_reply(
@@ -303,12 +344,14 @@ def _chat_reply(
     email_collected: bool = False,
     is_email_collection: bool = False,
     trace: Optional[AnswerTrace] = None,
+    blocks: Optional[List[Block]] = None,
 ) -> ChatResponse:
     return ChatResponse(
         response=response,
         email_collected=email_collected,
         is_email_collection=is_email_collection,
         trace=trace,
+        blocks=blocks or [],
     )
 
 
@@ -577,7 +620,32 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             turns,
         )
 
-        return _chat_reply(answer.text, trace=_answer_trace(answer, selection, language))
+        blocks = _writing_blocks(selection) if answer.from_model else []
+
+        # One structured line per answer: what was asked for (by kind, never the
+        # visitor's words), what was sent and what was shown. Enough to ask
+        # later which posts get read and which questions found nothing.
+        logger.info(
+            "chat_audit %s",
+            json.dumps(
+                {
+                    "language": language,
+                    "outcome": selection.outcome,
+                    "writing_intent": selection.writing_intent or None,
+                    "sent": [f"{d['kind']}/{d['slug']}" for d in selection.knowledge.documents],
+                    "listed": len(selection.knowledge.listed),
+                    "blocks": [b.model_dump(exclude_none=True) for b in blocks],
+                    "from_model": answer.from_model,
+                },
+                ensure_ascii=False,
+            ),
+        )
+
+        return _chat_reply(
+            answer.text,
+            trace=_answer_trace(answer, selection, language),
+            blocks=blocks,
+        )
 
     except HTTPException:
         raise
