@@ -5,6 +5,7 @@
     "company", "startup", "municipality", "municipalities", "council", "government", "nonprofit",
     "chatbot", "automation", "automate", "services", "offer", "course", "workshop", "teach", "mentoring",
     "available", "availability", "job", "position", "recruit",
+    "law office", "accountant", "small office", "משרד קטן", "רואה חשבון", "עורך דין",
     "מחיר", "מחירון", "עולה", "עלות", "תעריף", "הצעת מחיר", "תקציב",
     "פרילנס", "פרילנסר", "יועץ", "ייעוץ", "שכיר", "משרה", "פנוי", "זמין", "גיוס", "להעסיק",
     "חברה", "סטארטאפ", "עירייה", "מועצה", "רשות", "עמותה", "עסק", "ארגון",
@@ -53,6 +54,8 @@
   "project/trinity-legal": [
     "lawyer", "lawyers", "attorney", "law firm", "legal", "office", "documents", "files", "archive", "migration",
     "migrating", "cloud", "tenants", "pilot",
+    "real estate", "land", "property", "accountant", "accountants", "accounting", "cpa", "custom", "tailored",
+    "נדל\"ן", "נדלן", "מקרקעין", "רואה חשבון", "רואי חשבון", "הנהלת חשבונות", "בהתאמה אישית", "מותאם",
     "עורך דין", "עורכי דין", "משרד", "משפטי", "מסמכים", "קבצים", "ארכיון", "העברה", "הגירה", "ענן", "תיקים", "פיילוט"
   ],
   "writing/agent-advisor": [
