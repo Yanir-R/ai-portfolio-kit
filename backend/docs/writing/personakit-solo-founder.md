@@ -34,6 +34,8 @@
 
 #בינה_מלאכותית #AIAgents #AIMemory #Privacy
 
+PersonaKit ב-48 שניות: [לצפייה בסרטון](/writing/personakit-explainer.mp4)
+
 ## Kind
 post
 
@@ -45,6 +47,9 @@ https://www.linkedin.com/feed/update/urn:li:activity:7526964069598203906/
 
 ## Date
 2026-11-13
+
+## Media
+/writing/personakit-explainer-poster.jpg
 
 ## Summary
 סולו פאונדר עם כמה סוכני AI: מנוע סקירה ביום, סוכן ארכיטקט בלילה, ושחרור PersonaKit 0.1, זיכרון מקומי וקוד פתוח עם מקור לכל זיכרון.
