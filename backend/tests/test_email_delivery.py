@@ -66,8 +66,8 @@ def test_a_collected_address_is_emailed_and_confirmed(smtp):
     assert "visitor@example.com" in body
     assert "wants to talk" in body
 
-    assert reply["response"] == main.EMAIL_RECEIVED_MESSAGE
-    assert reply["email_collected"] is True
+    assert reply.response == main.EMAIL_RECEIVED_MESSAGE
+    assert reply.email_collected is True
 
 
 def test_a_failed_send_tells_the_visitor_where_to_write_instead(smtp, monkeypatch):
@@ -83,8 +83,8 @@ def test_a_failed_send_tells_the_visitor_where_to_write_instead(smtp, monkeypatc
     # Reporting a 500 would leave the visitor with a generic error and no idea
     # their message went nowhere, so the failure is answered in Yanir's voice
     # with the address to use instead.
-    assert reply["response"] == main.EMAIL_SEND_FAILED_MESSAGE
-    assert reply.get("email_collected") is not True
+    assert reply.response == main.EMAIL_SEND_FAILED_MESSAGE
+    assert reply.email_collected is not True
 
 
 def test_missing_email_configuration_does_not_pretend_to_have_sent(smtp, monkeypatch):
@@ -95,4 +95,4 @@ def test_missing_email_configuration_does_not_pretend_to_have_sent(smtp, monkeyp
     )
 
     assert smtp.sent == []
-    assert reply["response"] == main.EMAIL_SEND_FAILED_MESSAGE
+    assert reply.response == main.EMAIL_SEND_FAILED_MESSAGE

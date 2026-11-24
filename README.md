@@ -132,7 +132,8 @@ Stated plainly, so you know what you are forking:
   repository and sent to the Gemini API; the profile folder is also served by `/api/content/`.
 - **The answer trace reports what the model was given, not what it used.** No step attributes an
   answer to a document (`backend/main.py`, `backend/context.py`).
-- **Document selection is word overlap with an English stopword list.** When no term
+- **Document selection is word overlap with English and Hebrew stopword lists.** A Hebrew
+  question is matched against the Hebrew documents in `backend/docs/he/`. When no term
   distinguishes a document, every document is sent (`backend/selection.py`).
 - **The SMTP host is fixed in code** to one mail provider (`backend/main.py`).
 - **The frontend has no automated tests.** `frontend/package.json` defines typecheck, lint,

@@ -6,6 +6,7 @@ from hmac import compare_digest
 from dotenv import load_dotenv
 from gemini_helper import Answer, get_gemini_response
 from context import get_knowledge
+from language import detect_language
 from selection import Selection, select
 from docs_helper import (
     read_markdown_file, PROFILE_DIR,
@@ -14,7 +15,7 @@ from docs_helper import (
 )
 from rate_limit import chat_limiter, contact_limiter, enforce_rate_limit
 from pydantic import BaseModel, EmailStr, Field
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 import os
 import datetime
 from email.mime.text import MIMEText
@@ -211,31 +212,23 @@ def _to_model_turns(history: Optional[List[ChatMessage]]) -> List[Dict[str, str]
     return turns
 
 
-def _chat_reply(
-    response: str,
-    email_collected: bool = False,
-    is_email_collection: bool = False,
-    trace: Optional[Dict[str, object]] = None,
-) -> Dict[str, object]:
-    """One shape for every chat reply.
+class ContextCount(BaseModel):
+    """How many documents of one kind went into the request."""
 
-    The two flags drive the frontend's collection state, so a reply that omits
-    one leaves the client guessing at it.
-
-    `trace` is present only when a model produced the answer. The contact flow
-    replies here without calling Gemini at all, and a rail under those would be
-    describing a request that never happened.
-    """
-    return {
-        "response": response,
-        "email_collected": email_collected,
-        "is_email_collection": is_email_collection,
-        "trace": trace,
-    }
+    kind: str
+    count: int
 
 
-def _answer_trace(answer: Answer, selection: Selection) -> Optional[Dict[str, object]]:
-    """What the answer cost, for the rail the site draws beneath it.
+class Source(BaseModel):
+    """One document that was placed in front of the model."""
+
+    kind: Literal["profile", "project", "writing"]
+    slug: str
+    title: str
+
+
+class AnswerTrace(BaseModel):
+    """What one model answer cost and what it was given.
 
     Deliberately only what the system can back. The counts come from the SDK's
     own usage metadata and the document figures from the selection, so every
@@ -249,10 +242,11 @@ def _answer_trace(answer: Answer, selection: Selection) -> Optional[Dict[str, ob
     afterwards records which of those it leaned on. The distinction is the
     difference between a receipt and a guess.
 
-    `outcome` travels with the counts because "these documents were chosen for
-    your question" and "nothing distinguished one document from another, so all
-    of them went" are different facts. Rendering both as a bare number would
-    collapse them into a claim of selectivity the second case cannot support.
+    `context_outcome` travels with the counts because "these documents were
+    chosen for your question" and "nothing distinguished one document from
+    another, so all of them went" are different facts. Rendering both as a bare
+    number would collapse them into a claim of selectivity the second case
+    cannot support.
 
     `Knowledge.approx_tokens` is deliberately absent. It is a chars-over-four
     estimate of the same quantity `prompt_tokens` reports exactly, and showing a
@@ -260,32 +254,91 @@ def _answer_trace(answer: Answer, selection: Selection) -> Optional[Dict[str, ob
     out which one to believe. It stays a server-side signal for deciding when
     the corpus needs trimming.
     """
+
+    model: Optional[str] = None
+    prompt_tokens: Optional[int] = None
+    thinking_tokens: Optional[int] = None
+    output_tokens: Optional[int] = None
+    total_tokens: Optional[int] = None
+    finish_reason: Optional[str] = None
+    latency_ms: Optional[int] = None
+    # Pluralisation of `kind` is left to the frontend, which is where the
+    # site's copy lives.
+    context: List[ContextCount]
+    context_outcome: Literal["narrowed", "unfocused", "conversational", "no_corpus"]
+    context_available: int
+    # The same documents `context` counts, by name. They are what the model was
+    # given for this question, in the order it was given them - not the ones
+    # the answer drew on, which nothing here can know.
+    sources: List[Source]
+    # The language the question was read as, which decides whether the Hebrew
+    # or the English version of each document was sent.
+    language: Literal["en", "he"]
+
+
+class ChatResponse(BaseModel):
+    """One shape for every chat reply.
+
+    `response` stays the first field so the text can be streamed ahead of the
+    rest if streaming is added.
+
+    The two flags drive the frontend's collection state, so a reply that omits
+    one leaves the client guessing at it.
+
+    `trace` is present only when a model produced the answer. The contact flow
+    replies without calling Gemini at all, and a rail under those would be
+    describing a request that never happened.
+    """
+
+    response: str
+    email_collected: bool = False
+    is_email_collection: bool = False
+    trace: Optional[AnswerTrace] = None
+
+
+def _chat_reply(
+    response: str,
+    email_collected: bool = False,
+    is_email_collection: bool = False,
+    trace: Optional[AnswerTrace] = None,
+) -> ChatResponse:
+    return ChatResponse(
+        response=response,
+        email_collected=email_collected,
+        is_email_collection=is_email_collection,
+        trace=trace,
+    )
+
+
+def _answer_trace(
+    answer: Answer, selection: Selection, language: str
+) -> Optional[AnswerTrace]:
+    """The trace for `answer`, or None when no model produced it."""
     if not answer.from_model:
         return None
 
-    return {
-        "model": answer.model,
-        "prompt_tokens": answer.prompt_tokens,
-        "thinking_tokens": answer.thinking_tokens,
-        "output_tokens": answer.output_tokens,
-        "total_tokens": answer.total_tokens,
-        "finish_reason": answer.finish_reason,
-        "latency_ms": answer.latency_ms,
-        # Counts, not names. The kind of document is safe to state; which one an
-        # answer leaned on is not knowable here. Pluralisation is left to the
-        # frontend, which is where the site's copy lives.
-        "context": [
-            {"kind": kind, "count": count}
+    return AnswerTrace(
+        model=answer.model,
+        prompt_tokens=answer.prompt_tokens,
+        thinking_tokens=answer.thinking_tokens,
+        output_tokens=answer.output_tokens,
+        total_tokens=answer.total_tokens,
+        finish_reason=answer.finish_reason,
+        latency_ms=answer.latency_ms,
+        context=[
+            ContextCount(kind=kind, count=count)
             for kind, count in selection.knowledge.source_counts
         ],
-        "context_outcome": selection.outcome,
-        "context_available": selection.available,
-    }
+        context_outcome=selection.outcome,
+        context_available=selection.available,
+        sources=[Source(**document) for document in selection.knowledge.documents],
+        language=language,
+    )
 
 
 async def _deliver_collected_email(
     email: str, message_content: str, context: str
-) -> Dict[str, object]:
+) -> ChatResponse:
     """Emails an address collected in chat and returns the reply to show for it.
 
     Both places that accept an address route through here so a delivery failure
@@ -408,7 +461,7 @@ async def chat_status():
     knowledge = get_knowledge()
     return {"knowledge_ready": not knowledge.is_empty}
 
-@app.post("/chat-with-files")
+@app.post("/chat-with-files", response_model=ChatResponse)
 async def chat_with_files(chat_request: ChatRequest, request: Request):
     # Shape only. The visitor's message is their words, not ours to retain in
     # log storage.
@@ -498,9 +551,17 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
         # was actually made - calling select() again for the trace could
         # describe a different one if the corpus rebuilt in between.
         turns = _to_model_turns(chat_request.conversation_history)
+
+        # Read from the visitor's own words only. The model's earlier replies
+        # follow the visitor's language, so they add nothing, and a caller who
+        # forged one must not be able to choose the corpus with it.
+        language = detect_language(
+            chat_request.message,
+            earlier=[turn["content"] for turn in turns if turn["role"] == "user"],
+        )
         selection = select(
             chat_request.message,
-            get_knowledge(),
+            get_knowledge(language),
             history=[turn["content"] for turn in turns],
         )
         # The SDK call is synchronous and can take over a minute. Run in the
@@ -514,7 +575,7 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             turns,
         )
 
-        return _chat_reply(answer.text, trace=_answer_trace(answer, selection))
+        return _chat_reply(answer.text, trace=_answer_trace(answer, selection, language))
 
     except HTTPException:
         raise
