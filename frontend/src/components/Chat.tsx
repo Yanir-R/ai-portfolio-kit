@@ -255,7 +255,8 @@ const Chat: React.FC<ChatProps> = ({
                         >
                             {msg.context && (msg.type === 'user' || msg.type === 'quick') && (
                                 <p className="mb-1 font-mono text-[0.65rem] text-muted">
-                                    Asking about: <bdi>{msg.context.title}</bdi>
+                                    {msg.context.lang === 'he' ? 'שואלים על:' : 'Asking about:'}{' '}
+                                    <bdi>{msg.context.title}</bdi>
                                 </p>
                             )}
                             <p
@@ -339,7 +340,9 @@ const Chat: React.FC<ChatProps> = ({
             >
                 {context && (
                     <div className="flex gap-2 items-center mb-2 min-w-0 font-mono text-xs text-muted">
-                        <span className="flex-shrink-0">Asking about:</span>
+                        <span className="flex-shrink-0">
+                            {context.lang === 'he' ? 'שואלים על:' : 'Asking about:'}
+                        </span>
                         <span className="truncate text-content" dir="auto">
                             {context.title}
                         </span>

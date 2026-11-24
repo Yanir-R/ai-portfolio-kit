@@ -93,6 +93,8 @@ export interface ChatContext {
     type: 'writing';
     ref: string;
     title: string;
+    /** The piece's language, so the panel speaks it. */
+    lang?: 'en' | 'he';
 }
 
 export interface ChatMessage {

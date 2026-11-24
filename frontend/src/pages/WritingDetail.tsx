@@ -89,6 +89,8 @@ const WritingDetail: React.FC = () => {
     }
 
     const body = stripWritingMetadata(entry.content);
+    // A Hebrew post gets a Hebrew panel; the visitor came to it in Hebrew.
+    const isHebrew = /[\u0590-\u05FF]/.test(entry.title);
     // Typed media from the index; plain paths as images for an older backend.
     const allMedia: MediaItem[] =
         entry.media_items ?? (entry.media ?? []).map((src) => ({ kind: 'image' as const, src }));
@@ -263,13 +265,24 @@ const WritingDetail: React.FC = () => {
                 does it actually do?" needs no subject. Keyed on the slug so
                 moving to the next piece starts a fresh conversation about it. */}
             <section className="mt-12" aria-label="Ask about this piece">
-                <p className="mb-3 label">Ask about this piece</p>
+                <p className="mb-3 label">
+                    {isHebrew ? 'שאלו על הקטע הזה' : 'Ask about this piece'}
+                </p>
                 <Chat
                     key={entry.slug}
                     compact
                     hideQuickMessages
-                    context={{ type: 'writing', ref: entry.slug, title: entry.title }}
-                    initialMessage="Ask anything about this piece, in English or Hebrew. The answer comes from what I wrote here and in my other notes."
+                    context={{
+                        type: 'writing',
+                        ref: entry.slug,
+                        title: entry.title,
+                        lang: isHebrew ? 'he' : 'en',
+                    }}
+                    initialMessage={
+                        isHebrew
+                            ? 'אפשר לשאול כל דבר על הפוסט הזה, בעברית או באנגלית. אענה ממה שכתבתי כאן ומשאר החומרים שלי.'
+                            : 'Ask anything about this piece, in English or Hebrew. I answer from what I wrote here and in my other notes.'
+                    }
                 />
             </section>
         </article>

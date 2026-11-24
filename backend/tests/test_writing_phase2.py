@@ -164,8 +164,11 @@ def test_a_question_from_a_piece_page_is_about_that_piece(calls):
         "So what does it actually do?",
         context={"type": "writing", "ref": "ninety-prs-review-engine"},
     )
-    knowledge = calls[0][2]
+    question, knowledge = calls[0][1], calls[0][2]
     assert "ninety-prs-review-engine" in {d["slug"] for d in knowledge.documents}
+    # The model is told which piece "it" refers to, by the corpus's title.
+    assert question.startswith('(Asked while reading your post "')
+    assert question.endswith("So what does it actually do?")
     # The piece is open in front of the visitor, so it is not offered back.
     for block in reply["blocks"]:
         assert "ninety-prs-review-engine" not in (block.get("items") or [block["ref"]])

@@ -749,13 +749,24 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
                 RECENT_REPLY[language], blocks=blocks, answered_by="index", language=language
             )
 
+        # Asked from a piece's page: the model is told which piece "it" and
+        # "this" mean. The title comes from the corpus, never from the request.
+        question_for_model = chat_request.message
+        if chat_request.context:
+            reading_entry = get_writing_by_slug(chat_request.context.ref)
+            if reading_entry and reading_entry.get("title"):
+                question_for_model = (
+                    f'(Asked while reading your post "{reading_entry["title"]}" on the site.)\n'
+                    f"{chat_request.message}"
+                )
+
         # The SDK call is synchronous and can take over a minute. Run in the
         # threadpool so it does not block the event loop, which would stall
         # every other request, health checks included, until it returned.
         answer = await run_in_threadpool(
             get_gemini_response,
             GEMINI_API_KEY,
-            chat_request.message,
+            question_for_model,
             selection.knowledge,
             turns,
         )
