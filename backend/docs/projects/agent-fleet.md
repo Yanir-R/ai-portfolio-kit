@@ -10,10 +10,10 @@ My own working system of more than 40 AI agents, running on Grok Bot. One head a
 
 ## Key Features
 - One way in: every request goes to the head agent, which decides which group handles it
-- Groups by field: video production, content, activity on professional networks, cloud infrastructure, market research, knowledge and memory, and the health of the agents themselves
+- Groups by field: video production, content drafts, collecting and analysing activity on professional networks, monitoring the cost, health and security of cloud infrastructure, market research, knowledge and memory, and the health of the agents themselves
 - Clear reporting: an agent reports to its group lead, the lead reports to the head agent, and I receive one message instead of dozens
 - Permissions by role: each agent gets only the access its job needs, and several groups can only read and never change anything
-- A person decides: nothing is sent, published or changed outside the system without my approval
+- A person decides: nothing is sent, published, deployed or changed outside the system without my approval. Agents write drafts, and I publish myself
 - Agents that watch agents: one group checks that the others are working and keeps the map of the system up to date
 
 ## Project Type
