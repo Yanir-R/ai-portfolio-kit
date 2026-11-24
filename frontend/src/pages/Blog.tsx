@@ -21,6 +21,7 @@ const Blog: React.FC = () => {
     const [index, setIndex] = useState<WritingIndex | null>(null);
     const [params, setParams] = useSearchParams();
     const [query, setQuery] = useState('');
+    const [showAllTopics, setShowAllTopics] = useState(false);
     const topicId = params.get('topic');
     const seriesId = params.get('series');
     const [loading, setLoading] = useState(true);
@@ -128,8 +129,33 @@ const Blog: React.FC = () => {
                             className="py-2 px-3 w-full text-base rounded border transition-colors bg-ink-700 text-content placeholder-muted border-border focus:outline-none focus:border-caution focus-visible:ring-2 focus-visible:ring-caution/60"
                         />
                     </label>
+                    {/* Four first, so on a phone the chips do not push the
+                        first post below the fold; the rest behind a toggle.
+                        A topic picked from the address is always shown. */}
                     <div className="mt-4">
-                        <TopicChips index={index} lang="en" />
+                        <TopicChips
+                            index={index}
+                            lang="en"
+                            ids={
+                                showAllTopics
+                                    ? undefined
+                                    : index.overview.topics
+                                          .filter((t, i) => i < 4 || t.id === topicId)
+                                          .map((t) => t.id)
+                            }
+                        />
+                        {index.overview.topics.length > 4 && (
+                            <button
+                                type="button"
+                                onClick={() => setShowAllTopics((open) => !open)}
+                                aria-expanded={showAllTopics}
+                                className="mt-2 font-mono text-xs underline rounded transition-colors text-muted underline-offset-4 decoration-border hover:text-content focus:outline-none focus-visible:ring-2 focus-visible:ring-caution"
+                            >
+                                {showAllTopics
+                                    ? 'Fewer topics'
+                                    : `${index.overview.topics.length - 4} more topics`}
+                            </button>
+                        )}
                     </div>
                     {(topic || series) && (
                         <p className="flex flex-wrap gap-x-3 gap-y-1 items-baseline mt-4 font-mono text-xs text-muted">
