@@ -8,6 +8,7 @@ I build AI agents and systems for organizations, small businesses and public aut
 
 -   **AI agents for your organization** - agents that do real work inside your processes, with evidence for what they did and a person in control of what matters
 -   **Custom CRM systems, ready for AI** - a system built around your requirements that your team works in every day, and built so that AI capabilities can be connected quickly when the time comes
+-   **Tailored systems for small professional offices** - law offices, accountants and similar practices. I sit with the people who do the work, specify the process with them, and build the system around it. Trinity Legal was built this way, with a law office that specialises in real estate and land
 -   **Making an existing LLM system reliable** - grounding, hallucination prevention, token cost, and AI code review workflows
 -   **Full-stack product development** - from a React screen to cloud operations on GCP
 
