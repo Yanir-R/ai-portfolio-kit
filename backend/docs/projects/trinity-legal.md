@@ -1,7 +1,11 @@
 # Trinity Legal
 
 ## Overview
-Cloud document and case management for small law firms, in Hebrew and right-to-left. It is in a live pilot with active clients. This is full-stack product work rather than AI work: the hard parts are documents that several people edit, strict separation between firms, and moving a real archive into the cloud without losing anything. The client is not named here.
+A document and case management system, custom made for a small law office that specialises in real estate and land. It was specified in working sessions with lawyers who practise in that field, so the process inside the system follows how the office actually works and what it needs, not a generic template. That makes it a system fitted to one specific sector. It runs in the cloud, in Hebrew and right-to-left, and is in a live pilot with active clients.
+
+Out of this work I now offer the same kind of tailored system to other small practices: law offices, accountants and similar professional offices.
+
+At this stage it is full-stack product work and not yet AI work, and that is on purpose. It is how I build: first a system that works, then making sure it is reliable and does what the office needs and wants, and only after that adding AI on a base that has already proved itself. The system answers pains that many small offices know well: documents scattered across computers and email, not knowing which version is the latest, several people working on the same document, and information that has to stay safe and in order for years.
 
 ## Technical Details
 - **Frontend**: Next.js 16, React 19, TypeScript
