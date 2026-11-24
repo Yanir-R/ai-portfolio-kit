@@ -7545,7 +7545,8 @@ video.w-v {
         justify-content: center;
         text-align: center;
     }
-    .cvm .tb .btn:first-child {
+    /* The download, when offered, spans the row above the two share buttons. */
+    .cvm .tb .btn[download] {
         grid-column: 1/-1;
     }
 }

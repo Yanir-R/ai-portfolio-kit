@@ -28,8 +28,11 @@ const COMPONENTS = {
     ),
 };
 
+// Notes for maintainers inside a document, which react-markdown would show as text.
+const HTML_COMMENT = /<!--[\s\S]*?-->/g;
+
 const Markdown: React.FC<{ children: string }> = ({ children }) => (
-    <ReactMarkdown components={COMPONENTS}>{children}</ReactMarkdown>
+    <ReactMarkdown components={COMPONENTS}>{children.replace(HTML_COMMENT, '')}</ReactMarkdown>
 );
 
 export default Markdown;
