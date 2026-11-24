@@ -1,3 +1,4 @@
+import { Lang } from '@/i18n/lang';
 import axios from 'axios';
 import { apiClient, toRequestError } from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
@@ -15,22 +16,26 @@ class ProjectService {
         return ProjectService.instance;
     }
 
-    async getAllProjects(): Promise<Project[]> {
+    /** In `lang` where the write-up has a Hebrew twin; the facts are the same in both. */
+    async getAllProjects(lang: Lang = 'en'): Promise<Project[]> {
         try {
-            const response = await apiClient.get<ProjectsResponse>(API_ENDPOINTS.PROJECTS);
+            const response = await apiClient.get<ProjectsResponse>(API_ENDPOINTS.PROJECTS, {
+                params: { lang },
+            });
             return response.data.projects || [];
         } catch (error) {
             throw toRequestError(error, 'Error fetching projects');
         }
     }
 
-    async getProjectBySlug(slug: string): Promise<Project> {
+    async getProjectBySlug(slug: string, lang: Lang = 'en'): Promise<Project> {
         try {
-            const response = await apiClient.get<ProjectResponse>(API_ENDPOINTS.PROJECT(slug));
+            const response = await apiClient.get<ProjectResponse>(API_ENDPOINTS.PROJECT(slug), {
+                params: { lang },
+            });
             return response.data.project;
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 404) {
-                console.error(`Error fetching project ${slug}:`, error);
                 throw new Error(`Project "${slug}" not found`, { cause: error });
             }
             throw toRequestError(error, `Error fetching project ${slug}`);

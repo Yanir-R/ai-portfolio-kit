@@ -9,8 +9,8 @@ from context import get_knowledge
 from language import detect_language
 from selection import Selection, select
 from docs_helper import (
-    read_markdown_file, PROFILE_DIR,
-    get_all_projects, get_project_by_slug, get_featured_projects,
+    read_markdown_file, PROFILE_DIR, HEBREW_DIR,
+    get_project_by_slug, get_projects_in, PROJECT_LANGUAGES,
     get_all_writing, get_writing_by_slug, get_writing_index, writing_overview
 )
 from rate_limit import chat_limiter, contact_limiter, enforce_rate_limit
@@ -795,7 +795,7 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
         raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
 
 @app.get("/api/content/{file_name}")
-async def get_content(file_name: str):
+async def get_content(file_name: str, lang: str = "en"):
     try:
         # Resolve and confine to PROFILE_DIR. The router already refuses to match
         # "/" inside a path param, but os.path.join() would silently honour an
@@ -808,6 +808,13 @@ async def get_content(file_name: str):
 
         if not os.path.isfile(file_path):
             raise HTTPException(status_code=404, detail="File not found")
+
+        # The Hebrew twin of a profile document, where one exists. It is looked
+        # up by the already-validated name, so it cannot leave docs/he/profile.
+        if lang == "he":
+            twin = os.path.join(HEBREW_DIR, "profile", os.path.basename(file_path))
+            if os.path.isfile(twin):
+                file_path = twin
 
         content = read_markdown_file(file_path)
         return {"content": content}
@@ -928,14 +935,16 @@ async def get_writing(slug: str):
         raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
 
 
+def _project_language(lang: str) -> str:
+    """An unknown language reads as English rather than failing the request."""
+    return lang if lang in PROJECT_LANGUAGES else "en"
+
+
 @app.get("/api/projects")
-async def get_projects(featured_only: bool = False):
-    """Get all projects or only featured projects"""
+async def get_projects(featured_only: bool = False, lang: str = "en"):
+    """Get all projects or only featured projects, in Hebrew where a twin exists"""
     try:
-        if featured_only:
-            projects = get_featured_projects()
-        else:
-            projects = get_all_projects()
+        projects = get_projects_in(_project_language(lang), featured_only)
 
         # Remove full content from listing to reduce payload size
         for project in projects:
@@ -948,10 +957,10 @@ async def get_projects(featured_only: bool = False):
         raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
 
 @app.get("/api/projects/{slug}")
-async def get_project(slug: str):
-    """Get a specific project by slug"""
+async def get_project(slug: str, lang: str = "en"):
+    """Get a specific project by slug, in Hebrew where a twin exists"""
     try:
-        project = get_project_by_slug(slug)
+        project = get_project_by_slug(slug, _project_language(lang))
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
 

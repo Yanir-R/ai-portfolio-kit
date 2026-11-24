@@ -11,10 +11,16 @@
  * At build time this reads backend/docs/{writing,projects,profile} straight
  * from the repository - the same files the API serves, so there is no network
  * call and no way for a backend outage to truncate a deploy - and writes one
- * HTML file per route next to index.html:
+ * HTML file per route next to index.html, in Hebrew at the root and in English
+ * under /en, each naming the other as its hreflang twin:
  *
  *   about.html, projects.html, blog.html
  *   projects/<slug>.html, blog/<slug>.html
+ *   en.html, en/about.html, en/projects.html, en/blog.html, en/...
+ *
+ * A project or the about page reads its Hebrew twin from backend/docs/he when
+ * there is one. A post is written in one language and shows as written at
+ * both addresses; its structured data names that language.
  *
  * Cloudflare Pages serves /blog/<slug> from blog/<slug>.html before the SPA
  * fallback in _redirects (real files win, the same reason robots.txt works).
@@ -33,7 +39,8 @@ import path from 'node:path';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Markdown from 'react-markdown';
-import { PERSON, PERSONAKIT } from './facts.mjs';
+import { HOME_SHARE, PERSON, PERSONAKIT, siteGraph } from './facts.mjs';
+import { pageTitle, SECTION_TITLE, SITE_NAME } from '../src/copy/routes';
 
 // Section headings that are metadata rather than prose, per docs_helper.py.
 // PROJECT_METADATA_SECTIONS and WRITING_SECTIONS there; keep in step.
@@ -53,13 +60,19 @@ const IMAGE = /\.(png|jpe?g|gif|webp)$/i;
 const HEBREW = /[א-ת]/g;
 const LATIN = /[a-z]/gi;
 
+export type Lang = 'he' | 'en';
+const LANGS: readonly Lang[] = ['he', 'en'];
+
 export type Page = {
-    path: string; // route, e.g. /blog/agent-advisor
-    file: string; // output file, e.g. blog/agent-advisor.html
-    title: string;
+    path: string; // route, e.g. /en/blog/agent-advisor
+    file: string; // output file, e.g. en/blog/agent-advisor.html
+    title: string; // og:title, and the <title> before the site name
+    docTitle?: string; // a whole <title>, for the home page
     description: string;
-    lang: 'he' | 'en';
+    lang: Lang; // the page's language: its address, its chrome and its locale
+    alternates: Record<Lang, string>; // the same page in each language
     image?: string; // absolute or site-relative
+    card?: boolean; // the image is a 1200x630 share card
     ogType: 'website' | 'article' | 'profile';
     published?: string; // ISO date
     jsonLd: object;
@@ -70,13 +83,61 @@ export type Page = {
 
 type Doc = { slug: string; title: string; sections: Record<string, string>; body: string };
 
+/** Hebrew lives at the root, English under /en; see src/i18n/lang.ts. */
+const localPath = (lang: Lang, route: string) =>
+    lang === 'he' ? route : route === '/' ? '/en' : `/en${route}`;
+
+/** Cloudflare Pages serves /x from x.html, so /en is en.html beside the en/ folder. */
+const fileOf = (route: string) => `${route.slice(1)}.html`;
+
+/** Both twins of one language-neutral route. */
+const twins = (route: string): Record<Lang, string> => ({
+    he: localPath('he', route),
+    en: localPath('en', route),
+});
+
+const DIR: Record<Lang, 'rtl' | 'ltr'> = { he: 'rtl', en: 'ltr' };
+
+const SHARE_CARD: Record<Lang, string> = { he: '/og-image.png', en: '/og-image-en.png' };
+
+// Copy the prerendered pages need beyond the documents themselves.
+const COPY = {
+    he: {
+        home: 'בית',
+        blogDescription:
+            `פוסטים ומאמרים של ${PERSON.nameHe} על בניית סוכני AI, זיכרון לסוכנים, סקירת קוד ` +
+            'עם AI, עלות טוקנים ואמינות, כולל הסדרה על בניית PersonaKit.',
+        projectsDescription:
+            `מה ${PERSON.nameHe} בנה: סוכני AI שרצים כל יום, PersonaKit, זיכרון AI בקוד פתוח, ` +
+            'מנוע לסקירת קוד עם AI, CRM בהתאמה אישית ומערכות למשרדים קטנים.',
+        about: `אודות ${PERSON.nameHe}`,
+        docs: 'התיעוד',
+        publishedOn: (source: string) => `פורסם במקור ב-${source}:`,
+        writtenFor: (source: string) => `נכתב במקור עבור ${source}.`,
+    },
+    en: {
+        home: 'Home',
+        blogDescription:
+            `Posts and articles by ${PERSON.name} on building AI agents, agent memory, ` +
+            'code review with AI, token cost and reliability, including the Building ' +
+            'PersonaKit series.',
+        projectsDescription:
+            `What ${PERSON.name} has built: AI agents running every day, PersonaKit open-source ` +
+            'AI memory, an AI code review engine, custom CRM and systems for small offices.',
+        about: `About ${PERSON.name}`,
+        docs: 'Documentation',
+        publishedOn: (source: string) => `Originally published on ${source}:`,
+        writtenFor: (source: string) => `Originally written for the ${source.toLowerCase()}.`,
+    },
+} as const;
+
 const escapeHtml = (s: string) =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // JSON inside <script> must not be able to close the element.
 const jsonScript = (o: object) => JSON.stringify(o, null, 2).replace(/</g, '\\u003c');
 
-const languageOf = (text: string): 'he' | 'en' =>
+const languageOf = (text: string): Lang =>
     (text.match(HEBREW) || []).length > (text.match(LATIN) || []).length ? 'he' : 'en';
 
 /** Strip markdown to one plain line, cut at a word near `max` characters. */
@@ -137,6 +198,10 @@ const readDir = (dir: string, meta: Set<string>) =>
               .map((f) => parseDoc(path.join(dir, f), meta))
         : [];
 
+/** A document's Hebrew twin under docs/he when it has one, else the document itself. */
+const inLanguage = <T,>(lang: Lang, english: T, hebrew: T | undefined): T =>
+    lang === 'he' && hebrew ? hebrew : english;
+
 const firstImage = (media?: string) =>
     (media || '')
         .split('\n')
@@ -147,22 +212,28 @@ const absolute = (siteUrl: string, src?: string) =>
     !src ? undefined : /^https?:\/\//.test(src) ? src : `${siteUrl}${src}`;
 
 /** The links every prerendered page carries, so a crawler can walk the site. */
-const nav = () =>
-    `<nav><a href="/">${PERSON.name}</a> · <a href="/about">About</a> · ` +
-    `<a href="/projects">Projects</a> · <a href="/blog">Blog</a></nav>`;
+const nav = (lang: Lang) => {
+    const t = SECTION_TITLE[lang];
+    const a = (route: string, label: string) => `<a href="${localPath(lang, route)}">${label}</a>`;
+    return (
+        `<nav>${a('/', SITE_NAME[lang])} · ${a('/about', t.about)} · ` +
+        `${a('/projects', t.projects)} · ${a('/blog', t.blog)}</nav>`
+    );
+};
 
-const shell = (lang: 'he' | 'en', inner: string) =>
-    `<div lang="${lang}" dir="${lang === 'he' ? 'rtl' : 'ltr'}" ` +
+/** The page in its own language, with the document inside in the document's. */
+const shell = (lang: Lang, inner: string, contentLang: Lang = lang) =>
+    `<div lang="${lang}" dir="${DIR[lang]}" ` +
     `style="max-width:46rem;margin:0 auto;padding:2rem 1rem;line-height:1.6">` +
-    `${nav()}<main>${inner}</main></div>`;
+    `${nav(lang)}<main lang="${contentLang}" dir="${DIR[contentLang]}">${inner}</main></div>`;
 
-const breadcrumbs = (siteUrl: string, trail: [string, string][]) => ({
+const breadcrumbs = (siteUrl: string, lang: Lang, trail: [string, string][]) => ({
     '@type': 'BreadcrumbList',
-    itemListElement: trail.map(([name, p], i) => ({
+    itemListElement: [[COPY[lang].home, '/'] as [string, string], ...trail].map(([name, p], i) => ({
         '@type': 'ListItem',
         position: i + 1,
         name,
-        item: `${siteUrl}${p}`,
+        item: `${siteUrl}${localPath(lang, p)}`,
     })),
 });
 
@@ -181,271 +252,328 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
         (b.sections.date || '').localeCompare(a.sections.date || '')
     );
     const projects = readDir(path.join(docsRoot, 'projects'), PROJECT_META);
+    const projectsHe = Object.fromEntries(
+        readDir(path.join(docsRoot, 'he', 'projects'), PROJECT_META).map((d) => [d.slug, d])
+    );
 
     const pages: Page[] = [];
 
-    // ---- writing ---------------------------------------------------------
-    for (const w of writing) {
-        const lang = languageOf(w.body);
-        const description = plain(w.sections.summary || w.body);
-        const image = firstImage(w.sections.media);
-        const source = w.sections.source || '';
-        const original = w.sections.url;
-        const isArticle = (w.sections.kind || '').toLowerCase() === 'article';
-        const route = `/blog/${w.slug}`;
-        const footer = original
-            ? `<p>Originally published on ${escapeHtml(source)}: <a href="${escapeHtml(original)}">${escapeHtml(original)}</a></p>`
-            : source
-              ? `<p>Originally written for the ${escapeHtml(source.toLowerCase())}.</p>`
-              : '';
-        pages.push({
-            path: route,
-            file: `blog/${w.slug}.html`,
-            title: w.title,
-            description,
+    for (const lang of LANGS) {
+        const copy = COPY[lang];
+        const sections = SECTION_TITLE[lang];
+        const url = (route: string) => `${siteUrl}${localPath(lang, route)}`;
+        const page = (
+            route: string,
+            fields: Omit<Page, 'path' | 'file' | 'lang' | 'alternates'>
+        ): Page => ({
+            path: localPath(lang, route),
+            file: fileOf(localPath(lang, route)),
             lang,
-            image,
-            ogType: 'article',
-            published: w.sections.date,
-            section: 'writing',
-            llms: `- [${w.title}](${siteUrl}${route}) (${w.sections.date || 'undated'}): ${description}`,
-            jsonLd: {
-                '@context': 'https://schema.org',
-                '@graph': [
-                    {
-                        '@type': isArticle ? 'Article' : 'BlogPosting',
-                        '@id': `${siteUrl}${route}#post`,
-                        headline: w.title.slice(0, 110),
-                        description,
-                        url: `${siteUrl}${route}`,
-                        mainEntityOfPage: `${siteUrl}${route}`,
-                        inLanguage: lang,
-                        ...(w.sections.date ? { datePublished: w.sections.date } : {}),
-                        ...(image ? { image: absolute(siteUrl, image) } : {}),
-                        author: person,
-                        publisher: person,
-                        isPartOf: { '@id': `${siteUrl}/blog#blog` },
-                        // The original post, so the copy here and the one on
-                        // LinkedIn or Medium read as the same work.
-                        ...(original ? { sameAs: original } : {}),
-                    },
-                    breadcrumbs(siteUrl, [
-                        ['Home', '/'],
-                        ['Blog', '/blog'],
-                        [w.title, route],
-                    ]),
-                ],
-            },
-            body: shell(
-                lang,
-                `<article><h1>${escapeHtml(w.title)}</h1>` +
-                    (w.sections.date
-                        ? `<p><time datetime="${w.sections.date}">${w.sections.date}</time></p>`
-                        : '') +
-                    renderMarkdown(w.body) +
-                    footer +
-                    `</article>`
-            ),
+            alternates: twins(route),
+            ...fields,
         });
-    }
 
-    pages.push({
-        path: '/blog',
-        file: 'blog.html',
-        title: 'Blog',
-        description: plain(
-            `Posts and articles by ${PERSON.name} on building AI agents, agent memory, ` +
-                'code review with AI, token cost and reliability, including the Building ' +
-                'PersonaKit series.'
-        ),
-        lang: 'en',
-        ogType: 'website',
-        jsonLd: {
-            '@context': 'https://schema.org',
-            '@graph': [
-                {
-                    '@type': 'Blog',
-                    '@id': `${siteUrl}/blog#blog`,
-                    url: `${siteUrl}/blog`,
-                    name: `${PERSON.name} - Blog`,
-                    author: person,
-                    isPartOf: website,
-                    blogPost: writing.map((w) => ({ '@id': `${siteUrl}/blog/${w.slug}#post` })),
-                },
-                breadcrumbs(siteUrl, [
-                    ['Home', '/'],
-                    ['Blog', '/blog'],
-                ]),
-            ],
-        },
-        body: shell(
-            'en',
-            `<h1>Blog</h1><ul>` +
-                writing
-                    .map(
-                        (w) =>
-                            `<li><a href="/blog/${w.slug}">${escapeHtml(w.title)}</a>` +
+        // ---- home (English; the Hebrew home is index.html itself) ----------
+        if (lang === 'en') {
+            pages.push(
+                page('/', {
+                    title: HOME_SHARE.titleEn,
+                    docTitle: HOME_SHARE.titleEn,
+                    description: HOME_SHARE.descriptionEn,
+                    image: SHARE_CARD.en,
+                    card: true,
+                    ogType: 'website',
+                    jsonLd: siteGraph(siteUrl),
+                    body: shell(
+                        lang,
+                        `<h1>${escapeHtml(HOME_SHARE.titleEn)}</h1>` +
+                            `<p>${escapeHtml(HOME_SHARE.descriptionEn)}</p>` +
+                            `<p>${escapeHtml(PERSON.description)}</p>`
+                    ),
+                })
+            );
+        }
+
+        // ---- writing -----------------------------------------------------
+        // A piece is written in one language; both addresses show it as is.
+        for (const w of writing) {
+            const contentLang = languageOf(w.body);
+            const description = plain(w.sections.summary || w.body);
+            const image = firstImage(w.sections.media);
+            const source = w.sections.source || '';
+            const original = w.sections.url;
+            const isArticle = (w.sections.kind || '').toLowerCase() === 'article';
+            const route = `/blog/${w.slug}`;
+            const footer = original
+                ? `<p>${escapeHtml(copy.publishedOn(source))} <a href="${escapeHtml(original)}">${escapeHtml(original)}</a></p>`
+                : source
+                  ? `<p>${escapeHtml(copy.writtenFor(source))}</p>`
+                  : '';
+            pages.push(
+                page(route, {
+                    title: w.title,
+                    description,
+                    image,
+                    ogType: 'article',
+                    published: w.sections.date,
+                    section: 'writing',
+                    llms: `- [${w.title}](${url(route)}) (${w.sections.date || 'undated'}): ${description}`,
+                    jsonLd: {
+                        '@context': 'https://schema.org',
+                        '@graph': [
+                            {
+                                '@type': isArticle ? 'Article' : 'BlogPosting',
+                                '@id': `${url(route)}#post`,
+                                headline: w.title.slice(0, 110),
+                                description,
+                                url: url(route),
+                                mainEntityOfPage: url(route),
+                                inLanguage: contentLang,
+                                ...(w.sections.date ? { datePublished: w.sections.date } : {}),
+                                ...(image ? { image: absolute(siteUrl, image) } : {}),
+                                author: person,
+                                publisher: person,
+                                isPartOf: { '@id': `${url('/blog')}#blog` },
+                                // The original post, so the copy here and the one on
+                                // LinkedIn or Medium read as the same work.
+                                ...(original ? { sameAs: original } : {}),
+                            },
+                            breadcrumbs(siteUrl, lang, [
+                                [sections.blog, '/blog'],
+                                [w.title, route],
+                            ]),
+                        ],
+                    },
+                    body: shell(
+                        lang,
+                        `<article><h1>${escapeHtml(w.title)}</h1>` +
                             (w.sections.date
-                                ? ` <time datetime="${w.sections.date}">${w.sections.date}</time>`
+                                ? `<p><time datetime="${w.sections.date}">${w.sections.date}</time></p>`
                                 : '') +
-                            (w.sections.summary
-                                ? `<p>${escapeHtml(plain(w.sections.summary, 300))}</p>`
-                                : '') +
-                            `</li>`
-                    )
-                    .join('') +
-                `</ul>`
-        ),
-    });
+                            renderMarkdown(w.body) +
+                            footer +
+                            `</article>`,
+                        contentLang
+                    ),
+                })
+            );
+        }
 
-    // ---- projects --------------------------------------------------------
-    for (const p of projects) {
-        const overview = (p.body.match(/## Overview\s*\n([\s\S]*?)(?=\n## |$)/) || [])[1] || p.body;
-        const description = plain(overview);
-        const image = firstImage(p.sections.media);
-        const repo = p.sections.repository;
-        const route = `/projects/${p.slug}`;
-        const isPersonaKit = p.slug === 'personakit';
-        const extraLinks = isPersonaKit
-            ? `<p><a href="${PERSONAKIT.url}">personakit.me</a> · <a href="${PERSONAKIT.docs}">Documentation</a></p>`
-            : '';
-        pages.push({
-            path: route,
-            file: `projects/${p.slug}.html`,
-            title: p.title,
-            description,
-            lang: languageOf(p.body),
-            image,
-            ogType: 'article',
-            section: 'projects',
-            llms: `- [${p.title}](${siteUrl}${route}): ${description}`,
-            jsonLd: {
-                '@context': 'https://schema.org',
-                '@graph': [
-                    {
-                        '@type': 'CreativeWork',
-                        '@id': `${siteUrl}${route}#project`,
-                        name: p.title,
-                        description,
-                        url: `${siteUrl}${route}`,
-                        ...(image ? { image: absolute(siteUrl, image) } : {}),
-                        creator: person,
-                        isPartOf: website,
-                        ...(p.sections.category ? { genre: p.sections.category } : {}),
-                        // Only public repositories. review-engine says
-                        // "Private Repository" here and is never linked.
-                        ...(repo && /^https:\/\/github\.com\//.test(repo)
-                            ? { codeRepository: repo }
-                            : {}),
-                        ...(isPersonaKit ? { sameAs: [PERSONAKIT.url, PERSONAKIT.docs] } : {}),
-                    },
-                    breadcrumbs(siteUrl, [
-                        ['Home', '/'],
-                        ['Projects', '/projects'],
-                        [p.title, route],
-                    ]),
-                ],
-            },
-            body: shell(
-                languageOf(p.body),
-                `<article><h1>${escapeHtml(p.title)}</h1>${renderMarkdown(p.body)}${extraLinks}</article>`
-            ),
-        });
-    }
-
-    pages.push({
-        path: '/projects',
-        file: 'projects.html',
-        title: 'Projects',
-        description: plain(
-            `What ${PERSON.name} has built: AI agents running every day, PersonaKit open-source ` +
-                'AI memory, an AI code review engine, custom CRM and systems for small offices.'
-        ),
-        lang: 'en',
-        ogType: 'website',
-        jsonLd: {
-            '@context': 'https://schema.org',
-            '@graph': [
-                {
-                    '@type': 'CollectionPage',
-                    '@id': `${siteUrl}/projects#page`,
-                    url: `${siteUrl}/projects`,
-                    name: `Projects - ${PERSON.name}`,
-                    isPartOf: website,
-                    about: person,
-                    mainEntity: {
-                        '@type': 'ItemList',
-                        itemListElement: projects.map((p, i) => ({
-                            '@type': 'ListItem',
-                            position: i + 1,
-                            url: `${siteUrl}/projects/${p.slug}`,
-                            name: p.title,
-                        })),
-                    },
+        pages.push(
+            page('/blog', {
+                title: sections.blog,
+                description: plain(copy.blogDescription),
+                ogType: 'website',
+                jsonLd: {
+                    '@context': 'https://schema.org',
+                    '@graph': [
+                        {
+                            '@type': 'Blog',
+                            '@id': `${url('/blog')}#blog`,
+                            url: url('/blog'),
+                            name: `${SITE_NAME[lang]} - ${sections.blog}`,
+                            inLanguage: lang,
+                            author: person,
+                            isPartOf: website,
+                            blogPost: writing.map((w) => ({
+                                '@id': `${url(`/blog/${w.slug}`)}#post`,
+                            })),
+                        },
+                        breadcrumbs(siteUrl, lang, [[sections.blog, '/blog']]),
+                    ],
                 },
-                breadcrumbs(siteUrl, [
-                    ['Home', '/'],
-                    ['Projects', '/projects'],
-                ]),
-            ],
-        },
-        body: shell(
-            'en',
-            `<h1>Projects</h1><ul>` +
-                pages
-                    .filter((pg) => pg.section === 'projects')
-                    .map(
-                        (pg) =>
-                            `<li><a href="${pg.path}">${escapeHtml(pg.title)}</a><p>${escapeHtml(pg.description)}</p></li>`
-                    )
-                    .join('') +
-                `</ul>`
-        ),
-    });
+                body: shell(
+                    lang,
+                    `<h1>${sections.blog}</h1><ul>` +
+                        writing
+                            .map(
+                                (w) =>
+                                    `<li><a href="${localPath(lang, `/blog/${w.slug}`)}">${escapeHtml(w.title)}</a>` +
+                                    (w.sections.date
+                                        ? ` <time datetime="${w.sections.date}">${w.sections.date}</time>`
+                                        : '') +
+                                    (w.sections.summary
+                                        ? `<p>${escapeHtml(plain(w.sections.summary, 300))}</p>`
+                                        : '') +
+                                    `</li>`
+                            )
+                            .join('') +
+                        `</ul>`
+                ),
+            })
+        );
 
-    // ---- about -----------------------------------------------------------
-    const aboutFile = path.join(docsRoot, 'profile', 'about-me.md');
-    if (existsSync(aboutFile)) {
-        const about = readFileSync(aboutFile, 'utf8').trim();
-        pages.push({
-            path: '/about',
-            file: 'about.html',
-            title: 'About',
-            description: plain(about),
-            lang: 'en',
-            ogType: 'profile',
-            jsonLd: {
-                '@context': 'https://schema.org',
-                '@graph': [
-                    {
-                        '@type': 'AboutPage',
-                        '@id': `${siteUrl}/about#page`,
-                        url: `${siteUrl}/about`,
-                        name: `About ${PERSON.name}`,
-                        isPartOf: website,
-                        about: person,
-                        mainEntity: person,
+        // ---- projects ----------------------------------------------------
+        const projectPages: Page[] = [];
+        for (const english of projects) {
+            const p = inLanguage(lang, english, projectsHe[english.slug]);
+            const contentLang = languageOf(p.body);
+            const overview =
+                (p.body.match(/## Overview\s*\n([\s\S]*?)(?=\n## |$)/) || [])[1] || p.body;
+            const description = plain(overview);
+            // Facts come from the English document; a twin translates prose only.
+            const image = firstImage(english.sections.media);
+            const repo = english.sections.repository;
+            const route = `/projects/${p.slug}`;
+            const isPersonaKit = p.slug === 'personakit';
+            const extraLinks = isPersonaKit
+                ? `<p><a href="${PERSONAKIT.url}">personakit.me</a> · <a href="${PERSONAKIT.docs}">${copy.docs}</a></p>`
+                : '';
+            projectPages.push(
+                page(route, {
+                    title: p.title,
+                    description,
+                    image,
+                    ogType: 'article',
+                    section: 'projects',
+                    llms: `- [${p.title}](${url(route)}): ${description}`,
+                    jsonLd: {
+                        '@context': 'https://schema.org',
+                        '@graph': [
+                            {
+                                '@type': 'CreativeWork',
+                                '@id': `${url(route)}#project`,
+                                name: p.title,
+                                description,
+                                url: url(route),
+                                inLanguage: contentLang,
+                                ...(image ? { image: absolute(siteUrl, image) } : {}),
+                                creator: person,
+                                isPartOf: website,
+                                ...(english.sections.category
+                                    ? { genre: english.sections.category }
+                                    : {}),
+                                // Only public repositories. review-engine says
+                                // "Private Repository" here and is never linked.
+                                ...(repo &&
+                                /^https:\/\/github\.com\//.test(repo) &&
+                                !/review-engine/i.test(repo)
+                                    ? { codeRepository: repo }
+                                    : {}),
+                                ...(isPersonaKit
+                                    ? { sameAs: [PERSONAKIT.url, PERSONAKIT.docs] }
+                                    : {}),
+                            },
+                            breadcrumbs(siteUrl, lang, [
+                                [sections.projects, '/projects'],
+                                [p.title, route],
+                            ]),
+                        ],
                     },
-                    breadcrumbs(siteUrl, [
-                        ['Home', '/'],
-                        ['About', '/about'],
-                    ]),
-                ],
-            },
-            body: shell('en', `<h1>About ${PERSON.name}</h1>${renderMarkdown(about)}`),
-        });
+                    body: shell(
+                        lang,
+                        `<article><h1>${escapeHtml(p.title)}</h1>${renderMarkdown(p.body)}${extraLinks}</article>`,
+                        contentLang
+                    ),
+                })
+            );
+        }
+        pages.push(...projectPages);
+
+        pages.push(
+            page('/projects', {
+                title: sections.projects,
+                description: plain(copy.projectsDescription),
+                ogType: 'website',
+                jsonLd: {
+                    '@context': 'https://schema.org',
+                    '@graph': [
+                        {
+                            '@type': 'CollectionPage',
+                            '@id': `${url('/projects')}#page`,
+                            url: url('/projects'),
+                            name: `${sections.projects} - ${SITE_NAME[lang]}`,
+                            inLanguage: lang,
+                            isPartOf: website,
+                            about: person,
+                            mainEntity: {
+                                '@type': 'ItemList',
+                                itemListElement: projectPages.map((pg, i) => ({
+                                    '@type': 'ListItem',
+                                    position: i + 1,
+                                    url: `${siteUrl}${pg.path}`,
+                                    name: pg.title,
+                                })),
+                            },
+                        },
+                        breadcrumbs(siteUrl, lang, [[sections.projects, '/projects']]),
+                    ],
+                },
+                body: shell(
+                    lang,
+                    `<h1>${sections.projects}</h1><ul>` +
+                        projectPages
+                            .map(
+                                (pg) =>
+                                    `<li><a href="${pg.path}">${escapeHtml(pg.title)}</a><p>${escapeHtml(pg.description)}</p></li>`
+                            )
+                            .join('') +
+                        `</ul>`
+                ),
+            })
+        );
+
+        // ---- about -------------------------------------------------------
+        const aboutFile = inLanguage(
+            lang,
+            path.join(docsRoot, 'profile', 'about-me.md'),
+            [path.join(docsRoot, 'he', 'profile', 'about-me.md')].find((f) => existsSync(f))
+        );
+        if (existsSync(aboutFile)) {
+            const about = readFileSync(aboutFile, 'utf8').trim();
+            const contentLang = languageOf(about);
+            pages.push(
+                page('/about', {
+                    title: sections.about,
+                    description: plain(about),
+                    ogType: 'profile',
+                    jsonLd: {
+                        '@context': 'https://schema.org',
+                        '@graph': [
+                            {
+                                '@type': 'AboutPage',
+                                '@id': `${url('/about')}#page`,
+                                url: url('/about'),
+                                name: copy.about,
+                                inLanguage: contentLang,
+                                isPartOf: website,
+                                about: person,
+                                mainEntity: person,
+                            },
+                            breadcrumbs(siteUrl, lang, [[sections.about, '/about']]),
+                        ],
+                    },
+                    body: shell(
+                        lang,
+                        `<h1>${escapeHtml(copy.about)}</h1>${renderMarkdown(about)}`,
+                        contentLang
+                    ),
+                })
+            );
+        }
     }
 
     return pages;
 };
 
+/** hreflang for both twins, with Hebrew, the site's default, as x-default. */
+const hreflang = (siteUrl: string, alternates: Record<Lang, string>) => [
+    ...LANGS.map(
+        (l) => `<link rel="alternate" hreflang="${l}" href="${siteUrl}${alternates[l]}" />`
+    ),
+    `<link rel="alternate" hreflang="x-default" href="${siteUrl}${alternates.he}" />`,
+];
+
+const LOCALE: Record<Lang, string> = { he: 'he_IL', en: 'en_US' };
+
 /** The <head> block that replaces the one between the seo:head markers. */
-export const headFor = (page: Page, siteUrl: string, defaultImage: string) => {
+export const headFor = (page: Page, siteUrl: string) => {
     const url = `${siteUrl}${page.path}`;
-    // A Hebrew page carries the Hebrew name, so the title reads in one script.
-    const title = `${page.title} | ${page.lang === 'he' ? PERSON.nameHe : PERSON.siteName}`;
-    const image = absolute(siteUrl, page.image) || defaultImage;
-    const isDefault = image === defaultImage;
+    // The site name follows the page's language, so the title reads in one script.
+    const title = page.docTitle ?? pageTitle(page.title, page.lang);
+    const image = absolute(siteUrl, page.image) || `${siteUrl}${SHARE_CARD[page.lang]}`;
+    const isCard = page.card || !page.image;
+    const other = LANGS.find((l) => l !== page.lang)!;
     const e = escapeHtml;
     return [
         `<title>${e(title)}</title>`,
@@ -453,14 +581,16 @@ export const headFor = (page: Page, siteUrl: string, defaultImage: string) => {
         `<meta name="description" content="${e(page.description)}" />`,
         `<meta name="author" content="${PERSON.name}" />`,
         `<link rel="canonical" href="${url}" />`,
+        ...hreflang(siteUrl, page.alternates),
         `<meta property="og:type" content="${page.ogType}" />`,
-        `<meta property="og:site_name" content="${PERSON.siteName}" />`,
-        `<meta property="og:locale" content="${page.lang === 'he' ? 'he_IL' : 'en_US'}" />`,
+        `<meta property="og:site_name" content="${SITE_NAME[page.lang]}" />`,
+        `<meta property="og:locale" content="${LOCALE[page.lang]}" />`,
+        `<meta property="og:locale:alternate" content="${LOCALE[other]}" />`,
         `<meta property="og:url" content="${url}" />`,
         `<meta property="og:title" content="${e(page.title)}" />`,
         `<meta property="og:description" content="${e(page.description)}" />`,
         `<meta property="og:image" content="${e(image)}" />`,
-        ...(isDefault
+        ...(isCard
             ? [
                   '<meta property="og:image:type" content="image/png" />',
                   '<meta property="og:image:width" content="1200" />',
@@ -484,40 +614,56 @@ export const headFor = (page: Page, siteUrl: string, defaultImage: string) => {
 };
 
 const HEAD_BLOCK = /<!-- seo:head:start -->[\s\S]*?<!-- seo:head:end -->/;
+const HTML_TAG = /<html lang="[^"]*"(?: dir="[^"]*")?>/;
 const ROOT = '<div id="root"></div>';
 
 /** The built index.html, rewritten for one route. */
 export const renderPage = (indexHtml: string, page: Page, siteUrl: string) => {
-    if (!HEAD_BLOCK.test(indexHtml) || !indexHtml.includes(ROOT)) {
-        throw new Error('index.html is missing the seo:head markers or the empty #root');
+    if (!HEAD_BLOCK.test(indexHtml) || !HTML_TAG.test(indexHtml) || !indexHtml.includes(ROOT)) {
+        throw new Error(
+            'index.html is missing the seo:head markers, the <html lang> tag or the empty #root'
+        );
     }
     return indexHtml
-        .replace(/<html lang="[^"]*">/, `<html lang="${page.lang}">`)
+        .replace(HTML_TAG, `<html lang="${page.lang}" dir="${DIR[page.lang]}">`)
         .replace(
             HEAD_BLOCK,
             () =>
-                `<!-- seo:head:start -->\n        ${headFor(page, siteUrl, `${siteUrl}/og-image.png`)}\n        <!-- seo:head:end -->`
+                `<!-- seo:head:start -->\n        ${headFor(page, siteUrl)}\n        <!-- seo:head:end -->`
         )
         .replace(ROOT, () => `<div id="root">${page.body}</div>`);
 };
 
+/** Every address in both languages, each listing its twin (Google's sitemap hreflang form). */
 export const sitemap = (siteUrl: string, pages: Page[]) => {
     const today = new Date().toISOString().slice(0, 10);
-    const entries = [
-        { loc: `${siteUrl}/`, priority: '1.0', lastmod: today },
-        ...pages.map((p) => ({
-            loc: `${siteUrl}${p.path}`,
-            priority: p.section ? '0.6' : '0.8',
-            lastmod: p.published || today,
-        })),
-    ];
+    const home: Pick<Page, 'path' | 'alternates' | 'published' | 'section'> = {
+        path: '/',
+        alternates: twins('/'),
+    };
+    const entries = [home, ...pages].map((p) => ({
+        loc: `${siteUrl}${p.path}`,
+        priority: p.path === '/' || p.path === '/en' ? '1.0' : p.section ? '0.6' : '0.8',
+        lastmod: p.published || today,
+        links: [
+            ...LANGS.map((l) => [l, p.alternates[l]] as const),
+            ['x-default', p.alternates.he] as const,
+        ],
+    }));
     return [
         '<?xml version="1.0" encoding="UTF-8"?>',
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
         ...entries.map(
             (e) =>
                 `    <url><loc>${e.loc}</loc><lastmod>${e.lastmod}</lastmod>` +
-                `<priority>${e.priority}</priority></url>`
+                `<priority>${e.priority}</priority>` +
+                e.links
+                    .map(
+                        ([l, href]) =>
+                            `<xhtml:link rel="alternate" hreflang="${l}" href="${siteUrl}${href}"/>`
+                    )
+                    .join('') +
+                `</url>`
         ),
         '</urlset>',
         '',
@@ -558,18 +704,20 @@ export const llmsTxt = (siteUrl: string, pages: Page[]) =>
         '',
         '## Pages',
         '',
-        `- [Home](${siteUrl}/)`,
-        `- [About](${siteUrl}/about)`,
-        `- [Projects](${siteUrl}/projects)`,
-        `- [Blog](${siteUrl}/blog)`,
+        'Every page is in Hebrew at its address and in English under /en.',
+        '',
+        `- [Home](${siteUrl}/en) ([Hebrew](${siteUrl}/))`,
+        `- [About](${siteUrl}/en/about)`,
+        `- [Projects](${siteUrl}/en/projects)`,
+        `- [Blog](${siteUrl}/en/blog)`,
         '',
         '## Projects',
         '',
-        ...pages.filter((p) => p.section === 'projects').map((p) => p.llms!),
+        ...pages.filter((p) => p.lang === 'en' && p.section === 'projects').map((p) => p.llms!),
         '',
         '## Writing',
         '',
-        ...pages.filter((p) => p.section === 'writing').map((p) => p.llms!),
+        ...pages.filter((p) => p.lang === 'en' && p.section === 'writing').map((p) => p.llms!),
         '',
         '## Elsewhere',
         '',

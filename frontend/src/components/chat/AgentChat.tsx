@@ -1,0 +1,300 @@
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { CHAT } from '@/copy/chat';
+import { SHEET_HEADS, SHEETS, SheetKey } from '@/content/sheets';
+import { Entry, HomeChat } from '@/chat/useHomeChat';
+import Markdown from '@/components/Markdown';
+import WritingBlocks from '@/components/writing/WritingBlocks';
+import { useSiteDialogs } from '@/components/site/SiteDialogs';
+import { Arrow } from '@/components/site/Arrow';
+import { REDUCED_MOTION_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
+import { useLang } from '@/i18n/useLang';
+
+// The input's placeholder cycles through example questions while it is idle.
+const EXAMPLE_EVERY_MS = 2600;
+
+/** A small picture of a sheet, under the answer that opened it. */
+const SheetThumb: React.FC<{ map?: boolean }> = ({ map }) =>
+    map ? (
+        <svg viewBox="0 0 96 60" aria-hidden="true">
+            <path
+                d="M48 14 22 30M48 14 74 30M22 30 18 48M52 48 18 48"
+                stroke="#0C1A44"
+                strokeWidth="1.2"
+                strokeDasharray="2 2"
+                fill="none"
+            />
+            <g fill="#fff" stroke="#0C1A44" strokeWidth="1.4">
+                <rect x="36" y="8" width="24" height="11" rx="2" />
+                <rect x="62" y="25" width="24" height="11" rx="2" />
+                <rect x="6" y="43" width="24" height="11" rx="2" />
+                <rect x="40" y="43" width="24" height="11" rx="2" />
+                <rect x="70" y="43" width="20" height="11" rx="2" />
+            </g>
+            <rect x="10" y="25" width="24" height="11" rx="2" fill="#FFC83D" />
+        </svg>
+    ) : (
+        <svg viewBox="0 0 96 60" aria-hidden="true">
+            <path d="M14 44h68" stroke="#0C1A44" strokeWidth="1.4" fill="none" />
+            <circle cx="20" cy="44" r="5" fill="#fff" stroke="#0C1A44" strokeWidth="1.4" />
+            <circle cx="48" cy="44" r="5" fill="#FFC83D" />
+            <circle cx="76" cy="44" r="5" fill="#fff" stroke="#0C1A44" strokeWidth="1.4" />
+            <rect
+                x="30"
+                y="12"
+                width="36"
+                height="14"
+                rx="3"
+                fill="#fff"
+                stroke="#0C1A44"
+                strokeWidth="1.4"
+            />
+        </svg>
+    );
+
+const ArtCard: React.FC<{ sheet: SheetKey; onOpen: (sheet: SheetKey) => void }> = ({
+    sheet,
+    onOpen,
+}) => {
+    const { t } = useLang();
+    const art = t(CHAT).art;
+    return (
+        <button type="button" className="art" onClick={() => onOpen(sheet)}>
+            <span className="th">
+                <SheetThumb map={sheet === 'map'} />
+            </span>
+            <span>
+                <b>{t(SHEET_HEADS)[sheet].title}</b>
+                <span className="s">
+                    {art.diagram} · <span className="vd">{art.opensSide}</span>
+                    <span className="vm">{art.opensBelow}</span>
+                </span>
+            </span>
+            <span className="o">
+                <Arrow>{art.open}</Arrow>
+            </span>
+        </button>
+    );
+};
+
+const EntryView: React.FC<{ entry: Entry; chat: HomeChat }> = ({ entry, chat }) => {
+    const { t } = useLang();
+    const copy = t(CHAT);
+    const { openContact } = useSiteDialogs();
+
+    switch (entry.kind) {
+        case 'user':
+            return <div className="m u">{entry.text}</div>;
+        case 'starters':
+            return (
+                <div className="m st0">
+                    <small>{copy.startHint}</small>
+                    <div className="stg">
+                        {copy.starters.map((s, i) => (
+                            <button key={s.q} type="button" onClick={() => chat.pickStarter(i)}>
+                                <b>{s.q}</b>
+                                <span>{s.sub}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        case 'working':
+            return (
+                <div className="m y ai wait">
+                    <span className="src ag">{copy.working}</span>
+                    {copy.workingNote}
+                </div>
+            );
+        case 'agent':
+            return (
+                <div className={entry.tag === 'sent' ? 'm y ok' : 'm y'}>
+                    {entry.tag === 'ready' && <span className="src">{copy.readyTag}</span>}
+                    {entry.tag === 'sent' && <span className="src ok">{copy.sentTag}</span>}
+                    {entry.text}
+                    {entry.sheet && <ArtCard sheet={entry.sheet} onOpen={chat.openSheet} />}
+                </div>
+            );
+        case 'answer': {
+            const record = entry.record;
+            return (
+                <div className="m y ai">
+                    {entry.fromIndex ? (
+                        <span className="src">{copy.readyTag}</span>
+                    ) : (
+                        <span className="src ag">
+                            {copy.answered}
+                            {record && ` · ${record.seconds} ${copy.seconds}`}
+                        </span>
+                    )}
+                    <Markdown>{entry.text}</Markdown>
+                    <WritingBlocks blocks={entry.blocks} />
+                    {entry.sheet === 'price' && (
+                        <button
+                            type="button"
+                            className="cta"
+                            onClick={() =>
+                                openContact({ kind: 'call', topic: t(SHEETS).price.topic })
+                            }
+                        >
+                            {copy.book}
+                        </button>
+                    )}
+                    {entry.sheet && <ArtCard sheet={entry.sheet} onOpen={chat.openSheet} />}
+                    {record && (
+                        <div className="rc">
+                            <u>{copy.sources}</u>
+                            {record.sources.length ? (
+                                record.sources.map((s) => (
+                                    <span key={`${s.kind}-${s.slug}`}>{s.title}</span>
+                                ))
+                            ) : (
+                                <span>{copy.noSource}</span>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        case 'summary': {
+            const c = copy.compare;
+            const name = copy.processes[entry.process].name;
+            return (
+                <div className="m card">
+                    <b>{c.cardTitle}</b>
+                    <div>
+                        <span>{c.process}</span>
+                        <span>{name}</span>
+                    </div>
+                    <div>
+                        <span>{c.handledBy}</span>
+                        <span>{entry.team}</span>
+                    </div>
+                    <div>
+                        <span>{c.interested}</span>
+                        <span>{c.interestedValue}</span>
+                    </div>
+                    <button
+                        type="button"
+                        className="cta"
+                        onClick={() =>
+                            openContact({
+                                kind: 'call',
+                                topic: name,
+                                message: `${c.handledBy}: ${entry.team}`,
+                            })
+                        }
+                    >
+                        {c.book}
+                    </button>
+                </div>
+            );
+        }
+        case 'error':
+            return <div className="m y">{entry.text}</div>;
+    }
+};
+
+/*
+ * The chat side of the hero: the conversation, the suggestions under it and
+ * the input. What happens on each action is decided in `useHomeChat`; this
+ * only draws it.
+ */
+const AgentChat: React.FC<{
+    chat: HomeChat;
+    turnstileRef: React.RefObject<HTMLDivElement | null>;
+}> = ({ chat, turnstileRef }) => {
+    const { t } = useLang();
+    const copy = t(CHAT);
+    const logRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [text, setText] = useState('');
+    const [example, setExample] = useState(-1);
+    const stillMotion = useMediaQuery(REDUCED_MOTION_QUERY);
+
+    // New lines scroll the log, never the page.
+    // Measured after layout, and again a frame later for content that settles late.
+    useLayoutEffect(() => {
+        const log = logRef.current;
+        if (!log) return;
+        const toEnd = () => (log.scrollTop = log.scrollHeight);
+        toEnd();
+        const frame = requestAnimationFrame(toEnd);
+        return () => cancelAnimationFrame(frame);
+    }, [chat.entries]);
+
+    useEffect(() => {
+        if (stillMotion) return;
+        const timer = window.setInterval(() => {
+            if (document.activeElement !== inputRef.current) setExample((i) => i + 1);
+        }, EXAMPLE_EVERY_MS);
+        return () => window.clearInterval(timer);
+    }, [stillMotion]);
+
+    // Asked for an address: the input says so and takes focus.
+    useEffect(() => {
+        if (chat.awaitingEmail) inputRef.current?.focus({ preventScroll: true });
+    }, [chat.awaitingEmail]);
+
+    // When the question is already known, only the address is missing.
+    const placeholder = chat.awaitingEmail
+        ? chat.awaitingEmail === 'ask'
+            ? copy.emailPlaceholderMore
+            : copy.emailPlaceholder
+        : example < 0
+          ? copy.placeholder
+          : copy.examplePrefix + copy.examples[example % copy.examples.length];
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!text.trim() || chat.busy) return;
+        chat.submit(text);
+        setText('');
+    };
+
+    return (
+        <div className="chat" aria-label={copy.panelLabel}>
+            <div className="ph">
+                <span className="who2">
+                    <i className="dot" />
+                    {copy.who} <small>{copy.whoNote}</small>
+                </span>
+                <span className="kk">{copy.step1}</span>
+            </div>
+            <div className="log" id="log" aria-live="polite" ref={logRef}>
+                {chat.offline && <div className="m y">{copy.offline}</div>}
+                {chat.entries.map((entry) => (
+                    <EntryView key={entry.id} entry={entry} chat={chat} />
+                ))}
+            </div>
+            <div className="qr one" data-l={chat.quick.label} aria-label={copy.suggestionsLabel}>
+                {chat.quick.items.map((item) => (
+                    <button
+                        key={item.label}
+                        type="button"
+                        className={item.kind === 'ask' ? 'ai' : undefined}
+                        disabled={chat.busy}
+                        onClick={() => chat.pickQuick(item)}
+                    >
+                        {item.label}
+                    </button>
+                ))}
+            </div>
+            <form className="inp" onSubmit={submit}>
+                <input
+                    ref={inputRef}
+                    type="text"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder={placeholder}
+                    aria-label={copy.inputLabel}
+                />
+                <button className="btn sm" type="submit" disabled={chat.busy}>
+                    {copy.send}
+                </button>
+            </form>
+            <div className="ts" ref={turnstileRef} />
+        </div>
+    );
+};
+
+export default AgentChat;

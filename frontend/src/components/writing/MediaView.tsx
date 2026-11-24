@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MediaItem } from '@/types/writing';
+import { REDUCED_MOTION_QUERY } from '@/hooks/useMediaQuery';
 
 const prefersReducedMotion = (): boolean =>
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    typeof window !== 'undefined' && window.matchMedia?.(REDUCED_MOTION_QUERY).matches;
 
 /*
  * A short silent loop, the way LinkedIn shows an animated image: it plays,
@@ -51,7 +50,7 @@ const Clip: React.FC<{ item: MediaItem; className: string }> = ({ item, classNam
 /** One media file of a piece, drawn by its kind. */
 const MediaView: React.FC<{ item: MediaItem; className?: string; title?: string }> = ({
     item,
-    className = 'w-full h-auto rounded border border-border',
+    className = 'w-v',
     title,
 }) => {
     if (item.kind === 'clip') return <Clip item={item} className={className} />;

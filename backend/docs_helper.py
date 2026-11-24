@@ -186,10 +186,43 @@ def get_all_projects() -> List[Dict[str, Any]]:
     projects.sort(key=lambda x: x.get('featured', False), reverse=True)
     return projects
 
-def get_project_by_slug(slug: str) -> Optional[Dict[str, Any]]:
-    """Get a specific project by its slug"""
+# A Hebrew twin under docs/he/projects/ replaces what a reader reads: the
+# title, the overview, the text and the technical details. What describes the
+# project rather than the prose (status, media, links, featured) stays the
+# English write-up's, so the two languages never disagree on facts.
+PROJECT_LANGUAGES = ("en", "he")
+
+
+def _in_language(project: Dict[str, Any], lang: str) -> Dict[str, Any]:
+    if lang != "he":
+        return project
+    path = os.path.join(HEBREW_DIR, "projects", f"{project['slug']}.md")
+    content = read_markdown_file(path) if os.path.isfile(path) else None
+    if not content:
+        return project
+    twin = parse_project_metadata(content)
+    merged = {key: value for key, value in project.items() if not key.startswith("tech_")}
+    merged.update({key: value for key, value in twin.items() if key.startswith("tech_")})
+    for key in ("title", "overview"):
+        if twin.get(key):
+            merged[key] = twin[key]
+    merged["content"] = content
+    merged["language"] = "he"
+    return merged
+
+
+def get_project_by_slug(slug: str, lang: str = "en") -> Optional[Dict[str, Any]]:
+    """Get a specific project by its slug, in `lang` where a twin exists"""
     projects = get_all_projects()
-    return next((p for p in projects if p['slug'] == slug), None)
+    project = next((p for p in projects if p['slug'] == slug), None)
+    return _in_language(project, lang) if project else None
+
+
+def get_projects_in(lang: str = "en", featured_only: bool = False) -> List[Dict[str, Any]]:
+    """All projects (or only featured ones), in `lang` where a twin exists"""
+    projects = get_featured_projects() if featured_only else get_all_projects()
+    return [_in_language(p, lang) for p in projects]
+
 
 def get_featured_projects() -> List[Dict[str, Any]]:
     """Get only featured projects"""

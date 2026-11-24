@@ -36,16 +36,39 @@ const field = (name) => {
 };
 const title = field('title');
 const description = field('description');
+const titleEn = field('titleEn');
 
 const checks = [
-    { file: 'index.html', text: title, expected: 4, what: 'title / meta title / og:title / twitter:title' },
+    {
+        file: 'index.html',
+        text: title,
+        expected: 4,
+        what: 'title / meta title / og:title / twitter:title',
+    },
     {
         file: 'index.html',
         text: description,
         expected: 3,
         what: 'description / og:description / twitter:description',
     },
-    { file: 'tools/og-card.html', text: description, expected: 1, what: 'the Hebrew card subtitle' },
+    {
+        file: 'tools/og-card.html',
+        text: description,
+        expected: 1,
+        what: 'the Hebrew card subtitle',
+    },
+    {
+        file: 'src/copy/routes.ts',
+        text: title,
+        expected: 1,
+        what: 'HOME_TITLE.he, the tab title in the app',
+    },
+    {
+        file: 'src/copy/routes.ts',
+        text: titleEn,
+        expected: 1,
+        what: 'HOME_TITLE.en, the tab title in the app',
+    },
 ];
 
 let failed = false;

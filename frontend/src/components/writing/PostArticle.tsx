@@ -1,0 +1,179 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router';
+import { WRITING } from '@/copy/writing';
+import Markdown from '@/components/Markdown';
+import MediaView from '@/components/writing/MediaView';
+import AskDock from '@/components/writing/AskDock';
+import { EntryTitle, Tag } from '@/components/writing/parts';
+import { ARROW } from '@/components/site/Arrow';
+import { useSiteDialogs } from '@/components/site/SiteDialogs';
+import { useLang } from '@/i18n/useLang';
+import { stripWritingMetadata } from '@/services/writingService';
+import { sourceLabel, WritingEntry, WritingIndex } from '@/types/writing';
+import { formatDate } from '@/utils/date';
+import { mediaOf, readMinutes, seriesOf } from '@/utils/writing';
+
+// The workplace blog is credited in words only; its site is not linked.
+const UNLINKED_SOURCE = /blog/i;
+
+interface Neighbour {
+    to: string;
+    small: string;
+    title: string;
+}
+
+/** The piece before and after this one: in its series when it has one, else in the blog's order. */
+const useNeighbours = (
+    entry: WritingEntry,
+    index: WritingIndex | null
+): [Neighbour, Neighbour] | null => {
+    const { lang, t, to } = useLang();
+    const copy = t(WRITING).post;
+    if (!index) return null;
+    const series = seriesOf(entry, index);
+    if (series && entry.series) {
+        const at = entry.series.position - 1;
+        const prev = series.parts[at - 1];
+        const next = series.parts[at + 1];
+        const title = lang === 'he' ? series.title_he : series.title;
+        const label = (slug: string) => index.bySlug[slug]?.title ?? slug;
+        return [
+            prev
+                ? {
+                      to: to(`/blog/${prev.slug}`),
+                      small: copy.previousInSeries,
+                      title: label(prev.slug),
+                  }
+                : { to: to('/blog'), small: copy.firstPiece, title: copy.allBlog },
+            next
+                ? {
+                      to: to(`/blog/${next.slug}`),
+                      small: copy.nextInSeries,
+                      title: label(next.slug),
+                  }
+                : {
+                      to: to(`/blog?series=${series.id}`),
+                      small: copy.endOfSeries,
+                      title: copy.allSeries(title),
+                  },
+        ];
+    }
+    // The blog lists newest first: the previous piece is the next one down.
+    const i = index.entries.findIndex((e) => e.slug === entry.slug);
+    const older = index.entries[i + 1];
+    const newer = i > 0 ? index.entries[i - 1] : undefined;
+    return [
+        older
+            ? { to: to(`/blog/${older.slug}`), small: copy.previous, title: older.title }
+            : { to: to('/blog'), small: copy.firstPiece, title: copy.allBlog },
+        newer
+            ? { to: to(`/blog/${newer.slug}`), small: copy.next, title: newer.title }
+            : { to: to('/blog'), small: copy.lastPiece, title: copy.allBlog },
+    ];
+};
+
+/*
+ * One piece, read in full: its tags, title, byline, media, the text, where
+ * it was first published, the pieces around it, and a way to ask about it.
+ * Used by a piece's own page and by the reading panel on the blog.
+ */
+const PostArticle: React.FC<{ entry: WritingEntry; index: WritingIndex | null }> = ({
+    entry,
+    index,
+}) => {
+    const { lang, t, to } = useLang();
+    const copy = t(WRITING);
+    const { openContact } = useSiteDialogs();
+    const [asking, setAsking] = useState(false);
+    const neighbours = useNeighbours(entry, index);
+    const series = seriesOf(entry, index);
+    const media = mediaOf(entry);
+    const [lead, ...rest] = media;
+    const date = formatDate(entry.date, lang);
+    const topics = (entry.topics ?? []).flatMap(
+        (id) => index?.overview.topics.filter((tp) => tp.id === id) ?? []
+    );
+
+    return (
+        <article className="w-post">
+            <Link className="w-back" to={to('/blog')}>
+                {ARROW[lang === 'he' ? 'en' : 'he']} {copy.post.back}
+            </Link>
+            <div className="mt">
+                <Tag tone={entry.kind === 'article' ? 'a' : 'n'}>{copy.tags[entry.kind]}</Tag>
+                {series && entry.series && (
+                    <Tag tone="a">
+                        {copy.post.seriesTag(
+                            lang === 'he' ? series.title_he : series.title,
+                            lang === 'he' ? entry.series.label_he : entry.series.label
+                        )}
+                    </Tag>
+                )}
+                {topics.map((topic) => (
+                    <Tag key={topic.id} tone="i">
+                        {topic[lang]}
+                    </Tag>
+                ))}
+            </div>
+            <EntryTitle entry={entry} as="h1" />
+            <div className="by">
+                {copy.post.byName} · {date} · {copy.readMinutes(readMinutes(entry))}
+            </div>
+            {lead &&
+                (lead.kind === 'image' ? (
+                    <span className="w-imgw">
+                        <img className="w-img" src={lead.src} alt="" />
+                    </span>
+                ) : (
+                    <MediaView item={lead} title={entry.title} />
+                ))}
+            <div className="w-body" dir="auto">
+                <Markdown>{stripWritingMetadata(entry.content)}</Markdown>
+                {rest.map((item) => (
+                    <MediaView key={item.src} item={item} title={entry.title} />
+                ))}
+                <div className="w-orig">
+                    <span>{copy.post.published(sourceLabel(entry.source, lang), date)}</span>
+                    {entry.url && !UNLINKED_SOURCE.test(entry.source) && (
+                        <a href={entry.url} target="_blank" rel="noopener">
+                            {copy.post.original}
+                        </a>
+                    )}
+                </div>
+            </div>
+            {neighbours && (
+                <div className="w-pn">
+                    {neighbours.map((n) => (
+                        <Link key={n.small} to={n.to}>
+                            <small>{n.small}</small>
+                            <b dir="auto">{n.title}</b>
+                        </Link>
+                    ))}
+                </div>
+            )}
+            <div className="w-end">
+                <b>{copy.ask.title}</b>
+                <span className="ac">
+                    <button
+                        type="button"
+                        className="w-chip"
+                        aria-expanded={asking}
+                        onClick={() => setAsking((open) => !open)}
+                    >
+                        {copy.ask.open}
+                    </button>
+                    <button
+                        type="button"
+                        className="btn sm"
+                        onClick={() => openContact({ kind: 'call', topic: entry.title })}
+                    >
+                        {copy.ask.book}
+                    </button>
+                </span>
+                {asking && <AskDock entry={entry} />}
+            </div>
+        </article>
+    );
+};
+
+export default PostArticle;
