@@ -13,7 +13,7 @@ import { useLocation } from 'react-router';
  * title once its data arrives may set document.title itself; this runs on
  * route change only, so it does not overwrite that.
  */
-const HOME_TITLE = 'Yanir Rot | AI agents and systems for businesses';
+const HOME_TITLE = 'יניר רוט | סוכני AI לעסקים';
 
 const titleFor = (pathname: string) => {
     const section = pathname.split('/')[1];

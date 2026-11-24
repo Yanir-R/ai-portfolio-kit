@@ -59,6 +59,22 @@ export const PERSON = {
     bookingUrl: 'https://cal.com/yanirrot/zoom-call',
 } as const;
 
+/**
+ * The home page's share card and search snippet, approved by Yanir on
+ * 2026-11-24. index.html repeats these strings (it cannot import this file)
+ * and tools/og-card.html draws them onto og-image.png;
+ * `npm run check:preview-copy` asserts all three still agree.
+ */
+export const HOME_SHARE = {
+    title: 'יניר רוט | סוכני AI לעסקים',
+    description:
+        'סוכנים ומערכות לעסקים קטנים, למשרדים ולרשויות. הצעד הראשון הוא שיחת אבחון של 20 דקות.',
+    headline: 'אני בונה סוכני AI לעסקים. ומתחיל מהבעיה, לא מהטכנולוגיה.',
+    titleEn: 'Yanir Rot | AI agents for businesses',
+    descriptionEn:
+        'Agents and systems for small businesses, offices and local authorities. It starts with a 20-minute discovery call.',
+} as const;
+
 export const PERSONAKIT = {
     name: 'PersonaKit',
     url: 'https://personakit.me',
