@@ -164,11 +164,12 @@ def test_a_question_from_a_piece_page_is_about_that_piece(calls):
         "So what does it actually do?",
         context={"type": "writing", "ref": "ninety-prs-review-engine"},
     )
-    question, knowledge = calls[0][1], calls[0][2]
+    question, knowledge, brief = calls[0][1], calls[0][2], calls[0][4]
     assert "ninety-prs-review-engine" in {d["slug"] for d in knowledge.documents}
-    # The model is told which piece "it" refers to, by the corpus's title.
-    assert question.startswith('(Asked while reading your post "')
-    assert question.endswith("So what does it actually do?")
+    # The visitor's words reach the model exactly as typed; which piece "it"
+    # refers to travels beside the corpus, by the corpus's own title.
+    assert question == "So what does it actually do?"
+    assert brief.startswith('The visitor is reading your piece "')
     # The piece is open in front of the visitor, so it is not offered back.
     for block in reply["blocks"]:
         assert "ninety-prs-review-engine" not in (block.get("items") or [block["ref"]])
@@ -209,3 +210,21 @@ def test_the_api_returns_the_overview():
     data = client.get("/api/writing").json()
     assert data["overview"]["total"] == len(data["writing"])
     assert data["overview"]["series"][0]["id"] == "building-personakit"
+
+
+def test_a_dated_note_reaches_the_model_from_the_piece_page(calls):
+    """The PersonaKit announcement mentions a waitlist; the note says it is open source now."""
+    _post("Can I join the waitlist?", context={"type": "writing", "ref": "why-i-started-personakit"})
+    brief = calls[0][4]
+    assert "open source" in brief
+    assert 'part 1 of' in brief and "Building PersonaKit" in brief
+
+
+def test_the_note_follows_the_question_language(calls):
+    _post("איך נרשמים לרשימת ההמתנה?", context={"type": "writing", "ref": "why-i-started-personakit"})
+    assert "בקוד פתוח" in calls[0][4]
+
+
+def test_a_question_off_any_page_carries_no_brief(calls):
+    _post("What have you written about AI memory?")
+    assert calls[0][4] == ""

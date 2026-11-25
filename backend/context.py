@@ -35,6 +35,8 @@ from docs_helper import (
     WRITING_DIR,
     get_all_projects,
     get_all_writing,
+    get_writing_by_slug,
+    get_writing_index,
     read_markdown_file,
     read_pdf_file,
 )
@@ -469,3 +471,54 @@ def get_knowledge(language: str = ENGLISH) -> Knowledge:
             )
 
     return built[language]
+
+
+def reading_brief(slug: str, language: str = ENGLISH) -> str:
+    """What the model needs to know about the piece a visitor has open.
+
+    Asked from a piece's page, "it", "this post" and "here" mean that piece, and
+    the model cannot know that from the question alone. Everything here comes
+    from the corpus and the writing index, never from the request, so a visitor
+    cannot describe a piece into existence. Empty when the slug names nothing.
+
+    The dated note matters most: a piece can say something that has since
+    changed (a waitlist that became an open release), and the model only reads
+    the piece itself, so without the note it would repeat the old claim as
+    current.
+    """
+    entry = get_writing_by_slug(slug)
+    if not entry or not entry.get("title"):
+        return ""
+
+    title = entry["title"]
+    published = ", ".join(
+        part for part in (entry.get("kind"), entry.get("source"), entry.get("date")) if part
+    )
+    lines = [
+        f'The visitor is reading your piece "{title}" on the site'
+        + (f" ({published})." if published else "."),
+        f'Its full text is in the PROFILE under "{_LABEL_PREFIX[WRITING]}{title}". '
+        '"It", "this", "this post" and "here" mean this piece unless the visitor '
+        "names something else.",
+    ]
+
+    series = entry.get("series")
+    if series:
+        series_title = next(
+            (s.get("title") for s in get_writing_index()["series"] if s.get("id") == series.get("id")),
+            None,
+        )
+        if series_title:
+            lines.append(
+                f'It is part {series["position"]} of {series["count"]} in your series "{series_title}".'
+            )
+
+    note = entry.get("note")
+    if isinstance(note, dict):
+        text = note.get(language) or note.get(ENGLISH)
+        if text:
+            lines.append(
+                f"Note added {note.get('date', 'later')}, which outranks the piece where they differ: {text}"
+            )
+
+    return "\n".join(lines)

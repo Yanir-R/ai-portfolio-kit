@@ -66,6 +66,7 @@ from typing import Dict, FrozenSet, Iterable, Optional, Set, Tuple
 
 from context import Knowledge, Section
 from docs_helper import DOCS_DIR, get_writing_index
+from prompt import HISTORY_TURNS
 
 logger = logging.getLogger(__name__)
 
@@ -342,7 +343,7 @@ UNFOCUSED = "unfocused"
 # How many recent turns are read when the message itself says nothing topical.
 # Matches the history the model is replayed, so what frames the search is what
 # the model can actually see.
-FRAMING_TURNS = 6
+FRAMING_TURNS = HISTORY_TURNS
 
 # The most documents sent beside the profile. A question that five documents
 # each answer a quarter of is not asking about five documents, and the ones
@@ -618,7 +619,7 @@ def _same_series(slugs: Tuple[str, ...]) -> bool:
 
 
 def _pinned_to(selection: Selection, knowledge: Knowledge, pinned: str) -> Selection:
-    """`selection` with the piece the visitor is reading always sent first.
+    """`selection` with the piece the visitor is reading always sent in full.
 
     Asked from a piece's own page, "what does the engine actually do?" is about
     that piece whatever its words match. Whatever else the search chose still

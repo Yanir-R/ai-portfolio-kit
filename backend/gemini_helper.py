@@ -14,8 +14,11 @@ from dataclasses import dataclass
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
-from typing import Dict, Iterable, Optional
+from pydantic import BaseModel, Field
+from typing import Dict, Iterable, Optional, Tuple
+import json
 import logging
+import re
 import threading
 import time
 
@@ -138,6 +141,68 @@ SAFETY_SETTINGS = [
     )
 ]
 
+class ModelReply(BaseModel):
+    """The shape the model answers in, enforced by Gemini's structured output.
+
+    Text alone could not say whether the model answered or declined, so the
+    site guessed it from the search outcome: a question that matched nothing
+    was treated as declined even when the profile answered it, and a matched
+    question the model could not answer was not. Asking the model for the flag
+    beside the text, in the same call, costs nothing extra and makes "offer to
+    take it by email" follow what actually happened.
+
+    The descriptions are part of the request: the model reads them as the
+    definition of each field.
+    """
+
+    answer: str = Field(
+        description=(
+            "The reply to the visitor, in plain text, following every rule above."
+        )
+    )
+    declined: bool = Field(
+        description=(
+            "true when the PROFILE does not cover the question and the answer "
+            "says so, or when the request is out of scope and the answer "
+            "redirects it; false when the answer answers the question."
+        )
+    )
+
+
+# Off switch for structured output, in one place. With it off the model answers
+# in plain text and `declined` is reported as unknown.
+STRUCTURED_OUTPUT = True
+
+# The answer field of a reply that came back as JSON but would not parse, for
+# instance cut short. Read rather than shown raw: a visitor must never see a
+# brace.
+_ANSWER_FIELD_RE = re.compile(r'"answer"\s*:\s*"((?:[^"\\]|\\.)*)"', re.DOTALL)
+
+
+def _parse_reply(text: str) -> Tuple[str, Optional[bool]]:
+    """The answer text and the declined flag from what the model returned.
+
+    Deterministic in every case: valid JSON gives both fields; text that is not
+    JSON at all (structured output switched off, or a model that ignored it) is
+    the answer itself with the flag unknown; JSON that does not parse gives
+    whatever answer field can be read out of it, or nothing.
+    """
+    stripped = text.strip()
+    if not stripped.startswith("{"):
+        return stripped, None
+    try:
+        reply = ModelReply.model_validate_json(stripped)
+        return reply.answer.strip(), reply.declined
+    except ValueError:
+        match = _ANSWER_FIELD_RE.search(stripped)
+        if not match:
+            return "", None
+        try:
+            return json.loads(f'"{match.group(1)}"').strip(), None
+        except ValueError:
+            return "", None
+
+
 # One client per API key for the life of the process.
 #
 # Building a client per request also builds a new HTTP connection pool per
@@ -224,11 +289,25 @@ class Answer:
     total_tokens: Optional[int] = None
     finish_reason: Optional[str] = None
     latency_ms: Optional[int] = None
+    # How much of the prompt Gemini served from its implicit cache.
+    cached_tokens: Optional[int] = None
+    # The model's own word on whether it answered (see ModelReply). None when
+    # it was not asked or the reply did not say.
+    declined: Optional[bool] = None
+    # True when a model was called but the text is the site's own copy
+    # (an empty or truncated reply), so it is not replayed as something the
+    # model said.
+    fallback: bool = False
 
     @property
     def from_model(self) -> bool:
         """Whether an upstream call produced this reply."""
         return self.model is not None
+
+    @property
+    def written_by_model(self) -> bool:
+        """Whether the text itself is the model's words."""
+        return self.from_model and not self.fallback
 
 
 def get_gemini_response(
@@ -236,6 +315,7 @@ def get_gemini_response(
     user_question: str,
     knowledge: Knowledge,
     conversation_history: Optional[Iterable[Dict[str, str]]] = None,
+    reading: str = "",
 ) -> Answer:
     """Answers a visitor's question in Yanir's voice, grounded in `knowledge`.
 
@@ -251,20 +331,21 @@ def get_gemini_response(
         return Answer(text=NO_KNOWLEDGE_MESSAGE)
 
     client = _client_for(api_key)
-    system_instruction = build_system_instruction(knowledge)
-    config = types.GenerateContentConfig(
+    system_instruction = build_system_instruction(knowledge, reading)
+    shared = dict(
         system_instruction=system_instruction,
         max_output_tokens=MAX_OUTPUT_TOKENS,
         safety_settings=SAFETY_SETTINGS,
+    )
+    if STRUCTURED_OUTPUT:
+        shared.update(response_mime_type="application/json", response_schema=ModelReply)
+    config = types.GenerateContentConfig(
+        **shared,
         thinking_config=types.ThinkingConfig(thinking_level=THINKING_LEVEL),
     )
     # The same request at the model's default thinking level, for a model that
     # refuses the setting above.
-    plain_config = types.GenerateContentConfig(
-        system_instruction=system_instruction,
-        max_output_tokens=MAX_OUTPUT_TOKENS,
-        safety_settings=SAFETY_SETTINGS,
-    )
+    plain_config = types.GenerateContentConfig(**shared)
     contents = build_contents(user_question, conversation_history)
 
     last_error: Optional[Exception] = None
@@ -323,12 +404,13 @@ def get_gemini_response(
             latency_ms = int((time.monotonic() - call_started) * 1000)
             usage = _read_usage(model_id, response)
 
-            text = (response.text or "").strip()
+            text, declined = _parse_reply(response.text or "")
             if not text:
                 return Answer(
                     text=EMPTY_RESPONSE_MESSAGE,
                     model=model_id,
                     latency_ms=latency_ms,
+                    fallback=True,
                     **usage,
                 )
 
@@ -347,6 +429,7 @@ def get_gemini_response(
                     text=TRUNCATED_RESPONSE_MESSAGE,
                     model=model_id,
                     latency_ms=latency_ms,
+                    fallback=True,
                     **usage,
                 )
 
@@ -354,6 +437,7 @@ def get_gemini_response(
                 text=text,
                 model=model_id,
                 latency_ms=latency_ms,
+                declined=declined,
                 **usage,
             )
 
@@ -421,6 +505,7 @@ def _read_usage(model_id: str, response) -> Dict[str, Optional[object]]:
         "thinking_tokens": getattr(usage, "thoughts_token_count", None),
         "output_tokens": getattr(usage, "candidates_token_count", None),
         "total_tokens": getattr(usage, "total_token_count", None),
+        "cached_tokens": getattr(usage, "cached_content_token_count", None),
     }
 
     if usage is not None:
@@ -428,12 +513,12 @@ def _read_usage(model_id: str, response) -> Dict[str, Optional[object]]:
         # cache. The rules and the profile open every request, so a run of
         # questions should show it climbing; if it stays empty, the start of
         # the system instruction is varying and the free discount is being
-        # missed. Logged only, not part of the reply.
+        # missed. Also reported in the answer's trace.
         logger.info(
             "Gemini usage model=%s prompt=%s cached=%s thinking=%s output=%s total=%s",
             model_id,
             fields["prompt_tokens"],
-            getattr(usage, "cached_content_token_count", None),
+            fields["cached_tokens"],
             fields["thinking_tokens"],
             fields["output_tokens"],
             fields["total_tokens"],

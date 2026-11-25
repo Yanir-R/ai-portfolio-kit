@@ -124,7 +124,7 @@ def stub_knowledge(monkeypatch):
     content of the system instruction is irrelevant and building it from the
     real corpus would only couple them to prompt.py.
     """
-    monkeypatch.setattr(gemini_helper, "build_system_instruction", lambda k: "sys")
+    monkeypatch.setattr(gemini_helper, "build_system_instruction", lambda k, reading="": "sys")
     monkeypatch.setattr(gemini_helper, "build_contents", lambda q, h: ["q"])
     return type("Knowledge", (), {"is_empty": False})()
 

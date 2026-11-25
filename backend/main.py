@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from hmac import compare_digest
 from dotenv import load_dotenv
 from gemini_helper import Answer, get_gemini_response
-from context import get_knowledge
+from context import get_knowledge, reading_brief
 from language import detect_language
 from selection import Selection, select
 from docs_helper import (
@@ -18,7 +18,7 @@ from rate_limit import (
     enforce_rate_limit,
 )
 import guard
-from prompt import RULES
+from prompt import HISTORY_TURNS, RULES
 import booking
 import site_mail
 from pydantic import BaseModel, EmailStr, Field
@@ -262,6 +262,25 @@ def _to_model_turns(history: Optional[List[ChatMessage]]) -> List[Dict[str, str]
     return turns
 
 
+def _history_counts(
+    history: Optional[List[ChatMessage]], turns: List[Dict[str, str]]
+) -> Dict[str, int]:
+    """How the history arrived and what of it reached the model, for the audit.
+
+    `dropped` counts assistant turns without a valid signature, which is how a
+    forged history shows up; `replayed` is what the model actually saw after
+    the window in prompt.py.
+    """
+    received = history or []
+    assistant = sum(1 for m in received if m.type in _MODEL_MESSAGE_TYPES)
+    kept = sum(1 for t in turns if t["role"] == "model")
+    return {
+        "received": len(received),
+        "dropped": assistant - kept,
+        "replayed": min(len(turns), HISTORY_TURNS),
+    }
+
+
 class ContextCount(BaseModel):
     """How many documents of one kind went into the request."""
 
@@ -310,6 +329,9 @@ class AnswerTrace(BaseModel):
     thinking_tokens: Optional[int] = None
     output_tokens: Optional[int] = None
     total_tokens: Optional[int] = None
+    # The part of `prompt_tokens` Gemini served from its implicit cache: the
+    # rules and profile that open every request.
+    cached_tokens: Optional[int] = None
     finish_reason: Optional[str] = None
     latency_ms: Optional[int] = None
     # Pluralisation of `kind` is left to the frontend, which is where the
@@ -460,8 +482,12 @@ class ChatResponse(BaseModel):
     answered_by: Optional[Literal["model", "index"]] = None
     # The language the question was read as, so the cards can match the answer.
     language: Optional[Literal["en", "he"]] = None
+    # The model's own word on whether it answered or declined, from its
+    # structured reply. Absent when no model wrote the text or it did not say.
+    declined: Optional[bool] = None
     # Sent back with this reply when it is replayed as history, proving the
-    # server wrote it. See guard.py.
+    # server wrote it. See guard.py. Absent on failure copy (busy, cut short),
+    # which is not part of the conversation and is not replayed to the model.
     sig: Optional[str] = None
 
 
@@ -472,6 +498,8 @@ def _log_chat_audit(
     answered_by: Optional[str],
     context: Optional[str] = None,
     shown: int = 0,
+    history: Optional[Dict[str, int]] = None,
+    answer: Optional[Answer] = None,
 ) -> None:
     """One structured line per answer.
 
@@ -493,6 +521,9 @@ def _log_chat_audit(
                 "listed": len(selection.knowledge.listed),
                 "blocks": [b.model_dump(exclude_none=True) for b in blocks],
                 "answered_by": answered_by,
+                "history": history,
+                "declined": answer.declined if answer else None,
+                "cached_tokens": answer.cached_tokens if answer else None,
             },
             ensure_ascii=False,
         ),
@@ -507,6 +538,8 @@ def _chat_reply(
     blocks: Optional[List[Block]] = None,
     answered_by: Optional[str] = None,
     language: Optional[str] = None,
+    declined: Optional[bool] = None,
+    sign: bool = True,
 ) -> ChatResponse:
     return ChatResponse(
         response=response,
@@ -516,7 +549,8 @@ def _chat_reply(
         blocks=blocks or [],
         answered_by=answered_by,
         language=language,
-        sig=guard.sign_turn(response),
+        declined=declined,
+        sig=guard.sign_turn(response) if sign else None,
     )
 
 
@@ -551,6 +585,7 @@ def _answer_trace(
         thinking_tokens=answer.thinking_tokens,
         output_tokens=answer.output_tokens,
         total_tokens=answer.total_tokens,
+        cached_tokens=answer.cached_tokens,
         finish_reason=answer.finish_reason,
         latency_ms=answer.latency_ms,
         context=[
@@ -832,15 +867,12 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             )
 
         # Asked from a piece's page: the model is told which piece "it" and
-        # "this" mean. The title comes from the corpus, never from the request.
-        question_for_model = chat_request.message
-        if chat_request.context:
-            reading_entry = get_writing_by_slug(chat_request.context.ref)
-            if reading_entry and reading_entry.get("title"):
-                question_for_model = (
-                    f'(Asked while reading your post "{reading_entry["title"]}" on the site.)\n'
-                    f"{chat_request.message}"
-                )
+        # "this" mean, where it was published, its place in a series and any
+        # note that corrects it since. Built from the corpus, never from the
+        # request, and sent beside the corpus so the visitor's turn stays
+        # exactly what they typed.
+        reading = chat_request.context.ref if chat_request.context else None
+        brief = reading_brief(reading, language) if reading else ""
 
         # The SDK call is synchronous and can take over a minute. Run in the
         # threadpool so it does not block the event loop, which would stall
@@ -848,26 +880,34 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
         answer = await run_in_threadpool(
             get_gemini_response,
             GEMINI_API_KEY,
-            question_for_model,
+            chat_request.message,
             selection.knowledge,
             turns,
+            brief,
         )
 
-        reading = chat_request.context.ref if chat_request.context else None
         blocks = _writing_blocks(selection, reading) if answer.from_model else []
         _log_chat_audit(
             language, selection, blocks,
             answered_by="model" if answer.from_model else None,
-            context=chat_request.context.ref if chat_request.context else None,
+            context=reading,
             shown=len(chat_request.shown),
+            history=_history_counts(chat_request.conversation_history, turns),
+            answer=answer,
         )
 
+        written = answer.written_by_model
         return _chat_reply(
-            _checked_answer_text(answer.text, language) if answer.from_model else answer.text,
+            _checked_answer_text(answer.text, language) if written else answer.text,
             trace=_answer_trace(answer, selection, language),
             blocks=blocks,
             answered_by="model" if answer.from_model else None,
             language=language,
+            declined=answer.declined if written else None,
+            # Failure copy is not signed, so the next request does not replay
+            # "I'm getting more questions than I can keep up with" to the model
+            # as something it said.
+            sign=written,
         )
 
     except HTTPException:
