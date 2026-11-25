@@ -8,7 +8,7 @@ My own always-on AI assistant. It runs all day on my machine, and I talk to it i
 - **Memory**: an Obsidian vault under git for the agent's own record (work summaries, improvements, measurements and performance); PersonaKit for the memory shared between my agents and Claude Code
 - **Interface**: WhatsApp and Telegram
 - **Language**: Python and shell
-- **Models**: Claude first, Codex as a fallback when quota runs out
+- **Models**: OpenAI through Codex, or OpenRouter, depending on how the profile is set up
 
 ## Key Features
 - Reading and preparing happen on their own; anything that sends, changes or removes something asks me first. Permanent deletion is not available to it at all
