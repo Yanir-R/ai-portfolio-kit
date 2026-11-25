@@ -24,3 +24,9 @@
         padding: 6px 8px;
     }
 }
+
+/* The loading sweep follows the reading direction: from the right in Hebrew. */
+[dir='rtl'] .sk .sk-bar,
+[dir='rtl'] .bk-cal .cg.ld button {
+    animation-direction: reverse;
+}

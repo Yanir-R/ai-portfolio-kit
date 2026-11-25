@@ -10,6 +10,7 @@ import { useWritingIndexState } from '@/hooks/useWritingIndex';
 import { useLang } from '@/i18n/useLang';
 import { sourceLabel, WritingEntry, WritingIndex, WritingSeries } from '@/types/writing';
 import { formatDate } from '@/utils/date';
+import { BlogSkeleton } from '@/components/site/Skeleton';
 import {
     isEnglishTitle,
     longVersionOf,
@@ -348,6 +349,24 @@ const Blog: React.FC = () => {
             );
     }, [index, query, kind, topic, seriesId]);
 
+    // The heading is known before the index arrives, so only the list waits.
+    const hero = (
+        <div className="w-hero">
+            <div>
+                <span className="tagline">{copy.blog.tagline}</span>
+                <h1>
+                    {copy.blog.title} <em>{copy.blog.em}</em>
+                </h1>
+            </div>
+            <p>
+                {copy.blog.lead}{' '}
+                <button type="button" className="hw" onClick={() => setHowOpen(true)}>
+                    {copy.blog.how}
+                </button>
+            </p>
+        </div>
+    );
+
     if (!index)
         return failed ? (
             <div className="w-hero">
@@ -358,9 +377,11 @@ const Blog: React.FC = () => {
                 <p>{copy.blog.failed.text}</p>
             </div>
         ) : (
-            <p className="state-note" role="status">
-                {copy.blog.loading}
-            </p>
+            <>
+                {hero}
+                <BlogSkeleton label={copy.blog.loading} />
+                {howOpen && <HowPanel onClose={() => setHowOpen(false)} />}
+            </>
         );
 
     const inSeries = new Set(index.overview.series.flatMap((s) => s.parts.map((p) => p.slug)));
@@ -379,20 +400,7 @@ const Blog: React.FC = () => {
 
     return (
         <>
-            <div className="w-hero">
-                <div>
-                    <span className="tagline">{copy.blog.tagline}</span>
-                    <h1>
-                        {copy.blog.title} <em>{copy.blog.em}</em>
-                    </h1>
-                </div>
-                <p>
-                    {copy.blog.lead}{' '}
-                    <button type="button" className="hw" onClick={() => setHowOpen(true)}>
-                        {copy.blog.how}
-                    </button>
-                </p>
-            </div>
+            {hero}
             <div className="w-lay">
                 <Filters
                     index={index}

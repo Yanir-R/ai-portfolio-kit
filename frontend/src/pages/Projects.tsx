@@ -3,7 +3,8 @@ import { Link } from 'react-router';
 import { PROJECTS } from '@/copy/projects';
 import { Arrow } from '@/components/site/Arrow';
 import { Tag } from '@/components/writing/parts';
-import { LoadFailed, LoadingNote } from '@/components/site/PageStates';
+import { LoadFailed } from '@/components/site/PageStates';
+import { CardsSkeleton } from '@/components/site/Skeleton';
 import { useLoad } from '@/hooks/useLoad';
 import { useLang } from '@/i18n/useLang';
 import { projectService } from '@/services/projectService';
@@ -25,7 +26,7 @@ const Projects: React.FC = () => {
                 </div>
                 <p>{copy.lead}</p>
             </div>
-            {value.state === 'loading' && <LoadingNote text={copy.loading} />}
+            {value.state === 'loading' && <CardsSkeleton label={copy.loading} count={4} />}
             {value.state === 'failed' && <LoadFailed copy={copy.failed} onRetry={retry} />}
             {value.state === 'ready' && (
                 <div className="w-arts proj">

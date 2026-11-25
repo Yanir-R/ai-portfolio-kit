@@ -431,7 +431,11 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             </button>
                         </div>
                     </div>
-                    <div className="cg">
+                    {/* While the free times load, the days still ahead shimmer. */}
+                    <div
+                        className={load.state === 'loading' ? 'cg ld' : 'cg'}
+                        aria-busy={load.state === 'loading'}
+                    >
                         {copy.weekdays.map((w) => (
                             <i key={w}>{w}</i>
                         ))}
@@ -474,7 +478,11 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             );
                         })}
                     </div>
-                    {load.state === 'loading' && <p className="fine">{copy.loading}</p>}
+                    {load.state === 'loading' && (
+                        <p className="fine" role="status">
+                            {copy.loading}
+                        </p>
+                    )}
                     {load.state === 'failed' && <p className="bk-err">{copy.failed}</p>}
                     {load.state === 'ready' && !anyFree && <p className="fine">{copy.none}</p>}
                 </div>

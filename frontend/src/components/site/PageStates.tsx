@@ -5,15 +5,10 @@ import { useNoIndex } from '@/hooks/useNoIndex';
 import { useLang } from '@/i18n/useLang';
 
 /*
- * The states a fetched page passes through before it has something to show:
- * loading, an address with nothing behind it, and a server that did not answer.
+ * The states a fetched page can end in besides its content: an address with
+ * nothing behind it, and a server that did not answer. Loading has its own
+ * placeholders, in Skeleton.tsx.
  */
-
-export const LoadingNote: React.FC<{ text: string }> = ({ text }) => (
-    <p className="state-note" role="status">
-        {text}
-    </p>
-);
 
 export const NotFoundHero: React.FC<{
     copy: { tagline: string; title: string; text: string };

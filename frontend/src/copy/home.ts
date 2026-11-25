@@ -64,6 +64,7 @@ export interface HomeCopy {
         title: string;
         text: string;
         all: string;
+        loading: string;
         kind: Record<string, string>;
     };
 }
@@ -293,6 +294,7 @@ export const HOME: Localized<HomeCopy> = {
             title: 'מה שאני לומד מהעבודה עם סוכני AI.',
             text: 'על סוכנים בעבודה אמיתית: מה עובד, מה נשבר, ומה למדתי בדרך.',
             all: 'לכל הבלוג',
+            loading: 'טוען את הפוסטים האחרונים…',
             kind: { post: 'פוסט', article: 'מאמר' },
         },
     },
@@ -532,6 +534,7 @@ export const HOME: Localized<HomeCopy> = {
             title: "What I'm learning from working with AI agents.",
             text: 'On agents in real work: what works, what breaks, and what I learned along the way.',
             all: 'All posts',
+            loading: 'Loading the latest posts…',
             kind: { post: 'Post', article: 'Article' },
         },
     },

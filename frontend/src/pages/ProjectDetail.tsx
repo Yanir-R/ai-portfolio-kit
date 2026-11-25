@@ -3,7 +3,8 @@ import { Link, useParams } from 'react-router';
 import { PROJECTS } from '@/copy/projects';
 import Markdown from '@/components/Markdown';
 import { ARROW } from '@/components/site/Arrow';
-import { LoadFailed, LoadingNote, NotFoundHero } from '@/components/site/PageStates';
+import { LoadFailed, NotFoundHero } from '@/components/site/PageStates';
+import { ArticleSkeleton } from '@/components/site/Skeleton';
 import { ERRORS } from '@/copy/errors';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { PersonaKitLinks } from '@/components/chat/sheets/parts';
@@ -52,7 +53,7 @@ const ProjectDetail: React.FC = () => {
         projectService.getProjectBySlug(slug, lang)
     );
 
-    if (load.state === 'loading') return <LoadingNote text={copy.loading} />;
+    if (load.state === 'loading') return <ArticleSkeleton label={copy.loading} />;
     // Only a 404 means the page is not there. Anything else - the server
     // asleep, a network drop, a 5xx - is a page that exists and did not load.
     if (load.state === 'failed' && load.notFound)
