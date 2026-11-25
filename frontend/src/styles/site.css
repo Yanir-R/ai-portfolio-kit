@@ -6406,12 +6406,16 @@ html.panel .w-post {
     align-self: stretch;
     background: var(--bg);
     border: 1.5px solid var(--line);
-    padding: 10px 12px;
+    padding: 14px;
     display: flex;
     gap: 8px;
     align-items: flex-start;
     font-size: 0.98rem;
     line-height: 1.5;
+}
+/* The card's gap spaces its parts; paragraphs bring no margins of their own. */
+.w-qa .ans > :is(p, ul, ol, h3, h4) {
+    margin: 0;
 }
 .w-qa .ans ul {
     margin: 0;

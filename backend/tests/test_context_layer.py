@@ -493,3 +493,18 @@ def test_technical_questions_do_not_trigger_contact_flow():
         "I'd like to get in touch.",
     ):
         assert routes_to_contact(request), request
+
+
+def test_catalogue_lines_are_whole_sentences():
+    """A one-line summary is all the model may say about an unsent document,
+    so it must never stop mid-sentence."""
+    for language in ("en", "he"):
+        for section in context.get_knowledge(language).sections:
+            if section.summary:
+                assert not section.summary.endswith("..."), section.label
+                assert section.summary.rstrip()[-1] in ".!?)\"'", section.label
+
+
+def test_a_long_opening_sentence_is_kept_whole():
+    sentence = "word " * 80 + "end."
+    assert context.summary_of(f"## Summary\n{sentence} Second.\n") == sentence.strip()
