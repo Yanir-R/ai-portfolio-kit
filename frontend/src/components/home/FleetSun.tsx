@@ -240,6 +240,18 @@ const FleetSun: React.FC = () => {
                     </text>
                 </svg>
                 {phone && (
+                    // On a phone the number tiles become this key: what each marker is, and how many.
+                    <ul className="fkey" aria-label={ui.keyLabel}>
+                        {FLEET_LAYERS.map((l) => (
+                            <li key={l.id}>
+                                <i className={`k-${l.id}`} aria-hidden="true" />
+                                <b>{l.count}</b>
+                                <span>{l.label[lang]}</span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                {phone && (
                     <div
                         className="fpick"
                         role="group"
@@ -325,47 +337,49 @@ const FleetSun: React.FC = () => {
                     </div>
                 )}
             </div>
-            <div className="fside">
-                <div className="fnums" role="group" aria-label={ui.filterLabel}>
-                    {FLEET_LAYERS.map((l) => (
-                        <button
-                            key={l.id}
-                            type="button"
-                            data-f={l.id}
-                            aria-pressed={layer === l.id}
-                            onClick={() => pickLayer(l.id)}
-                        >
-                            <b>{l.count}</b>
-                            <span>{l.label[lang]}</span>
-                        </button>
-                    ))}
+            {!phone && (
+                <div className="fside">
+                    <div className="fnums" role="group" aria-label={ui.filterLabel}>
+                        {FLEET_LAYERS.map((l) => (
+                            <button
+                                key={l.id}
+                                type="button"
+                                data-f={l.id}
+                                aria-pressed={layer === l.id}
+                                onClick={() => pickLayer(l.id)}
+                            >
+                                <b>{l.count}</b>
+                                <span>{l.label[lang]}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="fcard" aria-live="polite">
+                        {card ? (
+                            <>
+                                <span className="k">{ui.shown}</span>
+                                <b>{card.title[lang]}</b>
+                                <dl className="wh">
+                                    <dt>{ui.whyDone}</dt>
+                                    <dd>{card.why[lang]}</dd>
+                                    <dt>{ui.howHelps}</dt>
+                                    <dd>{card.helps[lang]}</dd>
+                                    <dt>{ui.whatSolved}</dt>
+                                    <dd>{card.solved[lang]}</dd>
+                                </dl>
+                            </>
+                        ) : (
+                            <>
+                                <span className="k">
+                                    {ray === DIRECT_RAY ? ui.aroundCentre : ui.group}
+                                </span>
+                                <b>{groupOf(ray!).name[lang]}</b>
+                                <p className="why">{groupOf(ray!).why[lang]}</p>
+                                <p className="hint">{ui.hint}</p>
+                            </>
+                        )}
+                    </div>
                 </div>
-                <div className="fcard" aria-live="polite">
-                    {card ? (
-                        <>
-                            <span className="k">{ui.shown}</span>
-                            <b>{card.title[lang]}</b>
-                            <dl className="wh">
-                                <dt>{ui.whyDone}</dt>
-                                <dd>{card.why[lang]}</dd>
-                                <dt>{ui.howHelps}</dt>
-                                <dd>{card.helps[lang]}</dd>
-                                <dt>{ui.whatSolved}</dt>
-                                <dd>{card.solved[lang]}</dd>
-                            </dl>
-                        </>
-                    ) : (
-                        <>
-                            <span className="k">
-                                {ray === DIRECT_RAY ? ui.aroundCentre : ui.group}
-                            </span>
-                            <b>{groupOf(ray!).name[lang]}</b>
-                            <p className="why">{groupOf(ray!).why[lang]}</p>
-                            <p className="hint">{ui.hint}</p>
-                        </>
-                    )}
-                </div>
-            </div>
+            )}
         </div>
     );
 };

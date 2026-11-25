@@ -388,6 +388,7 @@ export const FLEET_UI: Localized<{
     chartLabel: string;
     groupsLabel: string;
     filterLabel: string;
+    keyLabel: string;
     coreTitle: string;
     coreSub: string;
     shown: string;
@@ -409,6 +410,7 @@ export const FLEET_UI: Localized<{
         chartLabel: 'מערך הסוכנים: סוכן ראשי במרכז, שבע קבוצות סביבו',
         groupsLabel: 'קבוצות הסוכנים',
         filterLabel: 'סינון השרטוט',
+        keyLabel: 'מקרא השרטוט',
         coreTitle: 'הסוכן הראשי',
         coreSub: 'מחלק עבודה',
         shown: 'מוצג בשרטוט',
@@ -429,6 +431,7 @@ export const FLEET_UI: Localized<{
         chartLabel: 'The agent fleet: a head agent in the centre, seven groups around it',
         groupsLabel: 'Agent groups',
         filterLabel: 'Filter the chart',
+        keyLabel: 'Chart key',
         coreTitle: 'The head agent',
         coreSub: 'Hands out work',
         shown: 'Shown in the chart',
