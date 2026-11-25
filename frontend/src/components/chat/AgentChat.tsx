@@ -278,14 +278,14 @@ const AgentChat: React.FC<{
     // On a phone the card's input is a button that opens the layer. Focusing a
     // real input on the page would make the browser scroll the page to it
     // above the keyboard, before the layer is even drawn. Instead the tap
-    // focuses `keys`, a hidden input pinned to the top of the screen (the
-    // keyboard opens without moving anything, and iOS opens it only inside the
-    // tap), and once the layer is up the focus moves to its input.
+    // focuses `keys`, a hidden input pinned to the top of the screen: the
+    // keyboard opens without moving anything (and iOS opens it only inside
+    // the tap). Once the layer is up, the focus moves on to the layer's input.
     const openToType = () => {
         keysRef.current?.focus({ preventScroll: true });
         phone?.engage();
     };
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (full && document.activeElement === keysRef.current) {
             inputRef.current?.focus({ preventScroll: true });
         }
@@ -297,7 +297,8 @@ const AgentChat: React.FC<{
         const vv = window.visualViewport;
         const log = logRef.current;
         if (!full || !vv || !log) return;
-        const toEnd = () => (log.scrollTop = log.scrollHeight);
+        // A frame later, once the layer has taken the new height.
+        const toEnd = () => requestAnimationFrame(() => (log.scrollTop = log.scrollHeight));
         vv.addEventListener('resize', toEnd);
         return () => vv.removeEventListener('resize', toEnd);
     }, [full]);
@@ -406,6 +407,17 @@ const AgentChat: React.FC<{
                     </button>
                 ))}
             </div>
+            {phone && (
+                <input
+                    ref={keysRef}
+                    className="keys"
+                    type="text"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                />
+            )}
             {phone && !full ? (
                 <div className="inp">
                     <button
@@ -419,15 +431,6 @@ const AgentChat: React.FC<{
                             {copy.send}
                         </b>
                     </button>
-                    <input
-                        ref={keysRef}
-                        className="keys"
-                        type="text"
-                        tabIndex={-1}
-                        aria-hidden="true"
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                    />
                 </div>
             ) : (
                 <form className="inp" onSubmit={submit}>

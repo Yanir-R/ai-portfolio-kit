@@ -8902,7 +8902,7 @@ video.w-v {
 }
 /* Holds the keyboard open while the layer is drawn: invisible, at the top of
    the screen, so focusing it moves nothing. */
-.inp .keys {
+.chat .keys {
     position: fixed;
     top: 0;
     inset-inline-start: 0;
