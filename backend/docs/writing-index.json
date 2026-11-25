@@ -1,5 +1,5 @@
 {
-  "_about": "Curation for backend/docs/writing: topics (closed list), Hebrew one-line summaries, verbatim quotes, dated notes on pieces that went out of date, media kinds, and series. Prose stays in the .md files. tests/test_writing_index.py checks every piece has an entry and every quote is verbatim.",
+  "_about": "Curation for backend/docs/writing: topics (closed list), Hebrew one-line summaries, verbatim quotes, dated notes on pieces that went out of date, media kinds, series, and share_quote: a verbatim line drawn on the link-preview card of a piece that has no image (frontend/seo/share.mts). Prose stays in the .md files. tests/test_writing_index.py checks every piece has an entry and every quote is verbatim.",
   "topics": [
     {
       "id": "memory",
@@ -120,20 +120,23 @@
         "memory",
         "agents"
       ],
-      "summary_he": "ברגע שסוכן לא רק עונה אלא עובד ברקע, הבעיה משתנה."
+      "summary_he": "ברגע שסוכן לא רק עונה אלא עובד ברקע, הבעיה משתנה.",
+      "share_quote": "זיכרון של בינה מלאכותית הוא לא רק שליפה טובה יותר."
     },
     "agent-threads-are-the-artifact": {
       "topics": [
         "tools",
         "review"
       ],
-      "summary_he": "למה ה־diff לבדו כבר לא מספיק."
+      "summary_he": "למה ה־diff לבדו כבר לא מספיק.",
+      "share_quote": "The agent thread should not be a disposable transcript."
     },
     "agents-ask-approval": {
       "topics": [
         "agents"
       ],
-      "summary_he": "בשבוע מדגם הסוכן ביקש אישור לפני כ־16% מהפעולות, והמשתמשים אישרו 97% מהבקשות."
+      "summary_he": "בשבוע מדגם הסוכן ביקש אישור לפני כ־16% מהפעולות, והמשתמשים אישרו 97% מהבקשות.",
+      "share_quote": "אישור שתמיד אומרים לו כן כבר לא מגן על כלום."
     },
     "building-personakit-day-2": {
       "topics": [
@@ -183,7 +186,8 @@
       "topics": [
         "tools"
       ],
-      "summary_he": "זה מתחיל לשנות את הדרך שבה עובדים עם סוכני קוד."
+      "summary_he": "זה מתחיל לשנות את הדרך שבה עובדים עם סוכני קוד.",
+      "share_quote": "העתיד של סוכני קוד הוא לא רק מודלים חכמים יותר."
     },
     "crashed-claude-cli": {
       "topics": [
@@ -204,7 +208,8 @@
         "review",
         "tools"
       ],
-      "summary_he": "בשלב הזה כבר אי אפשר להתייחס ל־CI כאל עוד בדיקה שרצה לפני מיזוג."
+      "summary_he": "בשלב הזה כבר אי אפשר להתייחס ל־CI כאל עוד בדיקה שרצה לפני מיזוג.",
+      "share_quote": "הערך נמצא במערכת שמחזיקה את העבודה סביבו."
     },
     "personakit-memory-like-production": {
       "topics": [
@@ -240,7 +245,8 @@
         "tools",
         "agents"
       ],
-      "summary_he": "הרשאות ואישור לפני שליחה: המקום שבו MCP מתחיל להיות הגיוני."
+      "summary_he": "הרשאות ואישור לפני שליחה: המקום שבו MCP מתחיל להיות הגיוני.",
+      "share_quote": "Safer ways for agents to operate real systems."
     },
     "which-nothing-did-you-get": {
       "topics": [
@@ -258,7 +264,8 @@
         "date": "2026-11",
         "en": "The post mentions a private pilot and a waitlist. Since November 2026 PersonaKit is open source and free to use.",
         "he": "בפוסט מוזכרים פיילוט פרטי ורשימת המתנה. מאז נובמבר 2026 PersonaKit בקוד פתוח וחינמית לשימוש."
-      }
+      },
+      "share_quote": "Your AI's memory. Your say."
     }
   }
 }

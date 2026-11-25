@@ -12,9 +12,10 @@
         "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{mts,js,json}\" \"seo/**/*.mts\"",
         "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"*.{mts,js,json}\" \"seo/**/*.mts\"",
         "check:preview-copy": "node scripts/check-preview-copy.mjs",
-        "build": "npm run typecheck && vite build",
+        "build": "npm run typecheck && vite build && npm run share-cards",
         "build:dev": "npm run typecheck && vite build --mode development",
-        "build:prod": "npm run typecheck && vite build --mode production",
+        "build:prod": "npm run typecheck && vite build --mode production && npm run share-cards",
+        "share-cards": "node scripts/share-cards.mjs",
         "preview": "vite preview"
     },
     "dependencies": {
@@ -39,6 +40,7 @@
         "eslint-plugin-react-hooks": "^7.1.1",
         "eslint-plugin-react-refresh": "^0.4.24",
         "globals": "^17.7.0",
+        "playwright": "1.63.0",
         "prettier": "^3.6.2",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.65.0",

@@ -42,6 +42,13 @@ import Markdown from 'react-markdown';
 import { HOME_SHARE, PERSON, PERSONAKIT, TRINITY, siteGraph } from './facts.mjs';
 import { pageTitle, SECTION_TITLE, SITE_NAME } from '../src/copy/routes';
 import { ERRORS } from '../src/copy/errors';
+import {
+    loadWritingIndex,
+    projectCard,
+    wholeSentences,
+    writingCard,
+    type ShareCard,
+} from './share.mjs';
 
 // Section headings that are metadata rather than prose, per docs_helper.py.
 // PROJECT_METADATA_SECTIONS and WRITING_SECTIONS there; keep in step.
@@ -81,6 +88,7 @@ export type Page = {
     single?: boolean; // the content exists in one language only; see isSingleLanguage
     image?: string; // absolute or site-relative
     card?: boolean; // the image is a 1200x630 share card
+    share?: ShareCard; // this page's own card, drawn after the build; see share.mts
     ogType: 'website' | 'article' | 'profile';
     published?: string; // ISO date
     jsonLd: object;
@@ -273,6 +281,7 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
             : undefined;
     const writing = allWriting.filter((w) => !foldedInto(w));
     const projects = readDir(path.join(docsRoot, 'projects'), PROJECT_META);
+    const writingIndex = loadWritingIndex(docsRoot);
     const projectsHe = Object.fromEntries(
         readDir(path.join(docsRoot, 'he', 'projects'), PROJECT_META).map((d) => [d.slug, d])
     );
@@ -314,7 +323,7 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
         // A piece is written in one language; both addresses show it as is.
         for (const w of allWriting) {
             const contentLang = languageOf(w.body);
-            const description = plain(w.sections.summary || w.body);
+            const description = wholeSentences(w.sections.summary || w.body, 180);
             const image = firstImage(w.sections.media);
             const source = w.sections.source || '';
             const original = w.sections.url;
@@ -325,6 +334,17 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                 ? localPath(languageOf(bySlug[article].body), `/blog/${article}`)
                 : localPath(contentLang, route);
             const ownUrl = `${siteUrl}${localPath(contentLang, route)}`;
+            const share = writingCard({
+                route: localPath(lang, route),
+                lang,
+                slug: w.slug,
+                title: w.title,
+                body: w.body,
+                sections: w.sections,
+                image,
+                index: writingIndex,
+                siteUrl,
+            });
             const footer = original
                 ? `<p>${escapeHtml(copy.publishedOn(source))} <a href="${escapeHtml(original)}">${escapeHtml(original)}</a></p>`
                 : source
@@ -334,7 +354,9 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                 page(route, {
                     title: w.title,
                     description,
-                    image,
+                    image: `/${share.file}`,
+                    card: true,
+                    share,
                     ogType: 'article',
                     published: w.sections.date,
                     section: 'writing',
@@ -435,7 +457,7 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
             const contentLang = languageOf(p.body);
             const overview =
                 (p.body.match(/## Overview\s*\n([\s\S]*?)(?=\n## |$)/) || [])[1] || p.body;
-            const description = plain(overview);
+            const description = wholeSentences(overview, 180);
             // Facts come from the English document; a twin translates prose only.
             const image = firstImage(english.sections.media);
             const repo = english.sections.repository;
@@ -444,6 +466,16 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
             // address too; the English address is the one to index.
             const canonical = localPath(contentLang, route);
             const ownUrl = `${siteUrl}${canonical}`;
+            const share = projectCard({
+                route: localPath(lang, route),
+                slug: p.slug,
+                lang,
+                title: p.title,
+                overview,
+                category: english.sections.category,
+                image,
+                siteUrl,
+            });
             const isPersonaKit = p.slug === 'personakit';
             const isTrinity = p.slug === 'trinity-agent';
             const extraLinks = isPersonaKit
@@ -455,7 +487,9 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                 page(route, {
                     title: p.title,
                     description,
-                    image,
+                    image: `/${share.file}`,
+                    card: true,
+                    share,
                     ogType: 'article',
                     section: 'projects',
                     canonical,
@@ -660,7 +694,7 @@ export const headFor = (page: Page, siteUrl: string) => {
         `<meta property="og:image" content="${e(image)}" />`,
         ...(isCard
             ? [
-                  '<meta property="og:image:type" content="image/png" />',
+                  `<meta property="og:image:type" content="${page.share ? 'image/jpeg' : 'image/png'}" />`,
                   '<meta property="og:image:width" content="1200" />',
                   '<meta property="og:image:height" content="630" />',
               ]
