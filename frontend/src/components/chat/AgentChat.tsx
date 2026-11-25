@@ -242,6 +242,12 @@ const EntryView: React.FC<{
  * How the chat behaves on a phone, where it opens as a full-screen layer.
  * Absent on wider screens, where it stays a panel beside the drawing.
  */
+/** On a computer, once a question is asked: the chat at full height, and the way back. */
+export interface ChatSize {
+    grown: boolean;
+    toggle: () => void;
+}
+
 export interface PhoneLayer {
     /** The chat is open as the full-screen layer. */
     full: boolean;
@@ -278,8 +284,10 @@ const AgentChat: React.FC<{
     rootRef?: React.RefObject<HTMLDivElement | null>;
     /** The "continue" entry on the page, where focus goes back on close. */
     resumeRef?: React.RefObject<HTMLButtonElement | null>;
+    /** Set on a computer once the chat can grow (see HeroSection). */
+    size?: ChatSize;
     children?: React.ReactNode;
-}> = ({ chat, turnstileRef, phone, rootRef, resumeRef, children }) => {
+}> = ({ chat, turnstileRef, phone, rootRef, resumeRef, size, children }) => {
     const { t } = useLang();
     const copy = t(CHAT);
     const logRef = useRef<HTMLDivElement>(null);
@@ -300,6 +308,17 @@ const AgentChat: React.FC<{
             // An offer that fits shows whole, so every route to Yanir is in view
             // and the end of the answer fills what room is left above it. One
             // taller than the pane starts at its title instead.
+            // At full height a new answer is read from its first line, at the top of the log.
+            const last = chat.entries[chat.entries.length - 1];
+            const answers = log.querySelectorAll<HTMLElement>('.m.y.ai');
+            if (size?.grown && last?.kind === 'answer' && answers.length) {
+                const top =
+                    answers[answers.length - 1].getBoundingClientRect().top -
+                    log.getBoundingClientRect().top +
+                    log.scrollTop -
+                    8;
+                return void (log.scrollTop = Math.min(end, Math.max(0, top)));
+            }
             if (!hand || hand.offsetHeight <= log.clientHeight) return void (log.scrollTop = end);
             const above = hand.getBoundingClientRect().top - log.getBoundingClientRect().top;
             log.scrollTop = Math.min(end, log.scrollTop + above - 12);
@@ -307,6 +326,8 @@ const AgentChat: React.FC<{
         toEnd();
         const frame = requestAnimationFrame(toEnd);
         return () => cancelAnimationFrame(frame);
+        // Only a new entry moves the log; growing or shrinking leaves it where it is.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chat.entries]);
 
     useEffect(() => {
@@ -401,7 +422,13 @@ const AgentChat: React.FC<{
             aria-modal={full ? true : undefined}
         >
             <LayerHeader onClose={full ? phone?.close : undefined}>
-                <span className="kk">{copy.step1}</span>
+                {size && live ? (
+                    <button type="button" className="btn sm line sz" onClick={size.toggle}>
+                        {size.grown ? copy.smaller : copy.larger}
+                    </button>
+                ) : (
+                    <span className="kk">{copy.step1}</span>
+                )}
             </LayerHeader>
             {phone && !full && live && (
                 <button type="button" className="resume" ref={resumeRef} onClick={phone.engage}>

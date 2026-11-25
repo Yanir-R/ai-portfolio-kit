@@ -9889,3 +9889,63 @@ video.w-v {
         font-size: max(16px, 1em);
     }
 }
+
+/*
+ * The home chat on a computer (2026-11-25, option A). Once a question is
+ * asked the panel leaves the first-screen fit: the chat and the drawing grow
+ * to the screen's height, 16px from its edges, and each scrolls inside. The
+ * headline above scrolls away with the page. Phones and narrow windows are
+ * untouched (GROW_QUERY in useMediaQuery.ts).
+ */
+@media (min-width: 901px) and (min-height: 620px) {
+    #top.grown {
+        height: auto;
+        min-height: 0;
+        max-height: none;
+    }
+    #top.grown .duo {
+        flex: none;
+        height: calc(100svh - 32px);
+        transition: height 0.2s ease-out;
+    }
+    #top .chat .sz {
+        min-height: 32px;
+        padding: 4px 12px;
+        font-size: 0.85rem;
+    }
+    /* Answers take the log's width; posts and projects under them are one line each. */
+    #top .chat .m.y {
+        max-width: none;
+    }
+    #top .chat .w-card {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-2);
+        padding: 8px 12px;
+    }
+    #top .chat .w-card > :is(.w-imgw, p, .w-q, .w-old),
+    #top .chat .w-card .mt > :not(:first-child) {
+        display: none;
+    }
+    #top .chat .w-card .mt {
+        flex: none;
+        margin: 0;
+    }
+    #top .chat .w-card > :is(b, .w-en, [lang]) {
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #top .chat .w-card .w-out {
+        flex: none;
+        margin: 0;
+    }
+}
+@media (min-width: 901px) and (min-height: 620px) and (prefers-reduced-motion: reduce) {
+    #top.grown .duo {
+        transition: none;
+    }
+}

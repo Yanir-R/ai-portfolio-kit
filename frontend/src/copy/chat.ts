@@ -41,6 +41,9 @@ export interface ChatCopy {
     who: string;
     whoNote: string;
     step1: string;
+    /** On a computer: the chat back to its first-screen size, or out to the screen's height. */
+    smaller: string;
+    larger: string;
     greeting: string;
     startHint: string;
     starters: Starter[];
@@ -270,6 +273,8 @@ export const CHAT: Localized<ChatCopy> = {
         who: 'הסוכן של יניר',
         whoNote: 'עונה בשמו, רק מתוך מה שיניר כתב',
         step1: '1 · שואלים כאן',
+        smaller: 'הקטנה',
+        larger: 'הגדלה',
         greeting:
             'שלום, אני הסוכן של יניר, ועונה כאן בשמו. שאלו אותי על העבודה שלו, או על מה שסוכן יכול לעשות אצלכם. משמאל תראו איך הגעתי לכל תשובה.',
         startHint: 'אפשר להתחיל מכאן, או לכתוב שאלה משלכם',
@@ -580,6 +585,8 @@ export const CHAT: Localized<ChatCopy> = {
         who: "Yanir's agent",
         whoNote: 'Answers for him, only from what Yanir wrote',
         step1: '1 · Ask here',
+        smaller: 'Smaller',
+        larger: 'Larger',
         greeting:
             "Hi, I'm Yanir's agent, and I answer here on his behalf. Ask me about his work, or about what an agent could do for you. On the right you'll see how I got to each answer.",
         startHint: 'You can start here, or type your own question',

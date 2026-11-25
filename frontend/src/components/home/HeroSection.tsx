@@ -1,10 +1,15 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { HOME } from '@/copy/home';
 import { FEATURES } from '@/constants/links';
 import { useHomeChat } from '@/chat/useHomeChat';
-import AgentChat, { PhoneLayer } from '@/components/chat/AgentChat';
+import AgentChat, { ChatSize, PhoneLayer } from '@/components/chat/AgentChat';
 import { SheetKey } from '@/content/sheets';
-import { PHONE_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
+import {
+    GROW_QUERY,
+    PHONE_QUERY,
+    REDUCED_MOTION_QUERY,
+    useMediaQuery,
+} from '@/hooks/useMediaQuery';
 import { useHistoryLayer, useLayerChrome } from '@/hooks/usePhoneLayer';
 import AnswerPlan from '@/components/chat/AnswerPlan';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
@@ -39,6 +44,8 @@ const FIT_MARGIN_PX = 4;
 const KEYBOARD_COVER_PX = 120;
 // The parts of the open layer that give way above a keyboard (see site.css).
 const KB_FIT_STEPS = 5;
+// The grown chat keeps this much of the page around it, above and below.
+const GROW_EDGE_PX = 16;
 
 /*
  * The first screen: who this is and what he builds, then the chat beside the
@@ -224,6 +231,34 @@ const HeroSection: React.FC = () => {
         if (close) closeSheet();
     };
 
+    /*
+     * On a computer the chat grows to the screen's height with the first
+     * question, the page scrolls the headline away, and the chat and the
+     * drawing share that height, each scrolling inside. "Smaller" takes it
+     * back to the first-screen size and keeps the conversation. Phones and
+     * narrow windows keep the layer and the sheet; GROW_QUERY never overlaps
+     * them, so one behaviour holds at any width, also after a resize.
+     */
+    const roomy = useMediaQuery(GROW_QUERY);
+    const asked = chat.entries.some((e) => e.kind === 'user');
+    const [small, setSmall] = useState(false);
+    const grown = roomy && asked && !small;
+    const topRef = useRef<HTMLDivElement>(null);
+    const stillMotion = useMediaQuery(REDUCED_MOTION_QUERY);
+    useEffect(() => {
+        const duo = topRef.current?.querySelector('.duo');
+        if (!roomy || !asked || !duo) return;
+        const behavior = stillMotion ? 'auto' : 'smooth';
+        // Grown: the chat's top just under the screen's edge. Smaller: the first screen again.
+        const top = grown ? duo.getBoundingClientRect().top + window.scrollY - GROW_EDGE_PX : 0;
+        window.scrollTo({ top, behavior });
+        // Only growing or shrinking scrolls the page, not a change of motion setting.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [grown]);
+    const size: ChatSize | undefined = roomy
+        ? { grown, toggle: () => setSmall((s) => !s) }
+        : undefined;
+
     const phoneLayer: PhoneLayer | undefined = phone
         ? { full, engage: openLayer, close: closeLayer, showSheet }
         : undefined;
@@ -232,7 +267,7 @@ const HeroSection: React.FC = () => {
     const still = useMemo(() => ({ ...chat, plan: { kind: 'base' as const } }), [chat]);
 
     return (
-        <div className="sheet" id="top">
+        <div className={grown ? 'sheet grown' : 'sheet'} id="top" ref={topRef}>
             <div className="hero-top">
                 <div>
                     <span className="tagline">{copy.tagline}</span>
@@ -270,6 +305,7 @@ const HeroSection: React.FC = () => {
                     phone={phoneLayer}
                     rootRef={chatRef}
                     resumeRef={resumeRef}
+                    size={size}
                 >
                     {phone && (
                         <div className="psheet" hidden={!sheetOpen}>
