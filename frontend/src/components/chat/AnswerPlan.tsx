@@ -8,6 +8,7 @@ import SystemsMap from '@/components/chat/SystemsMap';
 import { SheetBody } from '@/components/chat/sheets/Sheets';
 import { ARROW, Arrow } from '@/components/site/Arrow';
 import { REDUCED_MOTION_QUERY, STACKED_QUERY } from '@/hooks/useMediaQuery';
+import { usePanelFill } from '@/hooks/usePanelFill';
 import { useLang } from '@/i18n/useLang';
 
 // The station that calls the model; the ones before it complete as the request goes.
@@ -56,6 +57,8 @@ const AnswerPlan: React.FC<{
         const smooth = !window.matchMedia(REDUCED_MOTION_QUERY).matches;
         ref.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
     }, [plan, onClose]);
+
+    usePanelFill(ref, plan);
 
     const id = (name: string) => (idless ? undefined : name);
     const trace = copy.trace;

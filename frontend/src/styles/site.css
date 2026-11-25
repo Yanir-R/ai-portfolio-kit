@@ -10668,35 +10668,39 @@ video.w-v {
 }
 
 /*
- * The grown panel uses its whole height. Content shorter than the space sits
- * in the middle between the header and the pinned button instead of leaving
- * a hole under it; content that is taller still scrolls from the top, since
- * auto margins collapse to nothing when there is no room.
+ * The grown panel uses its whole height (usePanelFill.ts sets the figures):
+ * a drawing's graphics grow by --fz, the gaps between its blocks widen to
+ * --fg, and the stations' rows spread by --ag. Without those, the plain
+ * layout stands, as on a short screen.
  */
 @media (min-width: 901px) and (min-height: 620px) {
+    #top.grown .plan,
+    #top.grown .plan .vis {
+        position: relative;
+    }
     #top.grown .plan.showvis .vis {
-        gap: var(--sp-4);
+        gap: var(--fg, 14px);
     }
-    #top.grown .plan.showvis .vis > :first-child {
-        margin-top: auto;
+    #top.grown .plan.showvis .vis .btn {
+        margin-top: 0;
     }
-    #top.grown .plan:not(.showvis, .showmap, .showcmp) .atr {
-        margin-top: auto;
-    }
-    #top.grown .plan:not(.showvis, .showmap, .showcmp) .sum {
-        margin-top: var(--sp-3) !important;
-        margin-bottom: auto !important;
-    }
-}
-/* On a tall screen the migration drawing grows with the panel; its words keep their size. */
-@media (min-width: 1200px) and (min-height: 780px) {
     #top.grown .v-new,
     #top.grown .v-old {
-        width: 195px;
+        width: calc(150px * var(--fz, 1));
     }
     #top.grown .pile,
     #top.grown .cells,
     #top.grown .v-wire {
-        zoom: 1.3;
+        zoom: var(--fz, 1);
+    }
+    #top.grown .atr > li + li {
+        margin-top: var(--ag, 0px);
+    }
+    #top.grown .atr > li + li::before {
+        top: calc(-9px - var(--ag, 0px));
+        height: calc(18px + var(--ag, 0px));
+    }
+    #top.grown .plan:not(.showvis, .showmap, .showcmp) .sum {
+        margin-top: var(--sp-3) !important;
     }
 }
