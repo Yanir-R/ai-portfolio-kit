@@ -242,6 +242,23 @@
 .w-stack .mt {
     margin: 8px 0 0;
 }
+/*
+ * A stack entry is usually a name ("FastAPI"), but some projects describe a
+ * layer in a sentence. A tag never wraps, so one long entry made the post
+ * wider than a phone screen and the whole page slid sideways. Here an entry
+ * wraps like text and never grows past the line; a short name still fits on
+ * one line and looks the same as before.
+ */
+.w-stack .w-tag {
+    white-space: normal;
+    max-width: 100%;
+    overflow-wrap: break-word;
+}
+/* The post column never grows past the screen because of what is inside it. */
+.w-post {
+    min-width: 0;
+    overflow-wrap: break-word;
+}
 
 /* The projects grid directly under its title, with room for the lead. */
 .w-hero + .w-arts {
