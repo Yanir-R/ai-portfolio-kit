@@ -1,6 +1,9 @@
 # GitHub Actions Workflows
 
-Two workflows, each split into `verify` and `deploy`.
+Two deploy workflows, each split into `verify` and `deploy`, plus `hygiene.yml`
+and `pr-review.yml` (AI review of pull requests with the open-source PR-Agent on the
+Gemini free tier: auto review when a PR opens, and `/review`, `/improve`, `/ask ...`
+comments from the repository owner).
 
 | Workflow | Triggers on | Jobs |
 | --- | --- | --- |
@@ -34,6 +37,7 @@ The audits run in CI, so a newly disclosed advisory fails the build rather than 
 | `EMAIL_ADDRESS`, `YOUR_EMAIL` | SMTP sender / recipient |
 | `CLOUDFLARE_API_TOKEN` | Scope: Account → Cloudflare Pages → Edit |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account |
+| `GEMINI_API_KEY` | AI Studio key for `pr-review.yml`, from a project with **no billing** (free tier only) |
 
 ### Variables
 
