@@ -22,6 +22,26 @@ export const stripWritingMetadata = (markdown: string): string =>
         .replace(/^#\s+.*\n?/, '')
         .trim();
 
+/** The overview's counts, taken again over the pieces the blog lists. */
+const listedOverview = (overview: WritingOverview, entries: WritingEntry[]): WritingOverview => {
+    const count = (pick: (entry: WritingEntry) => string[]) => {
+        const counts: Record<string, number> = {};
+        for (const entry of entries)
+            for (const key of pick(entry)) counts[key] = (counts[key] ?? 0) + 1;
+        return counts;
+    };
+    const topics = count((entry) => entry.topics ?? []);
+    return {
+        ...overview,
+        total: entries.length,
+        sources: count((entry) => [entry.source]),
+        topics: overview.topics
+            .map((topic) => ({ ...topic, count: topics[topic.id] ?? 0 }))
+            .filter((topic) => topic.count > 0)
+            .sort((a, b) => b.count - a.count),
+    };
+};
+
 export const writingService = {
     async getAll(): Promise<WritingEntry[]> {
         try {
@@ -39,17 +59,21 @@ export const writingService = {
             indexRequest = apiClient
                 .get<{ writing: WritingEntry[]; overview: WritingOverview }>(API_ENDPOINTS.WRITING)
                 .then((response) => {
-                    const entries = response.data.writing || [];
-                    return {
-                        entries,
-                        bySlug: Object.fromEntries(entries.map((entry) => [entry.slug, entry])),
-                        overview: response.data.overview ?? {
-                            total: entries.length,
-                            sources: {},
-                            topics: [],
-                            series: [],
-                        },
+                    const all = response.data.writing || [];
+                    const bySlug = Object.fromEntries(all.map((entry) => [entry.slug, entry]));
+                    // A post that is the short version of an article is read from the
+                    // article, not listed beside it; its own page and the chat keep it.
+                    const folded = (entry: WritingEntry) =>
+                        entry.kind === 'post' &&
+                        (entry.related ?? []).some((slug) => bySlug[slug]?.kind === 'article');
+                    const entries = all.filter((entry) => !folded(entry));
+                    const overview = response.data.overview ?? {
+                        total: 0,
+                        sources: {},
+                        topics: [],
+                        series: [],
                     };
+                    return { entries, bySlug, overview: listedOverview(overview, entries) };
                 })
                 .catch((error) => {
                     indexRequest = null;

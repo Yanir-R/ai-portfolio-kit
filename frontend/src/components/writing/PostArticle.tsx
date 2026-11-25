@@ -16,7 +16,7 @@ import { sourceLabel, WritingEntry, WritingIndex } from '@/types/writing';
 import { formatDate } from '@/utils/date';
 import { mediaOf, readMinutes, seriesOf } from '@/utils/writing';
 
-// The workplace blog is credited in words only; its site is not linked.
+// The former workplace's blog is credited in words only; its site is not linked.
 const UNLINKED_SOURCE = /blog/i;
 const LINKEDIN_URL = /^https:\/\/(www\.)?linkedin\.com\//;
 
@@ -75,6 +75,8 @@ const useNeighbours = (
     }
     // The blog lists newest first: the previous piece is the next one down.
     const i = index.entries.findIndex((e) => e.slug === entry.slug);
+    // A short version folded into its article is not in the list: nothing sits around it.
+    if (i < 0) return null;
     const older = index.entries[i + 1];
     const newer = i > 0 ? index.entries[i - 1] : undefined;
     return [
@@ -115,6 +117,17 @@ const PostArticle: React.FC<Props> = ({ entry, index, page = false }) => {
     };
     const inLayer = phone && page;
     const neighbours = useNeighbours(entry, index);
+    // An article's short version is not listed on its own: the article links to it.
+    const shortVersion =
+        entry.kind === 'article'
+            ? Object.values(index?.bySlug ?? {}).find(
+                  (e) =>
+                      e.kind === 'post' &&
+                      !!e.url &&
+                      LINKEDIN_URL.test(e.url) &&
+                      (e.related ?? []).includes(entry.slug)
+              )
+            : undefined;
     const series = seriesOf(entry, index);
     const media = mediaOf(entry);
     const [lead, ...rest] = media;
@@ -172,10 +185,25 @@ const PostArticle: React.FC<Props> = ({ entry, index, page = false }) => {
                     </div>
                 ) : (
                     <div className="w-orig" dir={lang === 'he' ? 'rtl' : 'ltr'}>
-                        <span>{copy.post.published(sourceLabel(entry.source, lang), date)}</span>
+                        <span>
+                            {UNLINKED_SOURCE.test(entry.source)
+                                ? copy.post.publishedCompany(date)
+                                : copy.post.published(sourceLabel(entry.source, lang), date)}
+                        </span>
                         {entry.url && !UNLINKED_SOURCE.test(entry.source) && (
                             <a href={entry.url} target="_blank" rel="noopener">
                                 {copy.post.original}
+                            </a>
+                        )}
+                        {shortVersion?.url && (
+                            <a
+                                className="w-src"
+                                href={shortVersion.url}
+                                target="_blank"
+                                rel="noopener"
+                            >
+                                <LinkedInMark />
+                                {copy.post.shortOnLinkedIn}
                             </a>
                         )}
                     </div>
