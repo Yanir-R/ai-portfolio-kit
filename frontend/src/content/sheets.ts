@@ -541,8 +541,7 @@ export const SHEETS: Localized<SheetCopy> = {
             kinds: { profile: 'Profile', project: 'Project', writing: 'Writing' },
             before: 'Before the model: the bot check passed, and the question is within the daily quota. Every number here was measured while the answer was written.',
             plainDocs: (n, of) => `${n} of ${of}`,
-            plainDocsNote:
-                'documents I wrote were put in front of the model. It saw nothing else.',
+            plainDocsNote: 'documents I wrote were put in front of the model. It saw nothing else.',
             plainTime: 'From question to answer',
             plainOnce: 'Once',
             plainOnceNote: 'The model was asked, and answered',
@@ -566,8 +565,7 @@ export const SHEETS: Localized<SheetCopy> = {
             message: 'The message',
             added: 'You added',
             waiting: 'Waiting for what you type in the chat',
-            sentNote:
-                "The message is in my inbox, and I reply from there straight to your email.",
+            sentNote: 'The message is in my inbox, and I reply from there straight to your email.',
             howTitle: 'Type in the chat',
             howNeedsMessage:
                 'your email and a line about the subject, and the message is sent as is.',
@@ -588,7 +586,7 @@ export const SHEETS: Localized<SheetCopy> = {
                     kind: 'mail',
                     note: "If you'd rather write",
                     title: 'Email from the chat',
-                    text: "Type your email and a line about the subject in the chat, and it comes to me.",
+                    text: 'Type your email and a line about the subject in the chat, and it comes to me.',
                     go: 'Type in the chat',
                 },
                 {
