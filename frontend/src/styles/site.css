@@ -10729,8 +10729,12 @@ video.w-v {
 }
 .pr h3 {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--sp-2);
+}
+/* The circle sits on the title's first line when the title wraps. */
+.pr h3 .pn {
+    margin-top: 4px;
 }
 .pr h3 .pn {
     display: inline-flex;
