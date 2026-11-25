@@ -9,6 +9,7 @@ import { useTurnstile } from '@/hooks/useTurnstile';
 import { FailureCase, failureCase, failureText as describeFailure } from '@/chat/failure';
 import FailureCard, { ContactActions } from '@/components/chat/FailureCard';
 import { useLang } from '@/i18n/useLang';
+import { useLogFollowsViewport } from '@/hooks/usePhoneLayer';
 import { ChatBlock, ChatContext, ChatMessage, TraceSource } from '@/types/chat';
 import { WritingEntry } from '@/types/writing';
 
@@ -59,7 +60,22 @@ const lastShown = (turns: Turn[]): string => {
     return '';
 };
 
-const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
+interface Props {
+    entry: WritingEntry;
+    /**
+     * Inside the phone's full-screen layer (see PostChatLayer): a greeting
+     * opens the log, and while the keyboard leaves little room or the visitor
+     * is typing, the suggestions give their room to the conversation.
+     */
+    layer?: boolean;
+    /** The layer is open on screen. */
+    active?: boolean;
+}
+
+// Under this visible height the layer's suggestions fold away (as in the home chat).
+const SHORT_VIEW_PX = 480;
+
+const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
     const { lang, t } = useLang();
     const copy = t(WRITING).ask;
     const errors = t(CHAT).errors;
@@ -78,6 +94,8 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
         const log = logRef.current;
         if (log) log.scrollTop = log.scrollHeight;
     }, [turns]);
+    const short = useLogFollowsViewport(logRef, layer && active, SHORT_VIEW_PX);
+    const showChips = !closed && chips.length > 0 && !(layer && (short || text.trim() !== ''));
 
     const context: ChatContext | null = withContext
         ? { type: 'writing', ref: entry.slug, title: entry.title, lang }
@@ -152,7 +170,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
     };
 
     return (
-        <div className="w-dock">
+        <div className={layer ? 'w-dock in-layer' : 'w-dock'}>
             {withContext && (
                 <div className="w-ctx">
                     <Tag tone="a">{t(WRITING).tags.askingAbout}</Tag>
@@ -170,6 +188,11 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                 aria-live="polite"
                 ref={logRef}
             >
+                {layer && (
+                    <div className="ans hi" dir="auto">
+                        {copy.greeting(entry.kind)}
+                    </div>
+                )}
                 {turns.map((turn) => {
                     if (turn.kind === 'q')
                         return (
@@ -238,7 +261,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                     );
                 })}
             </div>
-            {!closed && chips.length > 0 && (
+            {showChips && (
                 <div className="qs">
                     {chips.map((chip) => (
                         <button

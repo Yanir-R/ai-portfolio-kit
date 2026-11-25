@@ -91,6 +91,10 @@ export interface WritingCopy {
         inputLabel: string;
         send: string;
         sources: string;
+        /** The phone's fixed bar on a piece, which opens the chat layer. */
+        bar: (kind: 'article' | 'post') => string;
+        /** The layer's first message. */
+        greeting: (kind: 'article' | 'post') => string;
     };
     cards: {
         recent: string;
@@ -208,6 +212,9 @@ export const WRITING: Localized<WritingCopy> = {
             inputLabel: 'שאלה על הקטע',
             send: 'שאלו',
             sources: 'מקורות',
+            bar: (kind) => `שאלו את הסוכן על ${kind === 'post' ? 'הפוסט' : 'המאמר'}`,
+            greeting: (kind) =>
+                `קראתי את ${kind === 'post' ? 'הפוסט' : 'המאמר'}. אפשר לשאול עליו, או על איך זה נראה בפרויקט אמיתי.`,
         },
         cards: {
             recent: 'אחרונים',
@@ -327,6 +334,9 @@ export const WRITING: Localized<WritingCopy> = {
             inputLabel: 'A question about this piece',
             send: 'Ask',
             sources: 'Sources',
+            bar: (kind) => `Ask the agent about this ${kind}`,
+            greeting: (kind) =>
+                `I read the ${kind}. Ask about it, or about how it looks in a real project.`,
         },
         cards: {
             recent: 'Latest',
