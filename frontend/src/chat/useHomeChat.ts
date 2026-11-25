@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CHAT, ProcessId, PROCESS_IDS } from '@/copy/chat';
+import { CHAT, ProcessId } from '@/copy/chat';
 import { SheetKey } from '@/content/sheets';
 import { useLang } from '@/i18n/useLang';
 import { chatService, ChatFailure, MAX_HISTORY_SENT } from '@/services/chatService';
@@ -82,6 +82,8 @@ export type Entry =
           handoff?: ChatHandoff | null;
       }
     | { id: number; kind: 'summary'; process: ProcessId; team: string }
+    /** The process question as a card of choices; folded once answered, by a pick or in words. */
+    | { id: number; kind: 'pick'; open: boolean; picked?: ProcessId }
     | {
           id: number;
           kind: 'error';
@@ -193,9 +195,11 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             // The starter grid goes once the visitor says anything, and an
             // open offer to talk directly folds once the conversation moves
             // on: asking on is the same choice as "I'll keep asking the agent".
+            // An open process card folds too: anything said answers it.
             ...prev
                 .filter((e) => e.kind !== 'starters' && e.kind !== 'working')
-                .map((e) => (e.kind === 'answer' && e.handoff ? { ...e, handoff: null } : e)),
+                .map((e) => (e.kind === 'answer' && e.handoff ? { ...e, handoff: null } : e))
+                .map((e) => (e.kind === 'pick' && e.open ? { ...e, open: false } : e)),
             ...items.map((item) => ({ ...item, id: nextId.current++ }) as Entry),
         ]);
     }, []);
@@ -479,24 +483,18 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
 
     // The scripted "what would an agent change for us" exchange: pick a process, then a team size.
     const startCompare = () => {
-        push(
-            { kind: 'user', text: copy.compare.ask },
-            { kind: 'agent', text: copy.compare.pickProcess }
-        );
+        push({ kind: 'user', text: copy.compare.ask }, { kind: 'pick', open: true });
         markAsked(copy.compare.ask);
-        setQuick({
-            label: copy.compare.pickProcessLabel,
-            items: PROCESS_IDS.map((id) => ({
-                kind: 'process',
-                label: copy.processes[id].name,
-                process: id,
-            })),
-        });
+        // The choices are on the card itself; the row under the log stays empty.
+        setQuick({ label: '', items: [] });
     };
 
     const [process, setProcess] = useState<ProcessId>('support');
     const pickProcess = (id: ProcessId) => {
         setProcess(id);
+        setEntries((prev) =>
+            prev.map((e) => (e.kind === 'pick' && e.open ? { ...e, open: false, picked: id } : e))
+        );
         push(
             { kind: 'user', text: copy.processes[id].name },
             { kind: 'agent', text: copy.compare.drawn }
@@ -580,6 +578,8 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
         retry: (text: string) => !busy && !closed && ask(text),
         /** Which sheet an address is being waited for, if any. */
         awaitingEmail: mailWait?.sheet ?? null,
+        /** The process card is waiting for a choice. */
+        picking: entries.some((e) => e.kind === 'pick' && e.open),
         submit,
         pickStarter,
         pickQuick,

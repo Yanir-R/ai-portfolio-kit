@@ -76,8 +76,9 @@ const HeroSection: React.FC = () => {
     const openLayer = useCallback(() => show(), [show]);
     const closeLayer = close;
     const showSheet = useCallback(
-        (key: SheetKey, record?: AnswerRecord | null) => {
-            chat.openSheet(key, record);
+        (key: SheetKey | 'cmp', record?: AnswerRecord | null) => {
+            // The process drawing is already the plan: only the sheet has to rise.
+            if (key !== 'cmp') chat.openSheet(key, record);
             if (sheetOpen) return;
             sheetOpener.current = document.activeElement as HTMLElement | null;
             show({ chatSheet: true });
@@ -107,7 +108,7 @@ const HeroSection: React.FC = () => {
     // The process drawing has no card in the conversation: on a phone it
     // rises as soon as it is drawn, and the team-size chips wait behind it.
     useEffect(() => {
-        if (full && !sheetOpen && chat.plan.kind === 'cmp') showSheet('cmp' as SheetKey);
+        if (full && !sheetOpen && chat.plan.kind === 'cmp') showSheet('cmp');
         // Only a new drawing opens it, not closing the sheet on top of one.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chat.plan]);

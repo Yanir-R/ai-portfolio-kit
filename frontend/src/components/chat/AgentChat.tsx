@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { CHAT } from '@/copy/chat';
+import { CHAT, PROCESS_IDS } from '@/copy/chat';
 import { SHEET_HEADS, SHEETS, SheetKey, sourceTitle } from '@/content/sheets';
 import { AnswerRecord, Entry, GREETING_ID, HomeChat } from '@/chat/useHomeChat';
 import Markdown from '@/components/Markdown';
@@ -190,6 +190,46 @@ const EntryView: React.FC<{
     switch (entry.kind) {
         case 'user':
             return <div className="m u">{entry.text}</div>;
+        case 'pick':
+            // The process question as a card of choices, folded once answered.
+            return (
+                <div className={entry.open ? 'm pick' : 'm pick done'}>
+                    <p>{copy.compare.pickProcess}</p>
+                    {entry.open ? (
+                        <>
+                            <small className="pk">{copy.compare.pickKicker}</small>
+                            <div className="pg">
+                                {PROCESS_IDS.map((id) => (
+                                    <button
+                                        key={id}
+                                        type="button"
+                                        onClick={() =>
+                                            chat.pickQuick({
+                                                kind: 'process',
+                                                label: copy.processes[id].name,
+                                                process: id,
+                                            })
+                                        }
+                                    >
+                                        <span>
+                                            <b>{copy.processes[id].name}</b>
+                                            <small>{copy.compare.pickNotes[id]}</small>
+                                        </span>
+                                        <i className="ch" aria-hidden="true" />
+                                    </button>
+                                ))}
+                            </div>
+                            <small className="po">{copy.compare.pickOther}</small>
+                        </>
+                    ) : (
+                        entry.picked && (
+                            <small className="pd">
+                                {copy.compare.picked} <b>{copy.processes[entry.picked].name}</b>
+                            </small>
+                        )
+                    )}
+                </div>
+            );
         case 'starters':
             return (
                 <div className="m st0">
@@ -550,9 +590,11 @@ const AgentChat: React.FC<{
         ? chat.awaitingEmail === 'ask'
             ? copy.emailPlaceholderMore
             : copy.emailPlaceholder
-        : example < 0
-          ? copy.placeholder
-          : copy.examplePrefix + copy.examples[example % copy.examples.length];
+        : chat.picking
+          ? copy.compare.pickPlaceholder
+          : example < 0
+            ? copy.placeholder
+            : copy.examplePrefix + copy.examples[example % copy.examples.length];
 
     // "live" once a question has been asked: on a phone the chat starts
     // compact and opens to its full height from then on.

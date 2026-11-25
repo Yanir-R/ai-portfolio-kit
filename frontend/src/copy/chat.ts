@@ -137,10 +137,17 @@ export interface ChatCopy {
     compare: {
         ask: string;
         pickProcess: string;
+        /** The process question as a card: its kicker, a line under each option, and the way out. */
+        pickKicker: string;
+        pickNotes: Record<ProcessId, string>;
+        pickOther: string;
+        /** The input's placeholder while the card is open. */
+        pickPlaceholder: string;
+        /** The folded card, after a pick. */
+        picked: string;
         drawn: string;
         team: string[];
         pickAnswer: string;
-        pickProcessLabel: string;
         summary: string;
         cardTitle: string;
         process: string;
@@ -346,10 +353,19 @@ export const CHAT: Localized<ChatCopy> = {
         compare: {
             ask: 'מה סוכן ישנה אצלנו?',
             pickProcess: 'איזה תהליך הכי מציק אצלכם? אשרטט אותו פעמיים: כמו שהוא היום, ועם סוכן.',
+            pickKicker: 'בחרו אחד, ואני ממשיך',
+            pickNotes: {
+                support: 'מיילים, וואטסאפ וטלפונים',
+                sales: 'מבקשה ועד הצעה חתומה',
+                docs: 'חיפוש, תיוק וגרסאות',
+                know: 'מה שיודעים רק אנשים מסוימים',
+            },
+            pickOther: 'או כתבו תהליך אחר בשורה למטה ↓',
+            pickPlaceholder: 'או כתבו תהליך אחר במילים שלכם',
+            picked: 'בחרתם',
             drawn: 'שרטטתי אותו משמאל פעמיים: כמו שהוא נראה היום ברוב העסקים, ולידו אותו תהליך עם סוכן. כמה אנשים מטפלים בזה אצלכם היום?',
             team: ['רק אני', '2 עד 5', 'יותר מ־5'],
             pickAnswer: 'בחרו תשובה',
-            pickProcessLabel: 'בחרו תהליך',
             summary: 'זה הסיכום. יניר יקבל אותו לפני שיחת האבחון, כדי שלא תתחילו מאפס.',
             cardTitle: 'הסיכום שלכם',
             process: 'התהליך',
@@ -704,10 +720,19 @@ export const CHAT: Localized<ChatCopy> = {
             ask: 'What would an agent change for us?',
             pickProcess:
                 "Which process bothers you most? I'll draw it twice: as it is today, and with an agent.",
+            pickKicker: "Pick one and I'll continue",
+            pickNotes: {
+                support: 'Email, WhatsApp and phone',
+                sales: 'From request to signed quote',
+                docs: 'Search, filing and versions',
+                know: 'What only certain people know',
+            },
+            pickOther: 'Or type another process in the box below ↓',
+            pickPlaceholder: 'Or describe another process in your own words',
+            picked: 'You picked',
             drawn: 'I drew it on the right twice: as it looks today in most businesses, and next to it the same process with an agent. How many people handle this for you today?',
             team: ['Just me', '2 to 5', 'More than 5'],
             pickAnswer: 'Pick an answer',
-            pickProcessLabel: 'Pick a process',
             summary:
                 "That's the summary. Yanir gets it before the discovery call, so you don't start from zero.",
             cardTitle: 'Your summary',
