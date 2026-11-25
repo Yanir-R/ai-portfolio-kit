@@ -6,7 +6,8 @@ import WritingBlocks from '@/components/writing/WritingBlocks';
 import { Tag } from '@/components/writing/parts';
 import { chatService, ChatFailure } from '@/services/chatService';
 import { useTurnstile } from '@/hooks/useTurnstile';
-import { failureText as describeFailure } from '@/chat/failureText';
+import { FailureCase, failureCase, failureText as describeFailure } from '@/chat/failure';
+import FailureCard, { ContactActions } from '@/components/chat/FailureCard';
 import { useLang } from '@/i18n/useLang';
 import { ChatBlock, ChatContext, ChatMessage, TraceSource } from '@/types/chat';
 import { WritingEntry } from '@/types/writing';
@@ -32,13 +33,31 @@ type Turn =
           fromPiece: boolean;
           sig?: string | null;
       }
-    | { id: number; kind: 'error'; text: string };
+    | {
+          id: number;
+          kind: 'error';
+          text: string;
+          failure: FailureCase;
+          /** What the visitor asked, and what a retry sends again. */
+          question: string;
+          shown: string;
+      };
 
 /** Turns before an id is given to them. */
 type NewTurn = Turn extends infer T ? (T extends Turn ? Omit<T, 'id'> : never) : never;
 
 type Chip = 'sum' | 'biz' | 'more';
 const CHIPS: Chip[] = ['sum', 'biz', 'more'];
+
+/** The latest question asked here, carried into the contact window. */
+const lastShown = (turns: Turn[]): string => {
+    for (let i = turns.length - 1; i >= 0; i--) {
+        const turn = turns[i];
+        if (turn.kind === 'error') return turn.shown;
+        if (turn.kind === 'q') return turn.text;
+    }
+    return '';
+};
 
 const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
     const { lang, t } = useLang();
@@ -52,6 +71,8 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
     const [withContext, setWithContext] = useState(true);
     const [text, setText] = useState('');
     const [busy, setBusy] = useState(false);
+    // The day's answers are spent: the input row becomes the routes to Yanir.
+    const [closed, setClosed] = useState(false);
 
     useLayoutEffect(() => {
         const log = logRef.current;
@@ -76,10 +97,20 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
             return [];
         });
 
-    const failureText = (failure: ChatFailure) => describeFailure(errors, failure);
+    const failed = (failure: ChatFailure, question: string, shown: string) => {
+        const kind = failureCase(failure);
+        if (kind === 'daily') setClosed(true);
+        add({
+            kind: 'error',
+            text: describeFailure(errors, failure),
+            failure: kind,
+            question,
+            shown,
+        });
+    };
 
     const ask = async (question: string, shown = question) => {
-        if (busy) return;
+        if (busy || closed) return;
         setBusy(true);
         add({ kind: 'q', text: shown }, { kind: 'wait' });
         const result = await chatService.sendMessage(
@@ -90,7 +121,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
         );
         resetToken();
         setBusy(false);
-        if (!result.success) return add({ kind: 'error', text: failureText(result.error) });
+        if (!result.success) return failed(result.error, question, shown);
         add({
             kind: 'answer',
             text: result.response,
@@ -174,9 +205,17 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                         );
                     if (turn.kind === 'error')
                         return (
-                            <div key={turn.id} className="ans">
-                                <span>{turn.text}</span>
-                            </div>
+                            <FailureCard
+                                key={turn.id}
+                                failure={turn.failure}
+                                text={turn.text}
+                                question={turn.shown}
+                                onRetry={
+                                    turn.failure === 'failed' || turn.failure === 'wait'
+                                        ? () => ask(turn.question, turn.shown)
+                                        : undefined
+                                }
+                            />
                         );
                     return (
                         <div key={turn.id} className="ans">
@@ -199,7 +238,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                     );
                 })}
             </div>
-            {chips.length > 0 && (
+            {!closed && chips.length > 0 && (
                 <div className="qs">
                     {chips.map((chip) => (
                         <button
@@ -214,18 +253,25 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                     ))}
                 </div>
             )}
-            <form onSubmit={submit}>
-                <input
-                    type="text"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder={withContext ? copy.placeholder : copy.placeholderGeneral}
-                    aria-label={copy.inputLabel}
-                />
-                <button type="submit" className="snd" disabled={busy}>
-                    {copy.send}
-                </button>
-            </form>
+            {closed ? (
+                <div className="lim-strip">
+                    <b>{errors.closed}</b>
+                    <ContactActions lead="call" question={lastShown(turns)} />
+                </div>
+            ) : (
+                <form onSubmit={submit}>
+                    <input
+                        type="text"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder={withContext ? copy.placeholder : copy.placeholderGeneral}
+                        aria-label={copy.inputLabel}
+                    />
+                    <button type="submit" className="snd" disabled={busy}>
+                        {copy.send}
+                    </button>
+                </form>
+            )}
             <div className="ts" ref={turnstileRef} />
         </div>
     );

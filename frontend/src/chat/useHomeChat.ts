@@ -6,7 +6,7 @@ import { chatService, ChatFailure } from '@/services/chatService';
 import { AnswerTrace, ChatBlock, ChatMessage, TraceSource } from '@/types/chat';
 import { classify } from '@/chat/intents';
 import { sheetFor } from '@/chat/sheetFor';
-import { failureText as describeFailure } from '@/chat/failureText';
+import { FailureCase, failureCase, failureText as describeFailure } from '@/chat/failure';
 
 /*
  * The home chat as a small, deterministic state machine.
@@ -65,7 +65,14 @@ export type Entry =
           sig?: string | null;
       }
     | { id: number; kind: 'summary'; process: ProcessId; team: string }
-    | { id: number; kind: 'error'; text: string };
+    | {
+          id: number;
+          kind: 'error';
+          text: string;
+          failure: FailureCase;
+          /** The words that did not get an answer, for a retry or the contact window. */
+          question: string;
+      };
 
 /** Entries before an id is given to them. */
 type NewEntry = Entry extends infer E ? (E extends Entry ? Omit<E, 'id'> : never) : never;
@@ -132,6 +139,9 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
     );
     const [asked, setAsked] = useState<Set<string>>(new Set());
     const [offline, setOffline] = useState(false);
+    // The day's answers are spent. Nothing typed can be answered until the
+    // budget renews, so the input gives way to the routes to Yanir.
+    const [closed, setClosed] = useState(false);
 
     // The greeting is always in the page's current language.
     const entries = useMemo(
@@ -246,7 +256,17 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             return [];
         });
 
-    const failureText = (failure: ChatFailure) => describeFailure(copy.errors, failure);
+    /** A send that got no answer: said in the log, and the input closed if the day is spent. */
+    const failed = (failure: ChatFailure, question: string) => {
+        const kind = failureCase(failure);
+        if (kind === 'daily') setClosed(true);
+        push({
+            kind: 'error',
+            text: describeFailure(copy.errors, failure),
+            failure: kind,
+            question,
+        });
+    };
 
     /** A question for the agent: the stations light while it runs, then the answer's drawing opens. */
     const ask = async (text: string, picked?: SheetKey) => {
@@ -279,7 +299,7 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
         setBusy(false);
 
         if (!result.success) {
-            push({ kind: 'error', text: failureText(result.error) });
+            failed(result.error, text);
             setPlan({ kind: 'base' });
             offerNext(askedNow);
             return;
@@ -349,7 +369,7 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
         setBusy(false);
 
         if (!result.success) {
-            push({ kind: 'error', text: failureText(result.error) });
+            failed(result.error, rest || text);
             return;
         }
         if (!result.email_collected) {
@@ -499,6 +519,9 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
         quick,
         busy,
         offline,
+        closed,
+        /** Sends a question again after a failed send. */
+        retry: (text: string) => !busy && !closed && ask(text),
         /** Which sheet an address is being waited for, if any. */
         awaitingEmail: mailWait?.sheet ?? null,
         submit,
