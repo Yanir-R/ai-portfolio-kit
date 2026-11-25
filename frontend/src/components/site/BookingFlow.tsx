@@ -350,6 +350,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                         {copy.about}
                         <textarea
                             rows={2}
+                            data-grow
                             maxLength={1000}
                             enterKeyHint="enter"
                             value={notes}
@@ -369,7 +370,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             </button>
                             <button
                                 type="button"
-                                className="btn sec"
+                                className="btn sec bk-back"
                                 onClick={() => setStep('time')}
                             >
                                 {copy.back}

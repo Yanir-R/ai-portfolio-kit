@@ -9185,3 +9185,105 @@ video.w-v {
 .bk-cal .mv:not(:disabled):not(:has(.back)) {
     background: var(--soft, #fff1c9);
 }
+
+/*
+ * Keyboard up, one pinned button (2026-11-25). While a phone keyboard is open
+ * the send button ("book the call" / "send") is pinned whole at the foot of
+ * the visible area on a white strip, and any error or result sits right above
+ * it. Everything else is compact so the three booking fields show without
+ * scrolling on a 390x844 phone; "back" and the fine print fold away (the day
+ * row's "change" link does what "back" does). With the keyboard closed nothing here applies.
+ */
+@media (max-width: 640px) {
+    .talk[data-kb] .th {
+        height: 56px;
+        padding: 8px 12px 8px 16px;
+    }
+    .talk[data-kb] .th button {
+        width: 40px;
+        height: 40px;
+    }
+    .talk[data-kb] .tb {
+        padding-top: 8px;
+        padding-bottom: 0;
+        gap: 10px;
+        /* Centre a focused field between the title and the pinned button. */
+        scroll-padding-block: 8px 72px;
+    }
+    .talk[data-kb] .bk-pick {
+        min-height: 40px;
+        padding-block: 6px;
+    }
+    .talk[data-kb] .bk-form,
+    .talk[data-kb] .tb.mail .v-form {
+        gap: 10px;
+    }
+    .talk[data-kb] .bk-form label,
+    .talk[data-kb] .tb.mail .v-form label {
+        gap: 4px;
+        font-size: 14px;
+    }
+    .talk[data-kb] .bk-form input,
+    .talk[data-kb] .tb.mail .v-form input {
+        height: 44px;
+        padding: 9px 12px;
+        line-height: 22px;
+    }
+    .talk[data-kb] .bk-form textarea[data-grow] {
+        height: var(--grow-h, 44px);
+        min-height: 44px;
+        max-height: 88px;
+        padding: 9px 12px;
+        line-height: 22px;
+        overflow-y: auto;
+    }
+    /* The fine print waits for the keyboard to close; the strip ends the form. */
+    .talk[data-kb] .bk-form > .fine {
+        display: none;
+    }
+    /*
+     * Room to scroll the day row fully away on a short screen, so it never
+     * ends half under the title; it sits above the strip, which ends the form.
+     */
+    .talk[data-kb] .bk-form::after {
+        content: '';
+        height: 40px;
+    }
+    .talk[data-kb] .bk-form > .bk-foot {
+        order: 1;
+    }
+    .talk[data-kb] .bk-form > .bk-foot,
+    .talk[data-kb] .tb.mail .v-form .v-btns {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        display: grid;
+        gap: 6px;
+        margin: 0 -16px;
+        padding: 8px 16px;
+        background: #fff;
+        border-top: 1px solid var(--ink);
+    }
+    .talk[data-kb] .bk-foot .bk-row {
+        display: block;
+    }
+    .talk[data-kb] .bk-foot .bk-back {
+        display: none;
+    }
+    .talk[data-kb] .bk-foot .btn,
+    .talk[data-kb] .tb.mail .v-form .v-btns .btn {
+        width: 100%;
+        min-height: 48px;
+        height: 48px;
+        margin: 0;
+    }
+    .talk[data-kb] .tb.mail .v-form .v-btns .note {
+        order: -1;
+    }
+    .talk[data-kb] .tb.mail .v-form .v-btns .note:empty {
+        display: none;
+    }
+    .talk[data-kb] .tb.mail > .fine {
+        padding-bottom: 12px;
+    }
+}
