@@ -1,6 +1,6 @@
 import { Lang } from '@/i18n/lang';
 import axios from 'axios';
-import { apiClient, toRequestError } from '@/api/client';
+import { apiClient, NotFoundError, toRequestError } from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
 import { Project, ProjectsResponse, ProjectResponse } from '@/types/project';
 
@@ -36,7 +36,7 @@ class ProjectService {
             return response.data.project;
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 404) {
-                throw new Error(`Project "${slug}" not found`, { cause: error });
+                throw new NotFoundError(`Project "${slug}" not found`, { cause: error });
             }
             throw toRequestError(error, `Error fetching project ${slug}`);
         }

@@ -1,7 +1,12 @@
-# Cloudflare Pages serves index.html for client-side routes, so deep links like
-# /projects/reelsensei and /about reach the router instead of 404ing.
+# No catch-all rewrite here, on purpose.
 #
-# Real files are matched first, which is why robots.txt, sitemap.xml, llms.txt
-# and build-info.json have to be emitted as files: anything this rule catches is
-# answered with the SPA shell and a 200, not a 404.
-/*    /index.html   200
+# This file used to send every unknown path to the app with `/* /index.html 200`.
+# That answered anything - /.env, /nope, a missing /assets/index-*.js - with the
+# home page and a 200. Crawlers saw pages that do not exist, and on 2026-11-25 a
+# script requested mid-deploy was answered with HTML that the edge then cached
+# as the script, so the site stopped running in browsers.
+#
+# Every real route has its own prerendered HTML file (seo/prerender.mts), so
+# none of them needs the rewrite. Unknown paths get 404.html or en/404.html with
+# a real 404 status: Cloudflare Pages does that whenever a top-level 404.html
+# exists and no rule here catches the path first. Do not add `/*` back.

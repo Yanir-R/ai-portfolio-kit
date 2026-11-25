@@ -8502,3 +8502,123 @@ video.w-v {
         display: none;
     }
 }
+
+/*
+ * Window polish (2026-11-25). The booking details keep their buttons, and any
+ * error above them, at the foot of the fixed-height window; WhatsApp starts
+ * right under the tabs like the other routes, and on a phone its button sits
+ * at the foot as Send does in the email tab; the email form's spacing stays
+ * even with the bot check's (invisible) holder in it.
+ */
+.talk .bk-form .bk-foot {
+    position: sticky;
+    bottom: -20px;
+    z-index: 1;
+    display: grid;
+    gap: 10px;
+    margin-inline: -4px;
+    padding: 10px 4px 20px;
+    background: var(--paper);
+}
+.talk .bk-form .bk-foot .bk-err {
+    margin: 0;
+}
+/*
+ * WhatsApp fills the frame the way the email tab does: the steps' box takes
+ * the spare height and spreads its three steps through it, and the button
+ * follows right under the box, so there is no empty band between the text
+ * and the button. On a wide screen the QR code sits beside it, at the top.
+ */
+.talk .tb.wa {
+    align-items: stretch;
+}
+.talk .tb.wa .wa-main {
+    flex: 1;
+}
+.talk .tb.wa .wa-steps {
+    flex: 1;
+    align-content: space-evenly;
+    gap: 18px;
+    padding: 18px 16px;
+}
+.talk .tb.wa .wa-qr {
+    align-self: flex-start;
+}
+.talk .tb.mail .v-form > .ts {
+    margin-top: -18px;
+}
+@media (max-width: 640px) {
+    .talk .bk-form .bk-foot {
+        bottom: -16px;
+        padding-bottom: 16px;
+    }
+    .talk .wa-main .btn {
+        align-self: stretch;
+    }
+}
+
+/*
+ * Booking without needless scrolling or empty bands (2026-11-25). On a wide
+ * screen the name and email share a row, so the details step fits the
+ * window. On a phone the calendar fills the frame, and a picked day's times
+ * open under it instead of replacing it.
+ */
+@media (min-width: 641px) {
+    .talk .bk-form {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        column-gap: 14px;
+    }
+    .talk .bk-form > label:has(textarea),
+    .talk .bk-form > .bk-foot,
+    .talk .bk-form > .fine {
+        grid-column: 1 / -1;
+    }
+}
+@media (max-width: 640px) {
+    .talk .tb > .bk-two {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .talk .tb > .bk-two:not(.has-day) {
+        flex: 1;
+    }
+    .talk .bk-two .bk-cal {
+        display: flex;
+        flex-direction: column;
+    }
+    .talk .bk-two:not(.has-day) .bk-cal {
+        flex: 1;
+    }
+    .talk .bk-two:not(.has-day) .bk-cal .cg {
+        flex: 1;
+        grid-auto-rows: minmax(36px, 56px);
+        align-content: space-evenly;
+    }
+    .talk .bk-two.has-day .bk-pick.only-phone {
+        display: none;
+    }
+    .talk .bk-sl .only-wide {
+        display: block;
+    }
+}
+@media (min-width: 641px) {
+    .talk .tb > .bk-form {
+        row-gap: 10px;
+    }
+}
+/* On a phone the details form fills the frame: the message box takes the spare height. */
+@media (max-width: 640px) {
+    .talk .tb > .bk-form {
+        flex: 1;
+        grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    }
+    .talk .tb > .bk-form > label:has(textarea) {
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+    .talk .tb > .bk-form textarea {
+        height: 100%;
+        min-height: 72px;
+        resize: none;
+    }
+}

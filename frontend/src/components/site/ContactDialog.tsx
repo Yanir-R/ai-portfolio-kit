@@ -181,7 +181,7 @@ const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topi
                         disabled={state === 'sent'}
                     />
                 </label>
-                <div ref={turnstileRef} />
+                <div className="ts" ref={turnstileRef} />
                 <div className="v-btns">
                     <button
                         className="btn"

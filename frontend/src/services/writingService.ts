@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { apiClient, toRequestError } from '@/api/client';
+import { apiClient, NotFoundError, toRequestError } from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
 import { WritingEntry, WritingIndex, WritingOverview } from '@/types/writing';
 import { stripMetadataSections } from '@/utils/markdown';
@@ -67,7 +67,7 @@ export const writingService = {
             return response.data.entry;
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 404) {
-                throw new Error(`Nothing published at "${slug}"`, { cause: error });
+                throw new NotFoundError(`Nothing published at "${slug}"`, { cause: error });
             }
             throw toRequestError(error, `Error fetching writing ${slug}`);
         }
