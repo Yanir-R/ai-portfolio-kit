@@ -107,10 +107,15 @@ def _start_cooldown(model_id: str, now: float) -> None:
 # model spends ~382 of them thinking and has 14 left, so the visitor gets half a
 # sentence returned as a complete-looking success with finish_reason=MAX_TOKENS.
 #
-# Answer length is the prompt's job ("two to four sentences"). This number only
-# needs enough headroom that thinking plus a normal answer fits; observed usage
-# is ~600 thinking + ~110 answer.
-MAX_OUTPUT_TOKENS = 1_500
+# Answer length is the prompt's job ("two to four sentences", more when the
+# visitor asks for detail). This number only needs headroom for the longest
+# answer a visitor can legitimately ask for - a detailed answer in Hebrew,
+# inside the structured reply, after thinking - so that it is never the reason
+# an answer is replaced by TRUNCATED_RESPONSE_MESSAGE. Raising it costs nothing
+# by itself: output is billed per token actually written, and a reply cut at
+# the ceiling is billed in full and then thrown away. Observed usage at the
+# LOW thinking level is ~75-110 answer tokens.
+MAX_OUTPUT_TOKENS = 4_000
 
 # How hard the model thinks before it answers.
 #
