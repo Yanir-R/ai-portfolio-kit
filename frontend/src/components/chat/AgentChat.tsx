@@ -166,12 +166,14 @@ const EntryView: React.FC<{
                     {record && (
                         <div className="rc">
                             <u>{copy.sources}</u>
-                            {record.sources.length ? (
-                                record.sources.map((s) => (
+                            {/* What the answer drew on when the model said so;
+                                otherwise what it was sent. */}
+                            {(record.used ?? record.sources).length ? (
+                                (record.used ?? record.sources).map((s) => (
                                     <span key={`${s.kind}-${s.slug}`}>{s.title}</span>
                                 ))
                             ) : (
-                                <span>{copy.noSource}</span>
+                                <span>{record.used ? copy.fromNotes : copy.noSource}</span>
                             )}
                         </div>
                     )}

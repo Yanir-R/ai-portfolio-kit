@@ -169,7 +169,9 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
             kind: 'answer',
             text: result.response,
             blocks: result.blocks,
-            sources: result.trace?.sources ?? [],
+            // What the answer drew on when the model said; otherwise what it
+            // was sent. An answer from the notes alone shows no line.
+            sources: result.used ?? result.trace?.sources ?? [],
             fromPiece: !!context,
             sig: result.sig,
             handoff: result.handoff,

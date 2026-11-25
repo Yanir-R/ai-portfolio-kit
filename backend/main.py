@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from hmac import compare_digest
 from dotenv import load_dotenv
 from gemini_helper import Answer, HandoffReason, get_gemini_response
-from context import get_knowledge, reading_brief
+from context import Section, get_knowledge, reading_brief
 from language import detect_language
 from selection import Selection, select
 from docs_helper import (
@@ -406,19 +406,42 @@ def _topic_ids() -> List[str]:
     return [topic["id"] for topic in writing_overview(get_all_writing())["topics"]]
 
 
-def _used_slugs(selection: Selection, used: Optional[Tuple[str, ...]]) -> Set[str]:
-    """Slugs of the sent pieces of writing the model says its answer drew on.
+def _cited_sections(selection: Selection, used: Optional[Tuple[str, ...]]) -> List[Section]:
+    """The sent projects and pieces of writing the model says its answer drew on.
 
     Matched by title against what was actually sent, so a title the model
-    invents or misremembers matches nothing.
+    invents or misremembers matches nothing. In corpus order.
     """
     wanted = {" ".join(title.casefold().split()) for title in used or ()}
-    return {
-        section.slug
+    return [
+        section
         for section in selection.knowledge.sections
-        if section.source == "writing"
+        if section.source in ("writing", "project")
+        and section.slug
         and " ".join(section.title.casefold().split()) in wanted
-    }
+    ]
+
+
+def _used_slugs(selection: Selection, used: Optional[Tuple[str, ...]]) -> Set[str]:
+    """Slugs of the sent pieces of writing the model says its answer drew on."""
+    return {s.slug for s in _cited_sections(selection, used) if s.source == "writing"}
+
+
+def _used_sources(selection: Selection, answer: Answer) -> Optional[List["Source"]]:
+    """What the answer drew on, for the site's "sources" line and drawings.
+
+    None when the model's own word is missing (failure copy, or a reply
+    without the structured fields), so the site can fall back to what was
+    sent. An empty list is a real answer: it rested on Yanir's notes alone.
+    """
+    if not answer.written_by_model or answer.declined is None:
+        return None
+    if answer.declined:
+        return []
+    return [
+        Source(kind=s.source, slug=s.slug, title=s.title)
+        for s in _cited_sections(selection, answer.used)
+    ]
 
 
 def _writing_blocks(
@@ -592,6 +615,10 @@ class ChatResponse(BaseModel):
     sig: Optional[str] = None
     # Present when this is the moment to offer a direct talk; see _handoff_card.
     handoff: Optional[HandoffCard] = None
+    # The projects and posts the answer drew on, by the model's own word and
+    # checked against what it was sent. Empty when it rested on Yanir's notes
+    # alone; absent when the model did not say (see _used_sources).
+    used: Optional[List[Source]] = None
 
 
 def _log_chat_audit(
@@ -647,6 +674,7 @@ def _chat_reply(
     declined: Optional[bool] = None,
     sign: bool = True,
     handoff: Optional[HandoffCard] = None,
+    used: Optional[List[Source]] = None,
 ) -> ChatResponse:
     return ChatResponse(
         response=response,
@@ -659,6 +687,7 @@ def _chat_reply(
         declined=declined,
         sig=guard.sign_turn(response) if sign else None,
         handoff=handoff,
+        used=used,
     )
 
 
@@ -677,7 +706,35 @@ def _checked_answer_text(text: str, language: str) -> str:
     if _rules_echo.matches(text):
         logger.warning("Answer quoted the rules; replaced with a decline")
         return RULES_DECLINE.get(language, RULES_DECLINE["en"])
-    return guard.clean_output(text)
+    return _named_links(guard.clean_output(text), language)
+
+
+# A bare address in the middle of a Hebrew sentence reads as noise and breaks
+# the line's direction. Addresses the model writes on its own are turned into
+# links with a short name: the known ones by what they are, any other by its
+# host and path without the scheme. Links the model already named are left as
+# they are.
+LINK_NAMES = {
+    "https://cal.com/yanirrot/zoom-call": {"he": "קביעת שיחה", "en": "book a call"},
+}
+_BARE_URL = re.compile(r"(?<!\]\()(?<![<\w/])https?://[^\s<>()\[\]]+")
+_TRAILING = ".,;:!?\"'״׳"
+
+
+def _named_links(text: str, language: str) -> str:
+    def name(match: "re.Match[str]") -> str:
+        url = match.group(0)
+        tail = ""
+        while url and url[-1] in _TRAILING:
+            url, tail = url[:-1], url[-1] + tail
+        names = LINK_NAMES.get(url.rstrip("/"))
+        label = (
+            names.get(language, names["en"]) if names
+            else re.sub(r"^https?://(www\.)?", "", url).rstrip("/")
+        )
+        return f"[{label}]({url}){tail}"
+
+    return _BARE_URL.sub(name, text)
 
 
 def _answer_trace(
@@ -1025,6 +1082,7 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             # as something it said.
             sign=written,
             handoff=handoff,
+            used=_used_sources(selection, answer),
         )
 
     except HTTPException:

@@ -82,3 +82,41 @@ def test_explicit_writing_questions_still_list_the_writing(model):
     model(used=())
     cards = _cards("What have you written about AI memory?")
     assert cards and cards[0]["type"] == "writing_list"
+
+
+def _reply(message):
+    return TestClient(main.app).post("/chat-with-files", json={"message": message}).json()
+
+
+def test_the_reply_lists_only_what_the_answer_used(model):
+    sent = model()
+    _reply("What do you think about agents asking for approval?")
+    title = next(s.title for s in sent if s.slug == "agents-ask-approval")
+
+    model(used=(title,), declined=False)
+    used = _reply("What do you think about agents asking for approval?")["used"]
+
+    assert [u["slug"] for u in used] == ["agents-ask-approval"]
+
+
+def test_an_answer_from_the_notes_alone_lists_nothing(model):
+    model(used=(), declined=False)
+    assert _reply(PRICE)["used"] == []
+
+
+def test_without_the_models_word_the_list_is_absent(model):
+    model()
+    assert _reply(PRICE).get("used") is None
+
+
+@pytest.mark.parametrize("text, language, expected", [
+    (
+        "אפשר לקבוע שיחה ב-https://cal.com/yanirrot/zoom-call או להשאיר מייל.",
+        "he",
+        "אפשר לקבוע שיחה ב-[קביעת שיחה](https://cal.com/yanirrot/zoom-call) או להשאיר מייל.",
+    ),
+    ("Docs: https://personakit.me/docs.", "en", "Docs: [personakit.me/docs](https://personakit.me/docs)."),
+    ("Already [named](https://personakit.me).", "en", "Already [named](https://personakit.me)."),
+])
+def test_bare_addresses_become_named_links(text, language, expected):
+    assert main._named_links(text, language) == expected

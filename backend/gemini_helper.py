@@ -296,9 +296,9 @@ class ModelReply(BaseModel):
         description=(
             "The titles, exactly as written after \"Project / \" or \"Writing / \" "
             "in the PROFILE, of the projects and pieces of writing whose full text "
-            "this answer actually draws on. Only ones the visitor would want to "
-            "open next because they show what the answer says. Empty when the "
-            "answer rests on Yanir's notes alone, which is often."
+            "this answer actually draws on and mentions. Only ones the visitor "
+            "would want to open next because they show what the answer says. "
+            "Empty when the answer rests on Yanir's notes alone, which is often."
         ),
     )
 

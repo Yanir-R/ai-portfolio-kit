@@ -25,6 +25,11 @@ export interface AnswerRecord {
     question: string;
     seconds: number;
     sources: TraceSource[];
+    /**
+     * The projects and posts the answer drew on, by the model's own word,
+     * checked by the backend against what was sent. Null when it did not say.
+     */
+    used: TraceSource[] | null;
     /** The whole corpus, so "3 of 12" can be said. */
     available: number;
     declined: boolean;
@@ -341,12 +346,13 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
                       Math.round((trace.latency_ms ?? performance.now() - started) / 1000)
                   ),
                   sources: trace.sources ?? [],
+                  used: result.used,
                   available: trace.context_available ?? trace.sources?.length ?? 0,
-                  declined: trace.context_outcome === 'unmatched',
+                  declined: result.declined ?? trace.context_outcome === 'unmatched',
                   trace,
               }
             : null;
-        const sheet = fromIndex ? undefined : sheetFor(text, trace, picked);
+        const sheet = fromIndex ? undefined : sheetFor(text, trace, picked, result.used);
         const asksEmail = record?.declined ?? false;
 
         push({
