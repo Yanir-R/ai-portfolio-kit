@@ -1051,8 +1051,9 @@ footer {
     height: 330px;
     overflow-y: auto;
 }
+/* Messages start under the header; spare height stays below, by the input. */
 .log > :first-child {
-    margin-top: auto;
+    margin-top: 0;
 }
 .m {
     max-width: 88%;

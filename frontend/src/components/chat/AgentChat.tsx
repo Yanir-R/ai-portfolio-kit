@@ -13,6 +13,8 @@ import { REDUCED_MOTION_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
 import { useLang } from '@/i18n/useLang';
 import { useLogFollowsViewport } from '@/hooks/usePhoneLayer';
 
+/** How long a change of size takes to settle (the pane eases over 0.2s). */
+const SETTLE_MS = 400;
 // The input's placeholder cycles through example questions while it is idle.
 const EXAMPLE_EVERY_MS = 2600;
 
@@ -434,6 +436,8 @@ const AgentChat: React.FC<{
         const log = logRef.current;
         if (!log) return;
         const toEnd = () => {
+            // Before the first question the log reads from its top, the greeting first.
+            if (!log.querySelector('.m.u')) return void (log.scrollTop = 0);
             const end = log.scrollHeight - log.clientHeight;
             const hand = log.querySelector<HTMLElement>('.hand:last-child');
             // An offer that fits shows whole, so every route to Yanir is in view
@@ -460,6 +464,36 @@ const AgentChat: React.FC<{
         // Only a new entry moves the log; growing or shrinking leaves it where it is.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chat.entries]);
+
+    // Growing or shrinking the chat lands on the visitor's last question: at
+    // the top of the log, with what followed it below. The size eases in, so
+    // the place is set again as the log settles, then left to the reader.
+    const grown = !!size?.grown;
+    const sized = useRef(grown);
+    useLayoutEffect(() => {
+        const log = logRef.current;
+        if (!log || sized.current === grown) return;
+        sized.current = grown;
+        const asked = log.querySelectorAll<HTMLElement>('.m.u');
+        const mine = asked[asked.length - 1];
+        if (!mine) return;
+        const land = () => {
+            const top =
+                mine.getBoundingClientRect().top -
+                log.getBoundingClientRect().top +
+                log.scrollTop -
+                8;
+            log.scrollTop = Math.max(0, top);
+        };
+        land();
+        const settle = new ResizeObserver(land);
+        settle.observe(log);
+        const stop = window.setTimeout(() => settle.disconnect(), SETTLE_MS);
+        return () => {
+            settle.disconnect();
+            window.clearTimeout(stop);
+        };
+    }, [grown]);
 
     useEffect(() => {
         if (stillMotion) return;
