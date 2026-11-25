@@ -33,6 +33,12 @@ export const PERSON = {
         'for AI, and tailored systems for small professional offices. Creator and lead ' +
         'developer of PersonaKit, open-source memory for AI assistants. Open to freelance ' +
         'projects, a full-time role or a contract.',
+    // The same, in Hebrew, for the Hebrew home page's crawler copy.
+    descriptionHe:
+        'אני בונה סוכני AI ומערכות לארגונים, לעסקים קטנים ולרשויות, ומתחיל בלהבין איתכם את ' +
+        'הבעיה. אני מריץ כל יום יותר מ-40 סוכנים משלי. אני בונה גם מערכות CRM בהתאמה ' +
+        'אישית שמוכנות ל-AI, ומערכות מותאמות למשרדים מקצועיים קטנים. יוצר ומפתח ראשי של ' +
+        'PersonaKit, זיכרון בקוד פתוח לעוזרי AI. פתוח לפרויקטים כפרילנסר, למשרה מלאה או לחוזה.',
     knowsAbout: [
         'AI agents',
         'Multi-agent AI systems',
@@ -81,6 +87,12 @@ export const PERSONAKIT = {
     url: 'https://personakit.me',
     docs: 'https://personakit.me/docs',
     code: 'https://github.com/Yanir-R/personaKit',
+} as const;
+
+/** Trinity Agent, formerly shown as Hermes; its own page lives on personakit.me. */
+export const TRINITY = {
+    name: 'Trinity Agent',
+    url: 'https://personakit.me/trinity',
 } as const;
 
 /** The site-wide graph: Person, WebSite, ProfilePage and the service offer. */

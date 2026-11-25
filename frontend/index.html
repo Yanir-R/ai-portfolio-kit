@@ -76,10 +76,11 @@
         />
         <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
 
-        <!-- Structured data, and the only description of Yanir that a crawler
-             which does not run JavaScript sees on this page. Built from
+        <!-- Structured data, built from
              seo/facts.mts at build time so the facts live in one place; the
              per-route files carry their own graph for the post or project.
+             The page's text for crawlers is written into #root at build time
+             (homeBody in seo/prerender.mts).
 
              No `email` property, deliberately. A structured-data block is the
              most machine-readable place on the internet to publish an address,
