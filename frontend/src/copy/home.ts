@@ -77,7 +77,7 @@ export const HOME: Localized<HomeCopy> = {
                 'אצלי סוכנים כאלה חוקרים שוק עם מקורות, בודקים קוד ומנטרים מערכות בלילה.',
                 'אני יניר, מפתח AI, והצ׳אט כאן הוא סוכן שבניתי.',
             ],
-            cta: 'קבעו שיחת אבחון, 20 דקות',
+            cta: 'קבעו שיחת אבחון',
             whatsapp: 'וואטסאפ',
         },
         build: {
@@ -303,7 +303,7 @@ export const HOME: Localized<HomeCopy> = {
                 'Mine research markets with sources, review code and watch systems overnight.',
                 "I'm Yanir, an AI developer, and the chat here is an agent I built.",
             ],
-            cta: 'Book a 20-minute call',
+            cta: 'Book a discovery call',
             whatsapp: 'WhatsApp',
         },
         build: {

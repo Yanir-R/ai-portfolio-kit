@@ -182,7 +182,7 @@
 .cvm .tb .cv-lang {
     margin-inline-start: auto;
     display: flex;
-    gap: 6px;
+    gap: var(--sp-2);
 }
 .cvm .tb .cv-lang [aria-pressed='true'] {
     background: var(--ink);

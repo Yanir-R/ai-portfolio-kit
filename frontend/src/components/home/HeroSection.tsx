@@ -37,6 +37,8 @@ const FIT_STEPS = 5;
 const FIT_MARGIN_PX = 4;
 // This much of the screen hidden means a keyboard is up (as in useKeyboardFit).
 const KEYBOARD_COVER_PX = 120;
+// The parts of the open layer that give way above a keyboard (see site.css).
+const KB_FIT_STEPS = 5;
 
 /*
  * The first screen: who this is and what he builds, then the chat beside the
@@ -137,6 +139,35 @@ const HeroSection: React.FC = () => {
             window.removeEventListener('resize', measure);
             vv?.removeEventListener('resize', measure);
             watch.disconnect();
+        };
+    }, [phone, full]);
+
+    // The open layer, before the first question, while a keyboard is up: the
+    // greeting must not sit half under the header. Drop optional parts, one
+    // step at a time, until the whole conversation fits (see site.css).
+    useLayoutEffect(() => {
+        const el = chatRef.current;
+        const log = el?.querySelector<HTMLElement>('.log');
+        if (!phone || !full || !el || !log) return;
+        const measure = () => {
+            let fit = 0;
+            el.dataset.kfit = '0';
+            if (!el.hasAttribute('data-kb') || el.classList.contains('live')) return;
+            while (fit < KB_FIT_STEPS && log.scrollHeight > log.clientHeight + 1) {
+                el.dataset.kfit = String(++fit);
+            }
+        };
+        measure();
+        // data-kb comes and goes with the keyboard; the log changes with the
+        // visible height and with the conversation.
+        const kb = new MutationObserver(measure);
+        kb.observe(el, { attributes: true, attributeFilter: ['data-kb', 'class'] });
+        const size = new ResizeObserver(measure);
+        size.observe(log);
+        return () => {
+            kb.disconnect();
+            size.disconnect();
+            delete el.dataset.kfit;
         };
     }, [phone, full]);
 

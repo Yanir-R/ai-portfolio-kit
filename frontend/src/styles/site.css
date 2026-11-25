@@ -271,6 +271,17 @@
     }
 }
 :root {
+    /* Spacing scale: every gap, padding and section rhythm comes from here. */
+    --sp-1: 6px;
+    --sp-2: 10px;
+    --sp-3: 16px;
+    --sp-4: 24px;
+    --sp-5: 48px;
+    --sp-6: 72px;
+    /* Between sibling cards, inside a card, between page sections. */
+    --sp-card: var(--sp-4);
+    --sp-pad: var(--sp-4);
+    --sp-section: var(--sp-6);
     color-scheme: light;
     --bg: #e9effb;
     --paper: #ffffff;
@@ -284,6 +295,13 @@
     --wa: #0e8a4a;
     --display: 'Karantina', 'Arial Narrow', Arial, sans-serif;
     --body: 'Assistant', 'Arial Hebrew', Arial, sans-serif;
+}
+@media (max-width: 640px) {
+    :root {
+        --sp-card: var(--sp-3);
+        --sp-pad: var(--sp-3);
+        --sp-section: var(--sp-5);
+    }
 }
 * {
     box-sizing: border-box;
@@ -586,7 +604,7 @@ h2 em {
     border-bottom: 2px solid var(--blue);
 }
 section {
-    padding-block: 72px 0;
+    padding-block: var(--sp-section) 0;
 }
 .head {
     display: grid;
@@ -603,16 +621,16 @@ section {
 .build {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr);
-    gap: 14px;
+    gap: var(--sp-card);
 }
 .b {
     background: var(--paper);
     border: 2px solid var(--ink);
     border-radius: 8px;
-    padding: 24px;
+    padding: var(--sp-pad);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--sp-2);
 }
 .b.main,
 .chat .qr button.ai:hover,
@@ -784,7 +802,7 @@ section {
 .pick,
 .rec .links {
     display: flex;
-    gap: 8px;
+    gap: var(--sp-2);
     flex-wrap: wrap;
 }
 .pick button {
@@ -972,7 +990,7 @@ footer {
 .duo {
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    gap: 22px;
+    gap: var(--sp-card);
     margin-top: 28px;
     align-items: stretch;
 }
@@ -3425,7 +3443,7 @@ a.il {
 .stg {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: var(--sp-2);
 }
 .stg button {
     text-align: start;
@@ -3956,7 +3974,7 @@ a.il {
 .fside {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: var(--sp-card);
 }
 .fnums {
     display: grid;
@@ -4001,7 +4019,7 @@ a.il {
     background: var(--paper);
     border: 2px solid var(--coral);
     border-radius: 8px;
-    padding: 16px 18px;
+    padding: var(--sp-3) var(--sp-pad);
     min-height: 9.5em;
 }
 .fcard .k {
@@ -4092,7 +4110,7 @@ a.il {
 .prom {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    gap: var(--sp-card);
 }
 .pathbar,
 .pr {
@@ -4111,7 +4129,7 @@ a.il {
 }
 .pr .top,
 .yrs button {
-    padding: 22px 22px 18px;
+    padding: var(--sp-pad) var(--sp-pad) var(--sp-3);
     gap: 6px;
 }
 .pr h3 {
@@ -4141,13 +4159,13 @@ a.il {
     color: var(--blue);
 }
 #path {
-    padding-block: 56px 0;
+    padding-block: var(--sp-section) 0;
 }
 .pathbar {
-    padding: 18px 22px;
+    padding: var(--sp-3) var(--sp-pad);
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    gap: 8px 26px;
+    gap: var(--sp-2) var(--sp-4);
     align-items: center;
 }
 .pt,
@@ -4411,6 +4429,17 @@ a.il {
     grid-template-rows: auto auto;
     row-gap: 0;
 }
+/* One column: each card is its own box again, spaced like every other card. */
+@media (max-width: 900px) {
+    .prom {
+        grid-template-rows: none;
+        row-gap: var(--sp-card);
+    }
+    .pr {
+        display: flex;
+        grid-row: auto;
+    }
+}
 .pr .ev {
     margin-top: 0;
 }
@@ -4438,6 +4467,7 @@ a.il {
 }
 .btn.sm {
     padding: 7px 14px;
+    min-height: 44px;
 }
 .btn::after {
     content: '←';
@@ -4896,8 +4926,8 @@ summary::after {
 .rec {
     color: #fff;
     border-color: var(--ink);
-    padding: 22px 26px;
-    gap: 18px;
+    padding: var(--sp-pad);
+    gap: var(--sp-3);
 }
 .rec > div:first-child {
     display: grid;
@@ -4967,7 +4997,7 @@ footer a {
 }
 .cvm .tb {
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--sp-2);
     border-bottom: 1.5px solid var(--line);
 }
 .cvm .tb .ok {
@@ -5020,7 +5050,7 @@ footer a {
     .nav {
         flex-wrap: wrap;
         position: relative;
-        gap: 10px;
+        gap: var(--sp-2);
     }
     .nav .logo {
         margin-inline-end: auto;
@@ -5092,7 +5122,7 @@ footer a {
     .fgr {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: var(--sp-2);
         margin-top: 10px;
     }
     .fgr button {
@@ -5606,7 +5636,7 @@ html.panel body > a {
     font-size: 1.7rem;
 }
 .w-side .w-body {
-    padding: 18px 20px;
+    padding: var(--sp-3) var(--sp-pad);
     font-size: 1.05rem;
 }
 .w-side .w-pn a {
@@ -5635,7 +5665,7 @@ html.panel .w-post {
     .w-idx .tl {
         flex-direction: row;
         overflow-x: auto;
-        gap: 8px;
+        gap: var(--sp-2);
         padding-bottom: 6px;
         scrollbar-width: none;
     }
@@ -5714,7 +5744,7 @@ html.panel .w-post {
     background: var(--paper);
     border: 2px solid var(--ink);
     border-radius: 8px;
-    padding: 26px 28px;
+    padding: var(--sp-pad);
     font-size: 1.12rem;
     line-height: 1.75;
 }
@@ -5818,16 +5848,16 @@ html.panel .w-post {
     text-align: end;
 }
 .w-end {
-    margin-top: 12px;
+    margin-top: var(--sp-card);
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 12px;
+    gap: var(--sp-2);
     align-items: center;
     justify-content: space-between;
     background: var(--paper);
     border: 2px solid var(--ink);
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: var(--sp-2) var(--sp-3);
 }
 .w-end > b {
     font-size: 1rem;
@@ -5836,7 +5866,7 @@ html.panel .w-post {
 .w-dock,
 .w-end .ac {
     display: flex;
-    gap: 8px;
+    gap: var(--sp-2);
 }
 .w-end .ac {
     flex-wrap: nowrap;
@@ -5844,6 +5874,10 @@ html.panel .w-post {
 }
 .w-end .ac > * {
     white-space: nowrap;
+    /* Chips and buttons in this row stand the same height. */
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
 }
 .w-end .w-chip[aria-expanded='true'],
 .w-how .hd .sw button[aria-pressed='true'] {
@@ -6522,7 +6556,7 @@ html.panel .w-post {
 }
 @media (max-width: 900px) {
     .w-body {
-        padding: 18px 16px;
+        padding: var(--sp-pad);
         font-size: 1.05rem;
     }
     .w-pn {
@@ -6564,7 +6598,7 @@ html.panel .w-post {
 }
 .w-ser {
     border: 2px solid var(--ink);
-    padding: 18px 20px;
+    padding: var(--sp-3) var(--sp-pad);
 }
 .w-ser .hd {
     display: flex;
@@ -6802,7 +6836,7 @@ a.w-out:hover {
 .w-arts {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: var(--sp-card);
 }
 .w-art,
 .w-list {
@@ -6811,10 +6845,10 @@ a.w-out:hover {
     border-radius: 8px;
 }
 .w-art {
-    padding: 20px 22px;
+    padding: var(--sp-pad);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--sp-2);
 }
 .w-art .mt {
     display: flex;
@@ -7532,6 +7566,7 @@ video.w-v {
     .nav .btn.sm {
         font-size: 0.78rem;
         padding: 7px 9px;
+        min-height: 44px;
         white-space: nowrap;
     }
     .nav .lang a,
@@ -7540,7 +7575,7 @@ video.w-v {
         font-size: 0.78rem;
     }
     .nav {
-        gap: 8px;
+        gap: var(--sp-2);
     }
     .acts .btn:not(.wa) {
         font-size: 0.95rem;
@@ -8967,6 +9002,41 @@ video.w-v {
         display: none;
     }
     #top .chat.phone:not(.full)[data-fit='5'] .stg button span {
+        display: none;
+    }
+}
+
+/*
+ * The open layer above a keyboard, before the first question: HeroSection
+ * raises data-kfit until the whole conversation fits under the header, so the
+ * greeting is never half cut. First the teaser, then the third starter, the
+ * hint, the starters' subtitles, and last the greeting itself.
+ */
+@media (max-width: 640px) {
+    #top
+        .chat.full:is(
+            [data-kfit='1'],
+            [data-kfit='2'],
+            [data-kfit='3'],
+            [data-kfit='4'],
+            [data-kfit='5']
+        )
+        .tz {
+        display: none;
+    }
+    #top
+        .chat.full:is([data-kfit='2'], [data-kfit='3'], [data-kfit='4'], [data-kfit='5'])
+        .stg
+        button:nth-child(n + 3) {
+        display: none;
+    }
+    #top .chat.full:is([data-kfit='3'], [data-kfit='4'], [data-kfit='5']) .m.st0 > small {
+        display: none;
+    }
+    #top .chat.full:is([data-kfit='4'], [data-kfit='5']) .stg button span {
+        display: none;
+    }
+    #top .chat.full[data-kfit='5'] .log > .m.y:first-child {
         display: none;
     }
 }
