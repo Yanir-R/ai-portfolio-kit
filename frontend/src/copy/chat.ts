@@ -94,6 +94,16 @@ export interface ChatCopy {
     };
     /** The sheet card under an answer. */
     art: { diagram: string; opensSide: string; opensBelow: string; open: string };
+    /** The phone layout: the chat as a full-screen layer, the diagram as a sheet over it. */
+    phone: {
+        /** The greeting without "on the left": on a phone the drawing is a sheet. */
+        greeting: string;
+        teaser: string;
+        resume: string;
+        close: string;
+        backToChat: string;
+        closeSheet: string;
+    };
     book: string;
     processes: Record<ProcessId, Process>;
     /** The site's own chat, drawn with the same stations. */
@@ -301,6 +311,15 @@ export const CHAT: Localized<ChatCopy> = {
             opensSide: 'נפתח משמאל',
             opensBelow: 'נפתח למטה',
             open: 'פתחו',
+        },
+        phone: {
+            greeting:
+                'שלום, אני הסוכן של יניר. שאלו אותי על העבודה שלו, או על מה שסוכן יכול לעשות אצלכם.',
+            teaser: 'לכל תשובה מצורף שרטוט, ורואים איך הסוכן הגיע אליה.',
+            resume: 'המשך השיחה',
+            close: 'סגירת השיחה',
+            backToChat: 'חזרה לשיחה',
+            closeSheet: 'סגירת השרטוט',
         },
         book: 'קבעו שיחת אבחון',
         processes: {
@@ -590,6 +609,15 @@ export const CHAT: Localized<ChatCopy> = {
             opensSide: 'opens on the right',
             opensBelow: 'opens below',
             open: 'Open',
+        },
+        phone: {
+            greeting:
+                "Hi, I'm Yanir's agent. Ask me about his work, or about what an agent could do for you.",
+            teaser: 'Every answer comes with a diagram of how the agent got there.',
+            resume: 'Continue the conversation',
+            close: 'Close the chat',
+            backToChat: 'Back to the chat',
+            closeSheet: 'Close the diagram',
         },
         book: 'Book a discovery call',
         processes: {

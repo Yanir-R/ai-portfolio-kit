@@ -106,7 +106,7 @@ interface Options {
 }
 
 /** The greeting's id: its text follows the page's language. */
-const GREETING_ID = 0;
+export const GREETING_ID = 0;
 
 export const useHomeChat = ({ getToken, resetToken }: Options) => {
     const { t } = useLang();
