@@ -73,9 +73,9 @@ export const HIRE: Localized<{ title: string; text: string; cv: string; linkedin
     },
 };
 
-export const FOOTER: Localized<{ name: string; blog: string; linkedin: string }> = {
-    he: { name: 'יניר רוט', blog: 'בלוג', linkedin: 'לינקדאין' },
-    en: { name: 'Yanir Rot', blog: 'Blog', linkedin: 'LinkedIn' },
+export const FOOTER: Localized<{ name: string; blog: string; about: string }> = {
+    he: { name: 'יניר רוט', blog: 'בלוג', about: 'אודות' },
+    en: { name: 'Yanir Rot', blog: 'Blog', about: 'About' },
 };
 
 export interface CvCopy {

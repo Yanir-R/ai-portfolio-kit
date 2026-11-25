@@ -42,15 +42,11 @@ const SiteFooter: React.FC = () => {
 
     return (
         <footer>
+            {/* LinkedIn and GitHub sit in the hiring band just above, so the
+                line keeps only what the band does not have. */}
             <span>
                 {copy.name} · {SITE_HOST} · <Link to={to('/blog')}>{copy.blog}</Link> ·{' '}
-                <a href={LINKS.linkedin} target="_blank" rel="noopener">
-                    {copy.linkedin}
-                </a>{' '}
-                ·{' '}
-                <a href={LINKS.github} target="_blank" rel="noopener">
-                    GitHub
-                </a>
+                <Link to={to('/about')}>{copy.about}</Link>
             </span>
         </footer>
     );
