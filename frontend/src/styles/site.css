@@ -10666,3 +10666,37 @@ video.w-v {
 .trail > span:not(.td) {
     white-space: nowrap;
 }
+
+/*
+ * The grown panel uses its whole height. Content shorter than the space sits
+ * in the middle between the header and the pinned button instead of leaving
+ * a hole under it; content that is taller still scrolls from the top, since
+ * auto margins collapse to nothing when there is no room.
+ */
+@media (min-width: 901px) and (min-height: 620px) {
+    #top.grown .plan.showvis .vis {
+        gap: var(--sp-4);
+    }
+    #top.grown .plan.showvis .vis > :first-child {
+        margin-top: auto;
+    }
+    #top.grown .plan:not(.showvis, .showmap, .showcmp) .atr {
+        margin-top: auto;
+    }
+    #top.grown .plan:not(.showvis, .showmap, .showcmp) .sum {
+        margin-top: var(--sp-3) !important;
+        margin-bottom: auto !important;
+    }
+}
+/* On a tall screen the migration drawing grows with the panel; its words keep their size. */
+@media (min-width: 1200px) and (min-height: 780px) {
+    #top.grown .v-new,
+    #top.grown .v-old {
+        width: 195px;
+    }
+    #top.grown .pile,
+    #top.grown .cells,
+    #top.grown .v-wire {
+        zoom: 1.3;
+    }
+}
