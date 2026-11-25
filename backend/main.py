@@ -575,10 +575,10 @@ app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 # it. Setting the variable is the last step, not the first.
 ORIGIN_SHARED_SECRET = os.getenv("ORIGIN_SHARED_SECRET", "").strip()
 
-# Paths that must stay reachable without the header. Cloud Run's own health
-# probing and any uptime check call these, and they neither cost quota nor
-# disclose anything.
-_UNGUARDED_PATHS = frozenset({"/", "/health"})
+# The one path that stays reachable without the header, for Cloud Run's own
+# health probing and any uptime check. It costs no quota and answers a bare
+# status, nothing about the service behind it.
+_UNGUARDED_PATHS = frozenset({"/health"})
 
 
 @app.middleware("http")
@@ -642,9 +642,13 @@ async def cache_read_only_content(request: Request, call_next):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    # No cookies or HTTP auth cross this boundary, so the browser is never told
+    # it may send them. Methods and request headers are the ones the frontend
+    # actually uses: JSON bodies, and the Turnstile token the edge checks (the
+    # preflight for it reaches this app, so it has to be allowed here).
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-Turnstile-Token"],
     # Response headers are not readable by cross-origin JavaScript unless they
     # are exposed. Without this the frontend can see the 429 status but not the
     # Retry-After value the limiter computed, so it cannot tell the visitor how
@@ -655,12 +659,9 @@ app.add_middleware(
 @app.get("/")
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "service": "backend",
-        "message": "FastAPI is running",
-        "timestamp": datetime.datetime.now().isoformat()
-    }
+    # A bare status: a probe needs nothing more, and an anonymous caller should
+    # learn nothing about what runs here.
+    return {"status": "ok"}
 
 @app.get("/api/chat/status")
 async def chat_status():
