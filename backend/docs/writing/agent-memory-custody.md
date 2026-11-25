@@ -33,7 +33,7 @@
 בעולם של סוכנים שעובדים ברקע, זה לא פרט טכני.
 זה המוצר.
 
-<https://lnkd.in/dUT7Rw4G>
+קישור מהפוסט: [OpenAI: Introducing Dots ↗](https://openai.com/index/introducing-dots/)
 
 ## Kind
 post

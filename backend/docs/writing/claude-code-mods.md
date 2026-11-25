@@ -40,7 +40,7 @@
 וזה בדיוק מה שמתחיל להפוך סוכני קוד מכלי שעונים לו בצ׳אט,
 לשותף עבודה שאפשר לבנות סביבו תהליך אמיתי.
 
-<https://lnkd.in/dXDX3xV5>
+קישור מהפוסט: [Claude Code: Getting started with mods ↗](https://claude.dev/blog/getting-started-with-claude-code-mods/)
 
 ## Kind
 post

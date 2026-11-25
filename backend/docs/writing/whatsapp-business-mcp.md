@@ -46,8 +46,7 @@ Not more tools in the prompt.
 
 Safer ways for agents to operate real systems.
 
-Meta’s WhatsApp Business MCP:
-<https://lnkd.in/dJnbDRe5>
+[Meta’s WhatsApp Business MCP ↗](https://developers.facebook.com/documentation/mcp/whatsapp-business-tools-mcp)
 
 ## Kind
 post
