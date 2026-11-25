@@ -193,12 +193,12 @@ export default {
         }
 
         try {
-            // Returned as-is. The backend already emits the CORS headers the
-            // browser needs, including the exposed Retry-After the frontend
-            // reads to tell a visitor how long a rate limit lasts; rewriting
-            // any of that here would only create a second place for it to
-            // drift.
-            return await fetch(
+            // Returned as the backend sent it. The backend already emits the
+            // CORS headers the browser needs, including the exposed Retry-After
+            // the frontend reads to tell a visitor how long a rate limit lasts;
+            // rewriting any of that here would only create a second place for
+            // it to drift.
+            const response = await fetch(
                 new Request(target, {
                     method: request.method,
                     headers,
@@ -206,6 +206,15 @@ export default {
                     redirect: 'manual',
                 })
             );
+            // The one thing taken out: Google Cloud's internal trace id for
+            // the request. It tells a visitor nothing and names the platform
+            // and request behind this Worker.
+            if (!response.headers.has('x-cloud-trace-context')) {
+                return response;
+            }
+            const cleaned = new Response(response.body, response);
+            cleaned.headers.delete('x-cloud-trace-context');
+            return cleaned;
         } catch (err) {
             // The origin is unreachable, or took too long. Without this the
             // rejection escapes and Cloudflare answers with its own 1101 error
