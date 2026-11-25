@@ -233,7 +233,7 @@ export const HOME: Localized<HomeCopy> = {
                 {
                     year: '2026',
                     label: 'Trinity',
-                    text: 'סוכנים ומערכות לעסקים: TrinityLegal בפיילוט עם לקוחות, יותר מ־40 סוכנים שרצים אצלי כל יום, ו־PersonaKit בקוד פתוח.',
+                    text: 'סוכנים ומערכות לעסקים: Trinity Legal בפיילוט עם לקוחות, יותר מ־40 סוכנים שרצים אצלי כל יום, ו־PersonaKit בקוד פתוח.',
                 },
             ],
         },
@@ -463,7 +463,7 @@ export const HOME: Localized<HomeCopy> = {
                 {
                     year: '2026',
                     label: 'Trinity',
-                    text: 'Agents and systems for businesses: TrinityLegal in a pilot with clients, more than 40 agents that run for me every day, and PersonaKit as open source.',
+                    text: 'Agents and systems for businesses: Trinity Legal in a pilot with clients, more than 40 agents that run for me every day, and PersonaKit as open source.',
                 },
             ],
         },

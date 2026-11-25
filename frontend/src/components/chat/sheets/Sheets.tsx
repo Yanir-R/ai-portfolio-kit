@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SheetKey, SHEETS } from '@/content/sheets';
+import { SheetKey, SHEETS, sourceTitle } from '@/content/sheets';
 import { FEATURES, LINKS } from '@/constants/links';
 import { AnswerRecord, Letter as LetterState } from '@/chat/useHomeChat';
 import { TraceSource } from '@/types/chat';
@@ -300,7 +300,7 @@ const ReadSheet: React.FC<{ record?: AnswerRecord }> = ({ record }) => {
                                 }}
                             >
                                 <small>{copy.kinds[s.kind] ?? s.kind}</small>
-                                <b>{s.title}</b>
+                                <b>{sourceTitle(s, copy)}</b>
                                 {tagged && <em>{copy.usedTag}</em>}
                             </li>
                         ))}
@@ -308,12 +308,12 @@ const ReadSheet: React.FC<{ record?: AnswerRecord }> = ({ record }) => {
                 )}
                 {rest.length > 0 && (
                     <p className="rx-rest">
-                        {copy.readNotUsed} {rest.map((s) => s.title).join(', ')}
+                        {copy.readNotUsed} {rest.map((s) => sourceTitle(s, copy)).join(', ')}
                     </p>
                 )}
                 {always.length > 0 && (
                     <p className="rx-rest">
-                        {copy.alwaysSent} {always.map((s) => s.title).join(', ')}
+                        {copy.alwaysSent} {always.map((s) => sourceTitle(s, copy)).join(', ')}
                     </p>
                 )}
             </div>

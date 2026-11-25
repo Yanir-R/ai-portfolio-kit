@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CHAT } from '@/copy/chat';
-import { SHEET_HEADS, SHEETS, SheetKey } from '@/content/sheets';
+import { SHEET_HEADS, SHEETS, SheetKey, sourceTitle } from '@/content/sheets';
 import { AnswerRecord, Entry, GREETING_ID, HomeChat } from '@/chat/useHomeChat';
 import Markdown from '@/components/Markdown';
 import WritingBlocks from '@/components/writing/WritingBlocks';
@@ -275,7 +275,9 @@ const EntryView: React.FC<{
                                 otherwise what it was sent. */}
                             {(record.used ?? record.sources).length ? (
                                 (record.used ?? record.sources).map((s) => (
-                                    <span key={`${s.kind}-${s.slug}`}>{s.title}</span>
+                                    <span key={`${s.kind}-${s.slug}`}>
+                                        {sourceTitle(s, t(SHEETS).read)}
+                                    </span>
                                 ))
                             ) : (
                                 <span>{record.used ? copy.fromNotes : copy.noSource}</span>

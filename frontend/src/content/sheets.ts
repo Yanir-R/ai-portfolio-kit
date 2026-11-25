@@ -28,7 +28,7 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
         legal: {
             title: '56,607 קבצים עברו לענן',
             tab: 'ארכיון המסמכים',
-            cap: 'כך נראתה ההעברה ב־TrinityLegal. שם המשרד נשאר אצלי.',
+            cap: 'כך נראתה ההעברה ב־Trinity Legal. שם המשרד נשאר אצלי.',
         },
         price: {
             title: 'איך מגיעים למחיר',
@@ -80,7 +80,7 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
         legal: {
             title: '56,607 files moved to the cloud',
             tab: 'The document archive',
-            cap: "This is what the migration looked like at TrinityLegal. The office's name stays with me.",
+            cap: "This is what the migration looked like at Trinity Legal. The office's name stays with me.",
         },
         price: {
             title: 'How the price is set',
@@ -169,6 +169,9 @@ export interface SheetCopy {
         usedTag: string;
         readNotUsed: string;
         alwaysSent: string;
+        /** Yanir's notes by file, in words: the backend names them by file name. */
+        profileTitles: Record<string, string>;
+        profileOther: string;
         kinds: Record<string, string>;
         more: string;
         declined: [string, string];
@@ -339,6 +342,12 @@ export const SHEETS: Localized<SheetCopy> = {
             usedTag: 'שימש בתשובה',
             readNotUsed: 'נקראו ולא שימשו:',
             alwaysSent: 'נשלח עם כל שאלה:',
+            profileTitles: {
+                'about-me': 'אודות יניר',
+                resume: 'קורות החיים',
+                'work-with-me': 'איך עובדים איתי',
+            },
+            profileOther: 'מה שיניר כתב על עצמו',
             kinds: { profile: 'פרופיל', project: 'פרויקט', writing: 'כתיבה' },
             more: 'מה עוד קרה',
             declined: ['הסוכן אמר שאין לו תשובה', 'הוא לא מצא את זה במה שיניר כתב, ולא ניחש.'],
@@ -540,6 +549,12 @@ export const SHEETS: Localized<SheetCopy> = {
             usedTag: 'Used in the answer',
             readNotUsed: 'Read but not used:',
             alwaysSent: 'Sent with every question:',
+            profileTitles: {
+                'about-me': 'About Yanir',
+                resume: 'The resume',
+                'work-with-me': 'How to work with me',
+            },
+            profileOther: 'What Yanir wrote about himself',
             kinds: { profile: 'Profile', project: 'Project', writing: 'Writing' },
             more: 'What else happened',
             declined: [
@@ -675,7 +690,7 @@ export const MAP_NODES: MapNode[] = [
     },
     {
         id: 'legal',
-        name: { he: 'TrinityLegal', en: 'TrinityLegal' },
+        name: { he: 'Trinity Legal', en: 'Trinity Legal' },
         text: {
             he: 'ניהול מסמכים ותיקים למשרדי עורכי דין. 56,607 קבצים.',
             en: 'Document and case management for law offices. 56,607 files.',
@@ -737,3 +752,9 @@ export const PERSONAKIT_LINKS: Localized<{ site: string; docs: string }> = {
     he: { site: 'personakit.me ↗︎', docs: 'התיעוד ↗︎' },
     en: { site: 'personakit.me ↗︎', docs: 'The docs ↗︎' },
 };
+
+/** A source's title as a visitor reads it: Yanir's notes go by name, never by file. */
+export const sourceTitle = (
+    s: { kind: string; slug: string; title: string },
+    read: { profileTitles: Record<string, string>; profileOther: string }
+) => (s.kind === 'profile' ? (read.profileTitles[s.slug] ?? read.profileOther) : s.title);
