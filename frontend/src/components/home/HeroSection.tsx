@@ -35,6 +35,8 @@ const PULL_START_PX = 10;
 // The parts of the first-screen card that may give way on a short phone (see site.css).
 const FIT_STEPS = 5;
 const FIT_MARGIN_PX = 4;
+// This much of the screen hidden means a keyboard is up (as in useKeyboardFit).
+const KEYBOARD_COVER_PX = 120;
 
 /*
  * The first screen: who this is and what he builds, then the chat beside the
@@ -100,7 +102,13 @@ const HeroSection: React.FC = () => {
     useLayoutEffect(() => {
         const el = chatRef.current;
         if (!phone || full || !el) return;
+        const vv = window.visualViewport;
         const measure = () => {
+            // Not while a keyboard is up (the layer just closed, or a field on
+            // the page has focus): the screen is short only for now, and the
+            // card would drop parts it has room for. It measures again once
+            // the keyboard has gone.
+            if (vv && window.innerHeight - vv.height > KEYBOARD_COVER_PX) return;
             const top = el.getBoundingClientRect().top + window.scrollY;
             el.style.setProperty('--fill-top', `${top}px`);
             // Drop optional parts, one step at a time, until the input is on screen.
@@ -114,6 +122,7 @@ const HeroSection: React.FC = () => {
         };
         measure();
         window.addEventListener('resize', measure);
+        vv?.addEventListener('resize', measure);
         void document.fonts?.ready.then(measure);
         // The headline above and the card's own content can still settle
         // after the first paint (a late font, the starters): measure again
@@ -126,6 +135,7 @@ const HeroSection: React.FC = () => {
         if (log) watch.observe(log);
         return () => {
             window.removeEventListener('resize', measure);
+            vv?.removeEventListener('resize', measure);
             watch.disconnect();
         };
     }, [phone, full]);

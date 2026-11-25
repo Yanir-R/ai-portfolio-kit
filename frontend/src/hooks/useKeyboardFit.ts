@@ -119,6 +119,10 @@ export const useKeyboardFit = (
         const fit = () => {
             box.style.setProperty('--vv-h', `${vv.height}px`);
             box.style.setProperty('--vv-top', `${vv.offsetTop}px`);
+            // iOS can pan the visible viewport sideways as the keyboard opens:
+            // the window follows it, so nothing ends up off the screen's edge.
+            box.style.setProperty('--vv-left', `${vv.offsetLeft}px`);
+            box.style.setProperty('--vv-w', `${vv.width}px`);
             const open =
                 vv.height < KEYBOARD_VIEW_PX || window.innerHeight - vv.height > KEYBOARD_COVER_PX;
             box.toggleAttribute('data-kb', open);
@@ -168,6 +172,8 @@ export const useKeyboardFit = (
             box.removeAttribute('data-kb');
             box.style.removeProperty('--vv-h');
             box.style.removeProperty('--vv-top');
+            box.style.removeProperty('--vv-left');
+            box.style.removeProperty('--vv-w');
         };
     }, [ref, enabled, centring]);
 };
