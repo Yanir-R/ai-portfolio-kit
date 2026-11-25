@@ -8905,7 +8905,10 @@ video.w-v {
 /*
  * When the card does not fit the first screen, HeroSection raises data-fit
  * one step at a time until the input is in view: first the hint, then the
- * third starter, the greeting, the teaser, and last the starters' subtitles.
+ * teaser, the greeting, the third starter, and last the starters' subtitles.
+ * The starters go late so that as many as fit are shown at their own height
+ * (spare room only stretches them afterwards), and the open layer keeps the
+ * same starters as the card, so opening it never adds a question.
  */
 @media (max-width: 640px) {
     #top .chat.phone:not(.full)[data-fit='1'] .m.st0 > small,
@@ -8915,10 +8918,10 @@ video.w-v {
     #top .chat.phone:not(.full)[data-fit='5'] .m.st0 > small {
         display: none;
     }
-    #top .chat.phone:not(.full)[data-fit='2'] .stg button:nth-child(n + 3),
-    #top .chat.phone:not(.full)[data-fit='3'] .stg button:nth-child(n + 3),
-    #top .chat.phone:not(.full)[data-fit='4'] .stg button:nth-child(n + 3),
-    #top .chat.phone:not(.full)[data-fit='5'] .stg button:nth-child(n + 3) {
+    #top .chat.phone:not(.full)[data-fit='2'] .tz,
+    #top .chat.phone:not(.full)[data-fit='3'] .tz,
+    #top .chat.phone:not(.full)[data-fit='4'] .tz,
+    #top .chat.phone:not(.full)[data-fit='5'] .tz {
         display: none;
     }
     #top .chat.phone:not(.full)[data-fit='3'] .log > .m.y:first-child,
@@ -8926,8 +8929,10 @@ video.w-v {
     #top .chat.phone:not(.full)[data-fit='5'] .log > .m.y:first-child {
         display: none;
     }
-    #top .chat.phone:not(.full)[data-fit='4'] .tz,
-    #top .chat.phone:not(.full)[data-fit='5'] .tz {
+    #top .chat.phone:not(.full):not(.live)[data-fit='4'] .stg button:nth-child(n + 3),
+    #top .chat.phone:not(.full):not(.live)[data-fit='5'] .stg button:nth-child(n + 3),
+    #top .chat.phone[data-fit='4'] .stg button:nth-child(n + 3),
+    #top .chat.phone[data-fit='5'] .stg button:nth-child(n + 3) {
         display: none;
     }
     #top .chat.phone:not(.full)[data-fit='5'] .stg button span {

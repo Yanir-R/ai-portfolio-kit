@@ -155,7 +155,19 @@ const HeroSection: React.FC = () => {
         measure();
         window.addEventListener('resize', measure);
         void document.fonts?.ready.then(measure);
-        return () => window.removeEventListener('resize', measure);
+        // The headline above and the card's own content can still settle
+        // after the first paint (a late font, the starters): measure again
+        // whenever either changes size. A measure ends on the same layout it
+        // found, so this does not loop.
+        const watch = new ResizeObserver(measure);
+        const top = el.closest('#top');
+        if (top) watch.observe(top);
+        const log = el.querySelector('.log');
+        if (log) watch.observe(log);
+        return () => {
+            window.removeEventListener('resize', measure);
+            watch.disconnect();
+        };
     }, [phone, full]);
 
     // While open: the page behind does not scroll, and the layer follows the
