@@ -205,9 +205,15 @@ const emitSecurityHeaders = (backendUrl: string, avatarUrl: string) => {
         '  Cross-Origin-Opener-Policy: same-origin',
         '  Permissions-Policy: accelerometer=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()',
         '',
-        // Built assets carry a content hash in their name, so a cached copy is never stale.
+        // No year-long `immutable` here, although the names carry a content hash.
+        // Pages answers a path it does not have yet with the SPA shell (see
+        // _redirects), and during a deploy a browser can ask for the new bundle
+        // before every edge has it. With `immutable` that HTML was cached as the
+        // script for a year, at the edge and in browsers, and the site stayed
+        // blank. Revalidating costs a 304 per file and lets a bad copy heal on
+        // the next load.
         '/assets/*',
-        '  Cache-Control: public, max-age=31536000, immutable',
+        '  Cache-Control: public, max-age=0, must-revalidate',
         '',
     ].join('\n');
 };
