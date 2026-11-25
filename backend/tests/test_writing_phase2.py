@@ -91,7 +91,9 @@ def calls(monkeypatch):
 
     def fake(*args, **kwargs):
         made.append(args)
-        return Answer(text="An answer.", model="test")
+        # Cites every piece it was sent; see test_related_cards.py.
+        cited = tuple(s.title for s in args[2].sections if s.source == "writing")
+        return Answer(text="An answer.", model="test", used=cited)
 
     monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
     monkeypatch.setattr(main, "GEMINI_API_KEY", "test-key")

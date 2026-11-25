@@ -22,7 +22,7 @@ from prompt import HISTORY_TURNS, RULES
 import booking
 import site_mail
 from pydantic import BaseModel, EmailStr, Field
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 import json
 import os
 import datetime
@@ -406,14 +406,47 @@ def _topic_ids() -> List[str]:
     return [topic["id"] for topic in writing_overview(get_all_writing())["topics"]]
 
 
-def _writing_blocks(selection: Selection, reading: Optional[str] = None) -> List[Block]:
+def _used_slugs(selection: Selection, used: Optional[Tuple[str, ...]]) -> Set[str]:
+    """Slugs of the sent pieces of writing the model says its answer drew on.
+
+    Matched by title against what was actually sent, so a title the model
+    invents or misremembers matches nothing.
+    """
+    wanted = {" ".join(title.casefold().split()) for title in used or ()}
+    return {
+        section.slug
+        for section in selection.knowledge.sections
+        if section.source == "writing"
+        and " ".join(section.title.casefold().split()) in wanted
+    }
+
+
+def _writing_blocks(
+    selection: Selection,
+    reading: Optional[str] = None,
+    answer: Optional[Answer] = None,
+) -> List[Block]:
     """The cards a writing answer carries, from what selection found.
 
     `reading` is the piece the visitor asked from. It is already open in front
     of them, so it is never offered back as a card.
+
+    `answer` decides the cards beside an answer that was not about the writing.
+    Search alone chose them before, and a word in common is not relevance: a
+    question about price drew a post about reviewing pull requests because
+    both say "cost". Now a piece is shown only when search sent it AND the
+    model says the answer drew on it, and never beside a declined answer. No
+    card is better than a wrong one.
     """
     intent = selection.writing_intent
     slugs = [slug for slug in selection.writing if slug != reading]
+    if intent == "related":
+        cited = (
+            _used_slugs(selection, answer.used)
+            if answer is not None and not answer.declined
+            else set()
+        )
+        slugs = [slug for slug in slugs if slug in cited]
     if reading and not slugs:
         return []
     if not slugs:
@@ -961,7 +994,9 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             brief,
         )
 
-        blocks = _writing_blocks(selection, reading) if answer.from_model else []
+        blocks = (
+            _writing_blocks(selection, reading, answer) if answer.written_by_model else []
+        )
         handoff = _handoff_card(
             answer,
             chat_request,
