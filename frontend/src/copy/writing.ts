@@ -164,9 +164,9 @@ export const WRITING: Localized<WritingCopy> = {
             // A Latin name takes a maqaf after ב: ב־Medium.
             published: (source, date) =>
                 `פורסם במקור ב${/^[A-Za-z]/.test(source) ? '־' : ''}${source}, ${date}`,
-            original: 'לפוסט המקורי ↗',
+            original: 'לפוסט המקורי ↗︎',
             publishedOn: (date) => `פורסם במקור ב־${date}`,
-            originalLinkedIn: 'לפוסט המקורי בלינקדאין ↗',
+            originalLinkedIn: 'לפוסט המקורי בלינקדאין ↗︎',
             previous: 'הקודם',
             next: 'הבא',
             previousInSeries: 'הקודם בסדרה',
@@ -277,9 +277,9 @@ export const WRITING: Localized<WritingCopy> = {
             back: 'All of the blog',
             byName: 'Yanir Rot',
             published: (source, date) => `Originally published on ${source}, ${date}`,
-            original: 'The original post ↗',
+            original: 'The original post ↗︎',
             publishedOn: (date) => `Originally published ${date}`,
-            originalLinkedIn: 'The original post on LinkedIn ↗',
+            originalLinkedIn: 'The original post on LinkedIn ↗︎',
             previous: 'Previous',
             next: 'Next',
             previousInSeries: 'Previous in the series',

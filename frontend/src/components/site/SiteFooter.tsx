@@ -26,10 +26,10 @@ export const HireBand: React.FC = () => {
                     {copy.cv}
                 </button>
                 <a className="btn sm line" href={LINKS.linkedin} target="_blank" rel="noopener">
-                    {copy.linkedin} ↗
+                    {copy.linkedin} ↗︎
                 </a>
                 <a className="btn sm line" href={LINKS.github} target="_blank" rel="noopener">
-                    GitHub ↗
+                    GitHub ↗︎
                 </a>
             </div>
         </div>

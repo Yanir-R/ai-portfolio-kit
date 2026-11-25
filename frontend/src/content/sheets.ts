@@ -235,8 +235,8 @@ export const SHEETS: Localized<SheetCopy> = {
                     text: 'להורדה ולשימוש. האתר והתיעוד פתוחים לכולם.',
                 },
             ],
-            site: 'לאתר personakit.me ↗',
-            docs: 'לתיעוד ↗',
+            site: 'לאתר personakit.me ↗︎',
+            docs: 'לתיעוד ↗︎',
         },
         legal: {
             files: 56607,
@@ -424,8 +424,8 @@ export const SHEETS: Localized<SheetCopy> = {
                     text: 'To download and use. The site and the docs are open to everyone.',
                 },
             ],
-            site: 'Go to personakit.me ↗',
-            docs: 'The docs ↗',
+            site: 'Go to personakit.me ↗︎',
+            docs: 'The docs ↗︎',
         },
         legal: {
             files: 56607,
@@ -702,6 +702,6 @@ export const MAP_EDGES: { from: string; to: string; label: Localized<string> }[]
 ];
 
 export const PERSONAKIT_LINKS: Localized<{ site: string; docs: string }> = {
-    he: { site: 'personakit.me ↗', docs: 'התיעוד ↗' },
-    en: { site: 'personakit.me ↗', docs: 'The docs ↗' },
+    he: { site: 'personakit.me ↗︎', docs: 'התיעוד ↗︎' },
+    en: { site: 'personakit.me ↗︎', docs: 'The docs ↗︎' },
 };

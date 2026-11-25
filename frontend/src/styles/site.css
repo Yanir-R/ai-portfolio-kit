@@ -9017,24 +9017,6 @@ video.w-v {
         flex-direction: column;
         gap: 14px;
     }
-    .talk .tb > .bk-two:not(.has-day) {
-        flex: 1;
-    }
-    .talk .bk-two .bk-cal {
-        display: flex;
-        flex-direction: column;
-    }
-    .talk .bk-two:not(.has-day) .bk-cal {
-        flex: 1;
-    }
-    .talk .bk-two:not(.has-day) .bk-cal .cg {
-        flex: 1;
-        grid-auto-rows: minmax(36px, 56px);
-        align-content: space-evenly;
-    }
-    .talk .bk-two.has-day .bk-pick.only-phone {
-        display: none;
-    }
     .talk .bk-sl .only-wide {
         display: block;
     }
@@ -9058,4 +9040,45 @@ video.w-v {
         min-height: 72px;
         resize: none;
     }
+}
+
+/*
+ * The calendar shows four weeks from this one and is as tall as they are:
+ * 44px days, nothing stretched. Free days are filled and bold, days without
+ * a free time (and past ones) are plain, today has a ring, and a day that
+ * starts a new month carries the month's short name.
+ */
+.bk-cal .cg {
+    grid-template-rows: auto;
+    grid-auto-rows: 44px;
+    align-content: start;
+}
+.bk-cal .cg i {
+    align-self: end;
+}
+.bk-cal .cg button {
+    display: grid;
+    place-content: center;
+    gap: 1px;
+    height: 44px;
+    padding: 0;
+}
+.bk-cal .cg button.f {
+    color: var(--ink);
+}
+.bk-cal .cg button.td {
+    box-shadow: inset 0 0 0 2px var(--ink);
+}
+.bk-cal .cg button small {
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--muted);
+}
+.bk-cal .cg button.f[aria-pressed='true'] small {
+    color: #fff;
+}
+.bk-cal .mv {
+    width: 44px;
+    height: 44px;
 }

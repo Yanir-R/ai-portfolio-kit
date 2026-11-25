@@ -20,7 +20,7 @@ const FileLink: React.FC<{ file: string }> = ({ file }) => (
         target="_blank"
         rel="noopener"
     >
-        {file.split('/').pop()} ↗
+        {file.split('/').pop()} ↗︎
     </a>
 );
 

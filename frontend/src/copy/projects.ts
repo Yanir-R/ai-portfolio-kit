@@ -70,8 +70,8 @@ export const PROJECTS: Localized<ProjectsCopy> = {
             text: 'הפרויקט לא קיים, או שהכתובת שלו השתנתה.',
         },
         stack: 'טכנולוגיות',
-        live: 'לאתר ↗',
-        source: 'לקוד ↗',
+        live: 'לאתר ↗︎',
+        source: 'לקוד ↗︎',
         privateCode: 'הקוד פרטי',
         cta: {
             title: 'רוצים משהו כזה אצלכם?',
@@ -119,8 +119,8 @@ export const PROJECTS: Localized<ProjectsCopy> = {
             text: 'That project does not exist, or its address has changed.',
         },
         stack: 'Stack',
-        live: 'Live site ↗',
-        source: 'Source ↗',
+        live: 'Live site ↗︎',
+        source: 'Source ↗︎',
         privateCode: 'Private code',
         cta: {
             title: 'Want something like this?',
