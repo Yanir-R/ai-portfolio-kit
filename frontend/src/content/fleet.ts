@@ -92,8 +92,8 @@ export const FLEET_GROUPS: FleetGroup[] = [
             en: 'Solo business',
         },
         why: {
-            he: 'כי מי שעסוק בעבודה לא מספיק לחפש את העבודה הבאה.',
-            en: 'Because whoever is busy with the work has no time to look for the next job.',
+            he: 'כי בעסק של אדם אחד, אני גם מחפש העבודה, גם המפתח וגם המעצב.',
+            en: "Because in a one-person business, I'm the job hunter, the developer and the designer.",
         },
         lead: {
             he: 'שהעבודה על העסק לא תידחה בגלל העבודה בעסק.',
@@ -180,12 +180,12 @@ export const FLEET_GROUPS: FleetGroup[] = [
     },
     {
         name: {
-            he: 'Trinity Legal',
-            en: 'Trinity Legal',
+            he: 'Trinity Legal: הצעד הבא',
+            en: 'Trinity Legal: next step',
         },
         why: {
-            he: 'כי קל להתאהב ברעיון, וקשה לבדוק אותו ביושר.',
-            en: "Because it's easy to fall for an idea, and hard to test it honestly.",
+            he: 'כי Trinity Legal כבר עובד במשרד אמיתי. הקבוצה הזו מאתרת את המשרדים הבאים שהוא יחסוך להם הכי הרבה זמן.',
+            en: 'Because Trinity Legal already works in a real office. This group finds the next offices where it will save the most time.',
         },
         lead: {
             he: 'שאלה אחת: האם משרד קטן באמת צריך את זה?',
@@ -288,8 +288,8 @@ export const FLEET_DIRECT: { name: Line; why: Line; agents: Line[] } = {
             en: 'Some information only one agent can see.',
         },
         {
-            he: 'מכין הכול מראש. שום דבר לא יוצא בלי אישור שלי.',
-            en: 'Prepares everything ahead. Nothing goes out without my approval.',
+            he: 'הניירת של העסק מוכנה מראש. שום רישום לא נסגר בלי אישור שלי.',
+            en: 'The business paperwork is ready ahead of time. No entry is closed without my approval.',
         },
     ],
 };
