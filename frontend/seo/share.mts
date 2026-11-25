@@ -182,6 +182,14 @@ export const writingCard = (o: {
     const sub = lang === 'he' && entry.summary_he ? entry.summary_he : wholeSentences(summary, 150);
 
     const quote = o.image ? undefined : entry.share_quote;
+    // A piece with no image draws a quote beside its title. Picking the line is
+    // an editorial choice, so the build names what is missing instead of guessing.
+    if (!o.image && !quote && lang === 'he') {
+        console.warn(
+            `share card: ${slug} has no image and no share_quote in writing-index.json; ` +
+                'its card has nothing beside the title'
+        );
+    }
     if (quote && !body.includes(quote)) {
         throw new Error(
             `writing-index.json share_quote for ${slug} is not word for word in the piece`
