@@ -5,9 +5,11 @@ import { CHAT } from '@/copy/chat';
 import Markdown from '@/components/Markdown';
 import WritingBlocks from '@/components/writing/WritingBlocks';
 import { Tag } from '@/components/writing/parts';
-import { chatService, ChatFailure } from '@/services/chatService';
 import { useTurnstile } from '@/hooks/useTurnstile';
-import { FailureCase, failureCase, failureText as describeFailure } from '@/chat/failure';
+import { FailureCase } from '@/chat/failure';
+import { AgentOutcome, foldHandoffs, useAgentSession } from '@/chat/useAgentSession';
+import { answerSources } from '@/chat/sources';
+import { SHEETS } from '@/content/sheets';
 import FailureCard, { ContactActions } from '@/components/chat/FailureCard';
 import HandoffCard from '@/components/chat/HandoffCard';
 import { useLang } from '@/i18n/useLang';
@@ -34,7 +36,10 @@ type Turn =
           kind: 'answer';
           text: string;
           blocks: ChatBlock[];
-          sources: TraceSource[];
+          /** What the answer drew on, by the model's word; null when it did not say. */
+          used: TraceSource[] | null;
+          /** What it was sent, which stands in when the model did not say. */
+          sent: TraceSource[];
           /** The model said it had no answer: the row says no document matched. */
           declined: boolean;
           fromPiece: boolean;
@@ -89,18 +94,13 @@ const SHORT_VIEW_PX = 480;
 const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
     const { lang, t } = useLang();
     const copy = t(WRITING).ask;
-    const errors = t(CHAT).errors;
     const { containerRef: turnstileRef, getToken, reset: resetToken } = useTurnstile();
+    const { busy, closed, send } = useAgentSession({ getToken, resetToken });
     const logRef = useRef<HTMLDivElement>(null);
     const [turns, setTurns] = useState<Turn[]>([]);
     const [chips, setChips] = useState<Chip[]>(CHIPS);
     const [withContext, setWithContext] = useState(true);
     const [text, setText] = useState('');
-    const [busy, setBusy] = useState(false);
-    // The day's answers are spent: the input row becomes the routes to Yanir.
-    const [closed, setClosed] = useState(false);
-    // Offered at most once per conversation; the server is told.
-    const [handoffOffered, setHandoffOffered] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const dockRef = useRef<HTMLDivElement>(null);
     const stillMotion = useMediaQuery(REDUCED_MOTION_QUERY);
@@ -149,11 +149,7 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
 
     const add = (...items: NewTurn[]) =>
         setTurns((prev) => [
-            ...prev
-                .filter((turn) => turn.kind !== 'wait' && turn.kind !== 'pick')
-                .map((turn) =>
-                    turn.kind === 'answer' && turn.handoff ? { ...turn, handoff: null } : turn
-                ),
+            ...foldHandoffs(prev.filter((turn) => turn.kind !== 'wait' && turn.kind !== 'pick')),
             ...items.map((item) => ({ ...item, id: nextTurnId++ }) as Turn),
         ]);
 
@@ -165,54 +161,34 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
             return [];
         });
 
-    const failed = (failure: ChatFailure, question: string, shown: string) => {
-        const kind = failureCase(failure);
-        if (kind === 'daily') setClosed(true);
-        add({
-            kind: 'error',
-            text: describeFailure(errors, failure),
-            failure: kind,
-            question,
-            shown,
-        });
-    };
+    const failed = (
+        outcome: Extract<AgentOutcome, { ok: false }>,
+        question: string,
+        shown: string
+    ) => add({ kind: 'error', text: outcome.text, failure: outcome.failure, question, shown });
 
     const ask = async (question: string, shown = question) => {
         if (busy || closed) return;
-        setBusy(true);
         add({ kind: 'q', text: shown }, { kind: 'wait' });
-        const result = await chatService.sendMessage(
-            question,
-            history(),
-            await getToken(),
-            context,
-            handoffOffered
-        );
-        resetToken();
-        setBusy(false);
-        if (!result.success) return failed(result.error, question, shown);
+        const outcome = await send(question, history(), { context });
+        if (!outcome.ok) return failed(outcome, question, shown);
+        const result = outcome.reply;
         add({
             kind: 'answer',
             text: result.response,
             blocks: result.blocks,
-            // What the answer drew on when the model said; otherwise what it
-            // was sent. An answer from the notes alone says so on the row.
-            sources: result.used ?? result.trace?.sources ?? [],
-            declined: result.declined === true,
+            used: result.used,
+            sent: result.trace?.sources ?? [],
+            declined: result.declined,
             fromPiece: !!context,
             sig: result.sig,
             handoff: result.handoff,
         });
-        if (result.handoff) setHandoffOffered(true);
     };
 
     /** "I'll keep asking the agent": the offer folds, the input takes focus, nothing else changes. */
     const keepAsking = () => {
-        setTurns((prev) =>
-            prev.map((turn) =>
-                turn.kind === 'answer' && turn.handoff ? { ...turn, handoff: null } : turn
-            )
-        );
+        setTurns(foldHandoffs);
         inputRef.current?.focus({ preventScroll: true });
     };
     const handoffOpen = turns.some((turn) => turn.kind === 'answer' && !!turn.handoff);
@@ -361,17 +337,11 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
                                 <WritingBlocks blocks={turn.blocks} />
                                 <div className="sr">
                                     <u>{copy.sources}</u>
-                                    {turn.declined ? (
-                                        <span>{t(CHAT).noSource}</span>
-                                    ) : turn.sources.length ? (
-                                        turn.sources.map((s) => (
-                                            <span key={`${s.kind}-${s.slug}`} dir="auto">
-                                                {s.title}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span>{t(CHAT).fromNotes}</span>
-                                    )}
+                                    {answerSources(turn, t(CHAT), t(SHEETS).read).map((label) => (
+                                        <span key={label} dir="auto">
+                                            {label}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                             {turn.handoff && (
@@ -405,7 +375,7 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
             )}
             {closed ? (
                 <div className="lim-strip">
-                    <b>{errors.closed}</b>
+                    <b>{t(CHAT).errors.closed}</b>
                     <ContactActions lead="call" question={lastShown(turns)} />
                 </div>
             ) : (

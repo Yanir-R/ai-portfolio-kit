@@ -4,11 +4,12 @@ import pytest
 from starlette.testclient import TestClient
 
 import main
+import settings
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
     return TestClient(main.app)
 
 

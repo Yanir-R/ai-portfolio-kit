@@ -138,10 +138,13 @@ export const chatService = {
                 language: response.data.language ?? null,
                 sig: response.data.sig ?? null,
                 handoff: response.data.handoff ?? null,
-                // The model's own word on whether it answered, and which
-                // projects and posts the answer drew on. Null when it did not
-                // say, so callers fall back to what was sent.
-                declined: response.data.declined ?? null,
+                // Declined only on the model's own word: the server's
+                // `declined` is the one field that says so. A reply the model
+                // did not write (fixed answers, the posts list, failure copy)
+                // never declined. Which projects and posts the answer drew on
+                // is null when the model did not say, so callers fall back to
+                // what was sent.
+                declined: response.data.declined === true,
                 used: response.data.used ?? null,
             };
         } catch (error) {

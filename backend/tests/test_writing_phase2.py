@@ -11,9 +11,12 @@ and "your latest posts" is answered from the index without a model call.
 import pytest
 from starlette.testclient import TestClient
 
-import context
 import docs_helper
 import main
+from routes import chat as chat_route
+import rate_limit
+import replies
+import settings
 import selection
 from gemini_helper import Answer
 from rate_limit import SlidingWindowLimiter
@@ -95,12 +98,12 @@ def calls(monkeypatch):
         cited = tuple(s.title for s in args[2].sections if s.source == "writing")
         return Answer(text="An answer.", model="test", used=cited)
 
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
-    monkeypatch.setattr(main, "GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "test-key")
     monkeypatch.setattr(
-        main, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
+        rate_limit, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
     )
-    monkeypatch.setattr(main, "get_gemini_response", fake)
+    monkeypatch.setattr(chat_route, "get_gemini_response", fake)
     return made
 
 
@@ -125,7 +128,7 @@ def test_latest_posts_are_answered_from_the_index_without_a_model(calls):
 def test_latest_posts_in_hebrew_get_a_hebrew_reply(calls):
     reply = _post("מה הפוסטים האחרונים שלך?")
     assert calls == []
-    assert reply["response"] == main.RECENT_REPLY["he"]
+    assert reply["response"] == replies.RECENT_REPLY["he"]
 
 
 def test_a_model_answer_says_so(calls):
@@ -250,13 +253,13 @@ def test_a_starter_topic_reaches_selection(calls, monkeypatch):
     """The starter's topic travels with the question, and an unknown one is
     refused rather than ignored, since only the page sends it."""
     seen = {}
-    real = main.select
+    real = chat_route.select
 
     def spy(*args, **kwargs):
         seen["topic"] = kwargs.get("topic")
         return real(*args, **kwargs)
 
-    monkeypatch.setattr(main, "select", spy)
+    monkeypatch.setattr(chat_route, "select", spy)
     _post("What has Yanir built with agents?", topic="built")
     assert seen["topic"] == "built"
 

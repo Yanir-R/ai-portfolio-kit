@@ -10,6 +10,13 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      # The chat contract the backend tests read from the frontend
+      # (tests/test_contract.py): a change there is checked against the server.
+      - "frontend/src/services/chatService.ts"
+      - "frontend/src/types/chat.ts"
+      - "frontend/src/chat/useHomeChat.ts"
+      - "frontend/src/chat/sheetFor.ts"
+      - "frontend/src/components/writing/AskDock.tsx"
 
 env:
   BACKEND_DIR: backend
@@ -55,9 +62,9 @@ jobs:
         working-directory: ${{ env.BACKEND_DIR }}
         # Context-layer regressions only, and none of them reach the network:
         # what the model is given, what must never reach it, and what it must
-        # never be asked to answer without. The prompt itself is evaluated by
-        # evals/run_eval.py, which is run by hand because it costs Gemini quota
-        # and its most useful checks are the ones a person reads.
+        # never be asked to answer without. The prompt itself is checked by hand
+        # against the question set in backend/README.md, because that costs
+        # Gemini quota and its most useful checks are the ones a person reads.
         run: pytest -q
 
       - name: Audit dependencies

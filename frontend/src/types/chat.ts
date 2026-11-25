@@ -1,16 +1,3 @@
-/**
- * A suggested question offered under the composer. Text only: the title and the
- * description carry the meaning, so a row of prompts reads as questions rather
- * than as a toolbar.
- */
-export interface QuickMessageOption {
-    title: string;
-    description: string;
-    message: string;
-    nextQuestions?: QuickMessageOption[];
-    isEmailRelated?: boolean;
-}
-
 /*
  * `confirm` is the success case - a contact address accepted - and renders in
  * the signal colour. `system` is the amber caution treatment, reserved for "that
@@ -111,8 +98,8 @@ export interface ChatContext {
 }
 
 /**
- * The server's offer to continue with Yanir directly (see _handoff_card in
- * main.py). `summary` is what the visitor said about their need, in their
+ * The server's offer to continue with Yanir directly (see handoff_card in
+ * backend/replies.py). `summary` is what the visitor said about their need, in their
  * words; empty when the offer is only because the day's answers run out.
  */
 export interface ChatHandoff {

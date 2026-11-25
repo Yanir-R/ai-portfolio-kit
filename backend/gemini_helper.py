@@ -194,7 +194,7 @@ class Handoff(BaseModel):
 
     Asked in the same call as the answer, so it costs a few output tokens and
     no extra request. The model only judges and restates; whether a card is
-    shown is the server's decision (see main.py), so a model that says "ready"
+    shown is the server's decision (see replies.handoff_card), so a model that says "ready"
     on every turn cannot make the site pushy.
 
     The summary follows the shape of a sales recap: where the visitor stands,
@@ -341,7 +341,7 @@ class ParsedReply(NamedTuple):
     declined: Optional[bool] = None
     handoff: Optional[Handoff] = None
     # Titles the model says the answer drew on; checked against what it was
-    # actually sent before anything is shown (see main._cited_sections).
+    # actually sent before anything is shown (see replies.cited_sections).
     used: Tuple[str, ...] = ()
 
 

@@ -335,6 +335,35 @@ const emitDiscoveryFiles = (siteUrl: string, backendUrl: string, avatarUrl: stri
     },
 });
 
+// The two faces every page draws with (see src/styles/fonts.css), Hebrew and
+// Latin subsets, about 50 KB together. Without a preload the browser finds them
+// only after the CSS has loaded and the page has painted in the fallback font,
+// and the swap then moves every line of text: up to 0.4 of layout shift on
+// long posts. The CV faces are left out, since they load only with the CV.
+const PRELOADED_FONTS = /^assets\/(assistant|karantina)-(hebrew|latin)-.*\.woff2$/;
+
+const preloadSiteFonts = {
+    name: 'preload-site-fonts',
+    transformIndexHtml: {
+        order: 'post' as const,
+        handler: (_html: string, ctx: { bundle?: Record<string, unknown> }) =>
+            Object.keys(ctx.bundle ?? {})
+                .filter((file) => PRELOADED_FONTS.test(file))
+                .sort()
+                .map((file) => ({
+                    tag: 'link',
+                    attrs: {
+                        rel: 'preload',
+                        href: `/${file}`,
+                        as: 'font',
+                        type: 'font/woff2',
+                        crossorigin: '',
+                    },
+                    injectTo: 'head' as const,
+                })),
+    },
+};
+
 export default defineConfig(({ mode, command }) => {
     // loadEnv reads .env files and also picks up prefixed process env vars,
     // which is how CI injects these.
@@ -402,6 +431,7 @@ export default defineConfig(({ mode, command }) => {
                             .replaceAll('%VITE_SITE_URL%', resolvedSiteUrl),
                 },
             },
+            preloadSiteFonts,
             emitDiscoveryFiles(resolvedSiteUrl, resolvedBackendUrl, avatarUrl),
         ],
         server: {

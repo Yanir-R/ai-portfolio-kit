@@ -18,6 +18,10 @@ import context
 import gemini_helper
 import guard
 import main
+from fastapi.testclient import TestClient
+from routes import chat as chat_route
+import replies
+import schemas
 import prompt
 import selection
 from gemini_helper import (
@@ -209,11 +213,11 @@ def test_build_contents_opens_with_the_visitor_and_alternates():
 
 def test_ui_chrome_is_not_replayed_as_conversation():
     """'initial' and 'system' are the greeting and error banners, not dialogue."""
-    turns = main._to_model_turns(
+    turns = replies.to_model_turns(
         [
-            main.ChatMessage(type="initial", content="hi, ask me anything"),
-            main.ChatMessage(type="system", content="⚠️ error banner"),
-            main.ChatMessage(type="user", content="a real question"),
+            schemas.ChatMessage(type="initial", content="hi, ask me anything"),
+            schemas.ChatMessage(type="system", content="⚠️ error banner"),
+            schemas.ChatMessage(type="user", content="a real question"),
         ]
     )
 
@@ -227,10 +231,10 @@ def test_clicked_quick_replies_are_attributed_to_the_visitor():
     model had already said, and the answer that follows contradicts a question
     nobody asked.
     """
-    turns = main._to_model_turns(
+    turns = replies.to_model_turns(
         [
-            main.ChatMessage(type="quick", content="Tell me about your experience"),
-            main.ChatMessage(
+            schemas.ChatMessage(type="quick", content="Tell me about your experience"),
+            schemas.ChatMessage(
                 type="ai", content="I've been at...", sig=guard.sign_turn("I've been at...")
             ),
         ]
@@ -244,29 +248,29 @@ def test_clicked_quick_replies_are_attributed_to_the_visitor():
 
 def test_oversized_message_is_rejected():
     with pytest.raises(ValueError):
-        main.ChatRequest(message="x" * (main.MAX_MESSAGE_CHARS + 1))
+        schemas.ChatRequest(message="x" * (schemas.MAX_MESSAGE_CHARS + 1))
 
 
 def test_empty_message_is_rejected():
     with pytest.raises(ValueError):
-        main.ChatRequest(message="")
+        schemas.ChatRequest(message="")
 
 
 def test_unbounded_history_is_rejected():
-    history = [{"type": "user", "content": "x"}] * (main.MAX_HISTORY_MESSAGES + 1)
+    history = [{"type": "user", "content": "x"}] * (schemas.MAX_HISTORY_MESSAGES + 1)
 
     with pytest.raises(ValueError):
-        main.ChatRequest(message="hello", conversation_history=history)
+        schemas.ChatRequest(message="hello", conversation_history=history)
 
 
 def test_debug_and_ungrounded_endpoints_are_gone():
     """Neither belongs in the surface area: one exposed filesystem detail no
     client needed, the other called Gemini with no corpus to ground it."""
-    paths = {route.path for route in main.app.routes if hasattr(route, "path")}
+    client = TestClient(main.app)
 
-    assert "/check-paths" not in paths
-    assert "/generate-text" not in paths
-    assert "/api/chat/status" in paths
+    assert client.get("/check-paths").status_code == 404
+    assert client.post("/generate-text", json={}).status_code == 404
+    assert client.get("/api/chat/status").status_code == 200
 
 
 # --- silent failures of corpus assembly ---------------------------------------
@@ -369,7 +373,7 @@ def test_a_reply_the_model_never_produced_carries_no_trace():
     chosen = _whole_corpus_selection()
 
     for message in (BUSY_MESSAGE, MISCONFIGURED_MESSAGE, NO_KNOWLEDGE_MESSAGE):
-        assert main._answer_trace(gemini_helper.Answer(text=message), chosen, "en") is None
+        assert replies.answer_trace(gemini_helper.Answer(text=message), chosen, "en") is None
 
 
 def test_an_empty_corpus_answers_without_a_model_attributed(monkeypatch):
@@ -413,7 +417,7 @@ def test_a_model_answer_reports_the_corpus_it_was_given():
         finish_reason="STOP",
     )
 
-    trace = main._answer_trace(answer, chosen, "en")
+    trace = replies.answer_trace(answer, chosen, "en")
 
     assert trace.model == "gemini-3.8-flash"
     # Every document is accounted for under some kind, so the breakdown a
@@ -431,7 +435,7 @@ def test_the_corpus_estimate_is_never_shown_beside_the_measured_count():
     chosen = _whole_corpus_selection()
     answer = gemini_helper.Answer(text="an answer", model="gemini-3.8-flash")
 
-    trace = main._answer_trace(answer, chosen, "en")
+    trace = replies.answer_trace(answer, chosen, "en")
 
     reported = trace.model_dump()
     assert "context_tokens" not in reported
@@ -470,11 +474,11 @@ def test_technical_questions_do_not_trigger_contact_flow():
     positive the phrase list plus the grammatical discriminator exist to avoid.
     """
 
-    # Mirrors the condition in main.chat_with_files, which is inline in the
+    # Mirrors the condition in chat_route.chat_with_files, which is inline in the
     # endpoint and cannot be called without a full request round-trip.
     def routes_to_contact(message):
         lowered = message.lower()
-        return any(p in lowered for p in main.CONTACT_INTENT_PHRASES) and not main._TOPIC_QUESTION.search(
+        return any(p in lowered for p in chat_route.CONTACT_INTENT_PHRASES) and not chat_route._TOPIC_QUESTION.search(
             message
         )
 

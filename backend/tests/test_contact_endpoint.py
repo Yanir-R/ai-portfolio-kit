@@ -10,11 +10,15 @@ import pytest
 from starlette.testclient import TestClient
 
 import main
+import mailer
+import rate_limit
+import schemas
+import settings
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
     return TestClient(main.app)
 
 
@@ -26,7 +30,7 @@ def test_an_invalid_address_is_refused_before_anything_is_sent(client, address, 
     def explode(*args, **kwargs):
         raise AssertionError("delivery must not be attempted for an invalid address")
 
-    monkeypatch.setattr(main, "_send_contact_email", explode)
+    monkeypatch.setattr(mailer, "send_contact_email", explode)
 
     response = client.post("/api/contact", json={"email": address, "message": "hello"})
 
@@ -37,11 +41,11 @@ def test_an_oversized_message_is_refused(client, monkeypatch):
     def explode(*args, **kwargs):
         raise AssertionError("delivery must not be attempted for an oversized message")
 
-    monkeypatch.setattr(main, "_send_contact_email", explode)
+    monkeypatch.setattr(mailer, "send_contact_email", explode)
 
     response = client.post(
         "/api/contact",
-        json={"email": "visitor@example.com", "message": "x" * (main.MAX_MESSAGE_CHARS + 1)},
+        json={"email": "visitor@example.com", "message": "x" * (schemas.MAX_MESSAGE_CHARS + 1)},
     )
 
     assert response.status_code == 422
@@ -55,7 +59,7 @@ def test_a_rejected_request_does_not_spend_a_rate_limit_slot(client, monkeypatch
     with input that fails at the schema.
     """
     calls = []
-    monkeypatch.setattr(main, "enforce_rate_limit", lambda *a, **k: calls.append(a))
+    monkeypatch.setattr(rate_limit, "enforce_rate_limit", lambda *a, **k: calls.append(a))
 
     response = client.post("/api/contact", json={"email": "nope", "message": "hello"})
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { CHAT, ChatCopy, PROCESS_IDS } from '@/copy/chat';
+import { CHAT, PROCESS_IDS } from '@/copy/chat';
 import { SHEET_HEADS, SHEETS, SheetKey, sourceTitle } from '@/content/sheets';
+import { answerSources } from '@/chat/sources';
 import { AnswerRecord, Entry, GREETING_ID, HomeChat } from '@/chat/useHomeChat';
 import Markdown from '@/components/Markdown';
 import WritingBlocks from '@/components/writing/WritingBlocks';
@@ -72,26 +73,6 @@ const ReceiptIcon: React.FC = () => (
         />
     </svg>
 );
-
-/**
- * What an answer drew on, as the labels of its sources row. Yanir's notes are
- * sent with every question, so an answer the model wrote always names them,
- * and then the projects and posts the model says it used. When the model did
- * not say (failure copy, an older reply), what it was sent stands in. A
- * declined answer drew on nothing.
- */
-const answerSources = (
-    record: AnswerRecord,
-    copy: ChatCopy,
-    read: Parameters<typeof sourceTitle>[1]
-): string[] => {
-    if (record.declined) return [copy.noSource];
-    if (!record.used) {
-        const sent = record.sources.map((s) => sourceTitle(s, read));
-        return sent.length ? [...new Set(sent)] : [copy.noSource];
-    }
-    return [copy.fromNotes, ...record.used.map((s) => sourceTitle(s, read))];
-};
 
 /** The sources row under a reply. Every reply has one, a fixed reply included. */
 const Sources: React.FC<{ items: string[] }> = ({ items }) => {
@@ -353,7 +334,15 @@ const EntryView: React.FC<{
                             }
                         />
                     ) : (
-                        record && <Sources items={answerSources(record, copy, t(SHEETS).read)} />
+                        record && (
+                            <Sources
+                                items={answerSources(
+                                    { ...record, sent: record.sources },
+                                    copy,
+                                    t(SHEETS).read
+                                )}
+                            />
+                        )
                     )}
                     {/* Every answer the model wrote ends with its stations and the
                         way to its receipt; a ready answer has neither. */}

@@ -7,12 +7,15 @@ from starlette.testclient import TestClient
 
 import booking
 import main
+from routes import booking as booking_route
+import rate_limit
+import settings
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
-    monkeypatch.setattr(main, "enforce_rate_limit", lambda *a, **k: None)
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(rate_limit, "enforce_rate_limit", lambda *a, **k: None)
     return TestClient(main.app)
 
 
@@ -56,7 +59,7 @@ def test_a_booking_is_sent_for_the_fixed_event_in_israel_time(client, monkeypatc
         {"lang": "fr"},
         {"start": "tomorrow"},
         {"start": _soon(-1)},
-        {"start": _soon(main.BOOKING_HORIZON_DAYS + 5)},
+        {"start": _soon(booking_route.BOOKING_HORIZON_DAYS + 5)},
         {"start": (datetime.datetime.now() + datetime.timedelta(days=2)).isoformat()},
     ],
 )

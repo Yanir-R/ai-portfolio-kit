@@ -58,7 +58,7 @@ export interface HowCopy {
 export const HOW_FILES = {
     selection: 'backend/selection.py',
     context: 'backend/context.py',
-    main: 'backend/main.py',
+    replies: 'backend/replies.py',
     tests: 'backend/tests/routing_questions.py',
 } as const;
 
@@ -127,7 +127,7 @@ export const HOW: Localized<HowCopy> = {
                 },
                 dev: {
                     title: 'תשובה בסכמה קבועה, מקורות מהשרת',
-                    file: HOW_FILES.main,
+                    file: HOW_FILES.replies,
                     texts: [
                         'כל תשובה חוזרת באותה סכמה מטיפוסית. כרטיסי המקור נגזרים בשרת מתוצאת השליפה ולא מפלט המודל, ולכן כרטיס לא יכול להפנות לקטע שלא קיים.',
                         'גם רשימות, כמו ״מה כתבת לאחרונה?״, מורכבות בשרת לפי תאריך. המודל מנסח את המשפט שמעליהן, ולא בוחר מה יופיע בהן.',
@@ -251,7 +251,7 @@ export const HOW: Localized<HowCopy> = {
                 },
                 dev: {
                     title: 'A fixed, typed schema; sources from the server',
-                    file: HOW_FILES.main,
+                    file: HOW_FILES.replies,
                     texts: [
                         'Every answer returns in the same typed schema. The source cards are derived on the server from the retrieval result, not from the model output, so a card cannot point to a piece that does not exist.',
                         'Lists too, like "what did you write lately?", are assembled on the server by date. The model writes the sentence above them, and does not choose what appears in them.',

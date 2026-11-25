@@ -14,6 +14,7 @@ import pytest
 from starlette.testclient import TestClient
 
 import main
+import settings
 
 
 SECRET = "test-secret-value"
@@ -22,14 +23,14 @@ SECRET = "test-secret-value"
 @pytest.fixture
 def guarded_client(monkeypatch):
     """The app with enforcement switched on."""
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", SECRET)
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", SECRET)
     return TestClient(main.app)
 
 
 @pytest.fixture
 def unguarded_client(monkeypatch):
     """The app as it runs before the secret is set anywhere."""
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
     return TestClient(main.app)
 
 

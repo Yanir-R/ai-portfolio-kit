@@ -18,7 +18,7 @@ interface Props {
 
 /*
  * The offer to continue with Yanir directly, drawn under an answer when the
- * server judged it the moment (see _handoff_card in main.py). The summary is
+ * server judged it the moment (see handoff_card in backend/replies.py). The summary is
  * the visitor's own need in their words; it goes into the booking notes and
  * the email, editable there, so the conversation reaches Yanir with its
  * context. WhatsApp opens without it: a prefilled chat message reads as sent

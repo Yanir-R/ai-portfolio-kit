@@ -13,6 +13,9 @@ from fastapi.testclient import TestClient
 
 import gemini_helper
 import main
+from routes import chat as chat_route
+import rate_limit
+import settings
 import prompt
 from gemini_helper import Answer, Handoff, _parse_reply
 from rate_limit import SlidingWindowLimiter
@@ -191,14 +194,14 @@ def test_the_reading_brief_follows_the_profile():
 
 @pytest.fixture
 def answer_with(monkeypatch):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
-    monkeypatch.setattr(main, "GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "test-key")
     monkeypatch.setattr(
-        main, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
+        rate_limit, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
     )
 
     def install(answer):
-        monkeypatch.setattr(main, "get_gemini_response", lambda *a, **k: answer)
+        monkeypatch.setattr(chat_route, "get_gemini_response", lambda *a, **k: answer)
 
     return install
 
@@ -301,7 +304,7 @@ def test_the_model_judges_but_the_server_decides(answer_with, changes):
 
 def test_the_last_answer_of_the_day_offers_the_way_to_keep_going(answer_with, monkeypatch):
     monkeypatch.setattr(
-        main, "chat_limiter", SlidingWindowLimiter(per_key_limit=1, global_limit=50)
+        rate_limit, "chat_limiter", SlidingWindowLimiter(per_key_limit=1, global_limit=50)
     )
     answer_with(_ready_answer(handoff=Handoff(**dict(_READY, ready=False, reason="none"))))
 
@@ -313,7 +316,7 @@ def test_the_last_answer_of_the_day_offers_the_way_to_keep_going(answer_with, mo
 
 def test_the_last_answer_still_respects_a_decline(answer_with, monkeypatch):
     monkeypatch.setattr(
-        main, "chat_limiter", SlidingWindowLimiter(per_key_limit=1, global_limit=50)
+        rate_limit, "chat_limiter", SlidingWindowLimiter(per_key_limit=1, global_limit=50)
     )
     answer_with(_ready_answer(declined=True))
 
