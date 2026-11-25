@@ -1,4 +1,5 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import { REDUCED_MOTION_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { WRITING } from '@/copy/writing';
 import { CHAT } from '@/copy/chat';
 import Markdown from '@/components/Markdown';
@@ -99,6 +100,29 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
     // Offered at most once per conversation; the server is told.
     const [handoffOffered, setHandoffOffered] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+    const dockRef = useRef<HTMLDivElement>(null);
+    const stillMotion = useMediaQuery(REDUCED_MOTION_QUERY);
+
+    // Under a post the dock opens below what is on screen: it is brought to the
+    // middle of the view on opening, and again whenever it grows (a question, a
+    // wait, an answer) past the edge of the view, so the question, the answer
+    // and the input stay in sight. The layer has its own screen and needs none.
+    useEffect(() => {
+        const dock = dockRef.current;
+        if (!dock || layer) return;
+        const behavior: ScrollBehavior = stillMotion ? 'auto' : 'smooth';
+        const centre = () => dock.scrollIntoView({ block: 'center', behavior });
+        centre();
+        let height = dock.offsetHeight;
+        const grew = new ResizeObserver(() => {
+            if (dock.offsetHeight === height) return;
+            height = dock.offsetHeight;
+            const box = dock.getBoundingClientRect();
+            if (box.top < 0 || box.bottom > window.innerHeight) centre();
+        });
+        grew.observe(dock);
+        return () => grew.disconnect();
+    }, [layer, stillMotion]);
 
     useLayoutEffect(() => {
         const log = logRef.current;
@@ -226,6 +250,7 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
 
     return (
         <div
+            ref={dockRef}
             className={['w-dock', layer && 'in-layer', failing && 'failing']
                 .filter(Boolean)
                 .join(' ')}
