@@ -7614,6 +7614,11 @@ video.w-v {
         padding-bottom: 9px;
     }
 }
+@media (min-width: 901px) and (min-height: 540px) and (max-height: 680px) {
+    #top .m.st0 > small {
+        display: none;
+    }
+}
 @media (min-width: 901px) and (min-height: 540px) and (max-height: 640px) {
     #top .hero-top p,
     #top .tagline {
@@ -7644,7 +7649,8 @@ video.w-v {
     border-radius: 10px;
     box-shadow: 3px 3px 0 var(--btn);
 }
-.acts .wa::after {
+.acts .wa::after,
+[dir='ltr'] .acts .wa::after {
     content: none;
 }
 .acts .wa span {
@@ -7716,7 +7722,24 @@ video.w-v {
     background: #fff;
     border-radius: 14px;
     box-shadow: 8px 8px 0 var(--btn);
+    overflow: hidden;
+}
+/* Header and routes stay put; the body takes the height left and scrolls. */
+.talk[open] {
+    display: flex;
+    flex-direction: column;
+}
+.talk .th,
+.talk .tt {
+    flex: none;
+}
+.talk .tb {
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
+}
+.talk .tb > a.fine {
+    flex: none;
 }
 .talk .th {
     align-items: flex-start;
@@ -7731,6 +7754,16 @@ video.w-v {
 .talk .th .tp {
     display: block;
     margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+.talk .th .tp b {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: var(--ink);
+    font-weight: 800;
 }
 .talk .th button {
     flex: none;
@@ -7775,6 +7808,8 @@ video.w-v {
     font-size: 0.98rem;
 }
 .talk .talk-cal {
+    flex: 0 1 min(560px, 62vh);
+    min-height: 320px;
     border: 1.5px solid var(--line);
     border-radius: 10px;
     background: #fff;
@@ -7796,10 +7831,6 @@ video.w-v {
         border-radius: 0;
         box-shadow: none;
     }
-    .talk[open] {
-        display: flex;
-        flex-direction: column;
-    }
     .talk .th {
         padding: 16px 16px 12px;
     }
@@ -7812,11 +7843,9 @@ video.w-v {
     .talk .tb {
         padding: 12px 16px 16px;
         gap: 12px;
-        flex: 1;
-        min-height: 0;
     }
     .talk .talk-cal {
-        flex: 1;
+        flex: 1 1 auto;
         height: auto;
         min-height: 360px;
     }
