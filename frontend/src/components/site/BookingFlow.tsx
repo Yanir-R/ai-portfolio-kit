@@ -390,7 +390,8 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
         viewFirst.slice(0, 7) === viewLast.slice(0, 7)
             ? fmt.month.format(noon(viewFirst))
             : fmt.month.formatRange(noon(viewFirst), noon(viewLast));
-    const anyFree = Object.values(days).some((list) => list.length > 0);
+    // Counted over the weeks on show: an empty page says so under the grid.
+    const anyFree = cells.some((key) => key >= today && !!days[key]?.length);
 
     return (
         <>

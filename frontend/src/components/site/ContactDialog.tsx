@@ -140,7 +140,7 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
 
 /* "Opens elsewhere", drawn: iOS shows the ↗ character as an emoji tile. */
 const OutArrow: React.FC = () => (
-    <svg className="out" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+    <svg className="out" viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
         <path
             d="M5 11l6-6M6 5h5v5"
             fill="none"

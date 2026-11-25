@@ -9146,9 +9146,9 @@ video.w-v {
 .talk .wa-card .nt {
     display: none;
 }
+/* The button's own 8px gap keeps label and arrow together. */
 .talk .btn .out {
     flex: none;
-    margin-inline-start: 8px;
 }
 @media (max-width: 640px) {
     .talk .tb.wa .wa-main {
