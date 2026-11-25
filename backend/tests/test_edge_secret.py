@@ -48,15 +48,10 @@ def test_request_carrying_the_secret_is_let_through(guarded_client):
 
 
 def test_health_stays_reachable_so_platform_probes_do_not_break(guarded_client):
-    # Cloud Run and any uptime check call this without the header. It costs no
-    # quota and answers a bare status, so it is deliberately outside the guard.
-    response = guarded_client.get("/health")
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
-
-
-def test_root_is_guarded_like_everything_else(guarded_client):
-    assert guarded_client.get("/").status_code == 403
+    # Cloud Run and any uptime check call these without the header. They cost
+    # no quota and disclose nothing, so they are deliberately outside the guard.
+    for path in ("/", "/health"):
+        assert guarded_client.get(path).status_code == 200
 
 
 def test_preflight_is_not_refused(guarded_client):

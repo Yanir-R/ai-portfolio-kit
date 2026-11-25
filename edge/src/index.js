@@ -33,10 +33,6 @@ const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/sit
 // The frontend sends the token under this name (frontend/src/constants/
 // turnstile.ts), so the two have to change together.
 const TURNSTILE_HEADER = 'X-Turnstile-Token';
-
-// Response headers from Cloud Run that describe its internals, not the reply.
-const INTERNAL_RESPONSE_HEADERS = ['x-cloud-trace-context', 'traceparent'];
-
 // Turnstile's documented maximum. Anything longer is not a token, so it is
 // refused here rather than posted to siteverify.
 const TURNSTILE_MAX_TOKEN_LENGTH = 2048;
@@ -202,7 +198,7 @@ export default {
             // reads to tell a visitor how long a rate limit lasts; rewriting
             // any of that here would only create a second place for it to
             // drift.
-            const upstream = await fetch(
+            return await fetch(
                 new Request(target, {
                     method: request.method,
                     headers,
@@ -210,14 +206,6 @@ export default {
                     redirect: 'manual',
                 })
             );
-            // Google's front end adds its request-trace id to every Cloud Run
-            // reply. It is internal plumbing with no use to a browser, so it
-            // stops here; everything else, the CORS headers included, passes.
-            const response = new Response(upstream.body, upstream);
-            for (const name of INTERNAL_RESPONSE_HEADERS) {
-                response.headers.delete(name);
-            }
-            return response;
         } catch (err) {
             // The origin is unreachable, or took too long. Without this the
             // rejection escapes and Cloudflare answers with its own 1101 error
