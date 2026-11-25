@@ -7914,25 +7914,52 @@ video.w-v {
 .bk-cal .ch {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
 }
-.bk-cal .ch span {
-    margin-inline-start: auto;
+.bk-cal .cm {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+.bk-cal .cm strong {
+    font-size: 1.12rem;
+    line-height: 1.2;
+}
+.bk-cal .cm span {
     font-size: 0.86rem;
     color: var(--muted);
     font-weight: 600;
 }
+.bk-cal .mvs {
+    display: flex;
+    gap: 6px;
+    flex: none;
+}
 .bk-cal .mv {
-    width: 30px;
-    height: 30px;
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
     border-radius: 8px;
     border: 1.5px solid var(--ink);
     background: #fff;
     color: var(--ink);
-    font-weight: 800;
     cursor: pointer;
+}
+.bk-cal .mv:hover:not(:disabled) {
+    background: var(--soft, #fff1c9);
+}
+.bk-cal .chev.back {
+    transform: scaleX(-1);
+}
+[dir='rtl'] .bk-cal .chev {
+    transform: scaleX(-1);
+}
+[dir='rtl'] .bk-cal .chev.back {
+    transform: none;
 }
 .bk-cal .mv:disabled {
     opacity: 0.35;
@@ -8289,4 +8316,56 @@ video.w-v {
 .w-body :is(p, li) > a {
     color: var(--link);
     font-weight: 800;
+}
+
+/*
+ * One look for every route in the contact window, taken from the booking
+ * screens: the amber primary button, the same fields and labels, and a full
+ * width button on a phone.
+ */
+.talk:focus {
+    outline: none;
+}
+.talk .tb .btn:not(.sec) {
+    background: var(--btn);
+    color: var(--ink);
+    border-color: var(--ink);
+}
+.talk .tb .btn:not(.sec):hover {
+    background: var(--btn-h);
+    color: var(--ink);
+}
+.talk .tb a.btn {
+    align-self: flex-start;
+}
+.talk .v-form {
+    gap: 14px;
+}
+.talk .v-form label {
+    gap: 6px;
+    font-size: 0.95rem;
+}
+.talk .v-form input,
+.talk .v-form textarea {
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+.talk .v-form .btn:disabled {
+    opacity: 0.6;
+}
+@media (max-width: 640px) {
+    .talk .v-form .v-btns {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .talk .v-form .btn,
+    .talk .tb a.btn {
+        width: 100%;
+        align-self: stretch;
+        justify-content: center;
+    }
+}
+/* The invisible Turnstile slot would otherwise add a second gap above Send. */
+.talk .v-form > div:empty {
+    display: none;
 }

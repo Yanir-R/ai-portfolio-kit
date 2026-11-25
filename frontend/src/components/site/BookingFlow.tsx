@@ -96,6 +96,26 @@ interface StepsProps extends Props {
     resetToken: () => void;
 }
 
+/** A month arrow. It points the way reading goes, so it flips under dir="rtl". */
+const Chevron: React.FC<{ back?: boolean }> = ({ back }) => (
+    <svg
+        className={back ? 'chev back' : 'chev'}
+        viewBox="0 0 16 16"
+        width="16"
+        height="16"
+        aria-hidden="true"
+    >
+        <path
+            d="M6 3l5 5-5 5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+
 const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetToken }) => {
     const { t, lang } = useLang();
     const copy = t(CONTACT).booking;
@@ -353,25 +373,29 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
             <div className={day ? 'bk-two has-day' : 'bk-two'}>
                 <div className="bk-cal">
                     <div className="ch">
-                        <button
-                            type="button"
-                            className="mv"
-                            aria-label={copy.prevMonth}
-                            disabled={atFirstMonth}
-                            onClick={() => shiftMonth(-1)}
-                        >
-                            {lang === 'he' ? '→' : '←'}
-                        </button>
-                        <strong>{fmt.month.format(noon(dayKey(month.y, month.m, 15)))}</strong>
-                        <button
-                            type="button"
-                            className="mv"
-                            aria-label={copy.nextMonth}
-                            onClick={() => shiftMonth(1)}
-                        >
-                            {lang === 'he' ? '←' : '→'}
-                        </button>
-                        <span>{copy.meta}</span>
+                        <div className="cm">
+                            <strong>{fmt.month.format(noon(dayKey(month.y, month.m, 15)))}</strong>
+                            <span>{copy.meta}</span>
+                        </div>
+                        <div className="mvs">
+                            <button
+                                type="button"
+                                className="mv"
+                                aria-label={copy.prevMonth}
+                                disabled={atFirstMonth}
+                                onClick={() => shiftMonth(-1)}
+                            >
+                                <Chevron back />
+                            </button>
+                            <button
+                                type="button"
+                                className="mv"
+                                aria-label={copy.nextMonth}
+                                onClick={() => shiftMonth(1)}
+                            >
+                                <Chevron />
+                            </button>
+                        </div>
                     </div>
                     <div className="cg">
                         {copy.weekdays.map((w) => (
