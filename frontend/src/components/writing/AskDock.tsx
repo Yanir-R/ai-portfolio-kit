@@ -94,6 +94,8 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
         const log = logRef.current;
         if (log) log.scrollTop = log.scrollHeight;
     }, [turns]);
+    // A limit or failure card on show: the context row folds to one line.
+    const failing = closed || turns[turns.length - 1]?.kind === 'error';
     const short = useLogFollowsViewport(logRef, layer && active, SHORT_VIEW_PX);
     const showChips = !closed && chips.length > 0 && !(layer && (short || text.trim() !== ''));
 
@@ -170,14 +172,34 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
     };
 
     return (
-        <div className={layer ? 'w-dock in-layer' : 'w-dock'}>
+        <div
+            className={['w-dock', layer && 'in-layer', failing && 'failing']
+                .filter(Boolean)
+                .join(' ')}
+        >
             {withContext && (
                 <div className="w-ctx">
                     <Tag tone="a">{t(WRITING).tags.askingAbout}</Tag>
                     <b dir="auto">{entry.title}</b>
-                    <button type="button" aria-label={copy.removeContext} onClick={removeContext}>
-                        ✕
-                    </button>
+                    {layer ? (
+                        // In the layer the X belongs to the layer itself: a word here.
+                        <button
+                            type="button"
+                            className="rm"
+                            aria-label={copy.removeContextLong(entry.kind)}
+                            onClick={removeContext}
+                        >
+                            {copy.removeShort}
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            aria-label={copy.removeContext}
+                            onClick={removeContext}
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
             )}
             <div
@@ -287,7 +309,9 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
                         type="text"
                         value={text}
                         onChange={(e) => setText(e.target.value)}
-                        placeholder={withContext ? copy.placeholder : copy.placeholderGeneral}
+                        placeholder={
+                            withContext ? copy.placeholder(entry.kind) : copy.placeholderGeneral
+                        }
                         aria-label={copy.inputLabel}
                     />
                     <button type="submit" className="snd" disabled={busy}>

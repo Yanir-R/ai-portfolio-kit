@@ -76,6 +76,9 @@ export interface WritingCopy {
         open: string;
         book: string;
         removeContext: string;
+        /** The phone layer's text button that drops the piece (its X is the layer's own). */
+        removeShort: string;
+        removeContextLong: (kind: 'article' | 'post') => string;
         log: string;
         reading: string;
         answered: string;
@@ -86,7 +89,7 @@ export interface WritingCopy {
         bizOptions: string[];
         bizNote: string;
         bizAsk: (kind: string) => string;
-        placeholder: string;
+        placeholder: (kind: 'article' | 'post') => string;
         placeholderGeneral: string;
         inputLabel: string;
         send: string;
@@ -192,6 +195,8 @@ export const WRITING: Localized<WritingCopy> = {
             open: 'שאלו את הסוכן',
             book: 'קבעו שיחה',
             removeContext: 'הסרת ההקשר',
+            removeShort: 'הסרה',
+            removeContextLong: (kind) => `לשאול בלי הקשר ל${kind === 'post' ? 'פוסט' : 'מאמר'}`,
             log: 'השיחה על הקטע',
             reading: 'הסוכן קורא את הקטע…',
             answered: 'הסוכן ענה',
@@ -207,7 +212,7 @@ export const WRITING: Localized<WritingCopy> = {
             bizNote: 'השאלה הזו קבועה ולא עולה קריאה למודל. המודל נקרא רק אחרי הבחירה.',
             bizAsk: (kind) =>
                 `מה הקטע הזה אומר ל${kind}? איפה זה פוגש אותנו ביום־יום, ומה צעד ראשון?`,
-            placeholder: 'שאלה על הקטע הזה',
+            placeholder: (kind) => `כתבו שאלה על ${kind === 'post' ? 'הפוסט' : 'המאמר'}`,
             placeholderGeneral: 'שאלה כללית לסוכן',
             inputLabel: 'שאלה על הקטע',
             send: 'שאלו',
@@ -308,6 +313,8 @@ export const WRITING: Localized<WritingCopy> = {
             open: 'Ask the agent',
             book: 'Book a call',
             removeContext: 'Remove the context',
+            removeShort: 'Remove',
+            removeContextLong: (kind) => `Ask without this ${kind}`,
             log: 'The conversation about this piece',
             reading: 'The agent is reading the piece…',
             answered: 'The agent answered',
@@ -329,7 +336,7 @@ export const WRITING: Localized<WritingCopy> = {
                 'This question is fixed and costs no model call. The model is called only after you pick.',
             bizAsk: (kind) =>
                 `What does this piece mean for ${kind.toLowerCase()}? Where does it meet us day to day, and what is a first step?`,
-            placeholder: 'A question about this piece',
+            placeholder: (kind) => `Ask about this ${kind}`,
             placeholderGeneral: 'A general question for the agent',
             inputLabel: 'A question about this piece',
             send: 'Ask',

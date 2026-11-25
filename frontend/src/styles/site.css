@@ -9494,14 +9494,45 @@ video.w-v {
         line-clamp: 2;
         overflow: hidden;
     }
-    .chat-layer .w-ctx button {
+    .chat-layer .w-ctx .rm {
         grid-column: 2;
         grid-row: 1 / span 2;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        box-shadow: inset 0 0 0 1.5px var(--ink);
-        color: var(--ink);
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0 4px;
+        background: none;
+        border: 0;
+        color: var(--muted);
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    /*
+     * While the keyboard is up, or a limit or failure card shows, the row
+     * folds to one line: "asking about: <title>", cut with an ellipsis.
+     */
+    .chat-layer[data-kb] .w-ctx,
+    .chat-layer .w-dock.failing .w-ctx {
+        display: flex;
+        padding-block: 4px;
+    }
+    .chat-layer[data-kb] .w-ctx > :first-child,
+    .chat-layer .w-dock.failing .w-ctx > :first-child {
+        flex: none;
+    }
+    .chat-layer[data-kb] .w-ctx > :first-child::after,
+    .chat-layer .w-dock.failing .w-ctx > :first-child::after {
+        content: ':';
+    }
+    .chat-layer[data-kb] .w-ctx b,
+    .chat-layer .w-dock.failing .w-ctx b {
+        flex: 1;
+        min-width: 0;
+        display: block;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
     .chat-layer .w-qa {
         flex: 1;
