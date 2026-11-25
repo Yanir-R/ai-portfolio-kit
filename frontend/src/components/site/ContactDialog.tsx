@@ -9,7 +9,7 @@ import { contactService } from '@/services/contactService';
 import { ContactRequest } from '@/components/site/SiteDialogs';
 
 /*
- * "Talk to Yanir": one window with the ways to reach him as tabs. The subject
+ * "Let's talk": one window with the ways to reach him as tabs. The subject
  * the visitor was reading or asking about rides along, so nobody starts the
  * conversation from zero.
  *

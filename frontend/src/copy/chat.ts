@@ -2,9 +2,10 @@ import { Localized } from '@/i18n/lang';
 import { SheetKey } from '@/content/sheets';
 
 /*
- * Copy for the home chat and the drawing beside it. The chat answers in
- * Yanir's name as "his agent"; fixed replies here are the ones that never
- * call the model (greeting, contact, the process drawing).
+ * Copy for the home chat and the drawing beside it. The chat is an agent that
+ * answers on Yanir's behalf in his first person, as the model does; fixed
+ * replies here are the ones that never call the model (greeting, contact, the
+ * process drawing).
  */
 
 /** One station of a process: [title, note] as a person does it, and as an agent does it. */
@@ -157,81 +158,81 @@ const SITE_HE: Process = {
     name: 'הצ׳אט באתר',
     steps: [
         {
-            person: ['שולחים ליניר שאלה', 'במייל או בוואטסאפ'],
+            person: ['שולחים לי שאלה', 'במייל או בוואטסאפ'],
             agent: ['שואלים כאן', 'בכל שעה, בעברית או באנגלית'],
             byAgent: false,
         },
         {
-            person: ['יניר רואה אותה', 'כשהוא מתפנה, לפעמים רק למחרת'],
+            person: ['אני רואה אותה', 'כשאני מתפנה, לפעמים רק למחרת'],
             agent: ['בודק את הפנייה', 'אדם ולא רובוט, ובתוך המכסה היומית'],
             byAgent: true,
         },
         {
-            person: ['מחפש בחומרים שלו', 'פרויקטים, מאמרים, קורות חיים'],
+            person: ['אני מחפש בחומרים שלי', 'פרויקטים, מאמרים, קורות חיים'],
             agent: ['בוחר מה לקרוא', 'רק מסמכים שקשורים לשאלה'],
             byAgent: true,
         },
         {
-            person: ['כותב תשובה', 'מאפס, בכל פעם'],
+            person: ['אני כותב תשובה', 'מאפס, בכל פעם'],
             agent: ['קורא ומנסח', 'פנייה אחת למודל, כמה שניות'],
             byAgent: true,
         },
         {
             person: ['אתם מקבלים תשובה', 'אחרי יום, ואז עוד שאלה'],
-            agent: ['אתם ויניר מדברים', 'על הפרויקט שלכם, לא על שאלות חוזרות'],
+            agent: ['אנחנו מדברים', 'על הפרויקט שלכם, לא על שאלות חוזרות'],
             byAgent: false,
         },
     ],
-    today: 'כל שאלה מחכה ליניר, גם כזו שהתשובה עליה כבר כתובה.',
-    withAgent: 'הסוכן עונה על מה שכבר כתוב. מה שהוא לא מצא, הוא אומר, ומפנה ליניר.',
+    today: 'כל שאלה מחכה לי, גם כזו שהתשובה עליה כבר כתובה.',
+    withAgent: 'הסוכן עונה על מה שכבר כתוב. מה שהוא לא מצא, הוא אומר, ומפנה אליי.',
 };
 
 const SITE_EN: Process = {
     name: "The site's chat",
     steps: [
         {
-            person: ['You send Yanir a question', 'By email or WhatsApp'],
+            person: ['You send me a question', 'By email or WhatsApp'],
             agent: ['Ask here', 'Any hour, in Hebrew or English'],
             byAgent: false,
         },
         {
-            person: ['Yanir sees it', "When he's free, sometimes only the next day"],
+            person: ['I see it', "When I'm free, sometimes only the next day"],
             agent: ['Checks the request', 'A person, not a bot, and within the daily quota'],
             byAgent: true,
         },
         {
-            person: ['Searches his materials', 'Projects, articles, CV'],
+            person: ['I search my materials', 'Projects, articles, CV'],
             agent: ['Chooses what to read', 'Only documents related to the question'],
             byAgent: true,
         },
         {
-            person: ['Writes an answer', 'From scratch, every time'],
+            person: ['I write an answer', 'From scratch, every time'],
             agent: ['Reads and writes', 'One call to the model, a few seconds'],
             byAgent: true,
         },
         {
             person: ['You get an answer', 'A day later, and then another question'],
-            agent: ['You and Yanir talk', 'About your project, not about repeat questions'],
+            agent: ['We talk', 'About your project, not about repeat questions'],
             byAgent: false,
         },
     ],
-    today: 'Every question waits for Yanir, even one whose answer is already written.',
+    today: 'Every question waits for me, even one whose answer is already written.',
     withAgent:
-        "The agent answers what's already written. What it didn't find, it says, and points you to Yanir.",
+        "The agent answers what's already written. What it didn't find, it says, and points you to me.",
 };
 
 export const CHAT: Localized<ChatCopy> = {
     he: {
         panelLabel: 'הצ׳אט של האתר',
-        who: 'הסוכן של יניר',
-        whoNote: 'עונה רק מתוך מה שיניר כתב',
+        who: 'הסוכן שלי',
+        whoNote: 'עונה בשמי, רק מתוך מה שכתבתי',
         step1: '1 · שואלים כאן',
         greeting:
-            'שלום, אני הסוכן של יניר. שאלו אותי על העבודה שלו, או על מה שסוכן יכול לעשות אצלכם. משמאל תראו איך הגעתי לכל תשובה.',
+            'שלום, כאן הסוכן שבניתי. הוא עונה בשמי, רק מתוך מה שכתבתי. שאלו על העבודה שלי, או על מה שסוכן יכול לעשות אצלכם. משמאל תראו איך הגיעה כל תשובה.',
         startHint: 'אפשר להתחיל מכאן, או לכתוב שאלה משלכם',
         starters: [
             {
-                q: 'מה יניר בנה עם סוכנים?',
+                q: 'מה בנית עם סוכנים?',
                 sub: 'שלוש מערכות, בשרטוט אחד',
                 action: 'ask',
                 sheet: 'built',
@@ -254,14 +255,14 @@ export const CHAT: Localized<ChatCopy> = {
             q: 'מה אתה בונה?',
             a: 'סוכני AI שעושים חלק מוגדר מהעבודה מתוך המידע שלכם, מערכות CRM בהתאמה אישית, ומערכות מידע שסוכן יכול להתחבר אליהן בהמשך.',
         },
-        mailSent: 'קיבלתי. ההודעה אצל יניר בתיבה, והוא יענה למייל שכתבתם.',
-        mailSentWithQuestion: 'קיבלתי. השאלה שלכם אצל יניר בתיבה, והוא יענה למייל שכתבתם.',
+        mailSent: 'קיבלתי. ההודעה אצלי בתיבה, ואענה למייל שכתבתם.',
+        mailSentWithQuestion: 'קיבלתי. השאלה שלכם אצלי בתיבה, ואענה למייל שכתבתם.',
         anythingElse: 'יש עוד משהו שתרצו לשאול?',
         placeholder: 'כתבו שאלה',
         examplePrefix: 'למשל: ',
         examples: [
             'יש ניסיון עם ארכיון מסמכים?',
-            'מה יניר בנה עם סוכנים?',
+            'מה בנית עם סוכנים?',
             'כמה זה עולה?',
             'אפשר לחבר סוכן ל־CRM שלנו?',
             'איך יוצרים איתך קשר?',
@@ -285,8 +286,7 @@ export const CHAT: Localized<ChatCopy> = {
         asking: 'שואלים על:',
         contactReply:
             'שלוש דרכים: שיחת אבחון של 20 עד 30 דקות, מייל ישר מהצ׳אט, או וואטסאפ. הן מחכות משמאל.',
-        mailReply:
-            'בשמחה. כתבו כאן את המייל שלכם עם שורה על מה תרצו לדבר, ויניר יחזור אליכם ישירות.',
+        mailReply: 'בשמחה. כתבו כאן את המייל שלכם עם שורה על מה תרצו לדבר, ואחזור אליכם ישירות.',
         mailAsk: 'אפשר לשלוח לך מייל?',
         invalidEmail: 'הכתובת לא נראית תקינה. בדקו אותה ושלחו שוב.',
         offline:
@@ -306,7 +306,7 @@ export const CHAT: Localized<ChatCopy> = {
             team: ['רק אני', '2 עד 5', 'יותר מ־5'],
             pickAnswer: 'בחרו תשובה',
             pickProcessLabel: 'בחרו תהליך',
-            summary: 'זה הסיכום. יניר יקבל אותו לפני שיחת האבחון, כדי שלא תתחילו מאפס.',
+            summary: 'זה הסיכום. הוא יגיע אליי לפני שיחת האבחון, כדי שלא נתחיל מאפס.',
             cardTitle: 'הסיכום שלכם',
             process: 'התהליך',
             handledBy: 'מטפלים היום',
@@ -323,7 +323,7 @@ export const CHAT: Localized<ChatCopy> = {
         },
         phone: {
             greeting:
-                'שלום, אני הסוכן של יניר. שאלו אותי על העבודה שלו, או על מה שסוכן יכול לעשות אצלכם.',
+                'שלום, כאן הסוכן שבניתי. הוא עונה בשמי, רק מתוך מה שכתבתי. שאלו על העבודה שלי, או על מה שסוכן יכול לעשות אצלכם.',
             teaser: 'לכל תשובה מצורף שרטוט, ורואים איך הסוכן הגיע אליה.',
             resume: 'המשך השיחה',
             close: 'סגירת השיחה',
@@ -478,13 +478,13 @@ export const CHAT: Localized<ChatCopy> = {
             },
             ready: {
                 title: 'תשובה מוכנה: המסלול הקצר',
-                cap: 'יניר כתב אותה מראש, והמודל לא הופעל.',
+                cap: 'כתבתי אותה מראש, והמודל לא הופעל.',
                 skipped: 'דילוג',
                 skipNote: 'לא נדרש לתשובה מוכנה',
                 who: 'מוכן',
                 done: 'תשובה מוכנה מראש',
                 note: 'בלי AI, ובלי לגעת במכסה',
-                sum: 'הגיעה מיד, מתוכן שיניר כתב. לא כל שאלה צריכה AI.',
+                sum: 'הגיעה מיד, מתוכן שכתבתי. לא כל שאלה צריכה AI.',
             },
             fromAnswer: 'נוצר מהתשובה הזו',
             fromChat: 'נוצר מהשיחה הזו',
@@ -500,7 +500,7 @@ export const CHAT: Localized<ChatCopy> = {
             noDocs: 'שום מסמך לא עוסק בזה במיוחד',
             modelNote: 'פנייה אחת למודל, והתשובה נכתבה רק מהמסמכים האלה',
             sumH: 'התשובה הזו:',
-            sumFrom: (n) => `נכתבה מתוך ${n} מסמכים של יניר. המודל לא ראה שום דבר אחר.`,
+            sumFrom: (n) => `נכתבה מתוך ${n} מסמכים שכתבתי. המודל לא ראה שום דבר אחר.`,
             sumDeclined: 'הסוכן אמר שהוא לא יודע, במקום להמציא.',
             trail: (n, sec) => `קרא ${n} מסמכים · ${sec} שניות`,
             trailNone: (sec) => `לא נמצא מסמך מתאים · ${sec} שניות`,
@@ -510,15 +510,15 @@ export const CHAT: Localized<ChatCopy> = {
     },
     en: {
         panelLabel: "The site's chat",
-        who: "Yanir's agent",
-        whoNote: 'Answers only from what Yanir wrote',
+        who: 'My agent',
+        whoNote: 'Answers for me, only from what I wrote',
         step1: '1 · Ask here',
         greeting:
-            "Hi, I'm Yanir's agent. Ask me about his work, or about what an agent could do for you. On the right you'll see how I got to each answer.",
+            "Hi, this is the agent I built. It answers for me, only from what I wrote. Ask about my work, or about what an agent could do for you. On the right you'll see how each answer was reached.",
         startHint: 'You can start here, or type your own question',
         starters: [
             {
-                q: 'What has Yanir built with agents?',
+                q: 'What have you built with agents?',
                 sub: 'Three systems, in one diagram',
                 action: 'ask',
                 sheet: 'built',
@@ -550,16 +550,15 @@ export const CHAT: Localized<ChatCopy> = {
             q: 'What do you build?',
             a: 'AI agents that do a defined part of the work from your data, custom CRM systems, and information systems an agent can connect to later.',
         },
-        mailSent:
-            "Got it. The message is in Yanir's inbox, and he'll reply to the email you wrote.",
+        mailSent: "Got it. The message is in my inbox, and I'll reply to the email you wrote.",
         mailSentWithQuestion:
-            "Got it. Your question is in Yanir's inbox, and he'll reply to the email you wrote.",
+            "Got it. Your question is in my inbox, and I'll reply to the email you wrote.",
         anythingElse: 'Anything else you would like to ask?',
         placeholder: 'Type a question',
         examplePrefix: 'For example: ',
         examples: [
             'Any experience with a document archive?',
-            'What has Yanir built with agents?',
+            'What have you built with agents?',
             'How much does it cost?',
             'Can an agent be connected to our CRM?',
             'How do I contact you?',
@@ -584,7 +583,7 @@ export const CHAT: Localized<ChatCopy> = {
         contactReply:
             "Three ways: a 20 to 30 minute discovery call, an email straight from the chat, or WhatsApp. They're waiting on the right.",
         mailReply:
-            "Gladly. Type your email here with a line on what you'd like to talk about, and Yanir will get back to you directly.",
+            "Gladly. Type your email here with a line on what you'd like to talk about, and I'll get back to you directly.",
         mailAsk: 'Can I send you an email?',
         invalidEmail: "That address doesn't look valid. Check it and send again.",
         offline:
@@ -606,7 +605,7 @@ export const CHAT: Localized<ChatCopy> = {
             pickAnswer: 'Pick an answer',
             pickProcessLabel: 'Pick a process',
             summary:
-                "That's the summary. Yanir gets it before the discovery call, so you don't start from zero.",
+                "That's the summary. It reaches me before the discovery call, so we don't start from zero.",
             cardTitle: 'Your summary',
             process: 'The process',
             handledBy: 'Handled today by',
@@ -623,7 +622,7 @@ export const CHAT: Localized<ChatCopy> = {
         },
         phone: {
             greeting:
-                "Hi, I'm Yanir's agent. Ask me about his work, or about what an agent could do for you.",
+                'Hi, this is the agent I built. It answers for me, only from what I wrote. Ask about my work, or about what an agent could do for you.',
             teaser: 'Every answer comes with a diagram of how the agent got there.',
             resume: 'Continue the conversation',
             close: 'Close the chat',
@@ -788,13 +787,13 @@ export const CHAT: Localized<ChatCopy> = {
             },
             ready: {
                 title: 'Ready answer: the short path',
-                cap: 'Yanir wrote it ahead of time, and the model was not called.',
+                cap: 'I wrote it ahead of time, and the model was not called.',
                 skipped: 'Skipped',
                 skipNote: 'Not needed for a ready answer',
                 who: 'Ready',
                 done: 'Answer prepared in advance',
                 note: 'No AI, and no quota used',
-                sum: 'It arrived at once, from content Yanir wrote. Not every question needs AI.',
+                sum: 'It arrived at once, from content I wrote. Not every question needs AI.',
             },
             fromAnswer: 'Made from this answer',
             fromChat: 'Made from this chat',
@@ -811,8 +810,7 @@ export const CHAT: Localized<ChatCopy> = {
             modelNote:
                 'One call to the model, and the answer was written only from these documents',
             sumH: 'This answer:',
-            sumFrom: (n) =>
-                `was written from ${n} of Yanir's documents. The model saw nothing else.`,
+            sumFrom: (n) => `was written from ${n} of my documents. The model saw nothing else.`,
             sumDeclined: "The agent said it doesn't know, instead of making something up.",
             trail: (n, sec) => `Read ${n} documents · ${sec} seconds`,
             trailNone: (sec) => `No matching document found · ${sec} seconds`,

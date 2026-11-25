@@ -38,7 +38,7 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
         pk: {
             title: 'PersonaKit: קוד פתוח, חינם',
             tab: 'PersonaKit',
-            cap: 'ערכת כלים שיניר יצר ומפתח. מורידים ומשתמשים, בלי לדבר עם אף אחד.',
+            cap: 'ערכת כלים שיצרתי ואני מפתח. מורידים ומשתמשים, בלי לדבר עם אף אחד.',
         },
         why: {
             title: 'למה לדבר איתי',
@@ -56,17 +56,17 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
             cap: 'לשאלה הזו אין שרטוט מוכן, אז הגיליון מראה את הקבלה של התשובה: מה נמדד בזמן שהיא נכתבה.',
         },
         ask: {
-            title: 'את זה כדאי לשאול את יניר',
-            tab: 'שאלה ליניר',
-            cap: 'הסוכן לא מצא תשובה במה שיניר כתב, ולא ניחש.',
+            title: 'את זה כדאי לשאול אותי ישירות',
+            tab: 'שאלה אליי',
+            cap: 'הסוכן לא מצא תשובה במה שכתבתי, ולא ניחש.',
         },
         contact: {
-            title: 'שלוש דרכים לדבר עם יניר',
+            title: 'שלוש דרכים לדבר איתי',
             tab: 'יצירת קשר',
             cap: 'תשובה מיידית. לשאלה כזו לא צריך AI.',
         },
         mail: {
-            title: 'מייל ליניר, ישר מהצ׳אט',
+            title: 'מייל אליי, ישר מהצ׳אט',
             tab: 'מייל',
             cap: 'בלי AI ובלי טופס: כותבים בצ׳אט את המייל שלכם ושורה על הנושא, וזה נשלח.',
         },
@@ -90,7 +90,7 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
         pk: {
             title: 'PersonaKit: open source, free',
             tab: 'PersonaKit',
-            cap: 'A toolset Yanir created and develops. Download and use it, without talking to anyone.',
+            cap: 'A toolset I created and develop. Download and use it, without talking to anyone.',
         },
         why: {
             title: 'Why talk to me',
@@ -108,17 +108,17 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
             cap: "There's no ready diagram for this question, so the sheet shows the answer's breakdown: what was measured while it was written.",
         },
         ask: {
-            title: 'This one is worth asking Yanir',
-            tab: 'A question for Yanir',
-            cap: 'The agent found no answer in what Yanir wrote, and did not guess.',
+            title: 'This one is worth asking me directly',
+            tab: 'A question for me',
+            cap: 'The agent found no answer in what I wrote, and did not guess.',
         },
         contact: {
-            title: 'Three ways to talk to Yanir',
+            title: 'Three ways to talk to me',
             tab: 'Contact',
             cap: "Instant answer. A question like this doesn't need AI.",
         },
         mail: {
-            title: 'Email Yanir, straight from the chat',
+            title: 'Email me, straight from the chat',
             tab: 'Email',
             cap: "No AI and no form: type your email and a line about the subject in the chat, and it's sent.",
         },
@@ -347,7 +347,7 @@ export const SHEETS: Localized<SheetCopy> = {
             kinds: { profile: 'פרופיל', project: 'פרויקט', writing: 'כתיבה' },
             before: 'לפני המודל: בדיקת הבוט עברה, והשאלה בתוך המכסה היומית. כל המספרים כאן נמדדו בזמן שהתשובה נכתבה.',
             plainDocs: (n, of) => `${n} מתוך ${of}`,
-            plainDocsNote: 'מסמכים שיניר כתב הונחו מול המודל. הוא לא ראה שום דבר אחר.',
+            plainDocsNote: 'מסמכים שכתבתי הונחו מול המודל. הוא לא ראה שום דבר אחר.',
             plainTime: 'מהשאלה עד התשובה',
             plainOnce: 'פעם אחת',
             plainOnceNote: 'המודל נשאל, וענה',
@@ -357,7 +357,7 @@ export const SHEETS: Localized<SheetCopy> = {
         ask: {
             what: 'מה קורה עכשיו?',
             whatText:
-                'הסוכן עונה רק מתוך מה שיניר כתב, ועל השאלה הזו אין שם תשובה. במקום לנחש, הוא הכין אותה כהודעה ליניר. חסר רק המייל שלכם, כדי שיהיה לו לאן לענות.',
+                'הסוכן עונה רק מתוך מה שכתבתי, ועל השאלה הזו אין שם תשובה. במקום לנחש, הוא הכין אותה כהודעה אליי. חסר רק המייל שלכם, כדי שאדע לאן לענות.',
             orCall: 'או קבעו שיחת אבחון',
             topic: 'שאלה מהצ׳אט',
         },
@@ -371,7 +371,7 @@ export const SHEETS: Localized<SheetCopy> = {
             message: 'ההודעה',
             added: 'הוספתם',
             waiting: 'ממתין למה שתכתבו בצ׳אט',
-            sentNote: 'ההודעה אצל יניר בתיבה, והוא עונה ממנה ישירות למייל שלכם.',
+            sentNote: 'ההודעה אצלי בתיבה, ואני עונה ממנה ישירות למייל שלכם.',
             howTitle: 'כתבו בצ׳אט',
             howNeedsMessage: 'את המייל שלכם ושורה על הנושא, וההודעה תישלח כמו שהיא.',
             howHasMessage: 'את המייל שלכם. אפשר להוסיף לידו עוד שורה, והכול יישלח יחד.',
@@ -390,14 +390,14 @@ export const SHEETS: Localized<SheetCopy> = {
                     kind: 'mail',
                     note: 'אם נוח יותר לכתוב',
                     title: 'מייל מהצ׳אט',
-                    text: 'כותבים בצ׳אט את המייל שלכם ושורה על הנושא, וזה נשלח ליניר.',
+                    text: 'כותבים בצ׳אט את המייל שלכם ושורה על הנושא, וזה מגיע אליי.',
                     go: 'כתבו בצ׳אט',
                 },
                 {
                     kind: 'whatsapp',
                     note: 'קצר ולעניין',
                     title: 'וואטסאפ',
-                    text: 'הודעה במילים שלכם, ויניר חוזר אליכם אישית.',
+                    text: 'הודעה במילים שלכם, ואני חוזר אליכם.',
                     go: 'כתבו בוואטסאפ',
                 },
             ],
@@ -541,8 +541,7 @@ export const SHEETS: Localized<SheetCopy> = {
             kinds: { profile: 'Profile', project: 'Project', writing: 'Writing' },
             before: 'Before the model: the bot check passed, and the question is within the daily quota. Every number here was measured while the answer was written.',
             plainDocs: (n, of) => `${n} of ${of}`,
-            plainDocsNote:
-                'documents Yanir wrote were put in front of the model. It saw nothing else.',
+            plainDocsNote: 'documents I wrote were put in front of the model. It saw nothing else.',
             plainTime: 'From question to answer',
             plainOnce: 'Once',
             plainOnceNote: 'The model was asked, and answered',
@@ -552,7 +551,7 @@ export const SHEETS: Localized<SheetCopy> = {
         ask: {
             what: 'What happens now?',
             whatText:
-                "The agent answers only from what Yanir wrote, and there's no answer there for this question. Instead of guessing, it prepared it as a message to Yanir. Only your email is missing, so he has somewhere to reply.",
+                "The agent answers only from what I wrote, and there's no answer there for this question. Instead of guessing, it prepared it as a message to me. Only your email is missing, so I know where to reply.",
             orCall: 'Or book a discovery call',
             topic: 'A question from the chat',
         },
@@ -566,8 +565,7 @@ export const SHEETS: Localized<SheetCopy> = {
             message: 'The message',
             added: 'You added',
             waiting: 'Waiting for what you type in the chat',
-            sentNote:
-                "The message is in Yanir's inbox, and he replies from there straight to your email.",
+            sentNote: 'The message is in my inbox, and I reply from there straight to your email.',
             howTitle: 'Type in the chat',
             howNeedsMessage:
                 'your email and a line about the subject, and the message is sent as is.',
@@ -588,14 +586,14 @@ export const SHEETS: Localized<SheetCopy> = {
                     kind: 'mail',
                     note: "If you'd rather write",
                     title: 'Email from the chat',
-                    text: "Type your email and a line about the subject in the chat, and it's sent to Yanir.",
+                    text: 'Type your email and a line about the subject in the chat, and it comes to me.',
                     go: 'Type in the chat',
                 },
                 {
                     kind: 'whatsapp',
                     note: 'Short and to the point',
                     title: 'WhatsApp',
-                    text: 'A message in your own words, and Yanir gets back to you personally.',
+                    text: 'A message in your own words, and I get back to you.',
                     go: 'Write on WhatsApp',
                 },
             ],
@@ -637,7 +635,7 @@ export const MAP_NODES: MapNode[] = [
             he: 'סוכנים בוואטסאפ ובטלגרם, עם כללי בטיחות, זיכרון ומשמרת לילה.',
             en: 'Agents on WhatsApp and Telegram, with safety rules, memory and a night shift.',
         },
-        meta: { he: 'רץ אצל יניר כל יום', en: 'Runs for Yanir every day' },
+        meta: { he: 'רץ אצלי כל יום', en: 'Runs for me every day' },
         wide: [130, 160],
         phone: [92, 138],
     },
