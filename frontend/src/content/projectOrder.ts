@@ -8,6 +8,7 @@ export const RICH_PROJECTS = [
     'personakit',
     'review-engine',
     'catchup',
+    'ai-chat-portfolio',
 ] as const;
 
 const rank = (slug: string) => {
