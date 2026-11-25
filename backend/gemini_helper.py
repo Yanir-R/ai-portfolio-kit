@@ -127,7 +127,7 @@ THINKING_LEVEL = types.ThinkingLevel.LOW
 
 # Gemini's content filters, set explicitly rather than left to the model's
 # default, which for recent models is to block nothing. Every answer here is
-# published in Yanir's voice, so a reply that a filter would flag is one he
+# published on Yanir's behalf, so a reply that a filter would flag is one he
 # would not have written; blocking at medium likelihood costs a real visitor
 # nothing. A blocked reply arrives with no text and is answered with
 # EMPTY_RESPONSE_MESSAGE.
@@ -234,18 +234,18 @@ def _client_for(api_key: str) -> "genai.Client":
 # User-facing copy per failure category, so an auth or configuration problem is
 # not reported to visitors as if the service were merely busy.
 #
-# These render as ordinary chat bubbles, so they are written in the same first
-# person as every other answer. Naming the plumbing ("the AI service is over its
+# These render as ordinary chat bubbles, so they are written in the agent's
+# voice like every other answer. Naming the plumbing ("the AI service is over its
 # quota") breaks that voice and tells a visitor nothing they can act on - the
 # thing they can act on is whether to wait or to leave an email.
 BUSY_MESSAGE = (
     "I'm getting more questions than I can keep up with at the moment. "
     "Give it a minute and ask me again - or leave your email here and "
-    "I'll come back to you directly."
+    "Yanir will come back to you directly."
 )
 MISCONFIGURED_MESSAGE = (
     "Something on my end isn't working right now, so I can't answer properly. "
-    "Leave your email here and I'll get back to you directly."
+    "Leave your email here and Yanir will get back to you directly."
 )
 GENERIC_ERROR_MESSAGE = (
     "That didn't go through on my end. Mind trying again?"
@@ -317,7 +317,7 @@ def get_gemini_response(
     conversation_history: Optional[Iterable[Dict[str, str]]] = None,
     reading: str = "",
 ) -> Answer:
-    """Answers a visitor's question in Yanir's voice, grounded in `knowledge`.
+    """Answers a visitor's question as Yanir's agent, grounded in `knowledge`.
 
     Returns an `Answer` in every case, including failure: `.text` is always
     user-facing copy, so callers render it as the assistant's reply rather than
@@ -417,7 +417,7 @@ def get_gemini_response(
             # A MAX_TOKENS finish means the visitor is looking at half a
             # sentence. The call succeeded and `response.text` is a plausible
             # string, which is exactly why this has to be checked rather than
-            # trusted: handing over a truncated answer in Yanir's voice presents
+            # trusted: handing over a truncated answer on Yanir's behalf presents
             # an incomplete claim as a complete one.
             #
             # The prompt asks for two to four sentences, so hitting a 1,500

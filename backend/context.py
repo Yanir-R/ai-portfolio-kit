@@ -389,7 +389,7 @@ def _build() -> Dict[str, Knowledge]:
         return {language: EMPTY for language in LANGUAGES}
 
     # Project and writing documents alone are not a profile. Without the profile
-    # the chat would report itself ready and answer in Yanir's first person with
+    # the chat would report itself ready and answer on Yanir's behalf with
     # nothing about Yanir behind it - every question about his background
     # declining, while the site claims an assistant that knows him.
     #
