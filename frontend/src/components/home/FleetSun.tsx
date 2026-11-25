@@ -26,6 +26,9 @@ const TIP_EDGE = 120;
 const TOUCH_TIP_MS = 2600;
 // A finger has to travel this far sideways for a swipe to change the group.
 const SWIPE_PX = 40;
+// A group's list shows whole up to this many rows; a longer one opens on its first rows.
+const ROLES_SHORT = 4;
+const ROLES_FIRST = 3;
 
 const polar = (r: number, a: number) => [C + r * Math.cos(a), C + r * Math.sin(a)] as const;
 const f = (n: number) => n.toFixed(1);
@@ -143,15 +146,20 @@ const FleetSun: React.FC = () => {
     // The group lead first, then each agent; the direct reports have no lead.
     const roles = (index: number) =>
         index === DIRECT_RAY
-            ? FLEET_DIRECT.agents.map((line) => ({ cls: 'dir', label: ui.directRole, line }))
+            ? FLEET_DIRECT.agents.map((line) => ({ cls: 'dir', line }))
             : [
-                  { cls: 'lead', label: ui.leadRole, line: FLEET_GROUPS[index].lead },
-                  ...FLEET_GROUPS[index].agents.map((line) => ({
-                      cls: 'sub',
-                      label: ui.subRole,
-                      line,
-                  })),
+                  { cls: 'lead', line: FLEET_GROUPS[index].lead },
+                  ...FLEET_GROUPS[index].agents.map((line) => ({ cls: 'sub', line })),
               ];
+    const shownRoles = roles(ORDER[pos]);
+    // A long list opens on its first rows; the rest wait for a tap, until the group changes.
+    const [openAt, setOpenAt] = useState<number | null>(null);
+    const long = shownRoles.length > ROLES_SHORT;
+    const visibleRoles = long && openAt !== pos ? shownRoles.slice(0, ROLES_FIRST) : shownRoles;
+    const rolesHead =
+        ORDER[pos] === DIRECT_RAY
+            ? ui.directHead(shownRoles.length)
+            : ui.rolesHead(shownRoles.length - 1);
     const pickLayer = (id: FleetLayer) =>
         setPick((p) => (p?.kind === 'layer' && p.id === id ? null : { kind: 'layer', id }));
 
@@ -320,15 +328,28 @@ const FleetSun: React.FC = () => {
                         </div>
                         {/* Who does what in the group shown: the same lines the drawing
                             shows on hover on a computer, which a phone has no way to reach. */}
-                        <ul className="fp-roles">
-                            {roles(ORDER[pos]).map((role, i) => (
-                                <li key={i} className={role.cls}>
-                                    <i aria-hidden="true" />
-                                    <small>{role.label}</small>
-                                    <span>{role.line[lang]}</span>
-                                </li>
-                            ))}
-                        </ul>
+                        <div className="fp-roles">
+                            <small>{rolesHead}</small>
+                            <ul id="fp-roles-list">
+                                {visibleRoles.map((role, i) => (
+                                    <li key={`${pos}-${i}`} className={role.cls}>
+                                        <i aria-hidden="true" />
+                                        <span>{role.line[lang]}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                            {long && openAt !== pos && (
+                                <button
+                                    type="button"
+                                    className="fp-more"
+                                    aria-expanded={false}
+                                    aria-controls="fp-roles-list"
+                                    onClick={() => setOpenAt(pos)}
+                                >
+                                    {ui.moreAgents(shownRoles.length - ROLES_FIRST)}
+                                </button>
+                            )}
+                        </div>
                         <div className="fp-dots" aria-hidden="true">
                             {ORDER.map((index, i) => (
                                 <i key={index} className={i === pos ? 'on' : undefined} />

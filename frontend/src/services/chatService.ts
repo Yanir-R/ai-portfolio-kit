@@ -18,7 +18,7 @@ import {
  * trip it. The server only replays the last few turns to the model anyway, so
  * sending more costs bandwidth and buys nothing.
  */
-const MAX_HISTORY_SENT = 20;
+export const MAX_HISTORY_SENT = 20;
 
 interface ChatResponse {
     response: string;

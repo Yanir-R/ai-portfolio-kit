@@ -284,8 +284,8 @@ export const FLEET_DIRECT: { name: Line; why: Line; agents: Line[] } = {
             en: 'An agent that forgets what was agreed yesterday starts every day from zero.',
         },
         {
-            he: 'רק סוכן אחד רשאי לגעת בו. כל השאר לא רואים אותו.',
-            en: "Only one agent may touch it. The rest don't see it.",
+            he: 'יש מידע שרק סוכן אחד רואה.',
+            en: 'Some information only one agent can see.',
         },
         {
             he: 'מכין הכול מראש. שום דבר לא יוצא בלי אישור שלי.',
@@ -402,9 +402,12 @@ export const FLEET_UI: Localized<{
     prevGroup: string;
     nextGroup: string;
     /** Roles beside each line in the phone's group card. */
-    leadRole: string;
-    subRole: string;
-    directRole: string;
+    /** Above a group's list on a phone: its lead and N sub-agents. */
+    rolesHead: (subs: number) => string;
+    /** Above the direct reports' list on a phone. */
+    directHead: (n: number) => string;
+    /** Reveals the rest of a long list. */
+    moreAgents: (n: number) => string;
 }> = {
     he: {
         chartLabel: 'מערך הסוכנים: סוכן ראשי במרכז, שבע קבוצות סביבו',
@@ -423,9 +426,9 @@ export const FLEET_UI: Localized<{
         position: (n, of) => `קבוצה ${n} מתוך ${of}`,
         prevGroup: 'הקבוצה הקודמת',
         nextGroup: 'הקבוצה הבאה',
-        leadRole: 'ראש הקבוצה',
-        subRole: 'תת־סוכן',
-        directRole: 'מדווח ישיר',
+        rolesHead: (n) => `ראש קבוצה ו־${n} תתי־סוכנים, ולמה כל אחד קיים`,
+        directHead: (n) => `${n} סוכנים, ולמה כל אחד מהם קיים`,
+        moreAgents: (n) => (n === 1 ? 'עוד סוכן אחד' : `עוד ${n} סוכנים`),
     },
     en: {
         chartLabel: 'The agent fleet: a head agent in the centre, seven groups around it',
@@ -444,8 +447,8 @@ export const FLEET_UI: Localized<{
         position: (n, of) => `Group ${n} of ${of}`,
         prevGroup: 'Previous group',
         nextGroup: 'Next group',
-        leadRole: 'Group lead',
-        subRole: 'Sub-agent',
-        directRole: 'Direct report',
+        rolesHead: (n) => `A group lead and ${n} sub-agents, and why each one exists`,
+        directHead: (n) => `${n} agents, and why each of them exists`,
+        moreAgents: (n) => (n === 1 ? 'One more agent' : `${n} more agents`),
     },
 };

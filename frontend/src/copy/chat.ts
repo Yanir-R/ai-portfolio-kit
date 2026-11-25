@@ -72,6 +72,8 @@ export interface ChatCopy {
     noSource: string;
     /** The answer drew on Yanir's own notes, not on a project or post. */
     fromNotes: string;
+    /** The link under an answer to its receipt. */
+    behind: string;
     readyTag: string;
     sentTag: string;
     asking: string;
@@ -180,6 +182,7 @@ export interface ChatCopy {
             sum: string;
         };
         fromAnswer: string;
+        about: (question: string) => string;
         fromChat: string;
         today: string;
         withAgent: string;
@@ -332,6 +335,7 @@ export const CHAT: Localized<ChatCopy> = {
         sources: 'מקורות',
         noSource: 'לא נמצא מסמך מתאים',
         fromNotes: 'מתוך מה שיניר כתב על עצמו',
+        behind: 'מאחורי התשובה',
         readyTag: 'תשובה מוכנה · בלי AI',
         sentTag: 'נשלח ✓ · בלי AI',
         asking: 'שואלים על:',
@@ -562,6 +566,7 @@ export const CHAT: Localized<ChatCopy> = {
                 sum: 'הגיעה מיד, מתוכן שיניר כתב. לא כל שאלה צריכה AI.',
             },
             fromAnswer: 'נוצר מהתשובה הזו',
+            about: (q) => `על השאלה: ״${q}״`,
             fromChat: 'נוצר מהשיחה הזו',
             today: 'היום',
             withAgent: 'עם סוכן',
@@ -579,7 +584,7 @@ export const CHAT: Localized<ChatCopy> = {
             sumDeclined: 'הסוכן אמר שהוא לא יודע, במקום להמציא.',
             trail: (n, sec) => `קרא ${n} מסמכים · ${sec} שניות`,
             trailNone: (sec) => `לא נמצא מסמך מתאים · ${sec} שניות`,
-            trailOpen: 'איך הגעתי לתשובה',
+            trailOpen: 'שש התחנות בדרך לתשובה',
             back: 'חזרה לשרטוט של התשובה',
         },
     },
@@ -656,6 +661,7 @@ export const CHAT: Localized<ChatCopy> = {
         sources: 'Sources',
         noSource: 'No matching document found',
         fromNotes: 'From what Yanir wrote about himself',
+        behind: 'Behind the answer',
         readyTag: 'Ready answer · no AI',
         sentTag: 'Sent ✓ · no AI',
         asking: 'Asking about:',
@@ -901,6 +907,7 @@ export const CHAT: Localized<ChatCopy> = {
                 sum: 'It arrived at once, from content Yanir wrote. Not every question needs AI.',
             },
             fromAnswer: 'Made from this answer',
+            about: (q) => `About the question: "${q}"`,
             fromChat: 'Made from this chat',
             today: 'Today',
             withAgent: 'With an agent',
@@ -920,7 +927,7 @@ export const CHAT: Localized<ChatCopy> = {
             sumDeclined: "The agent said it doesn't know, instead of making something up.",
             trail: (n, sec) => `Read ${n} documents · ${sec} seconds`,
             trailNone: (sec) => `No matching document found · ${sec} seconds`,
-            trailOpen: 'How I got to the answer',
+            trailOpen: 'The six stations to the answer',
             back: "Back to the answer's diagram",
         },
     },

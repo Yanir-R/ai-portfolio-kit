@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { HOME } from '@/copy/home';
 import { FEATURES } from '@/constants/links';
-import { useHomeChat } from '@/chat/useHomeChat';
+import { AnswerRecord, useHomeChat } from '@/chat/useHomeChat';
 import AgentChat, { ChatSize, PhoneLayer } from '@/components/chat/AgentChat';
 import { SheetKey } from '@/content/sheets';
 import {
@@ -76,8 +76,8 @@ const HeroSection: React.FC = () => {
     const openLayer = useCallback(() => show(), [show]);
     const closeLayer = close;
     const showSheet = useCallback(
-        (key: SheetKey) => {
-            chat.openSheet(key);
+        (key: SheetKey, record?: AnswerRecord | null) => {
+            chat.openSheet(key, record);
             if (sheetOpen) return;
             sheetOpener.current = document.activeElement as HTMLElement | null;
             show({ chatSheet: true });

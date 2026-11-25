@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SheetKey, SHEETS } from '@/content/sheets';
 import { FEATURES, LINKS } from '@/constants/links';
 import { AnswerRecord, Letter as LetterState } from '@/chat/useHomeChat';
+import { TraceSource } from '@/types/chat';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { Arrow } from '@/components/site/Arrow';
 import { CountUp, Letter, PersonaKitLinks, TalkButton } from '@/components/chat/sheets/parts';
@@ -218,87 +219,126 @@ const BuiltSheet: React.FC = () => {
 };
 
 /** The receipt of one answer: every figure on it is one the backend returned with that answer. */
-const ReadSheet: React.FC<{
-    record?: AnswerRecord;
-    onView: (view: 'tech' | 'plain') => void;
-    view: 'tech' | 'plain';
-}> = ({ record, onView, view }) => {
+const ReadSheet: React.FC<{ record?: AnswerRecord }> = ({ record }) => {
     const { t } = useLang();
     const sheets = t(SHEETS);
     const copy = sheets.read;
     if (!record) return <TalkButton label={sheets.cta} />;
 
     const trace = record.trace;
-    const n = record.sources.length;
-    const of = Math.max(record.available, n);
+    const read = record.sources;
+    const library = Math.max(record.available, read.length);
+    const id = (s: TraceSource) => `${s.kind}-${s.slug}`;
+    // The model names only projects and posts it drew on; Yanir's notes go with
+    // every question and are never named, so they are not called unused.
+    const notes = read.filter((s) => s.kind === 'profile');
+    const docs = read.filter((s) => s.kind !== 'profile');
+    const usedIds = record.used && !record.declined ? new Set(record.used.map(id)) : null;
+    const used = usedIds ? docs.filter((s) => usedIds.has(id(s))) : [];
+    const unused = usedIds ? docs.filter((s) => !usedIds.has(id(s))) : [];
+
+    let headline: string;
+    let listed: TraceSource[];
+    let tagged = false;
+    let rest: TraceSource[] = [];
+    let always: TraceSource[] = [];
+    if (usedIds && used.length) {
+        headline = copy.leans(used.length);
+        listed = used;
+        tagged = true;
+        rest = unused;
+        always = notes;
+    } else if (usedIds && notes.length) {
+        // An empty list is the model's word that it rested on his notes alone.
+        headline = copy.leans(notes.length);
+        listed = notes;
+        tagged = true;
+        rest = unused;
+    } else if (record.declined || usedIds) {
+        headline = copy.leansNone;
+        listed = read;
+    } else {
+        headline = copy.readN(read.length);
+        listed = read;
+    }
+    const count = read.length ? copy.ofRead(read.length, library) : copy.ofLibrary(library);
+
+    const events = [record.declined && copy.declined, record.handoff && copy.handoff].filter(
+        (e): e is [string, string] => !!e
+    );
+
     const format = (x: number) => x.toLocaleString('en-US');
-    const tokens = [trace?.prompt_tokens, trace?.thinking_tokens, trace?.output_tokens].map(
-        (x) => x ?? 0
-    );
-    const total = trace?.total_tokens ?? tokens.reduce((a, b) => a + b, 0);
-    const outcome = trace?.context_outcome ?? '';
-    const sources = (
-        <ul className="v-src">
-            {record.sources.map((s, i) => (
-                <li
-                    key={`${s.kind}-${s.slug}`}
-                    style={{
-                        animationDelay: `${SOURCE_STAGGER.start + i * SOURCE_STAGGER.step}ms`,
-                    }}
-                >
-                    <small>{copy.kinds[s.kind] ?? s.kind}</small>
-                    <b>{s.title}</b>
-                </li>
-            ))}
-        </ul>
-    );
+    const prompt = trace?.prompt_tokens ?? 0;
+    const cached = Math.min(trace?.cached_tokens ?? 0, prompt);
+    const parts = [prompt - cached, cached, trace?.thinking_tokens ?? 0, trace?.output_tokens ?? 0];
+    const total = trace?.total_tokens ?? parts.reduce((x, y) => x + y, 0);
+    const shown = parts.map((x, i) => ({ x, i })).filter((p) => p.x > 0);
     const latency = trace?.latency_ms != null ? (trace.latency_ms / 1000).toFixed(1) : null;
+    const finish = trace?.finish_reason;
+
+    const facts: [string, string][] = [];
+    if (latency) facts.push([copy.latency, `${latency} ${copy.secondsShort}`]);
+    if (trace?.language) facts.push([copy.language, copy.languages[trace.language]]);
+    facts.push([copy.convo, record.turn > 1 ? copy.nth(record.turn, record.prior) : copy.first]);
+    if (finish) facts.push([copy.finish, copy.finishWords[finish] ?? copy.finishOther]);
 
     return (
         <>
-            <div className="v-tg" role="group" aria-label={copy.viewLabel}>
-                {(['tech', 'plain'] as const).map((v) => (
-                    <button
-                        key={v}
-                        type="button"
-                        aria-pressed={view === v}
-                        onClick={() => onView(v)}
-                    >
-                        {copy[v]}
-                    </button>
-                ))}
+            <div className="rx">
+                <div className="rx-hd">
+                    <b>{headline}</b>
+                    <span>{count}</span>
+                </div>
+                {listed.length > 0 && (
+                    <ul className="v-src">
+                        {listed.map((s, i) => (
+                            <li
+                                key={id(s)}
+                                className={tagged ? 'used' : undefined}
+                                style={{
+                                    animationDelay: `${SOURCE_STAGGER.start + i * SOURCE_STAGGER.step}ms`,
+                                }}
+                            >
+                                <small>{copy.kinds[s.kind] ?? s.kind}</small>
+                                <b>{s.title}</b>
+                                {tagged && <em>{copy.usedTag}</em>}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                {rest.length > 0 && (
+                    <p className="rx-rest">
+                        {copy.readNotUsed} {rest.map((s) => s.title).join(', ')}
+                    </p>
+                )}
+                {always.length > 0 && (
+                    <p className="rx-rest">
+                        {copy.alwaysSent} {always.map((s) => s.title).join(', ')}
+                    </p>
+                )}
             </div>
-            <div className="v-tech">
+            {events.length > 0 && (
+                <div className="rx">
+                    <h4>{copy.more}</h4>
+                    <ul className="rx-ev">
+                        {events.map(([title, text]) => (
+                            <li key={title}>
+                                <b>{title}</b>
+                                <span>{text}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+            <div className="rx">
+                <h4>{copy.measures}</h4>
                 <dl className="v-kv">
-                    {trace?.model && (
-                        <div>
-                            <dt>{copy.model}</dt>
-                            <dd dir="ltr">{trace.model}</dd>
+                    {facts.map(([dt, dd]) => (
+                        <div key={dt}>
+                            <dt>{dt}</dt>
+                            <dd>{dd}</dd>
                         </div>
-                    )}
-                    {latency && (
-                        <div>
-                            <dt>{copy.latency}</dt>
-                            <dd>
-                                {latency} {copy.secondsShort}
-                            </dd>
-                        </div>
-                    )}
-                    {trace?.language && (
-                        <div>
-                            <dt>{copy.language}</dt>
-                            <dd>{copy.languages[trace.language]}</dd>
-                        </div>
-                    )}
-                    {trace?.finish_reason && (
-                        <div>
-                            <dt>{copy.finish}</dt>
-                            <dd>
-                                {trace.finish_reason === 'STOP' && `${copy.finishOk} `}
-                                <span dir="ltr">{trace.finish_reason}</span>
-                            </dd>
-                        </div>
-                    )}
+                    ))}
                 </dl>
                 {total > 0 && (
                     <div className="v-tok">
@@ -309,7 +349,7 @@ const ReadSheet: React.FC<{
                             <span>{copy.tokensNote}</span>
                         </div>
                         <div className="tb">
-                            {tokens.map((x, i) => (
+                            {shown.map(({ x, i }) => (
                                 <i
                                     key={i}
                                     className={`t${i}`}
@@ -318,43 +358,26 @@ const ReadSheet: React.FC<{
                             ))}
                         </div>
                         <ul>
-                            {tokens.map((x, i) => (
+                            {shown.map(({ x, i }) => (
                                 <li key={i} className={`t${i}`}>
                                     <b>{format(x)}</b>
                                     {copy.tokenParts[i]}
                                 </li>
                             ))}
                         </ul>
+                        {cached > 0 && (
+                            <p className="rx-cache">
+                                {cached * 2 > prompt ? copy.cachedMost : copy.cachedSome}
+                            </p>
+                        )}
                     </div>
                 )}
-                <div className="v-ctx">
-                    <div className="hd">
-                        <b>{copy.docsOf(n, of)}</b>
-                        {copy.chosen[outcome] && <span>{copy.chosen[outcome]}</span>}
-                    </div>
-                    {sources}
-                </div>
-                <p className="v-fine">{copy.measured}</p>
             </div>
-            <div className="v-plain">
-                <div className="v-num sm">
-                    <b>{copy.plainDocs(n, of)}</b>
-                    <span>{copy.plainDocsNote}</span>
-                </div>
-                {sources}
-                <ul className="v-facts two">
-                    <li>
-                        <b>
-                            {record.seconds} {copy.seconds}
-                        </b>
-                        {copy.plainTime}
-                    </li>
-                    <li>
-                        <b>{copy.plainOnce}</b>
-                        {copy.plainOnceNote}
-                    </li>
-                </ul>
-            </div>
+            {trace?.model && (
+                <p className="rx-model">
+                    {copy.model}: <span dir="ltr">{trace.model}</span>
+                </p>
+            )}
             <TalkButton label={sheets.cta} />
         </>
     );
@@ -425,20 +448,11 @@ export interface SheetProps {
     sheet: Exclude<SheetKey, 'map'>;
     record?: AnswerRecord;
     letter?: LetterState;
-    view: 'tech' | 'plain';
-    onView: (view: 'tech' | 'plain') => void;
     onMailChat: () => void;
 }
 
 /** The body of one sheet. The map is drawn separately, in its own frame. */
-export const SheetBody: React.FC<SheetProps> = ({
-    sheet,
-    record,
-    letter,
-    view,
-    onView,
-    onMailChat,
-}) => {
+export const SheetBody: React.FC<SheetProps> = ({ sheet, record, letter, onMailChat }) => {
     switch (sheet) {
         case 'pk':
             return <PkSheet />;
@@ -451,7 +465,7 @@ export const SheetBody: React.FC<SheetProps> = ({
         case 'built':
             return <BuiltSheet />;
         case 'read':
-            return <ReadSheet record={record} view={view} onView={onView} />;
+            return <ReadSheet record={record} />;
         case 'ask':
             return <AskSheet letter={letter} />;
         case 'mail':

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CHAT } from '@/copy/chat';
 import { SHEET_HEADS } from '@/content/sheets';
 import { AnswerRecord, HomeChat } from '@/chat/useHomeChat';
@@ -35,13 +35,6 @@ const AnswerPlan: React.FC<{
     const heads = t(SHEET_HEADS);
     const plan = chat.plan;
     const ref = useRef<HTMLDivElement>(null);
-    // The view belongs to the sheet it was chosen on; a new sheet starts in the technical one.
-    const [chosen, setChosen] = useState<{ plan: typeof plan; view: 'tech' | 'plain' } | null>(
-        null
-    );
-    const view = chosen?.plan === plan ? chosen.view : 'tech';
-    const setView = (next: 'tech' | 'plain') => setChosen({ plan, view: next });
-
     // On a stacked layout a newly opened drawing is scrolled to, since it opens below the chat.
     useEffect(() => {
         if (onClose) return;
@@ -144,6 +137,8 @@ const AnswerPlan: React.FC<{
         kicker = copy.plan.fromAnswer;
         title = heads[plan.key].title;
         cap = heads[plan.key].cap;
+        // The receipt names the question it is about.
+        if (plan.key === 'read' && current?.record) cap = copy.plan.about(current.record.question);
         mode = plan.key === 'map' ? 'showmap' : 'showvis';
     } else if (plan.kind === 'cmp') {
         kicker = copy.plan.fromChat;
@@ -178,11 +173,10 @@ const AnswerPlan: React.FC<{
             {plan.kind === 'sheet' && record && (
                 <button type="button" className="trail" onClick={() => chat.showPath(plan.key)}>
                     <span className="td">
-                        <i />
-                        <i className="a" />
-                        <i className="a" />
-                        <i className="a" />
-                        <i />
+                        {/* Five stations always run; the sixth only when Yanir was offered. */}
+                        {[0, 1, 2, 3, 4, 5].map((i) => (
+                            <i key={i} className={i < 5 || record.handoff ? 'a' : undefined} />
+                        ))}
                     </span>
                     <span>
                         {record.sources.length
@@ -218,20 +212,13 @@ const AnswerPlan: React.FC<{
             <div className="map" id={id('map')}>
                 {plan.kind === 'sheet' && plan.key === 'map' && <SystemsMap />}
             </div>
-            <div
-                className="vis"
-                id={id('vis')}
-                aria-live="polite"
-                data-view={view === 'plain' ? 'plain' : undefined}
-            >
+            <div className="vis" id={id('vis')} aria-live="polite">
                 {plan.kind === 'sheet' && plan.key !== 'map' && (
                     <SheetBody
                         key={plan.key}
                         sheet={plan.key}
                         record={record}
                         letter={current?.letter}
-                        view={view}
-                        onView={setView}
                         onMailChat={chat.mailFromChat}
                     />
                 )}

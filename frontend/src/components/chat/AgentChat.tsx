@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CHAT } from '@/copy/chat';
 import { SHEET_HEADS, SHEETS, SheetKey } from '@/content/sheets';
-import { Entry, GREETING_ID, HomeChat } from '@/chat/useHomeChat';
+import { AnswerRecord, Entry, GREETING_ID, HomeChat } from '@/chat/useHomeChat';
 import Markdown from '@/components/Markdown';
 import WritingBlocks from '@/components/writing/WritingBlocks';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
@@ -55,14 +55,31 @@ const SheetThumb: React.FC<{ map?: boolean }> = ({ map }) =>
         </svg>
     );
 
-const ArtCard: React.FC<{ sheet: SheetKey; onOpen: (sheet: SheetKey) => void }> = ({
+type OnSheet = (sheet: SheetKey, record?: AnswerRecord | null) => void;
+
+/** The drawing made for an answer; it reopens with that answer's own figures. */
+/** A small receipt: the link to what happened behind one answer. */
+const ReceiptIcon: React.FC = () => (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <path
+            d="M3.5 1.5h9v13l-1.5-1-1.5 1-1.5-1-1.5 1-1.5-1-1.5 1z M5.5 5h5 M5.5 8h5 M5.5 11h3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+
+const ArtCard: React.FC<{ sheet: SheetKey; record?: AnswerRecord | null; onOpen: OnSheet }> = ({
     sheet,
+    record,
     onOpen,
 }) => {
     const { t } = useLang();
     const art = t(CHAT).art;
     return (
-        <button type="button" className="art" onClick={() => onOpen(sheet)}>
+        <button type="button" className="art" onClick={() => onOpen(sheet, record)}>
             <span className="th">
                 <SheetThumb map={sheet === 'map'} />
             </span>
@@ -88,7 +105,7 @@ const ArtCard: React.FC<{ sheet: SheetKey; onOpen: (sheet: SheetKey) => void }> 
 const EntryView: React.FC<{
     entry: Entry;
     chat: HomeChat;
-    onSheet: (sheet: SheetKey) => void;
+    onSheet: OnSheet;
     engage?: () => void;
     /** The visitor chose to keep asking: the offer folds and the input takes focus. */
     onKeep: () => void;
@@ -162,7 +179,9 @@ const EntryView: React.FC<{
                             {copy.book}
                         </button>
                     )}
-                    {entry.sheet && <ArtCard sheet={entry.sheet} onOpen={onSheet} />}
+                    {entry.sheet && (
+                        <ArtCard sheet={entry.sheet} record={record} onOpen={onSheet} />
+                    )}
                     {record && (
                         <div className="rc">
                             <u>{copy.sources}</u>
@@ -175,6 +194,19 @@ const EntryView: React.FC<{
                             ) : (
                                 <span>{record.used ? copy.fromNotes : copy.noSource}</span>
                             )}
+                            {/* Every answer the model wrote keeps its receipt, diagram or
+                                not; when the receipt is the diagram, its card is the way in. */}
+                            {entry.sheet !== 'read' &&
+                                record.trace?.context_outcome !== 'conversational' && (
+                                    <button
+                                        type="button"
+                                        className="rc-why"
+                                        onClick={() => onSheet('read', record)}
+                                    >
+                                        <ReceiptIcon />
+                                        {copy.behind}
+                                    </button>
+                                )}
                         </div>
                     )}
                 </div>
@@ -257,7 +289,7 @@ export interface PhoneLayer {
     engage: () => void;
     close: () => void;
     /** A diagram card under an answer was tapped. */
-    showSheet: (sheet: SheetKey) => void;
+    showSheet: OnSheet;
 }
 
 /** The latest question that got no answer, carried into the contact window. */

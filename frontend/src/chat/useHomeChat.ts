@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CHAT, ProcessId, PROCESS_IDS } from '@/copy/chat';
 import { SheetKey } from '@/content/sheets';
 import { useLang } from '@/i18n/useLang';
-import { chatService, ChatFailure } from '@/services/chatService';
+import { chatService, ChatFailure, MAX_HISTORY_SENT } from '@/services/chatService';
 import { AnswerTrace, ChatBlock, ChatHandoff, ChatMessage, TraceSource } from '@/types/chat';
 import { classify } from '@/chat/intents';
 import { sheetFor } from '@/chat/sheetFor';
@@ -34,6 +34,12 @@ export interface AnswerRecord {
     available: number;
     declined: boolean;
     trace: AnswerTrace | null;
+    /** Which question of the conversation this was, from 1. */
+    turn: number;
+    /** The earlier questions that went with it as history. */
+    prior: number;
+    /** The offer to continue with Yanir came with this answer. */
+    handoff: boolean;
 }
 
 /** The message drafted to Yanir when the agent had no answer, or the visitor asked to email. */
@@ -318,9 +324,12 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             1000
         );
 
+        const sent = history();
+        const turn = entries.filter((e) => e.kind === 'user').length + 1;
+        const prior = sent.slice(-MAX_HISTORY_SENT).filter((m) => m.type === 'user').length;
         const result = await chatService.sendMessage(
             text,
-            history(),
+            sent,
             await getToken(),
             null,
             handoffOffered
@@ -350,6 +359,9 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
                   available: trace.context_available ?? trace.sources?.length ?? 0,
                   declined: result.declined ?? trace.context_outcome === 'unmatched',
                   trace,
+                  turn,
+                  prior,
+                  handoff: !!result.handoff,
               }
             : null;
         const sheet = fromIndex ? undefined : sheetFor(text, trace, picked, result.used);
@@ -571,7 +583,9 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
         pickQuick,
         showSheet,
         showPath,
-        openSheet: (key: SheetKey) => openSheet(key),
+        /** Opens a drawing; with the record of the answer it was made for, that answer's figures. */
+        openSheet: (key: SheetKey, record?: AnswerRecord | null) =>
+            openSheet(key, record ? { record } : {}),
         /** The email route on the contact sheet: the same exchange as typing "can I email you". */
         mailFromChat: () => !busy && mail(copy.mailAsk),
     };
