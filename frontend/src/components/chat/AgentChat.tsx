@@ -6,6 +6,7 @@ import Markdown from '@/components/Markdown';
 import WritingBlocks from '@/components/writing/WritingBlocks';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import FailureCard, { ContactActions } from '@/components/chat/FailureCard';
+import HandoffCard from '@/components/chat/HandoffCard';
 import LayerHeader from '@/components/chat/LayerHeader';
 import { Arrow } from '@/components/site/Arrow';
 import { REDUCED_MOTION_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
@@ -89,7 +90,9 @@ const EntryView: React.FC<{
     chat: HomeChat;
     onSheet: (sheet: SheetKey) => void;
     engage?: () => void;
-}> = ({ entry, chat, onSheet, engage }) => {
+    /** The visitor chose to keep asking: the offer folds and the input takes focus. */
+    onKeep: () => void;
+}> = ({ entry, chat, onSheet, engage, onKeep }) => {
     const { t } = useLang();
     const copy = t(CHAT);
     const { openContact } = useSiteDialogs();
@@ -136,7 +139,7 @@ const EntryView: React.FC<{
             );
         case 'answer': {
             const record = entry.record;
-            return (
+            const answer = (
                 <div className="m y ai">
                     {entry.fromIndex ? (
                         <span className="src">{copy.readyTag}</span>
@@ -173,6 +176,16 @@ const EntryView: React.FC<{
                         </div>
                     )}
                 </div>
+            );
+            if (!entry.handoff) return answer;
+            return (
+                <>
+                    {answer}
+                    <HandoffCard
+                        handoff={entry.handoff}
+                        onKeep={entry.handoff.reason === 'last_answer' ? undefined : onKeep}
+                    />
+                </>
             );
         }
         case 'summary': {
@@ -281,7 +294,16 @@ const AgentChat: React.FC<{
     useLayoutEffect(() => {
         const log = logRef.current;
         if (!log) return;
-        const toEnd = () => (log.scrollTop = log.scrollHeight);
+        const toEnd = () => {
+            const end = log.scrollHeight - log.clientHeight;
+            const hand = log.querySelector<HTMLElement>('.hand:last-child');
+            // An offer that fits shows whole, so every route to Yanir is in view
+            // and the end of the answer fills what room is left above it. One
+            // taller than the pane starts at its title instead.
+            if (!hand || hand.offsetHeight <= log.clientHeight) return void (log.scrollTop = end);
+            const above = hand.getBoundingClientRect().top - log.getBoundingClientRect().top;
+            log.scrollTop = Math.min(end, log.scrollTop + above - 12);
+        };
         toEnd();
         const frame = requestAnimationFrame(toEnd);
         return () => cancelAnimationFrame(frame);
@@ -301,6 +323,11 @@ const AgentChat: React.FC<{
     }, [chat.awaitingEmail]);
 
     const full = !!phone?.full;
+
+    const keepAsking = () => {
+        chat.keepAsking();
+        inputRef.current?.focus({ preventScroll: true });
+    };
 
     // On a phone the card's input is a button that opens the layer. Focusing a
     // real input on the page would make the browser scroll the page to it
@@ -326,7 +353,11 @@ const AgentChat: React.FC<{
     // On the phone layer a failure card already offers the next steps, and the
     // chips under it would push the input off a short screen.
     const failureShown = chat.entries[chat.entries.length - 1]?.kind === 'error';
-    const hideChips = chat.closed || (full && (short || text.trim() !== '' || failureShown));
+    // Under an open offer to talk directly the next step is the visitor's
+    // choice between the offer and the input; the chips return once they
+    // choose to keep asking.
+    const hideChips =
+        chat.closed || chat.handoffOpen || (full && (short || text.trim() !== '' || failureShown));
 
     // When the question is already known, only the address is missing.
     const placeholder = chat.awaitingEmail
@@ -390,6 +421,7 @@ const AgentChat: React.FC<{
                         chat={chat}
                         onSheet={phone ? phone.showSheet : chat.openSheet}
                         engage={phone?.engage}
+                        onKeep={keepAsking}
                     />
                 ))}
             </div>

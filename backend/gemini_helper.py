@@ -15,7 +15,7 @@ from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
 from pydantic import BaseModel, Field
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Dict, Iterable, Literal, Optional, Tuple
 import json
 import logging
 import re
@@ -107,10 +107,15 @@ def _start_cooldown(model_id: str, now: float) -> None:
 # model spends ~382 of them thinking and has 14 left, so the visitor gets half a
 # sentence returned as a complete-looking success with finish_reason=MAX_TOKENS.
 #
-# Answer length is the prompt's job ("two to four sentences"). This number only
-# needs enough headroom that thinking plus a normal answer fits; observed usage
-# is ~600 thinking + ~110 answer.
-MAX_OUTPUT_TOKENS = 1_500
+# Answer length is the prompt's job ("two to four sentences", more when the
+# visitor asks for detail). This number only needs headroom for the longest
+# answer a visitor can legitimately ask for - a detailed answer in Hebrew,
+# inside the structured reply, after thinking - so that it is never the reason
+# an answer is replaced by TRUNCATED_RESPONSE_MESSAGE. Raising it costs nothing
+# by itself: output is billed per token actually written, and a reply cut at
+# the ceiling is billed in full and then thrown away. Observed usage at the
+# LOW thinking level is ~75-110 answer tokens.
+MAX_OUTPUT_TOKENS = 4_000
 
 # How hard the model thinks before it answers.
 #
@@ -141,6 +146,118 @@ SAFETY_SETTINGS = [
     )
 ]
 
+# Why a conversation has reached the point where talking to Yanir directly
+# would serve the visitor better than another answer. "none" is the usual case.
+HandoffReason = Literal["business_context", "pricing", "timeline", "how_to_start", "none"]
+
+# Longest part of a summary, and of the fit line, the site passes on. The model
+# is asked for about half of this, so a normal reply never comes near it; the
+# ceiling is for one that ignores the request, so the card never fills with a
+# wall of text.
+HANDOFF_PART_MAX_CHARS = 160
+HANDOFF_FIT_MAX_CHARS = 200
+
+# A fit line is Yanir promising something in his own voice, so it may not
+# carry a figure: no price, no duration, no count the profile did not make
+# for this visitor. One that does is dropped and the card uses its fixed
+# line for the reason instead.
+_FIGURE_RE = re.compile(r"[0-9$€£₪%]")
+
+
+# Where a sentence ends: its closing mark, then a space or the end. Hebrew and
+# English use the same marks.
+_SENTENCE_END_RE = re.compile(r"(?<=[.!?])\s+")
+
+
+def _whole_sentences(text: str, limit: int) -> str:
+    """`text` cut to the whole sentences that fit in `limit`, or nothing.
+
+    Never mid-sentence: the summary is the visitor's words, shown in the card
+    and prefilled into the booking and the email, and a sentence that stops
+    halfway puts words in their mouth. A part whose first sentence is already
+    too long is dropped rather than sliced.
+    """
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    kept = ""
+    for sentence in _SENTENCE_END_RE.split(text):
+        candidate = f"{kept} {sentence}".strip()
+        if len(candidate) > limit:
+            break
+        kept = candidate
+    return kept
+
+
+class Handoff(BaseModel):
+    """The model's read of whether this is the moment to offer a direct talk.
+
+    Asked in the same call as the answer, so it costs a few output tokens and
+    no extra request. The model only judges and restates; whether a card is
+    shown is the server's decision (see main.py), so a model that says "ready"
+    on every turn cannot make the site pushy.
+
+    The summary follows the shape of a sales recap: where the visitor stands,
+    the problem in their words, and what they want instead. Asked as three
+    parts rather than one sentence so a missing pain is visible, and the card
+    is not offered over a summary that has none.
+    """
+
+    ready: bool = Field(
+        description=(
+            "true only when the visitor has described a need of their own that "
+            "Yanir could help with in person: their business or organisation "
+            "and a concrete problem, a question about price or cost, about "
+            "timing or availability, or about how to start working together. "
+            "false for questions about Yanir's projects, writing or background, "
+            "for small talk, for declined or out-of-scope questions, and "
+            "whenever unsure."
+        )
+    )
+    reason: HandoffReason = Field(
+        description=(
+            "Why ready is true: business_context (they described their "
+            "business and a problem), pricing, timeline, or how_to_start. "
+            "none when ready is false."
+        )
+    )
+    situation: str = Field(
+        description=(
+            "When ready: who the visitor is, as they said it, one short "
+            "complete sentence (under 90 characters) in their language and first person (e.g. 'I run a salon "
+            "with two branches.'). Empty if they did not say."
+        )
+    )
+    pain: str = Field(
+        description=(
+            "When ready: the problem in the visitor's own words, one short "
+            "complete sentence (under 90 characters), first person (e.g. 'We get a lot of WhatsApp messages "
+            "about appointments.'). Empty when ready is false."
+        )
+    )
+    goal: str = Field(
+        description=(
+            "When ready: what the visitor wants instead, one short complete "
+            "sentence (under 90 characters), first person (e.g. 'I want an agent that books against our "
+            "calendar.'). Empty if they did not say."
+        )
+    )
+    fit: str = Field(
+        description=(
+            "When ready: one complete sentence (under 120 characters) in Yanir's voice (first person, in the "
+            "visitor's language) naming the kind of thing he builds that fits "
+            "this pain, taken only from the PROFILE. No prices, durations or "
+            "numbers, no promises of results. Empty when the PROFILE does not "
+            "show such work, or when ready is false."
+        )
+    )
+
+    @property
+    def summary(self) -> str:
+        """The recap as the visitor would send it: situation, pain, goal."""
+        return " ".join(part for part in (self.situation, self.pain, self.goal) if part)
+
+
 class ModelReply(BaseModel):
     """The shape the model answers in, enforced by Gemini's structured output.
 
@@ -167,6 +284,13 @@ class ModelReply(BaseModel):
             "redirects it; false when the answer answers the question."
         )
     )
+    handoff: Handoff = Field(
+        description=(
+            "Whether the conversation has reached the moment to offer a direct "
+            "talk with Yanir. It never changes the answer: answer the question "
+            "fully either way, and do not mention this field."
+        )
+    )
 
 
 # Off switch for structured output, in one place. With it off the model answers
@@ -179,28 +303,59 @@ STRUCTURED_OUTPUT = True
 _ANSWER_FIELD_RE = re.compile(r'"answer"\s*:\s*"((?:[^"\\]|\\.)*)"', re.DOTALL)
 
 
-def _parse_reply(text: str) -> Tuple[str, Optional[bool]]:
-    """The answer text and the declined flag from what the model returned.
+def _parse_handoff(value: object) -> Optional[Handoff]:
+    """The handoff part of a reply, or None when it is missing or malformed.
 
-    Deterministic in every case: valid JSON gives both fields; text that is not
+    A broken handoff never costs the answer: the visitor still gets the reply,
+    just without the card.
+    """
+    if not isinstance(value, dict):
+        return None
+    try:
+        handoff = Handoff.model_validate(value)
+    except ValueError:
+        return None
+    fit = _whole_sentences(handoff.fit, HANDOFF_FIT_MAX_CHARS)
+    return handoff.model_copy(
+        update={
+            "situation": _whole_sentences(handoff.situation, HANDOFF_PART_MAX_CHARS),
+            "pain": _whole_sentences(handoff.pain, HANDOFF_PART_MAX_CHARS),
+            "goal": _whole_sentences(handoff.goal, HANDOFF_PART_MAX_CHARS),
+            "fit": "" if _FIGURE_RE.search(fit) else fit,
+        }
+    )
+
+
+def _parse_reply(text: str) -> Tuple[str, Optional[bool], Optional[Handoff]]:
+    """The answer text, the declined flag and the handoff from the reply.
+
+    Deterministic in every case: valid JSON gives every field it carries, and
+    a missing or malformed handoff only drops the handoff; text that is not
     JSON at all (structured output switched off, or a model that ignored it) is
-    the answer itself with the flag unknown; JSON that does not parse gives
+    the answer itself with the rest unknown; JSON that does not parse gives
     whatever answer field can be read out of it, or nothing.
     """
     stripped = text.strip()
     if not stripped.startswith("{"):
-        return stripped, None
+        return stripped, None, None
     try:
-        reply = ModelReply.model_validate_json(stripped)
-        return reply.answer.strip(), reply.declined
+        reply = json.loads(stripped)
     except ValueError:
-        match = _ANSWER_FIELD_RE.search(stripped)
-        if not match:
-            return "", None
-        try:
-            return json.loads(f'"{match.group(1)}"').strip(), None
-        except ValueError:
-            return "", None
+        reply = None
+    if isinstance(reply, dict) and isinstance(reply.get("answer"), str):
+        declined = reply.get("declined")
+        return (
+            reply["answer"].strip(),
+            declined if isinstance(declined, bool) else None,
+            _parse_handoff(reply.get("handoff")),
+        )
+    match = _ANSWER_FIELD_RE.search(stripped)
+    if not match:
+        return "", None, None
+    try:
+        return json.loads(f'"{match.group(1)}"').strip(), None, None
+    except ValueError:
+        return "", None, None
 
 
 # One client per API key for the life of the process.
@@ -294,6 +449,9 @@ class Answer:
     # The model's own word on whether it answered (see ModelReply). None when
     # it was not asked or the reply did not say.
     declined: Optional[bool] = None
+    # The model's read of whether to offer a direct talk (see Handoff). None
+    # when it was not asked or the reply did not carry one.
+    handoff: Optional[Handoff] = None
     # True when a model was called but the text is the site's own copy
     # (an empty or truncated reply), so it is not replayed as something the
     # model said.
@@ -404,7 +562,7 @@ def get_gemini_response(
             latency_ms = int((time.monotonic() - call_started) * 1000)
             usage = _read_usage(model_id, response)
 
-            text, declined = _parse_reply(response.text or "")
+            text, declined, handoff = _parse_reply(response.text or "")
             if not text:
                 return Answer(
                     text=EMPTY_RESPONSE_MESSAGE,
@@ -438,6 +596,7 @@ def get_gemini_response(
                 model=model_id,
                 latency_ms=latency_ms,
                 declined=declined,
+                handoff=handoff,
                 **usage,
             )
 

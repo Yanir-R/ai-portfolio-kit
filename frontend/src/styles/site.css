@@ -9581,6 +9581,43 @@ video.w-v {
     }
 }
 
+/* The offer to continue with Yanir (HandoffCard): the visitor's need in their
+   own words, on white with the amber bar on the reading side. */
+.hand-sum {
+    margin: 10px 0 0;
+    padding: 10px 16px;
+    background: #fff;
+    border-inline-start: 4px solid var(--btn);
+    border-radius: 4px;
+}
+.hand-sum span {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+}
+.m.lim .hand-sum p {
+    margin-top: 2px;
+}
+.hand-keep {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 2px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.hand-keep:hover {
+    color: var(--ink);
+}
+
 /*
  * Chat on a blog post, on a phone (frames 5-6, approved 2026-11-25). The page
  * has one fixed bar that looks like an input and opens the same full-screen

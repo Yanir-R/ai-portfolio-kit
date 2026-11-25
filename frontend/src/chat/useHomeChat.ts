@@ -3,7 +3,7 @@ import { CHAT, ProcessId, PROCESS_IDS } from '@/copy/chat';
 import { SheetKey } from '@/content/sheets';
 import { useLang } from '@/i18n/useLang';
 import { chatService, ChatFailure } from '@/services/chatService';
-import { AnswerTrace, ChatBlock, ChatMessage, TraceSource } from '@/types/chat';
+import { AnswerTrace, ChatBlock, ChatHandoff, ChatMessage, TraceSource } from '@/types/chat';
 import { classify } from '@/chat/intents';
 import { sheetFor } from '@/chat/sheetFor';
 import { FailureCase, failureCase, failureText as describeFailure } from '@/chat/failure';
@@ -63,6 +63,12 @@ export type Entry =
           asksEmail?: boolean;
           /** The server's signature on this reply, sent back with it as history. */
           sig?: string | null;
+          /**
+           * The offer to continue with Yanir, drawn under this answer. Removed
+           * when the visitor chooses to keep asking or a send fails after it;
+           * the answer itself, and so the history, stays exactly as it was.
+           */
+          handoff?: ChatHandoff | null;
       }
     | { id: number; kind: 'summary'; process: ProcessId; team: string }
     | {
@@ -142,6 +148,9 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
     // The day's answers are spent. Nothing typed can be answered until the
     // budget renews, so the input gives way to the routes to Yanir.
     const [closed, setClosed] = useState(false);
+    // The offer to talk directly is made at most once per conversation; the
+    // server is told, so it does not offer it again.
+    const [handoffOffered, setHandoffOffered] = useState(false);
 
     // The greeting is always in the page's current language.
     const entries = useMemo(
@@ -170,8 +179,12 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
 
     const push = useCallback((...items: NewEntry[]) => {
         setEntries((prev) => [
-            // The starter grid goes once the visitor says anything.
-            ...prev.filter((e) => e.kind !== 'starters' && e.kind !== 'working'),
+            // The starter grid goes once the visitor says anything, and an
+            // open offer to talk directly folds once the conversation moves
+            // on: asking on is the same choice as "I'll keep asking the agent".
+            ...prev
+                .filter((e) => e.kind !== 'starters' && e.kind !== 'working')
+                .map((e) => (e.kind === 'answer' && e.handoff ? { ...e, handoff: null } : e)),
             ...items.map((item) => ({ ...item, id: nextId.current++ }) as Entry),
         ]);
     }, []);
@@ -256,6 +269,13 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             return [];
         });
 
+    /** Folds away the offer to talk directly. Nothing else in the conversation changes. */
+    const foldHandoff = useCallback(() => {
+        setEntries((prev) =>
+            prev.map((e) => (e.kind === 'answer' && e.handoff ? { ...e, handoff: null } : e))
+        );
+    }, []);
+
     /** A send that got no answer: said in the log, and the input closed if the day is spent. */
     const failed = (failure: ChatFailure, question: string) => {
         const kind = failureCase(failure);
@@ -293,7 +313,13 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             1000
         );
 
-        const result = await chatService.sendMessage(text, history(), await getToken());
+        const result = await chatService.sendMessage(
+            text,
+            history(),
+            await getToken(),
+            null,
+            handoffOffered
+        );
         window.clearInterval(clock);
         resetToken();
         setBusy(false);
@@ -332,7 +358,9 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             sheet,
             asksEmail,
             sig: result.sig,
+            handoff: result.handoff,
         });
+        if (result.handoff) setHandoffOffered(true);
         offerNext(askedNow);
 
         if (fromIndex || !record) {
@@ -520,6 +548,14 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
         busy,
         offline,
         closed,
+        /**
+         * "I'll keep asking the agent": the offer folds away and the input is
+         * where it was. The next question goes to the agent like any other,
+         * with the whole conversation behind it.
+         */
+        keepAsking: foldHandoff,
+        /** The offer to talk directly is open under the last answer. */
+        handoffOpen: entries.some((e) => e.kind === 'answer' && !!e.handoff),
         /** Sends a question again after a failed send. */
         retry: (text: string) => !busy && !closed && ask(text),
         /** Which sheet an address is being waited for, if any. */
