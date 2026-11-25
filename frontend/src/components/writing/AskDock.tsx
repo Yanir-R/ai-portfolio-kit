@@ -6,6 +6,7 @@ import WritingBlocks from '@/components/writing/WritingBlocks';
 import { Tag } from '@/components/writing/parts';
 import { chatService, ChatFailure } from '@/services/chatService';
 import { useTurnstile } from '@/hooks/useTurnstile';
+import { failureText as describeFailure } from '@/chat/failureText';
 import { useLang } from '@/i18n/useLang';
 import { ChatBlock, ChatContext, ChatMessage, TraceSource } from '@/types/chat';
 import { WritingEntry } from '@/types/writing';
@@ -75,12 +76,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
             return [];
         });
 
-    const failureText = (failure: ChatFailure) =>
-        failure.code === 'too_long'
-            ? errors.tooLong
-            : failure.code === 'rate_limited'
-              ? errors.rateLimited
-              : errors.failed;
+    const failureText = (failure: ChatFailure) => describeFailure(errors, failure);
 
     const ask = async (question: string, shown = question) => {
         if (busy) return;

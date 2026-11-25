@@ -6,6 +6,7 @@ import { chatService, ChatFailure } from '@/services/chatService';
 import { AnswerTrace, ChatBlock, ChatMessage, TraceSource } from '@/types/chat';
 import { classify } from '@/chat/intents';
 import { sheetFor } from '@/chat/sheetFor';
+import { failureText as describeFailure } from '@/chat/failureText';
 
 /*
  * The home chat as a small, deterministic state machine.
@@ -245,14 +246,7 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             return [];
         });
 
-    const failureText = (failure: ChatFailure) => {
-        if (failure.code === 'too_long') return copy.errors.tooLong;
-        if (failure.code === 'rate_limited')
-            return failure.retryAfter
-                ? copy.errors.rateLimitedIn.replace('{n}', String(failure.retryAfter))
-                : copy.errors.rateLimited;
-        return copy.errors.failed;
-    };
+    const failureText = (failure: ChatFailure) => describeFailure(copy.errors, failure);
 
     /** A question for the agent: the stations light while it runs, then the answer's drawing opens. */
     const ask = async (text: string, picked?: SheetKey) => {
