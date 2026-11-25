@@ -70,7 +70,6 @@ interface Props {
     topic?: string;
     /** Told once the call is booked, so the dialog can drop its route tabs. */
     onBooked: () => void;
-    onClose: () => void;
 }
 
 const Stepper: React.FC<{ at: number; names: string[]; label: string }> = ({
@@ -92,7 +91,7 @@ const Stepper: React.FC<{ at: number; names: string[]; label: string }> = ({
     </ol>
 );
 
-const BookingFlow: React.FC<Props> = ({ topic, onBooked, onClose }) => {
+const BookingFlow: React.FC<Props> = ({ topic, onBooked }) => {
     const { t, lang } = useLang();
     const copy = t(CONTACT).booking;
     const locale = lang === 'he' ? 'he-IL' : 'en-GB';
@@ -132,13 +131,6 @@ const BookingFlow: React.FC<Props> = ({ topic, onBooked, onClose }) => {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',
-                timeZone: 'UTC',
-            }),
-            dayYear: new Intl.DateTimeFormat(locale, {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
                 timeZone: 'UTC',
             }),
         }),
@@ -222,53 +214,52 @@ const BookingFlow: React.FC<Props> = ({ topic, onBooked, onClose }) => {
             );
         return (
             <>
-                <Stepper at={3} names={copy.steps} label={copy.stepsLabel} />
-                <div className="bk-ok" role="status">
-                    <span className="ck" aria-hidden="true">
-                        ✓
-                    </span>
-                    <div>
-                        <h3>{copy.doneTitle}</h3>
-                        <p>{copy.doneText}</p>
-                    </div>
-                </div>
-                <dl className="bk-sum">
-                    <dt>{copy.when}</dt>
-                    <dd>
-                        {fmt.dayYear.format(noon(day))}
-                        <span className="sep"> · </span>
-                        <span className="tm">
-                            {clock(start)} {copy.until} {clock(end)}
+                {/* No step line here: the large check already says it is done. */}
+                <div className="bk-done">
+                    <div className="bk-ok" role="status">
+                        <span className="ck" aria-hidden="true">
+                            ✓
                         </span>
-                    </dd>
-                    <dt>{copy.where}</dt>
-                    <dd>{copy.whereValue}</dd>
-                    <dt>{copy.withWhom}</dt>
-                    <dd>{copy.withValue}</dd>
-                    {notes.trim() && (
-                        <>
-                            <dt>{copy.subject}</dt>
-                            <dd>{notes.trim()}</dd>
-                        </>
-                    )}
-                </dl>
-                <div className="bk-add">
-                    <span>{copy.addToCalendar}</span>
-                    <div className="bk-row">
-                        <a className="btn" href={calendarUrl} target="_blank" rel="noopener">
-                            {copy.calGoogle}
-                        </a>
-                        <a className="btn" href={calendarFile} download="call-with-yanir.ics">
-                            {copy.calFile}
-                        </a>
+                        <div>
+                            <h3>{copy.doneTitle}</h3>
+                            <p>{copy.doneText}</p>
+                        </div>
                     </div>
+                    <div className="bk-card">
+                        <dl className="bk-sum">
+                            {/* Day and time on their own rows: one line each at any width. */}
+                            <dt>{copy.when}</dt>
+                            <dd>{fmt.day.format(noon(day))}</dd>
+                            <dt>{copy.time}</dt>
+                            <dd>
+                                {clock(start)} {copy.until} {clock(end)}
+                            </dd>
+                            <dt>{copy.where}</dt>
+                            <dd>{copy.whereValue}</dd>
+                            <dt>{copy.withWhom}</dt>
+                            <dd>{copy.withValue}</dd>
+                            {notes.trim() && (
+                                <>
+                                    <dt>{copy.subject}</dt>
+                                    <dd>{notes.trim()}</dd>
+                                </>
+                            )}
+                        </dl>
+                        <div className="bk-add">
+                            <span>{copy.addToCalendar}</span>
+                            <div className="bk-cals">
+                                <a href={calendarUrl} target="_blank" rel="noopener">
+                                    {copy.calGoogle}
+                                </a>
+                                <a href={calendarFile} download="call-with-yanir.ics">
+                                    {copy.calFile}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {/* No Close button: the window has its ✕ and closes on a click outside. */}
+                    <small className="fine">{copy.doneFine}</small>
                 </div>
-                <div className="bk-row">
-                    <button type="button" className="btn sec" onClick={onClose}>
-                        {copy.close}
-                    </button>
-                </div>
-                <small className="fine">{copy.doneFine}</small>
             </>
         );
     }

@@ -8179,23 +8179,78 @@ video.w-v {
 [dir] .talk .bk-row .btn::after {
     content: none;
 }
-.bk-sum .tm {
-    white-space: nowrap;
+/*
+ * The confirmation: the check and title, one card with the summary and the
+ * calendar choices as its footer, then the fine print beside Close.
+ */
+.bk-done {
+    display: grid;
+    gap: 18px;
+    padding-top: 4px;
 }
-/* On a phone the time goes on its own line, so no dot hangs at a line edge. */
-@media (max-width: 640px) {
-    .bk-sum .sep {
-        display: none;
-    }
-    .bk-sum .tm {
-        display: block;
-    }
+.bk-done .bk-ok h3 {
+    margin-bottom: 6px;
+}
+.bk-card {
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.bk-card .bk-sum {
+    border: 0;
+    border-radius: 0;
+    padding: 16px 18px;
+    gap: 10px 20px;
 }
 .bk-add {
-    display: grid;
-    gap: 8px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    padding: 12px 18px;
+    border-top: 1.5px solid var(--line);
+    background: #f5f7fd;
 }
 .bk-add > span {
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    color: var(--muted);
+}
+.bk-cals {
+    display: flex;
+    gap: 8px;
+    margin-inline-start: auto;
+}
+.bk-cals a {
+    font: 800 0.92rem/1 var(--body);
+    color: var(--ink);
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 9px 14px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.bk-cals a:hover {
+    background: var(--btn);
+}
+@media (max-width: 640px) {
+    .bk-card .bk-sum {
+        padding: 14px;
+        gap: 8px 14px;
+    }
+    .bk-add {
+        padding: 12px 14px;
+    }
+    .bk-cals {
+        width: 100%;
+        margin: 0;
+    }
+    .bk-cals a {
+        flex: 1;
+        text-align: center;
+    }
+}
+.bk-sum {
+    align-items: baseline;
 }

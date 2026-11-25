@@ -87,11 +87,7 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
                 {kind === 'call' && (
                     <>
                         {!booked && <p>{copy.call.text}</p>}
-                        <BookingFlow
-                            topic={note || undefined}
-                            onBooked={() => setBooked(true)}
-                            onClose={() => ref.current?.close()}
-                        />
+                        <BookingFlow topic={note || undefined} onBooked={() => setBooked(true)} />
                     </>
                 )}
                 {kind === 'mail' && (

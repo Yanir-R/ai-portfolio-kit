@@ -169,6 +169,7 @@ export interface BookingCopy {
     doneTitle: string;
     doneText: string;
     when: string;
+    time: string;
     where: string;
     whereValue: string;
     withWhom: string;
@@ -179,7 +180,6 @@ export interface BookingCopy {
     calFile: string;
     /** Between two times; a dash reads in the wrong order inside Hebrew. */
     until: string;
-    close: string;
     doneFine: string;
     eventTitle: string;
     weekdays: [string, string, string, string, string, string, string];
@@ -222,7 +222,8 @@ export const CONTACT: Localized<ContactCopy> = {
             bookFailed: 'השיחה לא נקבעה. נסו שוב, או קבעו דרך הקישור למטה.',
             doneTitle: 'השיחה נקבעה',
             doneText: 'אישור עם הקישור לשיחה נשלח למייל שלכם.',
-            when: 'מתי',
+            when: 'יום',
+            time: 'שעה',
             where: 'איפה',
             whereValue: 'שיחת וידאו, הקישור במייל',
             withWhom: 'עם מי',
@@ -232,7 +233,6 @@ export const CONTACT: Localized<ContactCopy> = {
             calGoogle: 'Google Calendar',
             calFile: 'Apple / Outlook',
             until: 'עד',
-            close: 'סגירה',
             doneFine: 'צריך לשנות? במייל האישור יש קישור לשינוי מועד ולביטול.',
             eventTitle: 'שיחת אבחון עם יניר רוט',
             weekdays: ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'],
@@ -291,7 +291,8 @@ export const CONTACT: Localized<ContactCopy> = {
             bookFailed: 'The call was not booked. Try again, or book through the link below.',
             doneTitle: 'The call is booked',
             doneText: 'A confirmation with the call link is on its way to your email.',
-            when: 'When',
+            when: 'Day',
+            time: 'Time',
             where: 'Where',
             whereValue: 'Video call, link in the email',
             withWhom: 'With',
@@ -301,7 +302,6 @@ export const CONTACT: Localized<ContactCopy> = {
             calGoogle: 'Google Calendar',
             calFile: 'Apple / Outlook',
             until: 'to',
-            close: 'Close',
             doneFine:
                 'Need to change it? The confirmation email has links to reschedule or cancel.',
             eventTitle: 'Discovery call with Yanir Rot',
