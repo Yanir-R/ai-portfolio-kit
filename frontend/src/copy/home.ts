@@ -29,7 +29,15 @@ export interface HomeCopy {
     };
     proof: SectionHead & {
         evidenceLabel: string;
-        promises: { title: string; text: string; evidence: string }[];
+        promises: {
+            title: string;
+            text: string;
+            evidence: string;
+            /** Under the proof: the project page where the whole story is told. */
+            story?: { label: string; href: string };
+        }[];
+        /** Phones: after the promises, one band with the way to book. */
+        band: string;
         alsoTitle: string;
         /** Under the cards: the way to every project. */
         allProjects: string;
@@ -133,6 +141,10 @@ export const HOME: Localized<HomeCopy> = {
                     text: 'מתחילים מהתהליך ומהנתונים שלכם. AI נכנס רק כשהבסיס יציב ואמין.',
                     evidence:
                         'ב־Trinity Legal, מערכת שבניתי למשרד עורכי דין מתוך ישיבות אפיון איתם. 56,607 קבצים כבר בענן, ועכשיו מתחיל השלב הבא: שילוב AI בעבודה השוטפת של המשרד.',
+                    story: {
+                        label: 'לסיפור המלא של Trinity Legal',
+                        href: '/projects/trinity-legal',
+                    },
                 },
                 {
                     title: 'הסוכן שואל לפני שהוא פועל',
@@ -147,7 +159,8 @@ export const HOME: Localized<HomeCopy> = {
                         'באתר הזה: מתחת לכל תשובה של הסוכן יש קישור ״מאחורי התשובה״. נסו אותו בראש העמוד.',
                 },
             ],
-            alsoTitle: 'ועוד ארבע מערכות שבניתי',
+            band: 'רוצים שזה יעבוד כך גם אצלכם?',
+            alsoTitle: 'ועוד שלוש מערכות שבניתי',
             allProjects: 'לכל הפרויקטים',
             also: [
                 {
@@ -161,12 +174,6 @@ export const HOME: Localized<HomeCopy> = {
                     title: 'PersonaKit ↗︎',
                     text: 'זיכרון לסוכני AI שאפשר לקרוא, לבדוק ולתקן. מורידים ומשתמשים: personakit.me',
                     open: true,
-                },
-                {
-                    tag: 'פול־סטאק',
-                    title: 'TrinityCRM',
-                    text: 'CRM שנבנה סביב עסק אחד: תורים, לקוחות ותזכורות. מוכן לחיבור סוכן.',
-                    href: '/projects/trinity-crm',
                 },
                 {
                     tag: 'סוכן בודק סוכן',
@@ -363,6 +370,10 @@ export const HOME: Localized<HomeCopy> = {
                     text: 'We start from your process and your data. AI comes in only when the foundation is stable and reliable.',
                     evidence:
                         "At Trinity Legal, a system I built for a law office out of working sessions with the lawyers. 56,607 files are already in the cloud, and now the next stage begins: bringing AI into the office's daily work.",
+                    story: {
+                        label: 'The full Trinity Legal story',
+                        href: '/projects/trinity-legal',
+                    },
                 },
                 {
                     title: 'The agent asks before it acts',
@@ -377,7 +388,8 @@ export const HOME: Localized<HomeCopy> = {
                         'On this site: under every answer the agent gives there is a "Behind the answer" link. Try it at the top of the page.',
                 },
             ],
-            alsoTitle: 'And four more systems I built',
+            band: 'Want it to work like this for you?',
+            alsoTitle: 'And three more systems I built',
             allProjects: 'All projects',
             also: [
                 {
@@ -391,12 +403,6 @@ export const HOME: Localized<HomeCopy> = {
                     title: 'PersonaKit ↗︎',
                     text: 'Memory for AI agents that you can read, check and correct. Download and use: personakit.me',
                     open: true,
-                },
-                {
-                    tag: 'Full-stack',
-                    title: 'TrinityCRM',
-                    text: 'A CRM built around one business: appointments, customers and reminders. Ready for an agent.',
-                    href: '/projects/trinity-crm',
                 },
                 {
                     tag: 'Agent reviews agent',
