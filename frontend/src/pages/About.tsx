@@ -2,7 +2,8 @@ import React from 'react';
 import { PROJECTS } from '@/copy/projects';
 import Markdown from '@/components/Markdown';
 import Avatar from '@/components/site/Avatar';
-import { LoadFailed, LoadingNote } from '@/components/site/PageStates';
+import { LoadFailed } from '@/components/site/PageStates';
+import { BodySkeleton } from '@/components/site/Skeleton';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { useLoad } from '@/hooks/useLoad';
 import { useLang } from '@/i18n/useLang';
@@ -43,7 +44,7 @@ const About: React.FC = () => {
                     </button>
                 </p>
             </div>
-            {load.state === 'loading' && <LoadingNote text={t(PROJECTS).loading} />}
+            {load.state === 'loading' && <BodySkeleton label={t(PROJECTS).loading} />}
             {load.state === 'failed' && <LoadFailed copy={copy.failed} onRetry={retry} />}
             {load.state === 'ready' && (
                 <article className="w-post about">

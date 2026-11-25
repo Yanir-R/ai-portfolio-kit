@@ -2,7 +2,8 @@ import React from 'react';
 import { useParams } from 'react-router';
 import { WRITING } from '@/copy/writing';
 import PostArticle from '@/components/writing/PostArticle';
-import { LoadFailed, LoadingNote, NotFoundHero } from '@/components/site/PageStates';
+import { LoadFailed, NotFoundHero } from '@/components/site/PageStates';
+import { ArticleSkeleton } from '@/components/site/Skeleton';
 import { ERRORS } from '@/copy/errors';
 import { useLoad } from '@/hooks/useLoad';
 import { useWritingIndex } from '@/hooks/useWritingIndex';
@@ -20,7 +21,7 @@ const WritingDetail: React.FC = () => {
     const index = useWritingIndex();
     const [load, retry] = useLoad(slug, () => writingService.getBySlug(slug));
 
-    if (load.state === 'loading') return <LoadingNote text={copy.blog.loading} />;
+    if (load.state === 'loading') return <ArticleSkeleton label={copy.post.loading} />;
     // Only a 404 means the page is not there. Anything else - the server
     // asleep, a network drop, a 5xx - is a page that exists and did not load.
     if (load.state === 'failed' && load.notFound)

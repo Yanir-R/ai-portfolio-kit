@@ -209,11 +209,6 @@
     }
 }
 
-.state-note {
-    padding: 48px 0;
-    color: var(--muted);
-}
-
 /* The "all posts" link beside the latest posts' lede. */
 #posts .head .all {
     color: var(--link);
@@ -432,5 +427,198 @@
     .err-page.w-hero {
         grid-template-columns: 1fr;
         gap: 16px;
+    }
+}
+
+/*
+ * Loading placeholders (components/site/Skeleton.tsx). Grey shapes in the
+ * layout of the part that is waiting, inside that part's own classes, so the
+ * page keeps its frame. They appear after a short delay, so a fast answer
+ * never flashes them, and a slow light sweeps across while they wait.
+ */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+.sk-in {
+    opacity: 0;
+    animation: sk-show 0.3s ease-out 0.25s forwards;
+}
+.sk-bar {
+    display: block;
+    inline-size: 100%;
+    block-size: 0.8em;
+    border-radius: 4px;
+    background-color: var(--grid);
+    background-image: linear-gradient(
+        90deg,
+        transparent 0,
+        rgba(255, 255, 255, 0.75) 50%,
+        transparent 100%
+    );
+    background-size: 40% 100%;
+    background-repeat: no-repeat;
+    background-position: -60% 0;
+}
+.sk .sk-bar {
+    animation: sk-sweep 1.6s ease-in-out 0.55s infinite;
+}
+@keyframes sk-show {
+    to {
+        opacity: 1;
+    }
+}
+@keyframes sk-sweep {
+    0% {
+        background-position: -60% 0;
+    }
+    to {
+        background-position: 160% 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sk .sk-bar {
+        background-image: none;
+        animation: none;
+    }
+}
+
+/* Shapes, sized like the text they stand in for. */
+.sk-card {
+    gap: var(--sp-2);
+}
+.sk-card > .sk-bar,
+.sk-body > .sk-bar {
+    margin-block: 0.3em;
+}
+.sk-img {
+    block-size: auto;
+    aspect-ratio: 1.91 / 1;
+    border-radius: 8px;
+    margin-block-end: var(--sp-1);
+}
+.w-post .sk-img {
+    margin-block-end: 22px;
+}
+.sk-tags {
+    display: flex;
+    gap: var(--sp-1);
+}
+.sk-tag {
+    inline-size: 4.2em;
+    block-size: 1.4em;
+}
+/* The one yellow touch, where a status tag sits on the real card. */
+.sk-tag.hl {
+    background-color: var(--act-soft);
+}
+.sk-h {
+    block-size: 1.15em;
+    margin-block: 0.25em;
+}
+.sk-h2 {
+    block-size: 1.9em;
+}
+.sk-h1 {
+    block-size: clamp(1.6rem, 3.4vw, 2.2rem);
+    margin-block-end: 0.5rem;
+}
+.sk-small {
+    block-size: 0.7em;
+}
+.sk-gap {
+    block-size: var(--sp-3);
+    background: none;
+}
+.sk-ft {
+    display: flex;
+    justify-content: flex-start;
+    border-top: 1.5px dashed var(--line);
+    padding-top: var(--sp-2);
+    margin-top: auto;
+}
+.sk-ft .sk-bar {
+    background-color: var(--blue-soft);
+}
+.sk.w-post .sk-back {
+    margin-block-end: 18px;
+    background-color: var(--blue-soft);
+}
+.sk.w-post .sk-tags {
+    margin-block-end: var(--sp-2);
+}
+.sk-by {
+    margin: var(--sp-2) 0 20px;
+}
+.sk-body {
+    display: flex;
+    flex-direction: column;
+}
+.sk-sec {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    margin-block-end: var(--sp-3);
+}
+.sk-idx {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+.sk-field {
+    block-size: 2.6em;
+    border-radius: 8px;
+    background-color: var(--paper);
+    box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.sk-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sp-2);
+    padding-block: var(--sp-2);
+    border-bottom: 1.5px solid var(--grid);
+}
+.sk-row .sk-bar:last-child {
+    flex: none;
+}
+@media (max-width: 900px) {
+    /* On narrow screens the index is a search line and a row of chips. */
+    .sk-idx .sk-row {
+        display: none;
+    }
+    .sk-idx {
+        margin-block-end: var(--sp-3);
+    }
+}
+/* The photo's round well, so a slow photo shows a quiet circle, not its alt text. */
+.avatar {
+    background: var(--grid);
+    color: transparent;
+}
+/* The calendar while its free times load: the days ahead shimmer like the placeholders. */
+.bk-cal .cg.ld button:not(.past) {
+    background-color: #f3f6fd;
+    background-image: linear-gradient(
+        90deg,
+        transparent 0,
+        rgba(255, 255, 255, 0.85) 50%,
+        transparent 100%
+    );
+    background-size: 40% 100%;
+    background-repeat: no-repeat;
+    animation: sk-sweep 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+    .bk-cal .cg.ld button:not(.past) {
+        background-image: none;
+        animation: none;
     }
 }

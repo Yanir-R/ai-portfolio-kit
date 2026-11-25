@@ -53,6 +53,7 @@ export interface WritingCopy {
     panel: { label: string; close: string; full: string };
     post: {
         back: string;
+        loading: string;
         byName: string;
         published: (source: string, date: string) => string;
         original: string;
@@ -170,6 +171,7 @@ export const WRITING: Localized<WritingCopy> = {
         panel: { label: 'קריאת פוסט', close: 'סגירה', full: 'פתחו בדף מלא' },
         post: {
             back: 'לכל הבלוג',
+            loading: 'טוען את הפוסט…',
             byName: 'יניר רוט',
             // A Latin name takes a maqaf after ב: ב־Medium.
             published: (source, date) =>
@@ -293,6 +295,7 @@ export const WRITING: Localized<WritingCopy> = {
         panel: { label: 'Reading a post', close: 'Close', full: 'Open as a full page' },
         post: {
             back: 'All of the blog',
+            loading: 'Loading the piece…',
             byName: 'Yanir Rot',
             published: (source, date) => `Originally published on ${source}, ${date}`,
             original: 'The original post ↗︎',
