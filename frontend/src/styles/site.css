@@ -10766,17 +10766,14 @@ video.w-v {
  * (phones, the compact panel) the sheets stay as they were.
  */
 .v-sys .c .art,
+.v-sys .c .fx,
 .v-sys .c .how,
 .v-why .pf {
     display: none;
 }
 @media (min-width: 901px) and (min-height: 620px) {
-    #top.grown .plan.showvis .v-sys {
-        flex: 1 1 auto;
-        max-height: 400px;
-    }
     #top.grown .v-sys .w {
-        width: 72px;
+        width: 64px;
     }
     #top.grown .v-sys .c .art {
         display: block;
@@ -10789,7 +10786,7 @@ video.w-v {
     #top.grown .v-sys .art svg {
         display: block;
         width: 100%;
-        height: 56px;
+        height: 44px;
         fill: #fff;
         stroke: var(--ink);
         stroke-width: 2;
@@ -10809,22 +10806,51 @@ video.w-v {
         display: block;
         grid-column: 1 / -1;
         align-self: end;
-        margin-top: var(--sp-3);
+        margin-top: 0;
         padding-top: var(--sp-2);
         border-top: 1.5px dashed var(--line);
         font-size: 0.9rem;
         font-weight: 800;
     }
-    /* The text and any links sit together at the top; the way to the page sits at the bottom. */
+    /*
+     * The text and any links sit together at the top; the facts and the way
+     * to the page line up at the bottom of the three cards.
+     */
     #top.grown .v-sys .c {
-        grid-template-rows: auto auto auto auto 1fr;
+        grid-template-rows: auto auto auto auto 1fr auto;
     }
     #top.grown .v-sys .c .lk {
         align-self: start;
         margin-top: var(--sp-2);
     }
-    #top.grown .v-sys .c .how {
+    #top.grown .v-sys .c .fx {
+        display: block;
         grid-row: 5;
+        grid-column: 1 / -1;
+        align-self: end;
+        margin: var(--sp-2) 0 0;
+    }
+    /* The number floats beside its label, so a long label still uses the card's width. */
+    #top.grown .v-sys .fx > div {
+        display: flow-root;
+        padding: 6px 0;
+        border-top: 1.5px solid var(--line);
+    }
+    #top.grown .v-sys .fx dt {
+        float: inline-start;
+        margin-inline-end: 8px;
+        font-family: var(--display);
+        font-size: 1.9rem;
+        line-height: 1;
+    }
+    #top.grown .v-sys .fx dd {
+        margin: 0;
+        font-size: 0.86rem;
+        font-weight: 600;
+        line-height: 1.35;
+    }
+    #top.grown .v-sys .c .how {
+        grid-row: 6;
     }
     #top.grown .v-why .pf {
         display: block;

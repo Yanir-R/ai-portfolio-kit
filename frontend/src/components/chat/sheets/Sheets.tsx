@@ -7,6 +7,7 @@ import { TraceSource } from '@/types/chat';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { Arrow } from '@/components/site/Arrow';
 import { CountUp, Letter, PersonaKitLinks, TalkButton } from '@/components/chat/sheets/parts';
+import { PROJECT_PAGES } from '@/content/projectPages';
 import { useLang } from '@/i18n/useLang';
 
 /*
@@ -283,8 +284,20 @@ const BuiltSheet: React.FC = () => {
                             <div className="art">{SYSTEM_ART[i]}</div>
                             <span>{s.text}</span>
                             {s.links && <PersonaKitLinks />}
+                            {/* The project page's own fact tiles, so each figure lives in one place. */}
+                            <dl className="fx">
+                                {s.facts.map((n) => {
+                                    const fact = t(PROJECT_PAGES[s.slug]).facts[n];
+                                    return (
+                                        <div key={n}>
+                                            <dt>{fact.value}</dt>
+                                            <dd>{fact.label}</dd>
+                                        </div>
+                                    );
+                                })}
+                            </dl>
                             <div className="how">
-                                <Go href={s.href}>{copy.how}</Go>
+                                <Go href={`/projects/${s.slug}`}>{copy.how}</Go>
                             </div>
                         </div>
                     </React.Fragment>

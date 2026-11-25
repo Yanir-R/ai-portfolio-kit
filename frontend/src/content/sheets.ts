@@ -157,7 +157,14 @@ export interface SheetCopy {
         topic: string;
     };
     built: {
-        systems: { title: string; text: string; links?: boolean; href: string }[];
+        /** `facts`: which of the project page's fact tiles the card repeats. */
+        systems: {
+            title: string;
+            text: string;
+            links?: boolean;
+            slug: string;
+            facts: [number, number];
+        }[];
         wires: string[];
         /** The way from each card to its drawn project page. */
         how: string;
@@ -303,18 +310,21 @@ export const SHEETS: Localized<SheetCopy> = {
                 {
                     title: 'מנוע הביקורת',
                     text: 'סוכן אחד כותב, סוכן אחר בודק, ורק אז זה מגיע לאדם.',
-                    href: '/projects/review-engine',
+                    slug: 'review-engine',
+                    facts: [0, 1],
                 },
                 {
                     title: 'מערך הסוכנים',
                     text: 'יותר מ־40 סוכנים עם ראש אחד, וכל אחד עם ההרשאות שהתפקיד שלו צריך.',
-                    href: '/projects/agent-fleet',
+                    slug: 'agent-fleet',
+                    facts: [1, 2],
                 },
                 {
                     title: 'PersonaKit',
                     text: 'זיכרון לסוכנים שאפשר לקרוא, לבדוק ולתקן. קוד פתוח, חינם.',
                     links: true,
-                    href: '/projects/personakit',
+                    slug: 'personakit',
+                    facts: [0, 1],
                 },
             ],
             wires: ['בודק את', 'מזין זיכרון אל'],
@@ -530,18 +540,21 @@ export const SHEETS: Localized<SheetCopy> = {
                 {
                     title: 'The review engine',
                     text: 'One agent writes, another agent reviews, and only then it reaches a person.',
-                    href: '/projects/review-engine',
+                    slug: 'review-engine',
+                    facts: [0, 1],
                 },
                 {
                     title: 'The agent fleet',
                     text: 'More than 40 agents with one head, each with the permissions its role needs.',
-                    href: '/projects/agent-fleet',
+                    slug: 'agent-fleet',
+                    facts: [1, 2],
                 },
                 {
                     title: 'PersonaKit',
                     text: 'Memory for agents that you can read, check and correct. Open source, free.',
                     links: true,
-                    href: '/projects/personakit',
+                    slug: 'personakit',
+                    facts: [0, 1],
                 },
             ],
             wires: ['reviews', 'feeds memory to'],
