@@ -80,3 +80,29 @@ def test_a_taken_slot_reads_409_and_other_refusals_502(client, monkeypatch):
 
     monkeypatch.setattr(booking, "_post", down)
     assert client.post("/api/booking", json=_body()).status_code == 502
+
+
+def test_request_names_itself(monkeypatch):
+    """cal.com's Cloudflare refuses urllib's default User-Agent with 1010."""
+    seen = {}
+
+    class Reply:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            return b'{"status": "success", "data": {"uid": "u"}}'
+
+    def fake_urlopen(request, timeout):
+        seen["ua"] = request.get_header("User-agent")
+        seen["version"] = request.get_header("Cal-api-version")
+        return Reply()
+
+    monkeypatch.setattr(booking.urllib.request, "urlopen", fake_urlopen)
+    booking._post({"start": "x"})
+    assert seen["ua"] == booking.USER_AGENT
+    assert "urllib" not in seen["ua"].lower()
+    assert seen["version"] == booking.CAL_API_VERSION
