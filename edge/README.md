@@ -72,7 +72,7 @@ the Worker. For the routes that cost something per call, the Worker also checks
 a [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) token: a
 per-request proof that a browser running the site sent the message.
 
-- **Routes:** `POST /chat-with-files` and `POST /api/contact`. Everything else
+- **Routes:** `POST /chat-with-files`, `POST /api/contact` and `POST /api/booking`. Everything else
   (GETs, CORS preflights, other paths) is forwarded as before.
 - **Header:** the frontend sends the token in `X-Turnstile-Token`. The Worker
   verifies it against Turnstile's `siteverify` with `TURNSTILE_SECRET_KEY`, and
