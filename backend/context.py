@@ -214,9 +214,12 @@ CATALOGUE_LABEL = "Also published (one line each, full text not included here)"
 
 # A summary is whole sentences from the start of the overview: enough of them
 # to pass the minimum, because some overviews open with two words ("This
-# site."), and cut at the maximum if one sentence runs long.
+# site."). It is never cut inside a sentence. A line that stops mid-clause
+# ("keeps the exact quote each one came...") is the one thing the model is
+# told it may say about a document, so a half sentence there becomes a half
+# claim in the answer. A long opening sentence costs a few dozen tokens; the
+# summary paragraphs are written to be read whole.
 MIN_SUMMARY_CHARS = 80
-MAX_SUMMARY_CHARS = 220
 
 _SUMMARY_RE = re.compile(r"^## (?:Overview|Summary)[ \t]*\n+(.+?)(?=\n\s*\n|\n#|\Z)", re.MULTILINE | re.DOTALL)
 _SENTENCE_END_RE = re.compile(r"(?<=[.!?])\s")
@@ -237,8 +240,6 @@ def summary_of(body: str) -> str:
         summary = f"{summary} {sentence}".strip()
         if len(summary) >= MIN_SUMMARY_CHARS:
             break
-    if len(summary) > MAX_SUMMARY_CHARS:
-        summary = summary[:MAX_SUMMARY_CHARS].rsplit(" ", 1)[0] + "..."
     return summary
 
 
