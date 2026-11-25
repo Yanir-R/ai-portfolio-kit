@@ -10,6 +10,7 @@ import { useHistoryLayer } from '@/hooks/usePhoneLayer';
 import { EntryTitle, Tag } from '@/components/writing/parts';
 import { ARROW } from '@/components/site/Arrow';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
+import ShareBox, { ShareLink } from '@/components/site/ShareBox';
 import { useLang } from '@/i18n/useLang';
 import { stripWritingMetadata } from '@/services/writingService';
 import { sourceLabel, WritingEntry, WritingIndex } from '@/types/writing';
@@ -160,6 +161,7 @@ const PostArticle: React.FC<Props> = ({ entry, index, page = false }) => {
             <EntryTitle entry={entry} as="h1" />
             <div className="by">
                 {copy.post.byName} · {date} · {copy.readMinutes(readMinutes(entry))}
+                {page && <ShareLink />}
             </div>
             {lead &&
                 (lead.kind === 'image' ? (
@@ -182,6 +184,12 @@ const PostArticle: React.FC<Props> = ({ entry, index, page = false }) => {
                             <LinkedInMark />
                             {copy.post.originalLinkedIn}
                         </a>
+                        {page && (
+                            <ShareBox
+                                kind={entry.kind === 'article' ? 'article' : 'post'}
+                                title={entry.title}
+                            />
+                        )}
                     </div>
                 ) : (
                     <div className="w-orig" dir={lang === 'he' ? 'rtl' : 'ltr'}>
@@ -205,6 +213,12 @@ const PostArticle: React.FC<Props> = ({ entry, index, page = false }) => {
                                 <LinkedInMark />
                                 {copy.post.shortOnLinkedIn}
                             </a>
+                        )}
+                        {page && (
+                            <ShareBox
+                                kind={entry.kind === 'article' ? 'article' : 'post'}
+                                title={entry.title}
+                            />
                         )}
                     </div>
                 )}

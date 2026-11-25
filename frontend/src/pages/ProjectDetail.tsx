@@ -9,6 +9,7 @@ import { ERRORS } from '@/copy/errors';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { PersonaKitLinks } from '@/components/chat/sheets/parts';
 import ProjectPageView from '@/components/site/ProjectPageView';
+import ShareBox from '@/components/site/ShareBox';
 import { PROJECT_PAGES } from '@/content/projectPages';
 import { Tag } from '@/components/writing/parts';
 import { useLoad } from '@/hooks/useLoad';
@@ -133,6 +134,7 @@ const ProjectDetail: React.FC = () => {
                     page={page}
                     media={mediaView && <div className="pj-media">{mediaView}</div>}
                 />
+                <ShareBox kind="project" title={page.title ?? project.title} standalone />
                 {end}
             </article>
         );
@@ -174,6 +176,7 @@ const ProjectDetail: React.FC = () => {
                     ) : (
                         <span>{copy.privateCode}</span>
                     )}
+                    <ShareBox kind="project" title={project.title} />
                 </div>
             </div>
             {end}
