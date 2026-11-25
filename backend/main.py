@@ -14,12 +14,13 @@ from docs_helper import (
     get_all_writing, get_writing_by_slug, get_writing_index, writing_overview
 )
 from rate_limit import chat_limiter, contact_limiter, enforce_rate_limit
+import booking
+import site_mail
 from pydantic import BaseModel, EmailStr, Field
 from typing import Dict, List, Literal, Optional
 import json
 import os
 import datetime
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 import logging
@@ -215,6 +216,20 @@ class ContactRequest(BaseModel):
     # before the endpoint runs.
     email: EmailStr
     message: str = Field(min_length=1, max_length=MAX_MESSAGE_CHARS)
+    # What the page was about when the form opened, and the site's language:
+    # the topic heads Yanir's notification, the language picks the reply.
+    topic: Optional[str] = Field(default=None, max_length=120)
+    lang: Literal["he", "en"] = "he"
+
+
+class BookingRequest(BaseModel):
+    # The time comes from cal.com's own list of free slots, read by the page;
+    # cal.com checks it again when booking, so here it only has to be a time.
+    start: datetime.datetime
+    name: str = Field(min_length=1, max_length=120)
+    email: EmailStr
+    notes: Optional[str] = Field(default=None, max_length=1000)
+    lang: Literal["he", "en"] = "he"
 
 
 def _to_model_turns(history: Optional[List[ChatMessage]]) -> List[Dict[str, str]]:
@@ -856,8 +871,18 @@ def _validated_address(candidate: str) -> str:
     return validate_email(candidate, check_deliverability=False).email
 
 
-def _smtp_send(msg: MIMEMultipart, sender_email: str, sender_password: str) -> None:
-    """Sends one prepared message over SMTP. Blocking; call from a worker thread."""
+def _smtp_send(
+    msg: MIMEMultipart,
+    sender_email: str,
+    sender_password: str,
+    follow_up: Optional[MIMEMultipart] = None,
+) -> None:
+    """Sends a prepared message, then an optional second one, over one SMTP login.
+
+    Blocking; call from a worker thread. Only the first message decides the
+    outcome: the follow-up is the visitor's courtesy reply, and failing to send
+    it must not report their message to Yanir as lost.
+    """
     logger.info("Attempting to connect to SMTP server...")
     with smtplib.SMTP_SSL(
         'smtp.gmail.com', 465, timeout=SMTP_TIMEOUT_SECONDS
@@ -867,9 +892,23 @@ def _smtp_send(msg: MIMEMultipart, sender_email: str, sender_password: str) -> N
         logger.info("Logged in successfully, sending email...")
         server.send_message(msg)
         logger.info("Contact notification email sent")
+        if follow_up is not None:
+            try:
+                server.send_message(follow_up)
+                logger.info("Visitor auto-reply sent")
+            except Exception:
+                logger.exception("Visitor auto-reply failed")
 
 
-async def _send_contact_email(email: str, message: str) -> None:
+async def _send_contact_email(
+    email: str,
+    message: str,
+    *,
+    topic: Optional[str] = None,
+    route: str = "chat",
+    lang: Optional[str] = None,
+    reply_to_visitor: bool = False,
+) -> None:
     """Delivers a collected address to Yanir's inbox.
 
     Raises HTTPException on a configuration or SMTP failure; callers decide how
@@ -888,25 +927,29 @@ async def _send_contact_email(email: str, message: str) -> None:
             logger.error("Missing email configuration")
             raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
 
-        # Create message
-        msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = receiver_email
-        msg['Subject'] = "New Contact from Portfolio Chat"
-
-        body = f"""
-        New contact request from your portfolio chat!
-        
-        User Email: {email}
-        Message: {message}
-        Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-        """
-
-        msg.attach(MIMEText(body, 'plain'))
+        # Yanir's notification in the site's look; replying to it answers the
+        # visitor. The mail form also sends the visitor a fixed short reply.
+        msg = site_mail.notification(
+            sender_email,
+            receiver_email,
+            visitor=email,
+            message=message,
+            topic=topic,
+            route=route,
+            lang=lang,
+            replied=reply_to_visitor,
+        )
+        follow_up = (
+            site_mail.auto_reply(sender_email, receiver_email, email, lang or "he")
+            if reply_to_visitor
+            else None
+        )
 
         try:
             # smtplib is synchronous; see the note on the Gemini call.
-            await run_in_threadpool(_smtp_send, msg, sender_email, sender_password)
+            await run_in_threadpool(
+                _smtp_send, msg, sender_email, sender_password, follow_up
+            )
         except Exception:
             # The raw SMTP error names the sender account and the server, so it
             # stays server-side: returning it would reflect both back to anyone
@@ -925,8 +968,46 @@ async def _send_contact_email(email: str, message: str) -> None:
 async def contact(request: ContactRequest, http_request: Request):
     """Sends a contact message. Rate limited per client and globally."""
     enforce_rate_limit(http_request, contact_limiter, "contact")
-    await _send_contact_email(request.email, request.message)
+    await _send_contact_email(
+        request.email,
+        request.message,
+        topic=request.topic,
+        route="form",
+        lang=request.lang,
+        reply_to_visitor=True,
+    )
     return {"status": "success", "message": "Email sent successfully"}
+
+
+# Booking a slot further ahead than this is refused before cal.com is asked:
+# the page never offers one, so such a request did not come from it.
+BOOKING_HORIZON_DAYS = 120
+
+
+@app.post("/api/booking")
+async def book_call(request: BookingRequest, http_request: Request):
+    """Books the discovery call. Rate limited like the contact route."""
+    enforce_rate_limit(http_request, contact_limiter, "booking")
+    start = request.start
+    if start.tzinfo is None:
+        raise HTTPException(status_code=422, detail="start needs a time zone")
+    now = datetime.datetime.now(datetime.timezone.utc)
+    if not now < start < now + datetime.timedelta(days=BOOKING_HORIZON_DAYS):
+        raise HTTPException(status_code=422, detail="start is out of range")
+    try:
+        result = await run_in_threadpool(
+            booking.book,
+            start.astimezone(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+            request.name.strip(),
+            str(request.email),
+            (request.notes or "").strip() or None,
+            request.lang,
+        )
+    except booking.BookingError as err:
+        if err.taken:
+            raise HTTPException(status_code=409, detail="slot taken")
+        raise HTTPException(status_code=502, detail=INTERNAL_ERROR_DETAIL)
+    return {"status": "success", "booking": result}
 
 
 @app.get("/api/writing")

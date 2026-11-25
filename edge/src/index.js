@@ -39,9 +39,9 @@ const TURNSTILE_MAX_TOKEN_LENGTH = 2048;
 const TURNSTILE_TIMEOUT_MS = 5000;
 
 // The routes that spend something per call: model quota for the chat, an
-// outgoing email for the contact form. The contact route has no frontend
-// caller today, but it is public, so it gets the same check.
-const PROTECTED_PATHS = new Set(['/chat-with-files', '/api/contact']);
+// outgoing email for the contact form, and a real slot on Yanir's calendar
+// for the booking.
+const PROTECTED_PATHS = new Set(['/chat-with-files', '/api/contact', '/api/booking']);
 
 // The frontend shows `detail` verbatim to the visitor, so these are written
 // for a person, not for a log.

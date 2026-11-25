@@ -38,7 +38,8 @@ Each component has its own README with the detail: [frontend](../frontend/README
    A request that proved it came through the Worker is keyed on the visitor address the Worker
    passes along; any other request is keyed on the last forwarded-for entry.
 6. For a chat question, the backend selects documents from the corpus and calls the Gemini API.
-   For a contact request, it sends one email over SMTP.
+   For a contact request, it sends the notification over SMTP, and for the mail form one fixed
+   reply to the visitor. For a booking, it books the fixed event on cal.com.
 
 ## Data boundaries
 
@@ -46,7 +47,9 @@ Each component has its own README with the detail: [frontend](../frontend/README
 |---|---|
 | Browser -> Worker -> backend | The visitor's message, the conversation history the browser holds, and request headers. |
 | Backend -> Gemini API | The question, a bounded number of recent turns, and the selected documents from `backend/docs/`. |
-| Backend -> SMTP | The visitor's email address, their message and a timestamp, addressed to the owner's inbox. |
+| Backend -> SMTP | The visitor's email address, their message, the topic and a timestamp, addressed to the owner's inbox; and a fixed reply to the visitor. |
+| Browser -> cal.com | A request for free times of the public event. No visitor data. |
+| Backend -> cal.com | For a booking: the visitor's name, address, optional subject and the chosen time. |
 | Secret Manager -> backend | The Gemini API key, the mail password and the edge shared secret. |
 | Repository -> public | Everything under `backend/docs/`. It is tracked in a public repository. |
 
@@ -86,6 +89,7 @@ All routes are defined in `backend/main.py`.
 | `GET /api/chat/status` | Whether the chat has a corpus to answer from, as one boolean. |
 | `POST /chat-with-files` | The chat. Rate limited; request size is bounded by the schema. |
 | `POST /api/contact` | Sends a contact email. Rate limited; address and length are validated first. |
+| `POST /api/booking` | Books the discovery call on cal.com. Rate limited with contact; the event is fixed on the server. |
 | `GET /api/content/{file_name}` | Reads one document, confined to the profile folder. |
 | `GET /api/projects` and `GET /api/projects/{slug}` | Project data. |
 | `GET /api/writing` and `GET /api/writing/{slug}` | Published writing. |

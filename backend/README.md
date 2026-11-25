@@ -134,6 +134,7 @@ Over-limit requests get **429** with a `Retry-After` header.
 | `GET /api/projects/{slug}` | Single project |
 | `POST /chat-with-files` | Rate limited |
 | `POST /api/contact` | Rate limited |
+| `POST /api/booking` | Rate limited with contact; books the fixed cal.com event (`booking.py`) |
 
 There is deliberately no debug or ungrounded-generation endpoint. If you are porting from a
 fork that has one: an endpoint returning server filesystem paths and document listings to

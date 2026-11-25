@@ -7,11 +7,14 @@ import { TURNSTILE_HEADER } from '@/constants/turnstile';
  * lives with the form, in both languages; this reports only whether it worked.
  */
 export const contactService = {
-    async send(email: string, message: string, turnstileToken: string | null): Promise<boolean> {
+    async send(
+        details: { email: string; message: string; topic?: string; lang: 'he' | 'en' },
+        turnstileToken: string | null
+    ): Promise<boolean> {
         try {
             await apiClient.post(
                 API_ENDPOINTS.CONTACT,
-                { email, message },
+                details,
                 turnstileToken ? { headers: { [TURNSTILE_HEADER]: turnstileToken } } : undefined
             );
             return true;

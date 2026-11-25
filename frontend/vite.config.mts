@@ -162,6 +162,8 @@ const TURNSTILE_ORIGIN = 'https://challenges.cloudflare.com';
 // The booking page, embedded in the contact window.
 const BOOKING_ORIGIN = 'https://cal.com';
 
+const CAL_API_ORIGIN = 'https://api.cal.com';
+
 const emitSecurityHeaders = (backendUrl: string, avatarUrl: string) => {
     const originOf = (u: string) => {
         try {
@@ -170,7 +172,8 @@ const emitSecurityHeaders = (backendUrl: string, avatarUrl: string) => {
             return '';
         }
     };
-    const connectSrc = ["'self'", originOf(backendUrl), CF_ANALYTICS_REPORTING]
+    // cal.com's public slots endpoint, read by the booking screens.
+    const connectSrc = ["'self'", originOf(backendUrl), CF_ANALYTICS_REPORTING, CAL_API_ORIGIN]
         .filter(Boolean)
         .join(' ');
     // https: covers the author-written image hosts; the configured avatar origin

@@ -60,10 +60,21 @@ There are two ways a visitor's address reaches the owner, and both end in one em
    applies the rate limit, and sends the email. Whether the frontend uses this endpoint is
    (unverified).
 
-The email contains the visitor's address, their message and a timestamp. It is sent over SMTP
-from the configured sender account to the configured inbox (`_send_contact_email` in
-`backend/main.py`). The address is not stored anywhere else by the backend; the inbox is the
-record.
+The email contains the visitor's address, their message, the page topic, the route and language,
+and a timestamp, with Reply-To set to the visitor. It is sent over SMTP from the configured sender
+account to the configured inbox (`_send_contact_email` in `backend/main.py`, built in
+`backend/site_mail.py`). A message from the mail form also sends the visitor one short reply. That
+reply is fixed text in Hebrew or English and carries nothing they wrote but their address
+(`backend/tests/test_site_mail.py`). The address is not stored anywhere else by the backend; the
+inbox is the record.
+
+## Booking a call
+
+The booking window reads free times straight from cal.com's public slots endpoint in the
+browser; no key is involved. The booking itself goes through `POST /api/booking`, behind the
+same Turnstile check and contact rate limit. The backend forwards the visitor's name, address,
+optional subject and the chosen time to cal.com for one fixed event (`backend/booking.py`) and
+stores nothing. cal.com then emails the invite to both sides.
 
 ## Everything under `backend/docs/` is public
 
