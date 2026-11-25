@@ -614,7 +614,15 @@ export const headFor = (page: Page, siteUrl: string) => {
 };
 
 const HEAD_BLOCK = /<!-- seo:head:start -->[\s\S]*?<!-- seo:head:end -->/;
-const HTML_TAG = /<html lang="[^"]*"(?: dir="[^"]*")?>/;
+const HTML_TAG = /<html lang="[^"]*"(?: dir="[^"]*")?(?: translate="[^"]*")?>/;
+
+/*
+ * Hebrew pages ask the browser not to offer translation. Chrome on a phone
+ * set to English offered "Translate Hebrew to Hebrew" on them; the site has
+ * its own English version, linked from every page, for whoever needs it.
+ */
+export const htmlTag = (lang: Lang) =>
+    `<html lang="${lang}" dir="${DIR[lang]}"${lang === 'he' ? ' translate="no"' : ''}>`;
 const ROOT = '<div id="root"></div>';
 
 /** The built index.html, rewritten for one route. */
@@ -625,7 +633,7 @@ export const renderPage = (indexHtml: string, page: Page, siteUrl: string) => {
         );
     }
     return indexHtml
-        .replace(HTML_TAG, `<html lang="${page.lang}" dir="${DIR[page.lang]}">`)
+        .replace(HTML_TAG, htmlTag(page.lang))
         .replace(
             HEAD_BLOCK,
             () =>

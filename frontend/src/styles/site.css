@@ -5722,6 +5722,13 @@ html.panel .w-post {
     margin: 0 0 0.9em;
     white-space: pre-wrap;
 }
+/* Images inside a post's text are drawn at up to 1200px; keep them inside the column. */
+.w-body img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+}
 .w-body h2 {
     font-size: 1.45rem;
     margin: 1.3em 0 0.4em;
@@ -6495,7 +6502,9 @@ html.panel .w-post {
 }
 .w-pn a b {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    /* Three lines: on a phone a title of a short sentence needs them, and a cut
+       without an ellipsis (mixed-direction text drops it) would hide words. */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -8860,5 +8869,56 @@ video.w-v {
     }
     #top .chat.phone:not(.full)[data-fit='5'] .stg button span {
         display: none;
+    }
+}
+
+/* Phone: the chat card's input is a button that opens the full-screen layer. */
+.inp-tap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    text-align: start;
+    cursor: text;
+}
+.inp-tap span {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--muted);
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Holds the keyboard open while the layer is drawn: invisible, at the top of
+   the screen, so focusing it moves nothing. */
+.inp .keys {
+    position: fixed;
+    top: 0;
+    inset-inline-start: 0;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    font-size: 16px;
+    pointer-events: none;
+}
+/* iOS zooms the page into any field under 16px. */
+@media (pointer: coarse) {
+    input,
+    textarea,
+    select {
+        font-size: max(16px, 1em);
     }
 }

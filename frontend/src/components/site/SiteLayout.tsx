@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router';
+import React, { useEffect, useRef } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router';
 import { DIR } from '@/i18n/lang';
 import { useLang } from '@/i18n/useLang';
 import SiteNav from '@/components/site/SiteNav';
@@ -19,15 +19,35 @@ const DocumentLang: React.FC = () => {
     useEffect(() => {
         document.documentElement.lang = lang;
         document.documentElement.dir = DIR[lang];
+        // Hebrew pages are not offered for translation (see seo/prerender.mts).
+        document.documentElement.setAttribute('translate', lang === 'he' ? 'no' : 'yes');
     }, [lang]);
     return null;
 };
 
+/** Whether this page load is the visitor pressing reload. */
+const isReload = () =>
+    (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined)
+        ?.type === 'reload';
+
 const ScrollOnNavigate: React.FC = () => {
-    const { pathname, hash } = useLocation();
+    const { pathname, search, hash } = useLocation();
+    const navigate = useNavigate();
     const { openCv, openContact } = useSiteDialogs();
+    // A reload starts at the top of the page. A section anchor left in the
+    // address by an earlier click (the hero's "book a call" leads to #brief)
+    // would otherwise send the page to that section on every refresh.
+    const reloaded = useRef(isReload());
 
     useEffect(() => {
+        if (reloaded.current) {
+            reloaded.current = false;
+            if (hash && hash !== CV_HASH && hash !== CALL_HASH) {
+                navigate({ pathname, search }, { replace: true });
+                window.scrollTo(0, 0);
+                return;
+            }
+        }
         if (hash === CV_HASH) {
             openCv();
             return;
@@ -41,7 +61,7 @@ const ScrollOnNavigate: React.FC = () => {
             return;
         }
         window.scrollTo(0, 0);
-    }, [pathname, hash, openCv, openContact]);
+    }, [pathname, search, hash, navigate, openCv, openContact]);
 
     return null;
 };

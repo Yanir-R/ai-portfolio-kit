@@ -244,6 +244,7 @@ const AgentChat: React.FC<{
     const copy = t(CHAT);
     const logRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const keysRef = useRef<HTMLInputElement>(null);
     const [text, setText] = useState('');
     const [example, setExample] = useState(-1);
     const stillMotion = useMediaQuery(REDUCED_MOTION_QUERY);
@@ -272,6 +273,35 @@ const AgentChat: React.FC<{
         if (chat.awaitingEmail) inputRef.current?.focus({ preventScroll: true });
     }, [chat.awaitingEmail]);
 
+    const full = !!phone?.full;
+
+    // On a phone the card's input is a button that opens the layer. Focusing a
+    // real input on the page would make the browser scroll the page to it
+    // above the keyboard, before the layer is even drawn. Instead the tap
+    // focuses `keys`, a hidden input pinned to the top of the screen (the
+    // keyboard opens without moving anything, and iOS opens it only inside the
+    // tap), and once the layer is up the focus moves to its input.
+    const openToType = () => {
+        keysRef.current?.focus({ preventScroll: true });
+        phone?.engage();
+    };
+    useEffect(() => {
+        if (full && document.activeElement === keysRef.current) {
+            inputRef.current?.focus({ preventScroll: true });
+        }
+    }, [full]);
+
+    // The keyboard opening or closing changes the visible height: keep the
+    // newest message in view.
+    useEffect(() => {
+        const vv = window.visualViewport;
+        const log = logRef.current;
+        if (!full || !vv || !log) return;
+        const toEnd = () => (log.scrollTop = log.scrollHeight);
+        vv.addEventListener('resize', toEnd);
+        return () => vv.removeEventListener('resize', toEnd);
+    }, [full]);
+
     // When the question is already known, only the address is missing.
     const placeholder = chat.awaitingEmail
         ? chat.awaitingEmail === 'ask'
@@ -293,7 +323,6 @@ const AgentChat: React.FC<{
         setText('');
     };
 
-    const full = !!phone?.full;
     const lastQuestion = [...chat.entries].reverse().find((e) => e.kind === 'user');
     const lastAnswer = [...chat.entries].reverse().find((e) => e.kind === 'answer');
     // The opening of the last answer, as plain text, on the "continue" entry.
@@ -377,20 +406,44 @@ const AgentChat: React.FC<{
                     </button>
                 ))}
             </div>
-            <form className="inp" onSubmit={submit}>
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    onFocus={phone && !full ? phone.engage : undefined}
-                    placeholder={placeholder}
-                    aria-label={copy.inputLabel}
-                />
-                <button className="btn sm" type="submit" disabled={chat.busy}>
-                    {copy.send}
-                </button>
-            </form>
+            {phone && !full ? (
+                <div className="inp">
+                    <button
+                        type="button"
+                        className="inp-tap"
+                        aria-label={copy.inputLabel}
+                        onClick={openToType}
+                    >
+                        <span>{placeholder}</span>
+                        <b className="btn sm" aria-hidden="true">
+                            {copy.send}
+                        </b>
+                    </button>
+                    <input
+                        ref={keysRef}
+                        className="keys"
+                        type="text"
+                        tabIndex={-1}
+                        aria-hidden="true"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                    />
+                </div>
+            ) : (
+                <form className="inp" onSubmit={submit}>
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder={placeholder}
+                        aria-label={copy.inputLabel}
+                    />
+                    <button className="btn sm" type="submit" disabled={chat.busy}>
+                        {copy.send}
+                    </button>
+                </form>
+            )}
             <div className="ts" ref={turnstileRef} />
             {children}
         </div>
