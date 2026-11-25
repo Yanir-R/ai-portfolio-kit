@@ -18,7 +18,7 @@ Paused and private: the service is not running and the repository is closed. It 
 
 ### 🤖 AI-Powered Highlight Generation
 - **Vertex AI Integration**: Leverages Google Cloud's powerful AI for intelligent video analysis
-- **Smart Detection**: Automatically identifies epic gaming moments, clutch plays, and skill shots
+- **Smart Detection**: Automatically finds the highlight moments of a match: clutch plays (the decisive moments), skill shots and epic moments
 - **Multi-Game Support**: Optimized for FPS, MOBA, and other gaming genres
 - **Quality Scoring**: AI-powered confidence ratings for each highlight
 

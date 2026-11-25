@@ -37,8 +37,19 @@ const COMPONENTS = {
 // Notes for maintainers inside a document, which react-markdown would show as text.
 const HTML_COMMENT = /<!--[\s\S]*?-->/g;
 
+/*
+ * A Hebrew prefix joined by a hyphen to a Latin word or a number ("ל-commit",
+ * "ב-Obsidian", "ומ-2024") must not end a line apart from its word. A word
+ * joiner (U+2060, invisible) after the hyphen removes that break, and the
+ * font's own hyphen stays.
+ */
+const HEBREW_PREFIX = /(^|[\s(["'״׳])([ובכלמשה]{1,3})-(?=[A-Za-z0-9])/g;
+const keepPrefixes = (text: string) => text.replace(HEBREW_PREFIX, '$1$2-\u2060');
+
 const Markdown: React.FC<{ children: string }> = ({ children }) => (
-    <ReactMarkdown components={COMPONENTS}>{children.replace(HTML_COMMENT, '')}</ReactMarkdown>
+    <ReactMarkdown components={COMPONENTS}>
+        {keepPrefixes(children.replace(HTML_COMMENT, ''))}
+    </ReactMarkdown>
 );
 
 export default Markdown;
