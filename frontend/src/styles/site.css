@@ -8978,20 +8978,33 @@ video.w-v {
         color: var(--muted);
         font-size: 0.86rem;
         line-height: 1.45;
+        min-height: 44px;
+        border: 0;
+        font-family: inherit;
+        text-align: start;
+        cursor: pointer;
     }
-    .chat.phone .tz .td {
+    .chat.phone .tz u {
+        color: var(--link);
+        font-weight: 800;
+        text-underline-offset: 3px;
+    }
+    .chat.phone .tz .td,
+    .ptrail .td {
         display: inline-flex;
         gap: 4px;
         flex: none;
     }
-    .chat.phone .tz .td i {
+    .chat.phone .tz .td i,
+    .ptrail .td i {
         width: 9px;
         height: 9px;
         border-radius: 50%;
         background: var(--paper);
         box-shadow: 0 0 0 1.5px var(--ink);
     }
-    .chat.phone .tz .td i.a {
+    .chat.phone .tz .td i.a,
+    .ptrail .td i.a {
         background: var(--btn);
     }
 
@@ -10481,5 +10494,115 @@ video.w-v {
         inset-inline-start: 0;
         width: 100%;
         opacity: 0.6;
+    }
+}
+
+/* Phones: under an answer, one quiet row with its stations and the way to its receipt. */
+.ptrail {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--bg);
+    font: inherit;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: start;
+    cursor: pointer;
+}
+.ptrail {
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+.ptrail > span:not(.td) {
+    flex: 1 1 auto;
+    white-space: nowrap;
+}
+.ptrail u {
+    margin-inline-start: auto;
+}
+.ptrail .td i {
+    width: 8px;
+    height: 8px;
+}
+.ptrail u {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: none;
+    font-weight: 800;
+    color: var(--ink);
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+}
+/* Phones: the waiting bubble lists stations one to five as they light. */
+.pwork ol {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.pwork li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #636f93;
+}
+.pwork li b {
+    font-weight: 600;
+}
+.pwork li i {
+    flex: none;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+}
+.pwork li.done {
+    color: var(--ink);
+}
+.pwork li.done i {
+    border-color: var(--ink);
+    background: var(--coral);
+}
+.pwork li.now {
+    color: var(--ink);
+}
+.pwork li.now b {
+    font-weight: 800;
+}
+.pwork li.now i {
+    border-color: var(--ink);
+    background: var(--coral);
+    box-shadow: 0 0 0 3px #fff3cf;
+    animation: atr-ring 1.6s ease-in-out infinite;
+}
+.pwork li em {
+    font-style: normal;
+    font-weight: 800;
+    font-size: 0.72rem;
+    padding: 1px 7px;
+    border-radius: 4px;
+    background: #fff3cf;
+    color: #6b4a00;
+}
+.pwork p {
+    margin: 8px 0 0;
+    font-size: 0.84rem;
+    color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+    .pwork li.now i {
+        animation: none;
     }
 }

@@ -102,7 +102,9 @@ const AnswerPlan: React.FC<{
     let kicker = copy.plan.step2;
     let title = copy.plan.base.title;
     let cap = copy.plan.base.cap;
-    const sum: [string, React.ReactNode] = ['', foot];
+    // The phone's sheet, opened before any question, says why the stations are shown.
+    const sum: [string, React.ReactNode] =
+        plan.kind === 'base' && onClose ? [copy.plan.base.sumH, copy.plan.base.sumT] : ['', foot];
     let mode = '';
     const current = plan.kind === 'sheet' ? chat.sheets.find((s) => s.key === plan.key) : undefined;
 

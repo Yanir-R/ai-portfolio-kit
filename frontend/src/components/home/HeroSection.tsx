@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { HOME } from '@/copy/home';
 import { FEATURES } from '@/constants/links';
 import { AnswerRecord, useHomeChat } from '@/chat/useHomeChat';
@@ -85,6 +85,12 @@ const HeroSection: React.FC = () => {
         [chat, sheetOpen, show]
     );
     const closeSheet = close;
+    // The six stations as they are now, in the sheet, opening the layer under it if needed.
+    const showHow = useCallback(() => {
+        if (sheetOpen) return;
+        sheetOpener.current = document.activeElement as HTMLElement | null;
+        show({ chatSheet: true });
+    }, [sheetOpen, show]);
 
     // A question carried from another page ("ask the agent about X" on the
     // blog) is asked once, as if typed here.
@@ -259,11 +265,8 @@ const HeroSection: React.FC = () => {
         : undefined;
 
     const phoneLayer: PhoneLayer | undefined = phone
-        ? { full, engage: openLayer, close: closeLayer, showSheet }
+        ? { full, engage: openLayer, close: closeLayer, showSheet, showHow }
         : undefined;
-    // Under the chat on a phone: the five stops as a still explainer. The live
-    // drawing belongs to the sheet.
-    const still = useMemo(() => ({ ...chat, plan: { kind: 'base' as const } }), [chat]);
 
     return (
         <div className={grown ? 'sheet grown' : 'sheet'} id="top" ref={topRef}>
@@ -326,7 +329,8 @@ const HeroSection: React.FC = () => {
                         </div>
                     )}
                 </AgentChat>
-                <AnswerPlan chat={phone ? still : chat} idless={phone} />
+                {/* On a phone the stations live in the chat and its sheet. */}
+                {!phone && <AnswerPlan chat={chat} />}
             </div>
         </div>
     );

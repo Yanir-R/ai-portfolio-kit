@@ -71,6 +71,43 @@ const ReceiptIcon: React.FC = () => (
     </svg>
 );
 
+/** Six small dots: the first `lit` done, and the last one when the handoff was offered. */
+const Dots: React.FC<{ lit: number; last?: boolean }> = ({ lit, last }) => (
+    <span className="td" aria-hidden="true">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+            <i key={i} className={i < lit || (i === 5 && last) ? 'a' : undefined} />
+        ))}
+    </span>
+);
+
+/** The phone's waiting bubble: stations one to five as they light, and how long it has been. */
+const Working: React.FC<{ plan: { stage: number; elapsed: number } }> = ({ plan }) => {
+    const { t } = useLang();
+    const copy = t(CHAT);
+    const stations = copy.trace.stations.slice(0, 5);
+    // Stations two and three complete as the request goes; four is the model.
+    const current = Math.min(plan.stage + 1, 3);
+    return (
+        <div className="m y ai wait pwork">
+            <span className="src ag">{copy.phone.working(Math.max(1, plan.elapsed))}</span>
+            <ol>
+                {stations.map(([title], i) => (
+                    <li
+                        key={title}
+                        className={i < current ? 'done' : i === current ? 'now' : undefined}
+                    >
+                        <i aria-hidden="true" />
+                        <b>{title}</b>
+                        {i === current && <em>{copy.trace.now}</em>}
+                    </li>
+                ))}
+            </ol>
+            {/* Read out when the station changes, not every second. */}
+            <p aria-live="polite">{stations[current][1]}</p>
+        </div>
+    );
+};
+
 const ArtCard: React.FC<{ sheet: SheetKey; record?: AnswerRecord | null; onOpen: OnSheet }> = ({
     sheet,
     record,
@@ -139,6 +176,8 @@ const EntryView: React.FC<{
                 </div>
             );
         case 'working':
+            // On a phone the stations live here, in the waiting bubble.
+            if (engage && chat.plan.kind === 'running') return <Working plan={chat.plan} />;
             return (
                 <div className="m y ai wait">
                     <span className="src ag">{copy.working}</span>
@@ -196,7 +235,8 @@ const EntryView: React.FC<{
                             )}
                             {/* Every answer the model wrote keeps its receipt, diagram or
                                 not; when the receipt is the diagram, its card is the way in. */}
-                            {entry.sheet !== 'read' &&
+                            {!engage &&
+                                entry.sheet !== 'read' &&
                                 record.trace?.context_outcome !== 'conversational' && (
                                     <button
                                         type="button"
@@ -208,6 +248,24 @@ const EntryView: React.FC<{
                                     </button>
                                 )}
                         </div>
+                    )}
+                    {record && engage && (
+                        <button
+                            type="button"
+                            className="ptrail"
+                            onClick={() => onSheet('read', record)}
+                        >
+                            <Dots lit={5} last={record.handoff} />
+                            <span>
+                                {record.sources.length
+                                    ? copy.plan.trail(record.sources.length, record.seconds)
+                                    : copy.plan.trailNone(record.seconds)}
+                            </span>
+                            <u>
+                                <ReceiptIcon />
+                                {copy.behind}
+                            </u>
+                        </button>
                     )}
                 </div>
             );
@@ -290,6 +348,8 @@ export interface PhoneLayer {
     close: () => void;
     /** A diagram card under an answer was tapped. */
     showSheet: OnSheet;
+    /** The teaser row was tapped: the six stations, in the sheet. */
+    showHow: () => void;
 }
 
 /** The latest question that got no answer, carried into the contact window. */
@@ -487,16 +547,12 @@ const AgentChat: React.FC<{
                 ))}
             </div>
             {phone && !live && (
-                <div className="tz">
-                    <span className="td" aria-hidden="true">
-                        <i />
-                        <i className="a" />
-                        <i className="a" />
-                        <i className="a" />
-                        <i />
+                <button type="button" className="tz" onClick={phone.showHow}>
+                    <Dots lit={0} />
+                    <span>
+                        {copy.phone.teaser} <u>{copy.phone.howLink}</u>
                     </span>
-                    <span>{copy.phone.teaser}</span>
-                </div>
+                </button>
             )}
             <div
                 className="qr one"

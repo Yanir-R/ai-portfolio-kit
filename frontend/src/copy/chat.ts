@@ -157,6 +157,10 @@ export interface ChatCopy {
         /** The greeting without "on the left": on a phone the drawing is a sheet. */
         greeting: string;
         teaser: string;
+        /** The link at the end of the teaser row: opens the six stations. */
+        howLink: string;
+        /** On the waiting bubble: what is happening, and for how long. */
+        working: (seconds: number) => string;
         resume: string;
         close: string;
         backToChat: string;
@@ -347,7 +351,9 @@ export const CHAT: Localized<ChatCopy> = {
         phone: {
             greeting:
                 'שלום, אני הסוכן של יניר, ועונה כאן בשמו. שאלו אותי על העבודה שלו, או על מה שסוכן יכול לעשות אצלכם.',
-            teaser: 'לכל תשובה מצורף שרטוט, ורואים איך הסוכן הגיע אליה.',
+            teaser: 'כל שאלה עוברת שש תחנות, ותראו אותן נדלקות.',
+            howLink: 'איך הסוכן עונה',
+            working: (n) => `הסוכן עובד על התשובה · ${n} שנ׳`,
             resume: 'המשך השיחה',
             close: 'סגירת השיחה',
             backToChat: 'חזרה לשיחה',
@@ -700,7 +706,9 @@ export const CHAT: Localized<ChatCopy> = {
         phone: {
             greeting:
                 "Hi, I'm Yanir's agent, and I answer here on his behalf. Ask me about his work, or about what an agent could do for you.",
-            teaser: 'Every answer comes with a diagram of how the agent got there.',
+            teaser: "Every question goes through six stations, and you'll see them light up.",
+            howLink: 'How the agent answers',
+            working: (n) => `The agent is working on the answer · ${n} s`,
             resume: 'Continue the conversation',
             close: 'Close the chat',
             backToChat: 'Back to the chat',
