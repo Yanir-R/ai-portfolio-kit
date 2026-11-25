@@ -8621,25 +8621,20 @@ video.w-v {
     #top .chat.phone:not(.full):not(.live) .log > :first-child {
         margin-top: 0;
     }
-    /* Spare height is spread between the starters, never left as one empty band. */
+    /*
+     * Starters are never stretched: each is as tall as its text, 10px apart,
+     * right above the input. Spare height gathers above the greeting.
+     */
     #top .chat.phone:not(.full):not(.live) .log {
-        justify-content: space-between;
-    }
-    #top .chat.phone:not(.full):not(.live) .m.st0 {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
+        justify-content: flex-end;
     }
     #top .chat.phone:not(.full):not(.live) .stg {
-        flex: 1;
         display: flex;
         flex-direction: column;
-        justify-content: space-evenly;
+        gap: 10px;
     }
-    /* The starters take the slack first, up to about 16px more padding each. */
     #top .chat.phone:not(.full):not(.live) .stg button:not(:nth-child(n + 4)) {
-        flex: 1 1 auto;
-        max-height: 92px;
+        flex: none;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -8722,10 +8717,28 @@ video.w-v {
     html.chat-open,
     html.chat-open body {
         overflow: hidden;
+        overscroll-behavior: none;
+    }
+    /*
+     * A layer never scrolls or pans sideways: nothing in it is wider than
+     * the screen, and a sideways swipe does nothing.
+     */
+    #top .chat.full,
+    .chat-layer {
+        overflow-x: clip;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+    }
+    #top .chat.full > *,
+    .chat-layer > *,
+    .chat-layer .w-dock > * {
+        max-width: 100%;
+        min-width: 0;
     }
     #top .chat.full {
         position: fixed;
-        inset-inline: 0;
+        left: var(--vv-left, 0px);
+        width: var(--vv-w, 100%);
         top: var(--vv-top, 0px);
         height: var(--vv-h, 100dvh);
         min-height: 0;
@@ -8997,6 +9010,13 @@ video.w-v {
     padding: 0;
     border: 0;
     opacity: 0;
+    /* Nothing of it may ever be drawn: no text, no caret, no frame. */
+    color: transparent;
+    caret-color: transparent;
+    background: transparent;
+    appearance: none;
+    clip-path: inset(50%);
+    overflow: hidden;
     font-size: 16px;
     pointer-events: none;
 }
@@ -9458,7 +9478,8 @@ video.w-v {
         display: flex;
         flex-direction: column;
         position: fixed;
-        inset-inline: 0;
+        left: var(--vv-left, 0px);
+        width: var(--vv-w, 100%);
         top: var(--vv-top, 0px);
         height: var(--vv-h, 100dvh);
         z-index: 1000;
