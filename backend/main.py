@@ -41,12 +41,12 @@ logger = logging.getLogger(__name__)
 INTERNAL_ERROR_DETAIL = "Internal server error"
 
 # Replies for the contact flow, in one place so the three paths that can accept
-# an address cannot drift into three different voices. The site answers in
-# Yanir's first person and its whole argument is that it does not overstate. A
+# an address cannot drift into three different voices. The chat is Yanir's agent,
+# speaking about him, and its whole argument is that it does not overstate. A
 # confirmation is the one message a visitor is guaranteed to read, so it is the
 # worst place to sound like a different product.
 EMAIL_RECEIVED_MESSAGE = (
-    "Got it - that's in my inbox and I'll reply from there. "
+    "Got it - that's in Yanir's inbox and he'll reply from there. "
     "Anything else you want to ask while you're here?"
 )
 
@@ -57,14 +57,14 @@ EMAIL_INVALID_MESSAGE = (
 
 EMAIL_REQUEST_MESSAGE = (
     "Sure. Leave your email address here with a line about what you'd like to "
-    "discuss, and I'll get back to you directly."
+    "discuss, and Yanir will get back to you directly."
 )
 
 # Sending is best-effort from the visitor's side: if SMTP is down, telling them
 # the message vanished is worse than giving them the address to use instead.
 EMAIL_SEND_FAILED_MESSAGE = (
-    "I couldn't get that through to my inbox just now - something on my side. "
-    "Write to rotyanir@gmail.com directly and it will reach me."
+    "I couldn't get that through to Yanir's inbox just now - something on my side. "
+    "Write to rotyanir@gmail.com directly and it will reach him."
 )
 
 # Detecting an intent to make contact, in two parts.
@@ -452,8 +452,8 @@ def _writing_blocks(selection: Selection, reading: Optional[str] = None) -> List
 # by date. Answering it from the index saves a call from the daily quota and
 # cannot get a date wrong.
 RECENT_REPLY = {
-    "en": "My latest pieces, newest first.",
-    "he": "הקטעים האחרונים שלי, מהחדש לישן.",
+    "en": "Yanir's latest pieces, newest first.",
+    "he": "הקטעים האחרונים של יניר, מהחדש לישן.",
 }
 
 
@@ -557,8 +557,8 @@ def _chat_reply(
 # Shown instead of an answer that recites the rules. One sentence, back to
 # the work, which is what the rules ask the model to say in that case anyway.
 RULES_DECLINE = {
-    "en": "That's not something I share here. Ask me about my work, my projects or what I write about.",
-    "he": "את זה אני לא משתף כאן. אפשר לשאול אותי על העבודה שלי, הפרויקטים או מה שאני כותב.",
+    "en": "That's not something I share here. Ask me about Yanir's work, his projects or what he writes about.",
+    "he": "את זה אני לא משתף כאן. אפשר לשאול אותי על העבודה של יניר, הפרויקטים שלו או מה שהוא כותב.",
 }
 
 _rules_echo = guard.RulesEcho(RULES)

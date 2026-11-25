@@ -673,7 +673,7 @@ def _select(
 ) -> Selection:
     """Picks the documents worth sending for `question`.
 
-    Yanir's own notes are always included. The chat answers in his first person
+    Yanir's own notes are always included. The chat answers on his behalf
     about him, so his profile is not a topic that competes with the others - it
     is the ground every answer stands on, and a question that turns out to be
     about him after all must never find it missing.

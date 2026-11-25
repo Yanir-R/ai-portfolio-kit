@@ -18,7 +18,7 @@ Everything here is plain code that runs whatever the model was persuaded of:
   are removed and links are kept only to hosts the site itself links to. A
   reply that quotes the rules is replaced with a short decline. The rules are
   public in this repository, so this is not about secrecy; it keeps the chat
-  from reciting its own configuration in Yanir's voice.
+  from reciting its own configuration on Yanir's behalf.
 """
 
 from __future__ import annotations
