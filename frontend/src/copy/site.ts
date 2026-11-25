@@ -172,6 +172,12 @@ export interface BookingCopy {
     back: string;
     fine: string;
     taken: string;
+    /** The bot check refused the booking: a fresh check usually passes. */
+    unverified: string;
+    /** Rate limited; `seconds` is the server's Retry-After when it sent one. */
+    busy: (seconds?: number) => string;
+    /** The details were refused: almost always the email address. */
+    invalid: string;
     bookFailed: string;
     doneTitle: string;
     doneText: string;
@@ -226,6 +232,12 @@ export const CONTACT: Localized<ContactCopy> = {
             back: 'חזרה',
             fine: 'האישור והקישור לשיחה נשלחים למייל שכתבתם.',
             taken: 'השעה הזאת נתפסה הרגע. בחרו שעה אחרת.',
+            unverified: 'לא הצלחנו לאשר שהבקשה הגיעה מדפדפן. לחצו שוב על קביעת השיחה.',
+            busy: (seconds) =>
+                seconds && seconds < 3600
+                    ? `יותר מדי ניסיונות ברצף. נסו שוב בעוד ${Math.ceil(seconds / 60) === 1 ? 'דקה' : `${Math.ceil(seconds / 60)} דקות`}.`
+                    : 'יותר מדי ניסיונות ברצף. נסו שוב מאוחר יותר, או קבעו דרך הקישור למטה.',
+            invalid: 'משהו בפרטים לא עבר. בדקו את השם ואת כתובת המייל.',
             bookFailed: 'השיחה לא נקבעה. נסו שוב, או קבעו דרך הקישור למטה.',
             doneTitle: 'השיחה נקבעה',
             doneText: 'אישור עם הקישור לשיחה נשלח למייל שלכם.',
@@ -301,6 +313,12 @@ export const CONTACT: Localized<ContactCopy> = {
             back: 'Back',
             fine: 'The confirmation and the call link go to the email you entered.',
             taken: 'That time was just taken. Pick another one.',
+            unverified: "Couldn't confirm this came from a browser. Press Book the call again.",
+            busy: (seconds) =>
+                seconds && seconds < 3600
+                    ? `Too many tries in a row. Try again in ${Math.ceil(seconds / 60) === 1 ? 'a minute' : `${Math.ceil(seconds / 60)} minutes`}.`
+                    : 'Too many tries in a row. Try again later, or book through the link below.',
+            invalid: 'Something in the details was not accepted. Check your name and email.',
             bookFailed: 'The call was not booked. Try again, or book through the link below.',
             doneTitle: 'The call is booked',
             doneText: 'A confirmation with the call link is on its way to your email.',

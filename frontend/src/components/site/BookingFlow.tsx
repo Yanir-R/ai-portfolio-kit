@@ -210,7 +210,14 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
             setError(copy.taken);
             return;
         }
-        setError(copy.bookFailed);
+        // Each refusal says what to do next; see BookFailure.
+        const message = {
+            unverified: copy.unverified,
+            busy: copy.busy(outcome.retryAfter),
+            invalid: copy.invalid,
+            failed: copy.bookFailed,
+        }[outcome.reason];
+        setError(message);
     };
 
     const when = slot && day ? `${fmt.day.format(noon(day))} · ${clock(slot.start)}` : '';

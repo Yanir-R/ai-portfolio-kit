@@ -15,6 +15,18 @@ export const apiClient = axios.create({
     },
 });
 
+/**
+ * The server answered 404: the thing asked for does not exist. Kept apart from
+ * every other failure, because a page shows "not here" for this one and
+ * "did not load, try again" for the rest.
+ */
+export class NotFoundError extends Error {
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message, options);
+        this.name = 'NotFoundError';
+    }
+}
+
 const CONNECTION_ERROR =
     'Cannot connect to backend service. Please check if the server is running.';
 

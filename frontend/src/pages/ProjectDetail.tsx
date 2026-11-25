@@ -3,7 +3,8 @@ import { Link, useParams } from 'react-router';
 import { PROJECTS } from '@/copy/projects';
 import Markdown from '@/components/Markdown';
 import { ARROW } from '@/components/site/Arrow';
-import { LoadingNote, NotFoundHero } from '@/components/site/PageStates';
+import { LoadFailed, LoadingNote, NotFoundHero } from '@/components/site/PageStates';
+import { ERRORS } from '@/copy/errors';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { PersonaKitLinks } from '@/components/chat/sheets/parts';
 import { Tag } from '@/components/writing/parts';
@@ -47,13 +48,18 @@ const ProjectDetail: React.FC = () => {
     const { lang, t, to } = useLang();
     const copy = t(PROJECTS);
     const { openContact } = useSiteDialogs();
-    const [load] = useLoad(`${slug}-${lang}`, () => projectService.getProjectBySlug(slug, lang));
+    const [load, retry] = useLoad(`${slug}-${lang}`, () =>
+        projectService.getProjectBySlug(slug, lang)
+    );
 
     if (load.state === 'loading') return <LoadingNote text={copy.loading} />;
-    if (load.state === 'failed')
+    // Only a 404 means the page is not there. Anything else - the server
+    // asleep, a network drop, a 5xx - is a page that exists and did not load.
+    if (load.state === 'failed' && load.notFound)
         return (
             <NotFoundHero copy={copy.missing} link={{ to: to('/projects'), label: copy.back }} />
         );
+    if (load.state === 'failed') return <LoadFailed copy={t(ERRORS).loadFailed} onRetry={retry} />;
 
     const project = load.value;
     const media = projectService.getProjectMediaUrl(project);
