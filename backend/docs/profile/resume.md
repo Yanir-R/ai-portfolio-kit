@@ -63,7 +63,7 @@ Built multi-agent LLM investigations over Kubernetes, AWS and observability tele
 
 ## SIDE PROJECTS
 
--   **Hermes** - a self-hosted agent running continuously with a custom persona, Obsidian-vault memory and a Telegram interface, built on the open-source Hermes Agent
+-   **Trinity Agent** (https://personakit.me/trinity) - a self-hosted assistant running continuously on WhatsApp and Telegram, built on the open-source Hermes Agent by Nous Research, with PersonaKit as its memory layer
 -   **catchup** - an open-source Claude Code mod that summarizes the agent messages you have not read
 -   **Review Engine** - one AI code review engine shared by many repositories
 -   **This site** - a document-grounded assistant on Gemini, hardened against prompt injection, with a golden-question set covering grounding, refusal and injection cases

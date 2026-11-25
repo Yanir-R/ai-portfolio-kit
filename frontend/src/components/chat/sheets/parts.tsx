@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { ContactKind } from '@/copy/site';
-import { PERSONAKIT_LINKS, SHEETS } from '@/content/sheets';
+import { PERSONAKIT_LINKS, SHEETS, TRINITY_LINKS } from '@/content/sheets';
 import { LINKS } from '@/constants/links';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { REDUCED_MOTION_QUERY } from '@/hooks/useMediaQuery';
@@ -17,6 +17,18 @@ export const PersonaKitLinks: React.FC = () => {
             </a>
             <a href={LINKS.personakitDocs} target="_blank" rel="noopener">
                 {label.docs}
+            </a>
+        </span>
+    );
+};
+
+/** Trinity Agent's own page, beside its node on the systems map. */
+export const TrinityLinks: React.FC = () => {
+    const { t } = useLang();
+    return (
+        <span className="lk">
+            <a href={LINKS.trinity} target="_blank" rel="noopener">
+                {t(TRINITY_LINKS).site}
             </a>
         </span>
     );

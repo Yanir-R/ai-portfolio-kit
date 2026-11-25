@@ -41,10 +41,11 @@
     "video", "videos", "gaming", "games", "gamer", "clips", "highlights", "streaming", "twitch", "editing", "footage",
     "וידאו", "סרטונים", "משחקים", "גיימינג", "גיימרים", "קליפים", "היילייטס", "עריכה", "סטרימינג"
   ],
-  "project/hermes": [
+  "project/trinity-agent": [
+    "trinity agent", "trinity assistant", "hermes", "hermes agent", "nous research",
     "personal assistant", "assistant", "always on", "around the clock", "24/7", "bot", "telegram", "obsidian",
     "automations", "automation", "nightly", "scheduled",
-    "עוזר אישי", "עוזר", "מסביב לשעון", "כל הזמן", "בוט", "טלגרם", "אוטומציות", "אוטומציה", "לילי", "מתוזמן"
+    "הסוכן טריניטי", "טריניטי אייג׳נט", "הרמס", "עוזר אישי", "עוזר", "מסביב לשעון", "כל הזמן", "בוט", "טלגרם", "אוטומציות", "אוטומציה", "לילי", "מתוזמן"
   ],
   "project/review-engine": [
     "code review", "reviewer", "pull request", "pull requests", "pr", "merge", "checks", "ci", "quality", "automatically",
