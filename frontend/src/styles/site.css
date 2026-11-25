@@ -3016,7 +3016,8 @@ footer {
     margin: 0;
     font-weight: 800;
     font-size: 0.95rem;
-    white-space: nowrap;
+    /* A long value (the conversation, the finish) wraps inside its cell. */
+    overflow-wrap: anywhere;
     text-align: start;
     unicode-bidi: plaintext;
 }
@@ -10044,33 +10045,6 @@ video.w-v {
     }
 }
 
-/* The quiet way from an answer to its receipt, at the end of the sources row. */
-.rc .rc-why {
-    margin-inline-start: auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    border: 0;
-    background: none;
-    padding: 2px 0;
-    font-weight: 700;
-    color: var(--muted);
-    text-decoration: underline;
-    text-decoration-style: dotted;
-    text-underline-offset: 3px;
-    cursor: pointer;
-}
-.rc .rc-why:hover,
-.rc .rc-why:focus-visible {
-    color: var(--ink);
-}
-@media (max-width: 640px) {
-    .rc .rc-why {
-        min-height: 44px;
-        margin-block: -12px -12px;
-    }
-}
-
 /* The receipt of one answer: what it rests on, what else happened, the measurements. */
 .rx {
     display: flex;
@@ -10497,7 +10471,7 @@ video.w-v {
     }
 }
 
-/* Phones: under an answer, one quiet row with its stations and the way to its receipt. */
+/* Under an answer, one quiet row with its stations and the way to its receipt. */
 .ptrail {
     display: flex;
     align-items: center;
@@ -10605,4 +10579,90 @@ video.w-v {
     .pwork li.now i {
         animation: none;
     }
+}
+
+/* The six dots of the quiet row, on every screen. */
+.ptrail .td {
+    display: inline-flex;
+    gap: 4px;
+    flex: none;
+}
+.ptrail .td i {
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 0 0 1.5px var(--ink);
+}
+.ptrail .td i.a {
+    background: var(--btn);
+}
+.ptrail:hover u,
+.ptrail:focus-visible u {
+    text-decoration-style: solid;
+}
+
+/* Beside the chat: the waiting bubble names only the station at work. */
+.dwork p {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    column-gap: 8px;
+    row-gap: 2px;
+    margin: 8px 0 0;
+}
+.dwork p i {
+    flex: none;
+    align-self: center;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    border: 1.5px solid var(--ink);
+    background: var(--coral);
+    box-shadow: 0 0 0 3px #fff3cf;
+    animation: atr-ring 1.6s ease-in-out infinite;
+}
+.dwork p b {
+    font-weight: 800;
+}
+.dwork p span {
+    font-size: 0.86rem;
+    color: #636f93;
+}
+@media (prefers-reduced-motion: reduce) {
+    .dwork p i {
+        animation: none;
+    }
+}
+
+/* The drawing card whose drawing is the one in the panel right now. */
+.art.on {
+    box-shadow: 4px 4px 0 var(--btn);
+}
+[dir='rtl'] .art.on {
+    box-shadow: -4px 4px 0 var(--btn);
+}
+.art.on .s .vd,
+.art.on .s .vm {
+    color: var(--ink);
+}
+
+/* At the top of a receipt: back to the drawing of the same answer. */
+.plan .bk.top {
+    margin: 0 14px 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* The path row on a drawing: its figures keep together and wrap as a whole. */
+.trail {
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+.trail > span:not(.td) {
+    white-space: nowrap;
 }

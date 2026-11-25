@@ -108,15 +108,43 @@ const Working: React.FC<{ plan: { stage: number; elapsed: number } }> = ({ plan 
     );
 };
 
-const ArtCard: React.FC<{ sheet: SheetKey; record?: AnswerRecord | null; onOpen: OnSheet }> = ({
-    sheet,
-    record,
-    onOpen,
-}) => {
+/**
+ * Beside the chat, the waiting bubble names only the station at work; the
+ * full list lights up in the panel next to it.
+ */
+const WorkingLine: React.FC<{ plan: { stage: number; elapsed: number } }> = ({ plan }) => {
+    const { t } = useLang();
+    const copy = t(CHAT);
+    const [title, sub] = copy.trace.stations[Math.min(plan.stage + 1, 3)];
+    return (
+        <div className="m y ai wait dwork">
+            <span className="src ag">{copy.phone.working(Math.max(1, plan.elapsed))}</span>
+            {/* Read out when the station changes, not every second. */}
+            <p aria-live="polite">
+                <i aria-hidden="true" />
+                <b>{title}</b>
+                <span>{sub}</span>
+            </p>
+        </div>
+    );
+};
+
+const ArtCard: React.FC<{
+    sheet: SheetKey;
+    record?: AnswerRecord | null;
+    onOpen: OnSheet;
+    /** Its drawing is the one shown beside the chat right now. */
+    shown?: boolean;
+}> = ({ sheet, record, onOpen, shown }) => {
     const { t } = useLang();
     const art = t(CHAT).art;
     return (
-        <button type="button" className="art" onClick={() => onOpen(sheet, record)}>
+        <button
+            type="button"
+            className={shown ? 'art on' : 'art'}
+            aria-current={shown || undefined}
+            onClick={() => onOpen(sheet, record)}
+        >
             <span className="th">
                 <SheetThumb map={sheet === 'map'} />
             </span>
@@ -124,8 +152,8 @@ const ArtCard: React.FC<{ sheet: SheetKey; record?: AnswerRecord | null; onOpen:
                 <b>{t(SHEET_HEADS)[sheet].title}</b>
                 <span className="s">
                     {art.diagram}
-                    <span className="vd"> · {art.opensSide}</span>
-                    <span className="vm"> · {art.opensBelow}</span>
+                    <span className="vd"> · {shown ? art.shownSide : art.opensSide}</span>
+                    <span className="vm"> · {shown ? art.shownBelow : art.opensBelow}</span>
                 </span>
             </span>
             <span className="o">
@@ -150,6 +178,12 @@ const EntryView: React.FC<{
     const { t } = useLang();
     const copy = t(CHAT);
     const { openContact } = useSiteDialogs();
+    // Beside the chat, the card whose drawing is in the panel is marked.
+    const isShown = (sheet: SheetKey, record?: AnswerRecord | null) =>
+        !engage &&
+        chat.plan.kind === 'sheet' &&
+        chat.plan.key === sheet &&
+        (chat.sheets.find((s) => s.key === sheet)?.record ?? null) === (record ?? null);
 
     switch (entry.kind) {
         case 'user':
@@ -176,8 +210,10 @@ const EntryView: React.FC<{
                 </div>
             );
         case 'working':
-            // On a phone the stations live here, in the waiting bubble.
-            if (engage && chat.plan.kind === 'running') return <Working plan={chat.plan} />;
+            // On a phone the stations live here, in the waiting bubble; beside
+            // the chat, only the one at work.
+            if (chat.plan.kind === 'running')
+                return engage ? <Working plan={chat.plan} /> : <WorkingLine plan={chat.plan} />;
             return (
                 <div className="m y ai wait">
                     <span className="src ag">{copy.working}</span>
@@ -190,7 +226,13 @@ const EntryView: React.FC<{
                     {entry.tag === 'ready' && <span className="src">{copy.readyTag}</span>}
                     {entry.tag === 'sent' && <span className="src ok">{copy.sentTag}</span>}
                     {engage && entry.id === GREETING_ID ? copy.phone.greeting : entry.text}
-                    {entry.sheet && <ArtCard sheet={entry.sheet} onOpen={onSheet} />}
+                    {entry.sheet && (
+                        <ArtCard
+                            sheet={entry.sheet}
+                            onOpen={onSheet}
+                            shown={isShown(entry.sheet)}
+                        />
+                    )}
                 </div>
             );
         case 'answer': {
@@ -219,7 +261,12 @@ const EntryView: React.FC<{
                         </button>
                     )}
                     {entry.sheet && (
-                        <ArtCard sheet={entry.sheet} record={record} onOpen={onSheet} />
+                        <ArtCard
+                            sheet={entry.sheet}
+                            record={record}
+                            onOpen={onSheet}
+                            shown={isShown(entry.sheet, record)}
+                        />
                     )}
                     {record && (
                         <div className="rc">
@@ -233,23 +280,11 @@ const EntryView: React.FC<{
                             ) : (
                                 <span>{record.used ? copy.fromNotes : copy.noSource}</span>
                             )}
-                            {/* Every answer the model wrote keeps its receipt, diagram or
-                                not; when the receipt is the diagram, its card is the way in. */}
-                            {!engage &&
-                                entry.sheet !== 'read' &&
-                                record.trace?.context_outcome !== 'conversational' && (
-                                    <button
-                                        type="button"
-                                        className="rc-why"
-                                        onClick={() => onSheet('read', record)}
-                                    >
-                                        <ReceiptIcon />
-                                        {copy.behind}
-                                    </button>
-                                )}
                         </div>
                     )}
-                    {record && engage && (
+                    {/* Every answer the model wrote ends with its stations and the
+                        way to its receipt; a ready answer has neither. */}
+                    {record && !entry.fromIndex && (
                         <button
                             type="button"
                             className="ptrail"

@@ -151,7 +151,15 @@ export interface ChatCopy {
         another: string;
     };
     /** The sheet card under an answer. */
-    art: { diagram: string; opensSide: string; opensBelow: string; open: string };
+    art: {
+        diagram: string;
+        opensSide: string;
+        opensBelow: string;
+        /** The card's sub-line while its drawing is the one beside the chat. */
+        shownSide: string;
+        shownBelow: string;
+        open: string;
+    };
     /** The phone layout: the chat as a full-screen layer, the diagram as a sheet over it. */
     phone: {
         /** The greeting without "on the left": on a phone the drawing is a sheet. */
@@ -183,7 +191,14 @@ export interface ChatCopy {
     };
     plan: {
         step2: string;
-        base: { title: string; cap: string; sumH: string; sumT: string };
+        base: {
+            title: string;
+            cap: string;
+            /** The same on a phone's sheet, where the chat is not beside it. */
+            capPhone: string;
+            sumH: string;
+            sumT: string;
+        };
         running: { title: string; cap: string };
         lit: { kicker: string; title: string; cap: string };
         ready: {
@@ -217,6 +232,8 @@ export interface ChatCopy {
         trailNone: (sec: number) => string;
         trailOpen: string;
         back: string;
+        /** At the top of a receipt whose answer has a drawing: back to that drawing. */
+        backToDrawing: string;
     };
 }
 
@@ -346,6 +363,8 @@ export const CHAT: Localized<ChatCopy> = {
             diagram: 'שרטוט לתשובה הזו',
             opensSide: 'נפתח משמאל',
             opensBelow: 'נפתח למטה',
+            shownSide: 'מוצג משמאל',
+            shownBelow: 'מוצג למטה',
             open: 'פתחו',
         },
         phone: {
@@ -518,6 +537,7 @@ export const CHAT: Localized<ChatCopy> = {
             base: {
                 title: 'איך הסוכן עונה',
                 cap: 'כל שאלה עוברת את שש התחנות האלה. שאלו משהו מימין, והן יידלקו אחת אחת.',
+                capPhone: 'כל שאלה עוברת את שש התחנות האלה. שאלו משהו, והן יידלקו אחת אחת.',
                 sumH: 'למה זה כאן:',
                 sumT: 'כך נראה סוכן שאפשר לבדוק. רואים מה הוא קרא, וכמה זמן זה לקח.',
             },
@@ -554,10 +574,11 @@ export const CHAT: Localized<ChatCopy> = {
             sumH: 'התשובה הזו:',
             sumFrom: (n) => `נכתבה מתוך ${n} מסמכים של יניר. המודל לא ראה שום דבר אחר.`,
             sumDeclined: 'הסוכן אמר שהוא לא יודע, במקום להמציא.',
-            trail: (n, sec) => `קרא ${n} מסמכים · ${sec} שניות`,
+            trail: (n, sec) => `קרא ${n === 1 ? 'מסמך אחד' : `${n} מסמכים`} · ${sec} שניות`,
             trailNone: (sec) => `לא נמצא מסמך מתאים · ${sec} שניות`,
             trailOpen: 'שש התחנות בדרך לתשובה',
             back: 'חזרה לשרטוט של התשובה',
+            backToDrawing: 'חזרה לשרטוט',
         },
     },
     en: {
@@ -701,6 +722,8 @@ export const CHAT: Localized<ChatCopy> = {
             diagram: 'A diagram for this answer',
             opensSide: 'opens on the right',
             opensBelow: 'opens below',
+            shownSide: 'shown on the right',
+            shownBelow: 'shown below',
             open: 'Open',
         },
         phone: {
@@ -892,6 +915,8 @@ export const CHAT: Localized<ChatCopy> = {
             base: {
                 title: 'How the agent answers',
                 cap: 'Every question goes through these six stations. Ask something on the left, and they light up one by one.',
+                capPhone:
+                    'Every question goes through these six stations. Ask something, and they light up one by one.',
                 sumH: 'Why this is here:',
                 sumT: 'This is what an agent you can check looks like. You see what it read, and how long it took.',
             },
@@ -930,10 +955,11 @@ export const CHAT: Localized<ChatCopy> = {
             sumFrom: (n) =>
                 `was written from ${n} of Yanir's documents. The model saw nothing else.`,
             sumDeclined: "The agent said it doesn't know, instead of making something up.",
-            trail: (n, sec) => `Read ${n} documents · ${sec} seconds`,
+            trail: (n, sec) => `Read ${n} document${n === 1 ? '' : 's'} · ${sec} seconds`,
             trailNone: (sec) => `No matching document found · ${sec} seconds`,
             trailOpen: 'The six stations to the answer',
             back: "Back to the answer's diagram",
+            backToDrawing: 'Back to the drawing',
         },
     },
 };

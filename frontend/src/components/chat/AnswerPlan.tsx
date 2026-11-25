@@ -6,7 +6,7 @@ import ProcessFlow from '@/components/chat/ProcessFlow';
 import AnswerTrace, { TraceStation } from '@/components/chat/AnswerTrace';
 import SystemsMap from '@/components/chat/SystemsMap';
 import { SheetBody } from '@/components/chat/sheets/Sheets';
-import { Arrow } from '@/components/site/Arrow';
+import { ARROW, Arrow } from '@/components/site/Arrow';
 import { REDUCED_MOTION_QUERY, STACKED_QUERY } from '@/hooks/useMediaQuery';
 import { useLang } from '@/i18n/useLang';
 
@@ -42,7 +42,7 @@ const AnswerPlan: React.FC<{
     /** The second copy on the page: no element ids, which the live one owns. */
     idless?: boolean;
 }> = ({ chat, onClose, idless }) => {
-    const { t } = useLang();
+    const { t, lang } = useLang();
     const copy = t(CHAT);
     const heads = t(SHEET_HEADS);
     const plan = chat.plan;
@@ -101,7 +101,7 @@ const AnswerPlan: React.FC<{
     // Header, caption and summary for the current view.
     let kicker = copy.plan.step2;
     let title = copy.plan.base.title;
-    let cap = copy.plan.base.cap;
+    let cap = onClose ? copy.plan.base.capPhone : copy.plan.base.cap;
     // The phone's sheet, opened before any question, says why the stations are shown.
     const sum: [string, React.ReactNode] =
         plan.kind === 'base' && onClose ? [copy.plan.base.sumH, copy.plan.base.sumT] : ['', foot];
@@ -138,6 +138,15 @@ const AnswerPlan: React.FC<{
     }
 
     const record = current?.record;
+    // Beside the chat, a receipt whose answer also made a drawing leads back to it.
+    const drawing =
+        !onClose && plan.kind === 'sheet' && plan.key === 'read' && record
+            ? chat.entries.find((e) => e.kind === 'answer' && e.record === record)
+            : undefined;
+    const drawingKey =
+        drawing?.kind === 'answer' && drawing.sheet && drawing.sheet !== 'read'
+            ? drawing.sheet
+            : undefined;
 
     return (
         <div className={mode ? `plan ${mode}` : 'plan'} id={id('plan')} ref={ref}>
@@ -157,6 +166,17 @@ const AnswerPlan: React.FC<{
                     </button>
                 )}
             </div>
+            {drawingKey && (
+                <button
+                    type="button"
+                    className="bk top"
+                    onClick={() => chat.openSheet(drawingKey, record)}
+                >
+                    {/* Back the way the reader came: the arrow points against the text. */}
+                    <span aria-hidden="true">{ARROW[lang === 'he' ? 'en' : 'he']}</span>{' '}
+                    {copy.plan.backToDrawing}
+                </button>
+            )}
             <div className="cap" id={id('cap')}>
                 {cap}
             </div>
