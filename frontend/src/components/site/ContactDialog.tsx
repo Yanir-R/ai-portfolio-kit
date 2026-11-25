@@ -89,36 +89,30 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
                     </button>
                 ))}
             </div>
-            <div className="tb" role="tabpanel">
-                {kind === 'call' && (
-                    <>
-                        {!booked && <p>{copy.call.text}</p>}
-                        <BookingFlow topic={note || undefined} onBooked={() => setBooked(true)} />
-                    </>
-                )}
-                {kind === 'mail' && (
-                    <>
-                        <p>{copy.mail.text}</p>
-                        <MailForm
-                            initial={request.message ?? request.topic ?? ''}
-                            topic={request.topic}
-                        />
-                    </>
-                )}
-                {kind === 'whatsapp' && (
-                    <>
-                        <p>{copy.whatsapp.text}</p>
-                        <a
-                            className="btn"
-                            href={whatsappUrl(copy.whatsapp.first(request.topic))}
-                            target="_blank"
-                            rel="noopener"
-                        >
-                            {copy.whatsapp.open}
-                        </a>
-                        <p className="fine">{copy.whatsapp.fine}</p>
-                    </>
-                )}
+            {/*
+             * All three panels stay mounted and only the chosen one shows.
+             * Switching tabs then keeps what was typed and the booking step,
+             * and the calendar does not fetch its free days again.
+             */}
+            <div className="tb" role="tabpanel" hidden={kind !== 'call'}>
+                {!booked && <p>{copy.call.text}</p>}
+                <BookingFlow topic={note || undefined} onBooked={() => setBooked(true)} />
+            </div>
+            <div className="tb" role="tabpanel" hidden={kind !== 'mail'}>
+                <p>{copy.mail.text}</p>
+                <MailForm initial={request.message ?? request.topic ?? ''} topic={request.topic} />
+            </div>
+            <div className="tb" role="tabpanel" hidden={kind !== 'whatsapp'}>
+                <p>{copy.whatsapp.text}</p>
+                <a
+                    className="btn"
+                    href={whatsappUrl(copy.whatsapp.first(request.topic))}
+                    target="_blank"
+                    rel="noopener"
+                >
+                    {copy.whatsapp.open}
+                </a>
+                <p className="fine">{copy.whatsapp.fine}</p>
             </div>
         </dialog>
     );

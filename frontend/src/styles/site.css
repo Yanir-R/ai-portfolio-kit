@@ -8381,3 +8381,18 @@ video.w-v {
 [dir] .v-form .btn::after {
     content: none;
 }
+
+/* Only the chosen tab's panel shows; the others stay mounted (see ContactDialog). */
+.talk .tb[hidden] {
+    display: none;
+}
+/*
+ * One height for every tab on a wide screen, so switching routes does not make
+ * the window jump. It is the booking calendar's height; the shorter routes sit
+ * at the top of the same frame, and a taller step scrolls inside it.
+ */
+@media (min-width: 641px) {
+    .talk[open] {
+        height: min(640px, calc(100dvh - 32px));
+    }
+}
