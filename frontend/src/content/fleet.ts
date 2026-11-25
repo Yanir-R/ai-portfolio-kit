@@ -397,6 +397,9 @@ export const FLEET_UI: Localized<{
     whyDone: string;
     howHelps: string;
     whatSolved: string;
+    position: (n: number, of: number) => string;
+    prevGroup: string;
+    nextGroup: string;
 }> = {
     he: {
         chartLabel: 'מערך הסוכנים: סוכן ראשי במרכז, שבע קבוצות סביבו',
@@ -411,6 +414,9 @@ export const FLEET_UI: Localized<{
         whyDone: 'למה זה נעשה',
         howHelps: 'איך זה מועיל',
         whatSolved: 'מה זה פתר',
+        position: (n, of) => `קבוצה ${n} מתוך ${of}`,
+        prevGroup: 'הקבוצה הקודמת',
+        nextGroup: 'הקבוצה הבאה',
     },
     en: {
         chartLabel: 'The agent fleet: a head agent in the centre, seven groups around it',
@@ -425,5 +431,8 @@ export const FLEET_UI: Localized<{
         whyDone: 'Why it was done',
         howHelps: 'How it helps',
         whatSolved: 'What it solved',
+        position: (n, of) => `Group ${n} of ${of}`,
+        prevGroup: 'Previous group',
+        nextGroup: 'Next group',
     },
 };

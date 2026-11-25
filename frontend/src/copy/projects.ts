@@ -75,7 +75,7 @@ export const PROJECTS: Localized<ProjectsCopy> = {
         privateCode: 'הקוד פרטי',
         cta: {
             title: 'רוצים משהו כזה אצלכם?',
-            button: 'קבעו שיחת אבחון, 20 דקות',
+            button: 'קבעו שיחת אבחון',
             ask: 'שאלו את הסוכן',
             prompt: (title) => `ספר לי על ${title}: מה בנית ומה היה קשה?`,
         },
@@ -124,7 +124,7 @@ export const PROJECTS: Localized<ProjectsCopy> = {
         privateCode: 'Private code',
         cta: {
             title: 'Want something like this?',
-            button: 'Book a discovery call, 20 minutes',
+            button: 'Book a discovery call',
             ask: 'Ask the agent',
             prompt: (title) => `Tell me about ${title}: what did you build and what was hard?`,
         },

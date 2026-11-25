@@ -34,6 +34,8 @@ export interface HomeCopy {
         also: { tag: string; title: string; text: string; href?: string; open?: boolean }[];
     };
     fleet: SectionHead & {
+        /** The intro on phones, where a group is picked rather than a dot. */
+        textPhone: string;
         logTitle: string;
         logNote: string;
         log: { tag: string; date: string; title: string; text: string }[];
@@ -77,7 +79,7 @@ export const HOME: Localized<HomeCopy> = {
                 'אצלי סוכנים כאלה חוקרים שוק עם מקורות, בודקים קוד ומנטרים מערכות בלילה.',
                 'אני יניר, מפתח AI, והצ׳אט כאן הוא סוכן שבניתי.',
             ],
-            cta: 'קבעו שיחת אבחון, 20 דקות',
+            cta: 'קבעו שיחת אבחון',
             whatsapp: 'וואטסאפ',
         },
         build: {
@@ -175,6 +177,8 @@ export const HOME: Localized<HomeCopy> = {
             title: 'יותר מ־40 סוכנים.',
             em: 'ראש אחד.',
             text: 'לפני שאני בונה סוכנים לכם, אני מריץ אותם אצלי כל יום. כל נקודה היא סוכן אחד. עברו עליה עם העכבר, או הקישו עליה, כדי לראות למה הוא קיים.',
+            textPhone:
+                'לפני שאני בונה סוכנים לכם, אני מריץ אותם אצלי כל יום. בחרו קבוצה כדי לראות למה היא קיימת.',
             logTitle: 'מהיומן של המערך',
             logNote: 'שלושה מקרים אמיתיים מנובמבר 2026',
             log: [
@@ -303,7 +307,7 @@ export const HOME: Localized<HomeCopy> = {
                 'Mine research markets with sources, review code and watch systems overnight.',
                 "I'm Yanir, an AI developer, and the chat here is an agent I built.",
             ],
-            cta: 'Book a 20-minute call',
+            cta: 'Book a discovery call',
             whatsapp: 'WhatsApp',
         },
         build: {
@@ -402,6 +406,8 @@ export const HOME: Localized<HomeCopy> = {
             title: 'More than 40 agents.',
             em: 'One head.',
             text: 'Before I build agents for you, I run them myself every day. Each dot is one agent. Hover over it, or tap it, to see why it exists.',
+            textPhone:
+                'Before I build agents for you, I run them myself every day. Pick a group to see why it exists.',
             logTitle: "From the fleet's log",
             logNote: 'Three real cases from November 2026',
             log: [
