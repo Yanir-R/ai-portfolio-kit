@@ -4,6 +4,9 @@ import { WRITING } from '@/copy/writing';
 import Markdown from '@/components/Markdown';
 import MediaView from '@/components/writing/MediaView';
 import AskDock from '@/components/writing/AskDock';
+import PostChatLayer from '@/components/writing/PostChatLayer';
+import { PHONE_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
+import { useHistoryLayer } from '@/hooks/usePhoneLayer';
 import { EntryTitle, Tag } from '@/components/writing/parts';
 import { ARROW } from '@/components/site/Arrow';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
@@ -89,14 +92,28 @@ const useNeighbours = (
  * it was first published, the pieces around it, and a way to ask about it.
  * Used by a piece's own page and by the reading panel on the blog.
  */
-const PostArticle: React.FC<{ entry: WritingEntry; index: WritingIndex | null }> = ({
-    entry,
-    index,
-}) => {
+interface Props {
+    entry: WritingEntry;
+    index: WritingIndex | null;
+    /** The piece's own page (not the blog's reading panel): on a phone its chat is a layer. */
+    page?: boolean;
+}
+
+const PostArticle: React.FC<Props> = ({ entry, index, page = false }) => {
     const { lang, t, to } = useLang();
     const copy = t(WRITING);
     const { openContact } = useSiteDialogs();
     const [asking, setAsking] = useState(false);
+    // On a phone, on the piece's own page, the chat opens as a full-screen
+    // layer (a history entry, so Back and the X return to this spot).
+    const phone = useMediaQuery(PHONE_QUERY);
+    const layer = useHistoryLayer('postChat', phone && page);
+    const [started, setStarted] = useState(false);
+    const openLayer = () => {
+        setStarted(true);
+        layer.show();
+    };
+    const inLayer = phone && page;
     const neighbours = useNeighbours(entry, index);
     const series = seriesOf(entry, index);
     const media = mediaOf(entry);
@@ -180,8 +197,8 @@ const PostArticle: React.FC<{ entry: WritingEntry; index: WritingIndex | null }>
                     <button
                         type="button"
                         className="w-chip"
-                        aria-expanded={asking}
-                        onClick={() => setAsking((open) => !open)}
+                        aria-expanded={inLayer ? undefined : asking}
+                        onClick={inLayer ? openLayer : () => setAsking((open) => !open)}
                     >
                         {copy.ask.open}
                     </button>
@@ -193,8 +210,17 @@ const PostArticle: React.FC<{ entry: WritingEntry; index: WritingIndex | null }>
                         {copy.ask.book}
                     </button>
                 </span>
-                {asking && <AskDock entry={entry} />}
+                {asking && !inLayer && <AskDock entry={entry} />}
             </div>
+            {inLayer && (
+                <PostChatLayer
+                    entry={entry}
+                    open={layer.open}
+                    started={started}
+                    onOpen={openLayer}
+                    onClose={layer.close}
+                />
+            )}
         </article>
     );
 };

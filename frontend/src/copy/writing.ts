@@ -76,6 +76,12 @@ export interface WritingCopy {
         open: string;
         book: string;
         removeContext: string;
+        /** The phone layer's text button that drops the piece (its X is the layer's own). */
+        removeShort: string;
+        removeContextLong: (kind: 'article' | 'post') => string;
+        /** Lines in the log where the questions stop or start being about the piece. */
+        contextOff: (kind: 'article' | 'post') => string;
+        contextOn: (kind: 'article' | 'post') => string;
         log: string;
         reading: string;
         answered: string;
@@ -86,11 +92,15 @@ export interface WritingCopy {
         bizOptions: string[];
         bizNote: string;
         bizAsk: (kind: string) => string;
-        placeholder: string;
+        placeholder: (kind: 'article' | 'post') => string;
         placeholderGeneral: string;
         inputLabel: string;
         send: string;
         sources: string;
+        /** The phone's fixed bar on a piece, which opens the chat layer. */
+        bar: (kind: 'article' | 'post') => string;
+        /** The layer's first message. */
+        greeting: (kind: 'article' | 'post') => string;
     };
     cards: {
         recent: string;
@@ -188,6 +198,11 @@ export const WRITING: Localized<WritingCopy> = {
             open: 'שאלו את הסוכן',
             book: 'קבעו שיחה',
             removeContext: 'הסרת ההקשר',
+            removeShort: 'הסרה',
+            contextOff: (kind) =>
+                `מכאן השאלות כלליות, לא על ${kind === 'post' ? 'הפוסט' : 'המאמר'}.`,
+            contextOn: (kind) => `מכאן השאלות שוב על ${kind === 'post' ? 'הפוסט' : 'המאמר'}.`,
+            removeContextLong: (kind) => `לשאול בלי הקשר ל${kind === 'post' ? 'פוסט' : 'מאמר'}`,
             log: 'השיחה על הקטע',
             reading: 'הסוכן קורא את הקטע…',
             answered: 'הסוכן ענה',
@@ -203,11 +218,14 @@ export const WRITING: Localized<WritingCopy> = {
             bizNote: 'השאלה הזו קבועה ולא עולה קריאה למודל. המודל נקרא רק אחרי הבחירה.',
             bizAsk: (kind) =>
                 `מה הקטע הזה אומר ל${kind}? איפה זה פוגש אותנו ביום־יום, ומה צעד ראשון?`,
-            placeholder: 'שאלה על הקטע הזה',
+            placeholder: (kind) => `כתבו שאלה על ${kind === 'post' ? 'הפוסט' : 'המאמר'}`,
             placeholderGeneral: 'שאלה כללית לסוכן',
             inputLabel: 'שאלה על הקטע',
             send: 'שאלו',
             sources: 'מקורות',
+            bar: (kind) => `שאלו את הסוכן על ${kind === 'post' ? 'הפוסט' : 'המאמר'}`,
+            greeting: (kind) =>
+                `קראתי את ${kind === 'post' ? 'הפוסט' : 'המאמר'}. אפשר לשאול עליו, או על איך זה נראה בפרויקט אמיתי.`,
         },
         cards: {
             recent: 'אחרונים',
@@ -301,6 +319,10 @@ export const WRITING: Localized<WritingCopy> = {
             open: 'Ask the agent',
             book: 'Book a call',
             removeContext: 'Remove the context',
+            removeShort: 'Remove',
+            contextOff: (kind) => `From here the questions are general, not about this ${kind}.`,
+            contextOn: (kind) => `From here the questions are about this ${kind} again.`,
+            removeContextLong: (kind) => `Ask without this ${kind}`,
             log: 'The conversation about this piece',
             reading: 'The agent is reading the piece…',
             answered: 'The agent answered',
@@ -322,11 +344,14 @@ export const WRITING: Localized<WritingCopy> = {
                 'This question is fixed and costs no model call. The model is called only after you pick.',
             bizAsk: (kind) =>
                 `What does this piece mean for ${kind.toLowerCase()}? Where does it meet us day to day, and what is a first step?`,
-            placeholder: 'A question about this piece',
+            placeholder: (kind) => `Ask about this ${kind}`,
             placeholderGeneral: 'A general question for the agent',
             inputLabel: 'A question about this piece',
             send: 'Ask',
             sources: 'Sources',
+            bar: (kind) => `Ask the agent about this ${kind}`,
+            greeting: (kind) =>
+                `I read the ${kind}. Ask about it, or about how it looks in a real project.`,
         },
         cards: {
             recent: 'Latest',

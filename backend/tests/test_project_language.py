@@ -58,3 +58,12 @@ def test_profile_content_has_a_hebrew_twin(client):
     # A document without a twin is served in English.
     resume = client.get("/api/content/resume.md").json()["content"]
     assert client.get("/api/content/resume.md", params={"lang": "he"}).json()["content"] == resume
+
+
+def test_stack_comes_only_from_the_technical_details_section():
+    # Bold bullets under Features or Deployment are prose, not stack chips.
+    project = get_project_by_slug("reelsensei")
+    stack = " ".join(v for k, v in project.items() if k.startswith("tech_"))
+    assert "Next.js" in stack
+    assert "clutch plays" not in stack
+    assert "Leverages" not in stack

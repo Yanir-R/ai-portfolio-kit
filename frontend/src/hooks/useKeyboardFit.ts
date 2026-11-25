@@ -19,8 +19,15 @@ const GROW_LINES = 3;
  * middle of its scroll box on focus and again once the keyboard has settled.
  * While the keyboard is up a textarea marked `data-grow` starts one line high
  * and grows with its text up to three lines, through `--grow-h`.
+ *
+ * `centre: false` leaves scrolling alone, for a window whose input row is
+ * fixed at its foot (the chat layers) rather than inside a scrolling form.
  */
-export const useKeyboardFit = (ref: React.RefObject<HTMLElement | null>, enabled: boolean) => {
+export const useKeyboardFit = (
+    ref: React.RefObject<HTMLElement | null>,
+    enabled: boolean,
+    { centre: centring = true }: { centre?: boolean } = {}
+) => {
     useEffect(() => {
         const box = ref.current;
         const vv = window.visualViewport;
@@ -117,7 +124,7 @@ export const useKeyboardFit = (ref: React.RefObject<HTMLElement | null>, enabled
             box.toggleAttribute('data-kb', open);
             growAll();
             window.clearTimeout(timer);
-            timer = window.setTimeout(centre, SETTLE_MS);
+            if (centring) timer = window.setTimeout(centre, SETTLE_MS);
         };
         // A form that changes height (an error or a result above the pinned
         // button, a field that grew) settles again around the focused field.
@@ -142,7 +149,7 @@ export const useKeyboardFit = (ref: React.RefObject<HTMLElement | null>, enabled
             watchForms();
             growAll();
             window.clearTimeout(timer);
-            timer = window.setTimeout(centre, SETTLE_MS);
+            if (centring) timer = window.setTimeout(centre, SETTLE_MS);
         };
 
         fit();
@@ -162,7 +169,7 @@ export const useKeyboardFit = (ref: React.RefObject<HTMLElement | null>, enabled
             box.style.removeProperty('--vv-h');
             box.style.removeProperty('--vv-top');
         };
-    }, [ref, enabled]);
+    }, [ref, enabled, centring]);
 };
 
 /**
