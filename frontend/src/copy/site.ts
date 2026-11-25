@@ -175,6 +175,8 @@ export interface BookingCopy {
     withValue: string;
     subject: string;
     addToCalendar: string;
+    calGoogle: string;
+    calFile: string;
     /** Between two times; a dash reads in the wrong order inside Hebrew. */
     until: string;
     close: string;
@@ -204,7 +206,7 @@ export const CONTACT: Localized<ContactCopy> = {
             prevMonth: 'החודש הקודם',
             nextMonth: 'החודש הבא',
             pickDay: 'בחרו יום ביומן, והשעות הפנויות יופיעו כאן.',
-            timesNote: 'השעות לפי שעון ישראל',
+            timesNote: 'שעון ישראל. לחיצה על שעה ממשיכה לפרטים.',
             otherDay: 'יום אחר',
             change: 'שינוי',
             name: 'שם מלא',
@@ -227,6 +229,8 @@ export const CONTACT: Localized<ContactCopy> = {
             withValue: 'יניר רוט',
             subject: 'נושא',
             addToCalendar: 'הוספה ליומן',
+            calGoogle: 'Google Calendar',
+            calFile: 'Apple / Outlook',
             until: 'עד',
             close: 'סגירה',
             doneFine: 'צריך לשנות? במייל האישור יש קישור לשינוי מועד ולביטול.',
@@ -271,7 +275,7 @@ export const CONTACT: Localized<ContactCopy> = {
             prevMonth: 'Previous month',
             nextMonth: 'Next month',
             pickDay: 'Pick a day on the calendar and the free times show here.',
-            timesNote: 'Times are in Israel time',
+            timesNote: 'Israel time. Pick a time to continue.',
             otherDay: 'Another day',
             change: 'Change',
             name: 'Full name',
@@ -294,6 +298,8 @@ export const CONTACT: Localized<ContactCopy> = {
             withValue: 'Yanir Rot',
             subject: 'Subject',
             addToCalendar: 'Add to calendar',
+            calGoogle: 'Google Calendar',
+            calFile: 'Apple / Outlook',
             until: 'to',
             close: 'Close',
             doneFine:

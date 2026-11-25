@@ -26,10 +26,45 @@ const dayKey = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)
 const daysIn = (y: number, m: number) => new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
 /** A day key at noon UTC: the same calendar day in every time zone near Israel. */
 const noon = (key: string) => new Date(`${key}T12:00:00Z`);
-/** "09:30" from "2026-11-26T09:30:00.000+02:00": the slot is already in Israel time. */
-const clock = (iso: string) => iso.slice(11, 16);
+const israelClock = new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: BOOKING_TIME_ZONE,
+});
+/**
+ * "09:30" in Israel time. Slots come with Israel's offset but cal.com's booking
+ * answer is in UTC, so the time is converted rather than read off the string.
+ */
+const clock = (iso: string) => israelClock.format(new Date(iso));
 /** Google Calendar's compact UTC form, 20261126T073000Z. */
 const gcal = (iso: string) => new Date(iso).toISOString().replace(/[-:]|\.\d{3}/g, '');
+/** Text escaped for an iCalendar property value. */
+const icsText = (text: string) => text.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\r?\n/g, '\\n');
+
+/*
+ * One calendar file for Apple Calendar, Outlook and anything else that opens
+ * .ics: on an iPhone it opens the "add event" sheet, on a desktop the default
+ * calendar app. Google Calendar (Android's default) gets its own link.
+ */
+const icsFile = (uid: string, start: string, end: string, title: string, details: string) =>
+    [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//yanirrot.com//booking//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        `UID:${uid}@yanirrot.com`,
+        `DTSTAMP:${gcal(new Date().toISOString())}`,
+        `DTSTART:${gcal(start)}`,
+        `DTEND:${gcal(end)}`,
+        `SUMMARY:${icsText(title)}`,
+        ...(details ? [`DESCRIPTION:${icsText(details)}`] : []),
+        'END:VEVENT',
+        'END:VCALENDAR',
+        '',
+    ].join('\r\n');
 
 interface Props {
     topic?: string;
@@ -180,6 +215,11 @@ const BookingFlow: React.FC<Props> = ({ topic, onBooked, onClose }) => {
                 dates: `${gcal(start)}/${gcal(end)}`,
                 details: notes,
             }).toString();
+        const calendarFile =
+            'data:text/calendar;charset=utf-8,' +
+            encodeURIComponent(
+                icsFile(booked?.uid ?? start, start, end, copy.eventTitle, notes.trim())
+            );
         return (
             <>
                 <Stepper at={3} names={copy.steps} label={copy.stepsLabel} />
@@ -212,10 +252,18 @@ const BookingFlow: React.FC<Props> = ({ topic, onBooked, onClose }) => {
                         </>
                     )}
                 </dl>
+                <div className="bk-add">
+                    <span>{copy.addToCalendar}</span>
+                    <div className="bk-row">
+                        <a className="btn" href={calendarUrl} target="_blank" rel="noopener">
+                            {copy.calGoogle}
+                        </a>
+                        <a className="btn" href={calendarFile} download="call-with-yanir.ics">
+                            {copy.calFile}
+                        </a>
+                    </div>
+                </div>
                 <div className="bk-row">
-                    <a className="btn" href={calendarUrl} target="_blank" rel="noopener">
-                        {copy.addToCalendar}
-                    </a>
                     <button type="button" className="btn sec" onClick={onClose}>
                         {copy.close}
                     </button>
