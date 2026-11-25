@@ -8369,3 +8369,15 @@ video.w-v {
 .talk .v-form > div:empty {
     display: none;
 }
+
+/*
+ * direction.css adds '→' to every .btn under [dir='ltr'], and that rule ties
+ * the opt-outs above on specificity and loads later. Repeat the opt-outs with
+ * a [dir] prefix so English matches Hebrew: no arrow inside the contact window
+ * or on outlined buttons.
+ */
+[dir] .btn.line::after,
+[dir] .talk .btn::after,
+[dir] .v-form .btn::after {
+    content: none;
+}

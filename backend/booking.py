@@ -29,6 +29,10 @@ CAL_EVENT_SLUG = "zoom-call"
 # time written in cal.com's own confirmation email.
 TIME_ZONE = "Asia/Jerusalem"
 CAL_TIMEOUT_SECONDS = 15
+# cal.com sits behind Cloudflare, which refuses Python's default
+# "Python-urllib/3.x" signature outright (error 1010). The request says
+# plainly what it is instead.
+USER_AGENT = "yanirrot.com-booking/1.0 (+https://yanirrot.com)"
 
 
 class BookingError(Exception):
@@ -48,6 +52,8 @@ def _post(body: Dict[str, Any]) -> Dict[str, Any]:
         headers={
             "Content-Type": "application/json",
             "cal-api-version": CAL_API_VERSION,
+            "User-Agent": USER_AGENT,
+            "Accept": "application/json",
         },
     )
     try:

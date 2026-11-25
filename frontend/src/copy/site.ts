@@ -128,6 +128,7 @@ export interface ContactCopy {
     call: { text: string; open: string };
     booking: BookingCopy;
     mail: {
+        text: string;
         email: string;
         emailPlaceholder: string;
         message: string;
@@ -238,6 +239,7 @@ export const CONTACT: Localized<ContactCopy> = {
             weekdays: ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'],
         },
         mail: {
+            text: 'כמה מילים על מה שאתם צריכים מספיקות כדי להתחיל.',
             email: 'המייל שלכם',
             emailPlaceholder: 'name@company.co.il',
             message: 'ההודעה',
@@ -308,6 +310,7 @@ export const CONTACT: Localized<ContactCopy> = {
             weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         },
         mail: {
+            text: 'A few words on what you need are enough to start.',
             email: 'Your email',
             emailPlaceholder: 'name@company.com',
             message: 'The message',
