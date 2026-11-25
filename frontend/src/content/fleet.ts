@@ -400,6 +400,10 @@ export const FLEET_UI: Localized<{
     position: (n: number, of: number) => string;
     prevGroup: string;
     nextGroup: string;
+    /** Roles beside each line in the phone's group card. */
+    leadRole: string;
+    subRole: string;
+    directRole: string;
 }> = {
     he: {
         chartLabel: 'מערך הסוכנים: סוכן ראשי במרכז, שבע קבוצות סביבו',
@@ -417,6 +421,9 @@ export const FLEET_UI: Localized<{
         position: (n, of) => `קבוצה ${n} מתוך ${of}`,
         prevGroup: 'הקבוצה הקודמת',
         nextGroup: 'הקבוצה הבאה',
+        leadRole: 'ראש הקבוצה',
+        subRole: 'תת־סוכן',
+        directRole: 'מדווח ישיר',
     },
     en: {
         chartLabel: 'The agent fleet: a head agent in the centre, seven groups around it',
@@ -434,5 +441,8 @@ export const FLEET_UI: Localized<{
         position: (n, of) => `Group ${n} of ${of}`,
         prevGroup: 'Previous group',
         nextGroup: 'Next group',
+        leadRole: 'Group lead',
+        subRole: 'Sub-agent',
+        directRole: 'Direct report',
     },
 };

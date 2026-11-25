@@ -140,6 +140,18 @@ const FleetSun: React.FC = () => {
     // Steps the phone's group card, looping at both ends.
     const step = (by: 1 | -1) => pickRay(ORDER[(pos + by + ORDER.length) % ORDER.length]);
     const rtl = lang === 'he';
+    // The group lead first, then each agent; the direct reports have no lead.
+    const roles = (index: number) =>
+        index === DIRECT_RAY
+            ? FLEET_DIRECT.agents.map((line) => ({ cls: 'dir', label: ui.directRole, line }))
+            : [
+                  { cls: 'lead', label: ui.leadRole, line: FLEET_GROUPS[index].lead },
+                  ...FLEET_GROUPS[index].agents.map((line) => ({
+                      cls: 'sub',
+                      label: ui.subRole,
+                      line,
+                  })),
+              ];
     const pickLayer = (id: FleetLayer) =>
         setPick((p) => (p?.kind === 'layer' && p.id === id ? null : { kind: 'layer', id }));
 
@@ -294,6 +306,17 @@ const FleetSun: React.FC = () => {
                                 </p>
                             ))}
                         </div>
+                        {/* Who does what in the group shown: the same lines the drawing
+                            shows on hover on a computer, which a phone has no way to reach. */}
+                        <ul className="fp-roles">
+                            {roles(ORDER[pos]).map((role, i) => (
+                                <li key={i} className={role.cls}>
+                                    <i aria-hidden="true" />
+                                    <small>{role.label}</small>
+                                    <span>{role.line[lang]}</span>
+                                </li>
+                            ))}
+                        </ul>
                         <div className="fp-dots" aria-hidden="true">
                             {ORDER.map((index, i) => (
                                 <i key={index} className={i === pos ? 'on' : undefined} />

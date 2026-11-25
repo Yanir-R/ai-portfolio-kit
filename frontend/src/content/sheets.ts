@@ -176,7 +176,7 @@ export interface SheetCopy {
         docsOf: (n: number, of: number) => string;
         chosen: Record<string, string>;
         kinds: Record<string, string>;
-        before: string;
+        measured: string;
         plainDocs: (n: number, of: number) => string;
         plainDocsNote: string;
         plainTime: string;
@@ -249,7 +249,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 { title: 'בהתאמה אישית', text: 'מתוך ישיבות אפיון עם עורכי הדין' },
                 { title: 'בפיילוט', text: 'עם לקוחות פעילים' },
             ],
-            cta: 'יש לכם ארכיון כזה? נדבר 20 דקות',
+            cta: 'יש לכם ארכיון כזה? קבעו שיחת אבחון',
             topic: 'ארכיון מסמכים',
         },
         price: {
@@ -301,7 +301,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 },
             ],
             wires: ['בודק את', 'מזין זיכרון אל'],
-            cta: 'רוצים סוכן כזה אצלכם? נדבר 20 דקות',
+            cta: 'רוצים סוכן כזה אצלכם? קבעו שיחת אבחון',
             topic: 'סוכנים',
         },
         why: {
@@ -345,7 +345,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 unfocused: 'כל המסמכים נשלחו',
             },
             kinds: { profile: 'פרופיל', project: 'פרויקט', writing: 'כתיבה' },
-            before: 'לפני המודל: בדיקת הבוט עברה, והשאלה בתוך המכסה היומית. כל המספרים כאן נמדדו בזמן שהתשובה נכתבה.',
+            measured: 'כל המספרים כאן נמדדו בזמן שהתשובה נכתבה.',
             plainDocs: (n, of) => `${n} מתוך ${of}`,
             plainDocsNote: 'מסמכים שיניר כתב הונחו מול המודל. הוא לא ראה שום דבר אחר.',
             plainTime: 'מהשאלה עד התשובה',
@@ -438,7 +438,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 { title: 'Custom built', text: 'From working sessions with the lawyers' },
                 { title: 'In pilot', text: 'With active clients' },
             ],
-            cta: "Have an archive like this? Let's talk for 20 minutes",
+            cta: 'Have an archive like this? Book a diagnostic call',
             topic: 'Document archive',
         },
         price: {
@@ -491,7 +491,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 },
             ],
             wires: ['reviews', 'feeds memory to'],
-            cta: "Want an agent like this? Let's talk for 20 minutes",
+            cta: 'Want an agent like this? Book a diagnostic call',
             topic: 'Agents',
         },
         why: {
@@ -539,7 +539,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 unfocused: 'Every document was sent',
             },
             kinds: { profile: 'Profile', project: 'Project', writing: 'Writing' },
-            before: 'Before the model: the bot check passed, and the question is within the daily quota. Every number here was measured while the answer was written.',
+            measured: 'Every number here was measured while the answer was written.',
             plainDocs: (n, of) => `${n} of ${of}`,
             plainDocsNote:
                 'documents Yanir wrote were put in front of the model. It saw nothing else.',

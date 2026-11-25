@@ -334,7 +334,7 @@ const ReadSheet: React.FC<{
                     </div>
                     {sources}
                 </div>
-                <p className="v-fine">{copy.before}</p>
+                <p className="v-fine">{copy.measured}</p>
             </div>
             <div className="v-plain">
                 <div className="v-num sm">

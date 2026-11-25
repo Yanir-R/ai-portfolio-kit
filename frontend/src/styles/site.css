@@ -5289,6 +5289,49 @@ footer a {
         font-weight: 700;
         color: var(--act-text);
     }
+    .fp-roles {
+        list-style: none;
+        margin: 0;
+        padding: var(--sp-2) 0 0;
+        border-top: 1.5px dashed var(--line);
+        display: flex;
+        flex-direction: column;
+        gap: var(--sp-2);
+    }
+    .fp-roles li {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        column-gap: var(--sp-2);
+        align-items: center;
+    }
+    .fp-roles i {
+        grid-row: 1 / span 2;
+        justify-self: center;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: var(--coral);
+        box-shadow: 0 0 0 1.5px var(--ink);
+    }
+    .fp-roles .lead i {
+        width: 20px;
+        height: 20px;
+    }
+    .fp-roles .dir i {
+        background: var(--paper);
+        box-shadow: none;
+        border: 1.5px dashed var(--ink);
+    }
+    .fp-roles small {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--muted);
+        line-height: 1.2;
+    }
+    .fp-roles span {
+        font-size: 0.95rem;
+        line-height: 1.35;
+    }
     .fp-dots {
         display: flex;
         justify-content: center;
