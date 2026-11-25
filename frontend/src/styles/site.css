@@ -9008,6 +9008,10 @@ video.w-v {
         overflow: hidden;
         overscroll-behavior: none;
     }
+    /* A list scrolled to its end does not hand the drag on to the page. */
+    html.chat-open * {
+        overscroll-behavior: contain;
+    }
     /*
      * A layer never scrolls or pans sideways: nothing in it is wider than
      * the screen, and a sideways swipe does nothing.

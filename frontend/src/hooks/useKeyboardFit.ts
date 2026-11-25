@@ -158,20 +158,32 @@ export const useKeyboardFit = (
             if (centring) timer = window.setTimeout(centre, SETTLE_MS);
         };
 
+        // Viewport events can come many times a frame while iOS pans; the
+        // window moves once per frame, to the latest reading.
+        let frame = 0;
+        const follow = () => {
+            if (frame) return;
+            frame = requestAnimationFrame(() => {
+                frame = 0;
+                fit();
+            });
+        };
+
         fit();
         // A window that has just opened can read the viewport mid-change and
         // not be told when it settles (iOS toolbars): read it again then.
         const settleReads = SETTLE_READS_MS.map((ms) => window.setTimeout(fit, ms));
-        vv.addEventListener('resize', fit);
-        vv.addEventListener('scroll', fit);
+        vv.addEventListener('resize', follow);
+        vv.addEventListener('scroll', follow);
         box.addEventListener('focusin', onFocus);
         box.addEventListener('input', onInput);
         watchForms();
         return () => {
             window.clearTimeout(timer);
+            cancelAnimationFrame(frame);
             settleReads.forEach((read) => window.clearTimeout(read));
-            vv.removeEventListener('resize', fit);
-            vv.removeEventListener('scroll', fit);
+            vv.removeEventListener('resize', follow);
+            vv.removeEventListener('scroll', follow);
             box.removeEventListener('focusin', onFocus);
             box.removeEventListener('input', onInput);
             resized.disconnect();
