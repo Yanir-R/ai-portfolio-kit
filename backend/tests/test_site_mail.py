@@ -13,6 +13,9 @@ import pytest
 from starlette.testclient import TestClient
 
 import main
+import mailer
+import rate_limit
+import settings
 import site_mail
 from tests.test_email_delivery import RECEIVER, SENDER, _FakeSMTP
 
@@ -79,12 +82,12 @@ def test_auto_reply_is_fixed_text_in_the_visitors_language(lang):
 @pytest.fixture
 def client(monkeypatch):
     _FakeSMTP.sent = []
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
     monkeypatch.setenv("EMAIL_ADDRESS", SENDER)
     monkeypatch.setenv("EMAIL_PASSWORD", "app-password")
     monkeypatch.setenv("YOUR_EMAIL", RECEIVER)
-    monkeypatch.setattr(main.smtplib, "SMTP_SSL", _FakeSMTP)
-    monkeypatch.setattr(main, "enforce_rate_limit", lambda *a, **k: None)
+    monkeypatch.setattr(mailer.smtplib, "SMTP_SSL", _FakeSMTP)
+    monkeypatch.setattr(rate_limit, "enforce_rate_limit", lambda *a, **k: None)
     return TestClient(main.app)
 
 
@@ -118,7 +121,7 @@ def test_a_failed_auto_reply_still_reports_the_message_as_sent(client, monkeypat
                 raise OSError("recipient refused")
             super().send_message(msg)
 
-    monkeypatch.setattr(main.smtplib, "SMTP_SSL", _ReplyFails)
+    monkeypatch.setattr(mailer.smtplib, "SMTP_SSL", _ReplyFails)
 
     response = client.post(
         "/api/contact", json={"email": "dana@example.com", "message": "hello"}

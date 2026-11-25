@@ -174,7 +174,7 @@ def client_key(request: Request) -> str:
 
     Through the Cloudflare Worker, CF-Connecting-IP carries the real visitor and
     is used - but only when the request proved it came through the edge by
-    presenting the shared secret, which main.py records as
+    presenting the shared secret, which main.py's middleware records as
     `request.state.edge_verified`. On its own that header means nothing: anyone
     talking to the origin directly can invent one. The proof is what makes it
     usable, so the two mechanisms are deliberately coupled.

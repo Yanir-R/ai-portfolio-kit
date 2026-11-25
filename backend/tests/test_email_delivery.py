@@ -11,7 +11,8 @@ from email.utils import parseaddr
 
 import pytest
 
-import main
+from routes import chat as chat_route
+import mailer
 
 
 SENDER = "site@example.com"
@@ -47,13 +48,13 @@ def smtp(monkeypatch):
     monkeypatch.setenv("EMAIL_ADDRESS", SENDER)
     monkeypatch.setenv("EMAIL_PASSWORD", "app-password")
     monkeypatch.setenv("YOUR_EMAIL", RECEIVER)
-    monkeypatch.setattr(main.smtplib, "SMTP_SSL", _FakeSMTP)
+    monkeypatch.setattr(mailer.smtplib, "SMTP_SSL", _FakeSMTP)
     return _FakeSMTP
 
 
 def test_a_collected_address_is_emailed_and_confirmed(smtp):
     reply = asyncio.run(
-        main._deliver_collected_email("visitor@example.com", "wants to talk", "chat")
+        chat_route.deliver_collected_email("visitor@example.com", "wants to talk", "chat")
     )
 
     assert len(smtp.sent) == 1
@@ -73,7 +74,7 @@ def test_a_collected_address_is_emailed_and_confirmed(smtp):
     # An address left in chat gets no auto-reply: only the mail form sends one.
     assert len(smtp.sent) == 1
 
-    assert reply.response == main.EMAIL_RECEIVED_MESSAGE
+    assert reply.response == chat_route.EMAIL_RECEIVED_MESSAGE
     assert reply.email_collected is True
 
 
@@ -81,16 +82,16 @@ def test_a_failed_send_tells_the_visitor_where_to_write_instead(smtp, monkeypatc
     def refuse(*args, **kwargs):
         raise OSError("connection refused")
 
-    monkeypatch.setattr(main.smtplib, "SMTP_SSL", refuse)
+    monkeypatch.setattr(mailer.smtplib, "SMTP_SSL", refuse)
 
     reply = asyncio.run(
-        main._deliver_collected_email("visitor@example.com", "wants to talk", "chat")
+        chat_route.deliver_collected_email("visitor@example.com", "wants to talk", "chat")
     )
 
     # Reporting a 500 would leave the visitor with a generic error and no idea
     # their message went nowhere, so the failure is answered in Yanir's voice
     # with the address to use instead.
-    assert reply.response == main.EMAIL_SEND_FAILED_MESSAGE
+    assert reply.response == chat_route.EMAIL_SEND_FAILED_MESSAGE
     assert reply.email_collected is not True
 
 
@@ -98,8 +99,8 @@ def test_missing_email_configuration_does_not_pretend_to_have_sent(smtp, monkeyp
     monkeypatch.delenv("EMAIL_PASSWORD", raising=False)
 
     reply = asyncio.run(
-        main._deliver_collected_email("visitor@example.com", "wants to talk", "chat")
+        chat_route.deliver_collected_email("visitor@example.com", "wants to talk", "chat")
     )
 
     assert smtp.sent == []
-    assert reply.response == main.EMAIL_SEND_FAILED_MESSAGE
+    assert reply.response == chat_route.EMAIL_SEND_FAILED_MESSAGE

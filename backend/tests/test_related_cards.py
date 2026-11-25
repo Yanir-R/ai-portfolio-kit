@@ -9,16 +9,20 @@ import pytest
 from fastapi.testclient import TestClient
 
 import main
+from routes import chat as chat_route
+import rate_limit
+import replies
+import settings
 from gemini_helper import Answer
 from rate_limit import SlidingWindowLimiter
 
 
 @pytest.fixture
 def model(monkeypatch):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
-    monkeypatch.setattr(main, "GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "test-key")
     monkeypatch.setattr(
-        main, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
+        rate_limit, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
     )
 
     def install(**fields):
@@ -28,7 +32,7 @@ def model(monkeypatch):
             sent.extend(s for s in knowledge.sections if s.source == "writing")
             return Answer(text="An answer.", model="test", **fields)
 
-        monkeypatch.setattr(main, "get_gemini_response", answer)
+        monkeypatch.setattr(chat_route, "get_gemini_response", answer)
         return sent
 
     return install
@@ -119,4 +123,4 @@ def test_without_the_models_word_the_list_is_absent(model):
     ("Already [named](https://personakit.me).", "en", "Already [named](https://personakit.me)."),
 ])
 def test_bare_addresses_become_named_links(text, language, expected):
-    assert main._named_links(text, language) == expected
+    assert replies.named_links(text, language) == expected

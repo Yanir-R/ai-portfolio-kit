@@ -72,14 +72,14 @@ def reset_model_cooldowns():
 def fresh_recipient_limits(monkeypatch):
     # The per-recipient limits remember addresses for a day, and the tests reuse
     # the same few addresses, so each test starts with empty ones.
-    import main
+    import rate_limit
     from rate_limit import DAY_SECONDS, SlidingWindowLimiter
 
     monkeypatch.setattr(
-        main, "auto_reply_limiter", SlidingWindowLimiter(1, 40, DAY_SECONDS)
+        rate_limit, "auto_reply_limiter", SlidingWindowLimiter(1, 40, DAY_SECONDS)
     )
     monkeypatch.setattr(
-        main, "booking_address_limiter", SlidingWindowLimiter(2, 20, DAY_SECONDS)
+        rate_limit, "booking_address_limiter", SlidingWindowLimiter(2, 20, DAY_SECONDS)
     )
 
 

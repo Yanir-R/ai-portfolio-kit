@@ -111,8 +111,8 @@ export interface ChatContext {
 }
 
 /**
- * The server's offer to continue with Yanir directly (see _handoff_card in
- * main.py). `summary` is what the visitor said about their need, in their
+ * The server's offer to continue with Yanir directly (see handoff_card in
+ * backend/replies.py). `summary` is what the visitor said about their need, in their
  * words; empty when the offer is only because the day's answers run out.
  */
 export interface ChatHandoff {

@@ -81,7 +81,9 @@ Two rules hold across all of it:
 
 ## API
 
-All routes are defined in `backend/main.py`.
+Each group of routes is a module in `backend/routes/` (`chat.py`, `contact.py`, `booking.py`,
+`content.py`), and `backend/main.py` mounts them behind the edge-secret check, the cache
+headers and CORS. Request and reply shapes are in `backend/schemas.py`.
 
 | Endpoint | Purpose |
 |---|---|

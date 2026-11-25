@@ -153,7 +153,7 @@ Stated plainly, so you know what you are forking:
 - **The edge Worker is deployed by hand, not by CI.** Neither workflow in `.github/workflows/`
   touches `edge/`; see [edge/README.md](edge/README.md).
 - **The edge secret is enforced only when it is set.** With `ORIGIN_SHARED_SECRET` unset the
-  backend accepts direct requests (`backend/main.py`).
+  backend accepts direct requests (`backend/settings.py`, `backend/main.py`).
 - **The chat answers only from the committed markdown, so it declines what is not there.** The
   corpus is the files under `backend/docs/` and nothing else (`backend/context.py`). Whether the
   model always follows that instruction cannot be proven offline (unverified).
@@ -161,7 +161,7 @@ Stated plainly, so you know what you are forking:
   repository and sent to the Gemini API; the profile folder is also served by `/api/content/`.
 - **Which documents an answer used is the model's own word.** `used` is checked against what was
   sent, so it can only name a real document, but whether the answer leaned on it is the model's
-  claim, not a measurement (`backend/main.py`).
+  claim, not a measurement (`used_sources` in `backend/replies.py`).
 - **Document selection is word overlap with English and Hebrew stopword lists.** A starter
   question with a drawing also sends its topic, and the projects that drawing shows are always
   included (`TOPIC_PROJECTS`). A Hebrew
@@ -170,7 +170,7 @@ Stated plainly, so you know what you are forking:
   which a new document needs an entry in. At most three documents go beside the profile; every
   other document is named to the model in one line. When no word matches, only the profile and
   that list are sent (`backend/selection.py`).
-- **The SMTP host is fixed in code** to one mail provider (`backend/main.py`).
+- **The SMTP host is fixed in code** to one mail provider (`backend/mailer.py`).
 - **The frontend has no automated tests.** `frontend/package.json` defines typecheck, lint,
   format and build scripts, and no test script.
 
@@ -189,7 +189,7 @@ Each item names the file or test that shows it. Tests are in `backend/tests/` an
 | The owner's name never decides which document a question gets | `test_selection.py::test_the_owners_name_does_not_pick_a_document` |
 | A reply written without the model still names its sources | `test_writing_phase2.py::test_the_latest_posts_reply_names_its_sources` |
 | A bare address to an unknown host never becomes a link | `test_guard.py::test_a_bare_address_to_an_unknown_host_never_becomes_a_link` |
-| Oversized or empty chat requests are rejected | `backend/main.py`; `test_context_layer.py::test_oversized_message_is_rejected`, `::test_empty_message_is_rejected`, `::test_unbounded_history_is_rejected` |
+| Oversized or empty chat requests are rejected | `backend/schemas.py`; `test_context_layer.py::test_oversized_message_is_rejected`, `::test_empty_message_is_rejected`, `::test_unbounded_history_is_rejected` |
 | Interface banners are not replayed to the model as conversation | `test_context_layer.py::test_ui_chrome_is_not_replayed_as_conversation` |
 | Per-client and global rate limits, answering 429 with `Retry-After` | `backend/rate_limit.py` (code; no limiter test was read for this list) |
 | The client identity used for rate limiting cannot be claimed by a forged header | `test_client_identity.py` |
@@ -198,7 +198,7 @@ Each item names the file or test that shows it. Tests are in `backend/tests/` an
 | An invalid address or oversized message never reaches mail delivery or spends a rate-limit slot | `test_contact_endpoint.py` |
 | An address left in the chat is emailed, and a failed send tells the visitor so | `test_email_delivery.py` (mail transport stubbed) |
 | When the upstream API refuses, the chat falls back through its model list and then answers "busy" without queueing | `test_quota_resilience.py`; `test_context_layer.py::test_quota_exhaustion_advances_through_every_model` |
-| `/api/content/` is confined to the profile folder | `backend/main.py` (`get_content`; code, no test was read) |
+| `/api/content/` is confined to the profile folder | `backend/routes/content.py` (`get_content`; code, no test was read) |
 | Usage figures are shown only for answers a model produced | `test_context_layer.py::test_a_reply_the_model_never_produced_carries_no_trace` |
 | Pull requests run verify jobs; deploys run only on a push to `main` | `.github/workflows/backend-deploy.yml`, `.github/workflows/frontend-deploy.yml` |
 | Frontend typecheck, lint, format check and build | scripts in `frontend/package.json`, run by `frontend-deploy.yml` |

@@ -13,6 +13,9 @@ from starlette.testclient import TestClient
 import context
 import docs_helper
 import main
+from routes import chat as chat_route
+import rate_limit
+import settings
 import selection
 from gemini_helper import Answer
 from rate_limit import SlidingWindowLimiter
@@ -132,16 +135,15 @@ TOPIC_IDS = {t["id"] for t in docs_helper.get_writing_index()["topics"]}
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
-    monkeypatch.setattr(main, "GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "test-key")
     monkeypatch.setattr(
-        main, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
+        rate_limit, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
     )
     # The model cites every piece it was sent, so these tests see what search
     # chose; test_related_cards.py covers the model citing fewer.
     monkeypatch.setattr(
-        main,
-        "get_gemini_response",
+        chat_route, "get_gemini_response",
         lambda key, question, knowledge, *a, **k: Answer(
             text="An answer.",
             model="test",

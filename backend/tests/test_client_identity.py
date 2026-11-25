@@ -19,6 +19,7 @@ from fastapi import Request
 from starlette.testclient import TestClient
 
 import main
+import settings
 from rate_limit import client_key
 
 
@@ -60,13 +61,13 @@ def probe_app():
 
 @pytest.fixture
 def guarded(monkeypatch, probe_app):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", SECRET)
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", SECRET)
     return TestClient(probe_app)
 
 
 @pytest.fixture
 def unguarded(monkeypatch, probe_app):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
     return TestClient(probe_app)
 
 

@@ -371,14 +371,16 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
                   sources: trace.sources ?? [],
                   used: result.used,
                   available: trace.context_available ?? trace.sources?.length ?? 0,
-                  declined: result.declined ?? trace.context_outcome === 'unmatched',
+                  declined: result.declined,
                   trace,
                   turn,
                   prior,
                   handoff: !!result.handoff,
               }
             : null;
-        const sheet = fromIndex ? undefined : sheetFor(text, trace, picked, result.used);
+        const sheet = fromIndex
+            ? undefined
+            : sheetFor(text, trace, picked, result.used, result.declined);
         const asksEmail = record?.declined ?? false;
 
         push({

@@ -198,7 +198,7 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
             // What the answer drew on when the model said; otherwise what it
             // was sent. An answer from the notes alone says so on the row.
             sources: result.used ?? result.trace?.sources ?? [],
-            declined: result.declined === true,
+            declined: result.declined,
             fromPiece: !!context,
             sig: result.sig,
             handoff: result.handoff,

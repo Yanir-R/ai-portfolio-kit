@@ -13,7 +13,16 @@ backend/
 │   ├── he/            # Hebrew twins of the above, used for Hebrew questions
 │   ├── templates/     # placeholders for forks; never sent to the model
 │   └── search-phrases.json  # how visitors phrase each document (selection only)
-├── main.py            # FastAPI app: schemas, routes, CORS, the chat flow
+├── main.py            # the app: edge-secret check, cache headers, CORS, routers
+├── settings.py        # configuration read from the environment, in one place
+├── schemas.py         # every request and reply shape (Pydantic)
+├── routes/
+│   ├── chat.py        # the chat route: contact steps, posts list, model answer
+│   ├── contact.py     # the contact form
+│   ├── booking.py     # the discovery-call booking
+│   └── content.py     # read-only profile, projects and writing
+├── replies.py         # the parts a chat reply is built from: cards, sources, checks
+├── mailer.py          # sending the contact mail over SMTP
 ├── selection.py       # picks the documents each question gets (deterministic)
 ├── context.py         # assembles + caches the corpus, per-section
 ├── prompt.py          # the behavioural contract: grounding, voice, boundaries

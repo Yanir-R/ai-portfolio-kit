@@ -7,7 +7,7 @@ import { AnswerTrace } from '@/types/chat';
  * never chooses. Order matters: the first rule that holds wins.
  *
  *   1. A question picked from the starters carries its own drawing.
- *   2. Nothing in Yanir's material matched: the "ask Yanir" sheet.
+ *   2. The model said it has no answer (`declined`): the "ask Yanir" sheet.
  *   3. A question about price or a map, by its words.
  *   4. A project the question names by name.
  *   5. The documents the answer drew on: the first in the model's own list
@@ -48,11 +48,16 @@ export const sheetFor = (
     question: string,
     trace: AnswerTrace | null | undefined,
     picked?: SheetKey,
-    used?: { slug: string }[] | null
+    used?: { slug: string }[] | null,
+    declined = false
 ): SheetKey | undefined => {
     if (picked) return picked;
     if (!trace) return undefined;
-    if (trace.context_outcome === 'unmatched') return 'ask';
+    // The model said it has no answer: the drawing points to asking Yanir.
+    // Decided by `declined` alone, as every other part of the site does, and
+    // not by the search outcome: an unmatched search can still be answered
+    // from his notes.
+    if (declined) return 'ask';
     if (trace.context_outcome && NO_SHEET_OUTCOMES.has(trace.context_outcome)) return undefined;
     const byWords = BY_WORDS.find(([re]) => re.test(question));
     if (byWords) return byWords[1];

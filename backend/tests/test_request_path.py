@@ -13,14 +13,18 @@ from starlette.testclient import TestClient
 
 import docs_helper
 import main
+from routes import chat as chat_route
+import mailer
+import rate_limit
+import settings
 from gemini_helper import Answer
 from rate_limit import SlidingWindowLimiter
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
-    monkeypatch.setattr(main, "GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "test-key")
     return TestClient(main.app)
 
 
@@ -28,14 +32,14 @@ def client(monkeypatch):
 def chat_budget(monkeypatch):
     """A fresh chat limiter that allows exactly one model answer."""
     limiter = SlidingWindowLimiter(per_key_limit=1, global_limit=1, window_seconds=60)
-    monkeypatch.setattr(main, "chat_limiter", limiter)
+    monkeypatch.setattr(rate_limit, "chat_limiter", limiter)
     return limiter
 
 
 @pytest.fixture
 def contact_budget(monkeypatch):
     limiter = SlidingWindowLimiter(per_key_limit=50, global_limit=50)
-    monkeypatch.setattr(main, "contact_limiter", limiter)
+    monkeypatch.setattr(rate_limit, "contact_limiter", limiter)
     return limiter
 
 
@@ -45,7 +49,7 @@ def _stub_model(monkeypatch, seen_threads=None):
             seen_threads.append(threading.current_thread())
         return Answer(text="An answer.")
 
-    monkeypatch.setattr(main, "get_gemini_response", answer)
+    monkeypatch.setattr(chat_route, "get_gemini_response", answer)
 
 
 def test_the_model_call_runs_off_the_event_loop(client, chat_budget, monkeypatch):
@@ -115,9 +119,9 @@ def test_an_address_left_in_chat_spends_the_contact_budget(
     async def deliver(email, message):
         sent.append(email)
 
-    monkeypatch.setattr(main, "_send_contact_email", deliver)
+    monkeypatch.setattr(mailer, "send_contact_email", deliver)
     monkeypatch.setattr(
-        main, "contact_limiter", SlidingWindowLimiter(per_key_limit=1, global_limit=1)
+        rate_limit, "contact_limiter", SlidingWindowLimiter(per_key_limit=1, global_limit=1)
     )
 
     first = client.post("/chat-with-files", json={"message": "visitor@example.com"})
@@ -137,7 +141,7 @@ def test_an_address_is_removed_from_the_message_as_it_was_typed(
     async def deliver(email, message):
         delivered.append((email, message))
 
-    monkeypatch.setattr(main, "_send_contact_email", deliver)
+    monkeypatch.setattr(mailer, "send_contact_email", deliver)
 
     client.post(
         "/chat-with-files",
@@ -160,9 +164,9 @@ def test_validating_an_address_makes_no_network_call(monkeypatch):
         seen.update(kwargs)
         return type("Validated", (), {"email": candidate})()
 
-    monkeypatch.setattr(main, "validate_email", spy)
+    monkeypatch.setattr(mailer, "validate_email", spy)
 
-    main._validated_address("visitor@example.com")
+    mailer.validated_address("visitor@example.com")
 
     assert seen == {"check_deliverability": False}
 
@@ -186,24 +190,24 @@ def test_the_smtp_connection_has_a_timeout(monkeypatch):
         def send_message(self, msg):
             pass
 
-    monkeypatch.setattr(main.smtplib, "SMTP_SSL", Server)
+    monkeypatch.setattr(mailer.smtplib, "SMTP_SSL", Server)
 
-    main._smtp_send(main.MIMEMultipart(), "sender@example.com", "password")
+    mailer.smtp_send(mailer.MIMEMultipart(), "sender@example.com", "password")
 
-    assert seen["timeout"] == main.SMTP_TIMEOUT_SECONDS
+    assert seen["timeout"] == mailer.SMTP_TIMEOUT_SECONDS
 
 
 def test_a_missing_api_key_is_reported_without_naming_it(client, chat_budget, monkeypatch):
-    monkeypatch.setattr(main, "GEMINI_API_KEY", None)
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", None)
 
     response = client.post("/chat-with-files", json={"message": "What is ReelSensei?"})
 
     assert response.status_code == 500
-    assert response.json() == {"detail": main.INTERNAL_ERROR_DETAIL}
+    assert response.json() == {"detail": settings.INTERNAL_ERROR_DETAIL}
 
 
 def test_a_non_ascii_edge_secret_is_refused_not_an_error(monkeypatch):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "the-real-secret")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "the-real-secret")
     client = TestClient(main.app, raise_server_exceptions=False)
 
     response = client.get(
@@ -222,7 +226,7 @@ def test_an_empty_contact_message_is_refused(client, monkeypatch):
     def explode(*args, **kwargs):
         raise AssertionError("delivery must not be attempted for an empty message")
 
-    monkeypatch.setattr(main, "_send_contact_email", explode)
+    monkeypatch.setattr(mailer, "send_contact_email", explode)
 
     response = client.post(
         "/api/contact", json={"email": "visitor@example.com", "message": ""}

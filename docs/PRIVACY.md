@@ -12,18 +12,18 @@ it. Anything that could not be confirmed in the code is marked "(unverified)".
 | Step | What it receives | Shown by |
 |---|---|---|
 | Edge Worker | The whole request: message, the conversation history the browser sends, and headers. It forwards the request and stores nothing itself. | `edge/src/index.js` |
-| Backend | The same request. It validates size, applies rate limits and builds the model request. | `backend/main.py` |
-| Gemini API | The question, a bounded number of recent turns, and the selected documents from `backend/docs/`. This is a third-party service, used under its provider's terms. | `backend/main.py`, `backend/tests/test_context_layer.py` |
+| Backend | The same request. It validates size, applies rate limits and builds the model request. | `backend/routes/chat.py`, `backend/schemas.py` |
+| Gemini API | The question, a bounded number of recent turns, and the selected documents from `backend/docs/`. This is a third-party service, used under its provider's terms. | `backend/routes/chat.py`, `backend/gemini_helper.py`, `backend/tests/test_context_layer.py` |
 
 The frontend is a static bundle on Cloudflare Pages. Chat messages go to the API, not to Pages.
 
 ## What is stored
 
 - **No database.** The backend code that was reviewed writes no conversation to disk or to a
-  store (`backend/main.py`, `backend/context.py`, `backend/selection.py`,
+  store (`backend/routes/`, `backend/replies.py`, `backend/context.py`, `backend/selection.py`,
   `backend/rate_limit.py`).
 - **Conversation history lives in the visitor's browser** and is sent again with each request
-  (`ChatRequest` in `backend/main.py`). Whether the frontend keeps it beyond the open page is
+  (`ChatRequest` in `backend/schemas.py`). Whether the frontend keeps it beyond the open page is
   (unverified).
 - **Rate-limit counters are held in memory** in the backend process, keyed on the client
   address, and age out with their window (`backend/rate_limit.py`).
@@ -33,14 +33,14 @@ The frontend is a static bundle on Cloudflare Pages. Chat messages go to the API
 By the backend, to its standard log output:
 
 - For a chat request: the message length and the number of history messages. Not the text
-  (`backend/main.py`).
+  (`backend/routes/chat.py`).
 - For document selection: the labels of the documents chosen. Not the question
   (`backend/selection.py`).
 - For a rate-limit hit: the endpoint label, the client address and the retry delay
   (`backend/rate_limit.py`).
 - For a request rejected by the edge secret check: the path (`backend/main.py`).
 - For a contact delivery: that a send was attempted and whether it succeeded. The visitor's
-  address and message are not written to the log by this code (`backend/main.py`).
+  address and message are not written to the log by this code (`backend/mailer.py`).
 - On errors: a stack trace. Whether a trace can include request content is (unverified).
 
 Not confirmed here:
@@ -62,7 +62,7 @@ There are two ways a visitor's address reaches the owner, and both end in one em
 
 The email contains the visitor's address, their message, the page topic, the route and language,
 and a timestamp, with Reply-To set to the visitor. It is sent over SMTP from the configured sender
-account to the configured inbox (`_send_contact_email` in `backend/main.py`, built in
+account to the configured inbox (`send_contact_email` in `backend/mailer.py`, built in
 `backend/site_mail.py`). A message from the mail form also sends the visitor one short reply. That
 reply is fixed text in Hebrew or English and carries nothing they wrote but their address
 (`backend/tests/test_site_mail.py`). The address is not stored anywhere else by the backend; the

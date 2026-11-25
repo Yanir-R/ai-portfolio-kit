@@ -10,6 +10,9 @@ from starlette.testclient import TestClient
 
 import context
 import main
+from routes import chat as chat_route
+import rate_limit
+import settings
 import selection
 from gemini_helper import Answer
 from language import detect_language
@@ -102,10 +105,10 @@ def test_the_two_corpora_do_not_share_one_term_index():
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(main, "ORIGIN_SHARED_SECRET", "")
-    monkeypatch.setattr(main, "GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(settings, "ORIGIN_SHARED_SECRET", "")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "test-key")
     monkeypatch.setattr(
-        main, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
+        rate_limit, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
     )
     return TestClient(main.app)
 
@@ -115,7 +118,7 @@ def _stub_model(monkeypatch, given):
         given.append(knowledge)
         return Answer(text="An answer.", model="a-model")
 
-    monkeypatch.setattr(main, "get_gemini_response", answer)
+    monkeypatch.setattr(chat_route, "get_gemini_response", answer)
 
 
 def test_the_reply_names_the_documents_the_model_was_given(client, monkeypatch):
