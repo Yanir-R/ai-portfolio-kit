@@ -163,7 +163,7 @@ export const WRITING: Localized<WritingCopy> = {
             byName: 'יניר רוט',
             // A Latin name takes a maqaf after ב: ב־Medium.
             published: (source, date) =>
-                `פורסם במקור ב${/^[A-Za-z]/.test(source) ? '־' : ''}${source}, ${date}.`,
+                `פורסם במקור ב${/^[A-Za-z]/.test(source) ? '־' : ''}${source}, ${date}`,
             original: 'לפוסט המקורי ↗',
             publishedOn: (date) => `פורסם במקור ב־${date}`,
             originalLinkedIn: 'לפוסט המקורי בלינקדאין ↗',
@@ -276,7 +276,7 @@ export const WRITING: Localized<WritingCopy> = {
         post: {
             back: 'All of the blog',
             byName: 'Yanir Rot',
-            published: (source, date) => `Originally published on ${source}, ${date}.`,
+            published: (source, date) => `Originally published on ${source}, ${date}`,
             original: 'The original post ↗',
             publishedOn: (date) => `Originally published ${date}`,
             originalLinkedIn: 'The original post on LinkedIn ↗',
