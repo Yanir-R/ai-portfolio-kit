@@ -8254,3 +8254,39 @@ video.w-v {
 .bk-sum {
     align-items: baseline;
 }
+
+/* The post's source on LinkedIn: one tile with the mark (design change, 2026-11-25). */
+.w-orig a.w-src {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 3px 3px 0 var(--btn);
+    color: var(--ink);
+    font-weight: 800;
+    text-decoration: none;
+}
+.w-orig a.w-src:hover {
+    background: var(--tint);
+}
+.w-orig a.w-src svg {
+    flex: none;
+}
+@media (max-width: 640px) {
+    .w-orig {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .w-orig a.w-src {
+        justify-content: center;
+        white-space: normal;
+    }
+}
+/* Links inside a post's text read as links, in the site's link colour. */
+.w-body :is(p, li) > a {
+    color: var(--link);
+    font-weight: 800;
+}

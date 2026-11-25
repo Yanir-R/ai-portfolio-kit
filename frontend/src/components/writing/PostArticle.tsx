@@ -15,6 +15,18 @@ import { mediaOf, readMinutes, seriesOf } from '@/utils/writing';
 
 // The workplace blog is credited in words only; its site is not linked.
 const UNLINKED_SOURCE = /blog/i;
+const LINKEDIN_URL = /^https:\/\/(www\.)?linkedin\.com\//;
+
+/** LinkedIn's "in" mark, drawn inline so no third-party image is loaded. */
+const LinkedInMark: React.FC = () => (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+        <rect width="24" height="24" rx="3" fill="#0A66C2" />
+        <path
+            fill="#fff"
+            d="M5.3 9.2h2.9v9.4H5.3zM6.8 4.6a1.7 1.7 0 1 1 0 3.4 1.7 1.7 0 0 1 0-3.4zM10.1 9.2h2.8v1.3c.4-.7 1.3-1.5 2.8-1.5 3 0 3.5 2 3.5 4.5v5.1h-2.9v-4.5c0-1.1 0-2.5-1.5-2.5s-1.8 1.2-1.8 2.4v4.6h-2.9z"
+        />
+    </svg>
+);
 
 interface Neighbour {
     to: string;
@@ -132,14 +144,25 @@ const PostArticle: React.FC<{ entry: WritingEntry; index: WritingIndex | null }>
                 {rest.map((item) => (
                     <MediaView key={item.src} item={item} title={entry.title} />
                 ))}
-                <div className="w-orig">
-                    <span>{copy.post.published(sourceLabel(entry.source, lang), date)}</span>
-                    {entry.url && !UNLINKED_SOURCE.test(entry.source) && (
-                        <a href={entry.url} target="_blank" rel="noopener">
-                            {copy.post.original}
+                {entry.url && LINKEDIN_URL.test(entry.url) ? (
+                    // One way back to the post: a tile carrying LinkedIn's mark.
+                    <div className="w-orig" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+                        <span>{copy.post.publishedOn(date)}</span>
+                        <a className="w-src" href={entry.url} target="_blank" rel="noopener">
+                            <LinkedInMark />
+                            {copy.post.originalLinkedIn}
                         </a>
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    <div className="w-orig" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+                        <span>{copy.post.published(sourceLabel(entry.source, lang), date)}</span>
+                        {entry.url && !UNLINKED_SOURCE.test(entry.source) && (
+                            <a href={entry.url} target="_blank" rel="noopener">
+                                {copy.post.original}
+                            </a>
+                        )}
+                    </div>
+                )}
             </div>
             {neighbours && (
                 <div className="w-pn">

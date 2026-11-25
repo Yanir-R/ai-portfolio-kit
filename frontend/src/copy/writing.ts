@@ -56,6 +56,9 @@ export interface WritingCopy {
         byName: string;
         published: (source: string, date: string) => string;
         original: string;
+        /** A LinkedIn post: the mark on the control names the source, so the line gives only the date. */
+        publishedOn: (date: string) => string;
+        originalLinkedIn: string;
         previous: string;
         next: string;
         previousInSeries: string;
@@ -158,8 +161,12 @@ export const WRITING: Localized<WritingCopy> = {
         post: {
             back: 'לכל הבלוג',
             byName: 'יניר רוט',
-            published: (source, date) => `פורסם במקור ב${source}, ${date}.`,
+            // A Latin name takes a maqaf after ב: ב־Medium.
+            published: (source, date) =>
+                `פורסם במקור ב${/^[A-Za-z]/.test(source) ? '־' : ''}${source}, ${date}`,
             original: 'לפוסט המקורי ↗',
+            publishedOn: (date) => `פורסם במקור ב־${date}`,
+            originalLinkedIn: 'לפוסט המקורי בלינקדאין ↗',
             previous: 'הקודם',
             next: 'הבא',
             previousInSeries: 'הקודם בסדרה',
@@ -269,8 +276,10 @@ export const WRITING: Localized<WritingCopy> = {
         post: {
             back: 'All of the blog',
             byName: 'Yanir Rot',
-            published: (source, date) => `Originally published on ${source}, ${date}.`,
+            published: (source, date) => `Originally published on ${source}, ${date}`,
             original: 'The original post ↗',
+            publishedOn: (date) => `Originally published ${date}`,
+            originalLinkedIn: 'The original post on LinkedIn ↗',
             previous: 'Previous',
             next: 'Next',
             previousInSeries: 'Previous in the series',
