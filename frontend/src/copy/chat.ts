@@ -164,8 +164,19 @@ export interface ChatCopy {
     };
     book: string;
     processes: Record<ProcessId, Process>;
-    /** The site's own chat, drawn with the same stations. */
-    site: Process;
+    /** The six stations of the site's own chat, lit as an answer is made. */
+    trace: {
+        stations: [string, string][];
+        now: string;
+        start: string;
+        foot: {
+            before: string;
+            waiting: string;
+            after: (seconds: number, docs: number) => [string, string, string];
+            declined: string;
+            ready: string;
+        };
+    };
     plan: {
         step2: string;
         base: { title: string; cap: string; sumH: string; sumT: string };
@@ -204,73 +215,6 @@ export interface ChatCopy {
         back: string;
     };
 }
-
-const SITE_HE: Process = {
-    name: 'הצ׳אט באתר',
-    steps: [
-        {
-            person: ['שולחים ליניר שאלה', 'במייל או בוואטסאפ'],
-            agent: ['שואלים כאן', 'בכל שעה, בעברית או באנגלית'],
-            byAgent: false,
-        },
-        {
-            person: ['יניר רואה אותה', 'כשהוא מתפנה, לפעמים רק למחרת'],
-            agent: ['בודק את הפנייה', 'אדם ולא רובוט, ובתוך המכסה היומית'],
-            byAgent: true,
-        },
-        {
-            person: ['מחפש בחומרים שלו', 'פרויקטים, מאמרים, קורות חיים'],
-            agent: ['בוחר מה לקרוא', 'רק מסמכים שקשורים לשאלה'],
-            byAgent: true,
-        },
-        {
-            person: ['כותב תשובה', 'מאפס, בכל פעם'],
-            agent: ['קורא ומנסח', 'פנייה אחת למודל, כמה שניות'],
-            byAgent: true,
-        },
-        {
-            person: ['אתם מקבלים תשובה', 'אחרי יום, ואז עוד שאלה'],
-            agent: ['אתם ויניר מדברים', 'על הפרויקט שלכם, לא על שאלות חוזרות'],
-            byAgent: false,
-        },
-    ],
-    today: 'כל שאלה מחכה ליניר, גם כזו שהתשובה עליה כבר כתובה.',
-    withAgent: 'הסוכן עונה על מה שכבר כתוב. מה שהוא לא מצא, הוא אומר, ומפנה ליניר.',
-};
-
-const SITE_EN: Process = {
-    name: "The site's chat",
-    steps: [
-        {
-            person: ['You send Yanir a question', 'By email or WhatsApp'],
-            agent: ['Ask here', 'Any hour, in Hebrew or English'],
-            byAgent: false,
-        },
-        {
-            person: ['Yanir sees it', "When he's free, sometimes only the next day"],
-            agent: ['Checks the request', 'A person, not a bot, and within the daily quota'],
-            byAgent: true,
-        },
-        {
-            person: ['Searches his materials', 'Projects, articles, CV'],
-            agent: ['Chooses what to read', 'Only documents related to the question'],
-            byAgent: true,
-        },
-        {
-            person: ['Writes an answer', 'From scratch, every time'],
-            agent: ['Reads and writes', 'One call to the model, a few seconds'],
-            byAgent: true,
-        },
-        {
-            person: ['You get an answer', 'A day later, and then another question'],
-            agent: ['You and Yanir talk', 'About your project, not about repeat questions'],
-            byAgent: false,
-        },
-    ],
-    today: 'Every question waits for Yanir, even one whose answer is already written.',
-    withAgent:
-        "The agent answers what's already written. What it didn't find, it says, and points you to Yanir.",
-};
 
 export const CHAT: Localized<ChatCopy> = {
     he: {
@@ -540,12 +484,34 @@ export const CHAT: Localized<ChatCopy> = {
                 withAgent: 'הידע נשאר בארגון, והמומחים נשאלים רק מה שחדש.',
             },
         },
-        site: SITE_HE,
+        trace: {
+            stations: [
+                ['שואלים כאן', 'בכל שעה, בעברית או באנגלית'],
+                ['בודק את הפנייה', 'מוודא שאפשר לענות עליה'],
+                ['בוחר מה לקרוא', 'רק מסמכים שקשורים לשאלה, וזוכר את המשך השיחה'],
+                ['קורא ומנסח', 'פנייה אחת למודל, בדרך כלל כמה שניות'],
+                ['בודק את התשובה', 'קישורים רק לאתרים מוכרים, ואומר כשאין לו תשובה'],
+                ['אתם ויניר מדברים', 'כשזה נשמע כמו פרויקט, הסוכן מציע לעבור ליניר'],
+            ],
+            now: 'עכשיו',
+            start: 'מתחילים כאן',
+            foot: {
+                before: 'כל תחנה נדלקת כשהיא קורית.',
+                waiting: 'הסוכן קורא את המסמכים שנבחרו וכותב תשובה.',
+                after: (sec, docs) => [
+                    sec === 1 ? 'שנייה אחת' : `${sec} שניות`,
+                    ' משאלה לתשובה, מתוך ',
+                    docs === 1 ? 'מסמך אחד.' : `${docs} מסמכים.`,
+                ],
+                declined: 'הסוכן אמר שאין לו תשובה, במקום לנחש.',
+                ready: 'תשובה מוכנה שיניר כתב מראש. המודל לא הופעל.',
+            },
+        },
         plan: {
             step2: '2 · רואים כאן איך הוא ענה',
             base: {
                 title: 'איך הסוכן עונה',
-                cap: 'כל שאלה עוברת את חמש התחנות האלה. שאלו משהו מימין, והן יידלקו אחת אחת.',
+                cap: 'כל שאלה עוברת את שש התחנות האלה. שאלו משהו מימין, והן יידלקו אחת אחת.',
                 sumH: 'למה זה כאן:',
                 sumT: 'כך נראה סוכן שאפשר לבדוק. רואים מה הוא קרא, וכמה זמן זה לקח.',
             },
@@ -553,7 +519,7 @@ export const CHAT: Localized<ChatCopy> = {
             lit: {
                 kicker: 'המסלול של התשובה',
                 title: 'מאחורי התשובה הזו',
-                cap: 'חמש התחנות שהתשובה עברה, עם מה שנקרא וכמה זמן זה לקח.',
+                cap: 'שש התחנות שהתשובה עברה, עם מה שנקרא וכמה זמן זה לקח.',
             },
             ready: {
                 title: 'תשובה מוכנה: המסלול הקצר',
@@ -881,20 +847,51 @@ export const CHAT: Localized<ChatCopy> = {
                     "The knowledge stays in the organization, and the experts are asked only what's new.",
             },
         },
-        site: SITE_EN,
+        trace: {
+            stations: [
+                ['Ask here', 'Any hour, in Hebrew or English'],
+                ['Checks the request', 'Makes sure it can be answered'],
+                [
+                    'Chooses what to read',
+                    'Only documents related to the question, and it remembers the conversation',
+                ],
+                ['Reads and writes', 'One call to the model, usually a few seconds'],
+                [
+                    'Checks the answer',
+                    'Links only to known sites, and it says when it has no answer',
+                ],
+                [
+                    'You and Yanir talk',
+                    'When it sounds like a project, the agent offers to move to Yanir',
+                ],
+            ],
+            now: 'Now',
+            start: 'Start here',
+            foot: {
+                before: 'Each station lights up as it happens.',
+                waiting: 'The agent is reading the chosen documents and writing an answer.',
+                after: (sec, docs) => [
+                    sec === 1 ? 'One second' : `${sec} seconds`,
+                    ' from question to answer, from ',
+                    docs === 1 ? 'one document.' : `${docs} documents.`,
+                ],
+                declined: 'The agent said it has no answer, instead of guessing.',
+                ready: 'A ready answer Yanir wrote in advance. The model was not called.',
+            },
+        },
         plan: {
             step2: '2 · See here how it answered',
             base: {
                 title: 'How the agent answers',
-                cap: 'Every question goes through these five stops. Ask something on the left, and they light up one by one.',
+                cap: 'Every question goes through these six stations. Ask something on the left, and they light up one by one.',
                 sumH: 'Why this is here:',
                 sumT: 'This is what an agent you can check looks like. You see what it read, and how long it took.',
             },
-            running: { title: 'Behind this answer', cap: 'Each stop lights up as it happens.' },
+            running: { title: 'Behind this answer', cap: 'Each station lights up as it happens.' },
             lit: {
                 kicker: "The answer's path",
                 title: 'Behind this answer',
-                cap: 'The five stops the answer went through, with what was read and how long it took.',
+                cap: 'The six stations the answer went through, with what was read and how long it took.',
             },
             ready: {
                 title: 'Ready answer: the short path',

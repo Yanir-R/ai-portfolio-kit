@@ -574,6 +574,8 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
         keepAsking: foldHandoff,
         /** The offer to talk directly is open under the last answer. */
         handoffOpen: entries.some((e) => e.kind === 'answer' && !!e.handoff),
+        /** The offer to talk directly was made somewhere in this conversation. */
+        handoffOffered,
         /** Sends a question again after a failed send. */
         retry: (text: string) => !busy && !closed && ask(text),
         /** Which sheet an address is being waited for, if any. */
