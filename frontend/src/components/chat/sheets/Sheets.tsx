@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { SheetKey, SHEETS, sourceTitle } from '@/content/sheets';
+import { Link } from 'react-router';
+import { Proof, SheetKey, SHEETS, sourceTitle } from '@/content/sheets';
 import { FEATURES, LINKS } from '@/constants/links';
 import { AnswerRecord, Letter as LetterState } from '@/chat/useHomeChat';
 import { TraceSource } from '@/types/chat';
@@ -23,17 +24,88 @@ const SOURCE_STAGGER = { start: 500, step: 140 } as const;
 // A token part narrower than this share of the total would vanish from the bar.
 const MIN_TOKEN_SHARE = 0.06;
 
-const Points: React.FC<{ points: { n: string; title: string; text: string }[] }> = ({ points }) => (
+/** A link to a page of the site, or out of it. */
+const Go: React.FC<{ href: string; out?: boolean; children: React.ReactNode }> = ({
+    href,
+    out,
+    children,
+}) => {
+    const { to } = useLang();
+    return out ? (
+        <a href={href} target="_blank" rel="noopener">
+            <Arrow out>{children}</Arrow>
+        </a>
+    ) : (
+        <Link to={to(href)}>
+            <Arrow>{children}</Arrow>
+        </Link>
+    );
+};
+
+const Points: React.FC<{
+    points: { n: string; title: string; text: string; proof?: Proof }[];
+    proofTag?: string;
+}> = ({ points, proofTag }) => (
     <ol className="v-why">
         {points.map((p) => (
             <li key={p.n}>
                 <i>{p.n}</i>
                 <b>{p.title}</b>
                 <span>{p.text}</span>
+                {/* Where the claim already happens; shown where the panel has room for it. */}
+                {p.proof && (
+                    <p className="pf">
+                        <small>{proofTag}</small>
+                        {p.proof.text}{' '}
+                        <Go href={p.proof.href} out={p.proof.out}>
+                            {p.proof.label}
+                        </Go>
+                    </p>
+                )}
             </li>
         ))}
     </ol>
 );
+
+/*
+ * A small drawing of how each system works, in the project pages' line
+ * style: a draft passing a check before a person; a head with the agents
+ * around it; a memory file that can be read and checked.
+ */
+const SYSTEM_ART = [
+    <svg key="review" viewBox="0 0 132 52" aria-hidden="true">
+        <rect x="4" y="12" width="30" height="24" rx="4" />
+        <path d="M10 20h18M10 26h18M10 32h11" />
+        <path className="ln" d="M34 24h14" />
+        <circle className="am" cx="53" cy="24" r="4" />
+        <path className="ln" d="M57 24h10" />
+        <rect x="67" y="12" width="28" height="24" rx="4" />
+        <path d="M74 24l5 5 9-10" />
+        <path className="ln dash" d="M95 24h12" />
+        <circle cx="119" cy="17" r="6" />
+        <path d="M108 38a11 9 0 0 1 22 0" />
+    </svg>,
+    <svg key="fleet" viewBox="0 0 132 52" aria-hidden="true">
+        {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+            const a = -Math.PI / 2 + (i * 2 * Math.PI) / 7;
+            const x = 66 + 20 * Math.cos(a);
+            const y = 26 + 20 * Math.sin(a);
+            return (
+                <React.Fragment key={i}>
+                    <path className="ln" d={`M66 26L${x.toFixed(1)} ${y.toFixed(1)}`} />
+                    <circle className="dot" cx={x.toFixed(1)} cy={y.toFixed(1)} r="3.5" />
+                </React.Fragment>
+            );
+        })}
+        <circle className="am" cx="66" cy="26" r="8" />
+    </svg>,
+    <svg key="memory" viewBox="0 0 132 52" aria-hidden="true">
+        <rect x="42" y="6" width="48" height="38" rx="4" />
+        <path d="M42 15h48M49 23h28M49 30h28M49 37h18" />
+        <circle className="am" cx="88" cy="42" r="7" />
+        <path d="M84.5 42l2.5 2.5 4.5-5" />
+    </svg>,
+];
 
 const PkSheet: React.FC = () => {
     const { t } = useLang();
@@ -63,7 +135,7 @@ const WhySheet: React.FC = () => {
     const copy = t(SHEETS);
     return (
         <>
-            <Points points={copy.why.points} />
+            <Points points={copy.why.points} proofTag={copy.why.proofTag} />
             <TalkButton label={copy.cta} />
         </>
     );
@@ -207,8 +279,13 @@ const BuiltSheet: React.FC = () => {
                         <div className="c">
                             <i>{i + 1}</i>
                             <b>{s.title}</b>
+                            {/* The drawing and the way to the project page show where the panel has room. */}
+                            <div className="art">{SYSTEM_ART[i]}</div>
                             <span>{s.text}</span>
                             {s.links && <PersonaKitLinks />}
+                            <div className="how">
+                                <Go href={s.href}>{copy.how}</Go>
+                            </div>
                         </div>
                     </React.Fragment>
                 ))}

@@ -1,4 +1,5 @@
 import { Localized } from '@/i18n/lang';
+import { LINKS } from '@/constants/links';
 
 /*
  * The drawings the chat opens beside an answer. Each one is made for a kind
@@ -126,7 +127,9 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
 };
 
 /** A numbered point: number, title, line. */
-type Point = { n: string; title: string; text: string };
+/** Where a claim already happens on the site: a line and the way to it. */
+export type Proof = { text: string; label: string; href: string; out?: boolean };
+type Point = { n: string; title: string; text: string; proof?: Proof };
 
 export interface SheetCopy {
     cta: string;
@@ -154,12 +157,14 @@ export interface SheetCopy {
         topic: string;
     };
     built: {
-        systems: { title: string; text: string; links?: boolean }[];
+        systems: { title: string; text: string; links?: boolean; href: string }[];
         wires: string[];
+        /** The way from each card to its drawn project page. */
+        how: string;
         cta: string;
         topic: string;
     };
-    why: { points: Point[] };
+    why: { points: Point[]; proofTag: string };
     read: {
         leans: (n: number) => string;
         leansNone: string;
@@ -298,18 +303,22 @@ export const SHEETS: Localized<SheetCopy> = {
                 {
                     title: 'מנוע הביקורת',
                     text: 'סוכן אחד כותב, סוכן אחר בודק, ורק אז זה מגיע לאדם.',
+                    href: '/projects/review-engine',
                 },
                 {
                     title: 'מערך הסוכנים',
                     text: 'יותר מ־40 סוכנים עם ראש אחד, וכל אחד עם ההרשאות שהתפקיד שלו צריך.',
+                    href: '/projects/agent-fleet',
                 },
                 {
                     title: 'PersonaKit',
                     text: 'זיכרון לסוכנים שאפשר לקרוא, לבדוק ולתקן. קוד פתוח, חינם.',
                     links: true,
+                    href: '/projects/personakit',
                 },
             ],
             wires: ['בודק את', 'מזין זיכרון אל'],
+            how: 'איך הוא בנוי',
             cta: 'רוצים סוכן כזה אצלכם? קבעו שיחת אבחון',
             topic: 'סוכנים',
         },
@@ -319,18 +328,35 @@ export const SHEETS: Localized<SheetCopy> = {
                     n: '01',
                     title: 'מתחילים מהבעיה, לא מהטכנולוגיה',
                     text: 'לפעמים המסקנה היא שלא צריך סוכן בכלל, וגם את זה אני אומר.',
+                    proof: {
+                        text: 'Trinity Legal נבנה מתוך ישיבות אפיון עם עורכי הדין, לא מתוך רשימת כלים.',
+                        label: 'לעמוד הפרויקט',
+                        href: '/projects/trinity-legal',
+                    },
                 },
                 {
                     n: '02',
                     title: 'אתם נשארים בשליטה',
                     text: 'הסוכן מכין, ואדם אצלכם מאשר. שום הודעה ללקוח לא יוצאת בלי שראיתם אותה, אז אפשר להתחיל בלי לחשוש מטעות מול לקוח.',
+                    proof: {
+                        text: 'כך עובד גם מערך הסוכנים שלי: אפס פעולות החוצה בלי אישור שלי.',
+                        label: 'איך זה בנוי',
+                        href: '/projects/agent-fleet',
+                    },
                 },
                 {
                     n: '03',
                     title: 'בסוף זה שלכם',
                     text: 'תיעוד והדרכה, כדי שהמערכת לא תהיה תלויה בי.',
+                    proof: {
+                        text: 'PersonaKit פתוח לכולם, עם תיעוד שכל אחד יכול לקרוא.',
+                        label: 'לתיעוד',
+                        href: LINKS.personakitDocs,
+                        out: true,
+                    },
                 },
             ],
+            proofTag: 'ההוכחה',
         },
         read: {
             leans: (n) => (n === 1 ? 'התשובה נשענת על מסמך אחד' : `התשובה נשענת על ${n} מסמכים`),
@@ -504,18 +530,22 @@ export const SHEETS: Localized<SheetCopy> = {
                 {
                     title: 'The review engine',
                     text: 'One agent writes, another agent reviews, and only then it reaches a person.',
+                    href: '/projects/review-engine',
                 },
                 {
                     title: 'The agent fleet',
                     text: 'More than 40 agents with one head, each with the permissions its role needs.',
+                    href: '/projects/agent-fleet',
                 },
                 {
                     title: 'PersonaKit',
                     text: 'Memory for agents that you can read, check and correct. Open source, free.',
                     links: true,
+                    href: '/projects/personakit',
                 },
             ],
             wires: ['reviews', 'feeds memory to'],
+            how: "How it's built",
             cta: 'Want an agent like this? Book a diagnostic call',
             topic: 'Agents',
         },
@@ -525,18 +555,35 @@ export const SHEETS: Localized<SheetCopy> = {
                     n: '01',
                     title: 'I start from the problem, not the technology',
                     text: "Sometimes the conclusion is that you don't need an agent at all, and I say that too.",
+                    proof: {
+                        text: 'Trinity Legal was built from working sessions with the lawyers, not from a list of tools.',
+                        label: 'The project page',
+                        href: '/projects/trinity-legal',
+                    },
                 },
                 {
                     n: '02',
                     title: 'You stay in control',
                     text: 'The agent prepares, and a person on your side approves. No message goes to a customer without you seeing it, so you can start without fearing a mistake in front of a customer.',
+                    proof: {
+                        text: 'My agent fleet works the same way: zero outward actions without my approval.',
+                        label: "How it's built",
+                        href: '/projects/agent-fleet',
+                    },
                 },
                 {
                     n: '03',
                     title: "In the end it's yours",
                     text: 'Documentation and training, so the system does not depend on me.',
+                    proof: {
+                        text: 'PersonaKit is open to everyone, with docs anyone can read.',
+                        label: 'The docs',
+                        href: LINKS.personakitDocs,
+                        out: true,
+                    },
                 },
             ],
+            proofTag: 'The proof',
         },
         read: {
             leans: (n) =>

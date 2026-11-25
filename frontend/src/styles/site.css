@@ -10760,6 +10760,98 @@ video.w-v {
 }
 
 /*
+ * What the grown panel's spare room carries (Yanir, 2026-11-25): each system
+ * card gets a small drawing of how it works and the way to its project page;
+ * each reason gets its proof, a line on where it already happens. Elsewhere
+ * (phones, the compact panel) the sheets stay as they were.
+ */
+.v-sys .c .art,
+.v-sys .c .how,
+.v-why .pf {
+    display: none;
+}
+@media (min-width: 901px) and (min-height: 620px) {
+    #top.grown .plan.showvis .v-sys {
+        flex: 1 1 auto;
+        max-height: 400px;
+    }
+    #top.grown .v-sys .w {
+        width: 72px;
+    }
+    #top.grown .v-sys .c .art {
+        display: block;
+        grid-column: 1 / -1;
+        margin: var(--sp-1) 0;
+        padding: var(--sp-2);
+        border-radius: 6px;
+        background: var(--tint);
+    }
+    #top.grown .v-sys .art svg {
+        display: block;
+        width: 100%;
+        height: 56px;
+        fill: #fff;
+        stroke: var(--ink);
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+    #top.grown .v-sys .art .ln {
+        fill: none;
+    }
+    #top.grown .v-sys .art .dash {
+        stroke-dasharray: 3 3;
+    }
+    #top.grown .v-sys .art .am {
+        fill: var(--btn);
+    }
+    #top.grown .v-sys .c .how {
+        display: block;
+        grid-column: 1 / -1;
+        align-self: end;
+        margin-top: var(--sp-3);
+        padding-top: var(--sp-2);
+        border-top: 1.5px dashed var(--line);
+        font-size: 0.9rem;
+        font-weight: 800;
+    }
+    /* The text and any links sit together at the top; the way to the page sits at the bottom. */
+    #top.grown .v-sys .c {
+        grid-template-rows: auto auto auto auto 1fr;
+    }
+    #top.grown .v-sys .c .lk {
+        align-self: start;
+        margin-top: var(--sp-2);
+    }
+    #top.grown .v-sys .c .how {
+        grid-row: 5;
+    }
+    #top.grown .v-why .pf {
+        display: block;
+        grid-column: 2;
+        margin: 8px 0 0;
+        padding: 6px 12px;
+        border-inline-start: 3px solid var(--btn);
+        border-radius: 4px;
+        background: var(--coral-soft);
+        font-size: 0.9rem;
+        line-height: 1.45;
+    }
+    #top.grown .v-why .pf small {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--act-text);
+    }
+    #top.grown .v-why .pf a,
+    #top.grown .v-sys .how a {
+        color: var(--link);
+        font-weight: 800;
+        white-space: nowrap;
+    }
+}
+
+/*
  * Home proof: numbered promises, then the three systems as one box. Wide,
  * the systems are three columns with the way to every project in the heading
  * row; narrow, they are rows and that link sits under them. The booking band
