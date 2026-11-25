@@ -10,6 +10,7 @@ import { FailureCase, failureCase, failureText as describeFailure } from '@/chat
 import FailureCard, { ContactActions } from '@/components/chat/FailureCard';
 import HandoffCard from '@/components/chat/HandoffCard';
 import { useLang } from '@/i18n/useLang';
+import { useLogFollowsViewport } from '@/hooks/usePhoneLayer';
 import { ChatBlock, ChatContext, ChatHandoff, ChatMessage, TraceSource } from '@/types/chat';
 import { WritingEntry } from '@/types/writing';
 
@@ -25,6 +26,8 @@ type Turn =
     | { id: number; kind: 'q'; text: string }
     | { id: number; kind: 'wait' }
     | { id: number; kind: 'pick' }
+    /** A muted line in the log: the questions turned general, or back to the piece. */
+    | { id: number; kind: 'note'; text: string }
     | {
           id: number;
           kind: 'answer';
@@ -49,6 +52,9 @@ type Turn =
 /** Turns before an id is given to them. */
 type NewTurn = Turn extends infer T ? (T extends Turn ? Omit<T, 'id'> : never) : never;
 
+// Keys for the log's turns, unique across every dock on the page.
+let nextTurnId = 1;
+
 type Chip = 'sum' | 'biz' | 'more';
 const CHIPS: Chip[] = ['sum', 'biz', 'more'];
 
@@ -62,13 +68,27 @@ const lastShown = (turns: Turn[]): string => {
     return '';
 };
 
-const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
+interface Props {
+    entry: WritingEntry;
+    /**
+     * Inside the phone's full-screen layer (see PostChatLayer): a greeting
+     * opens the log, and while the keyboard leaves little room or the visitor
+     * is typing, the suggestions give their room to the conversation.
+     */
+    layer?: boolean;
+    /** The layer is open on screen. */
+    active?: boolean;
+}
+
+// Under this visible height the layer's suggestions fold away (as in the home chat).
+const SHORT_VIEW_PX = 480;
+
+const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
     const { lang, t } = useLang();
     const copy = t(WRITING).ask;
     const errors = t(CHAT).errors;
     const { containerRef: turnstileRef, getToken, reset: resetToken } = useTurnstile();
     const logRef = useRef<HTMLDivElement>(null);
-    const nextId = useRef(1);
     const [turns, setTurns] = useState<Turn[]>([]);
     const [chips, setChips] = useState<Chip[]>(CHIPS);
     const [withContext, setWithContext] = useState(true);
@@ -92,6 +112,10 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
         const above = hand.getBoundingClientRect().top - log.getBoundingClientRect().top;
         log.scrollTop = Math.min(end, log.scrollTop + above - 12);
     }, [turns]);
+    // A limit or failure card on show: the context row folds to one line.
+    const failing = closed || turns[turns.length - 1]?.kind === 'error';
+    const short = useLogFollowsViewport(logRef, layer && active, SHORT_VIEW_PX);
+    const showChips = !closed && chips.length > 0 && !(layer && (short || text.trim() !== ''));
 
     const context: ChatContext | null = withContext
         ? { type: 'writing', ref: entry.slug, title: entry.title, lang }
@@ -104,7 +128,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                 .map((turn) =>
                     turn.kind === 'answer' && turn.handoff ? { ...turn, handoff: null } : turn
                 ),
-            ...items.map((item) => ({ ...item, id: nextId.current++ }) as Turn),
+            ...items.map((item) => ({ ...item, id: nextTurnId++ }) as Turn),
         ]);
 
     const history = (): ChatMessage[] =>
@@ -171,10 +195,25 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
         void ask(copy.chips[chip]);
     };
 
+    // The piece's starters left when its context was dropped, for when it returns.
+    const [keptChips, setKeptChips] = useState<Chip[]>([]);
     const removeContext = () => {
         setWithContext(false);
+        setKeptChips(chips);
         setChips([]);
+        add({ kind: 'note', text: copy.contextOff(entry.kind) });
     };
+    // Reopening the layer from the piece asks about the piece again; the
+    // conversation so far stays, and its history still goes with each question.
+    const [wasActive, setWasActive] = useState(active);
+    if (active !== wasActive) {
+        setWasActive(active);
+        if (active && layer && !withContext) {
+            setWithContext(true);
+            setChips(keptChips);
+            add({ kind: 'note', text: copy.contextOn(entry.kind) });
+        }
+    }
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -184,14 +223,34 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
     };
 
     return (
-        <div className="w-dock">
+        <div
+            className={['w-dock', layer && 'in-layer', failing && 'failing']
+                .filter(Boolean)
+                .join(' ')}
+        >
             {withContext && (
                 <div className="w-ctx">
                     <Tag tone="a">{t(WRITING).tags.askingAbout}</Tag>
                     <b dir="auto">{entry.title}</b>
-                    <button type="button" aria-label={copy.removeContext} onClick={removeContext}>
-                        ✕
-                    </button>
+                    {layer ? (
+                        // In the layer the X belongs to the layer itself: a word here.
+                        <button
+                            type="button"
+                            className="rm"
+                            aria-label={copy.removeContextLong(entry.kind)}
+                            onClick={removeContext}
+                        >
+                            {copy.removeShort}
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            aria-label={copy.removeContext}
+                            onClick={removeContext}
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
             )}
             <div
@@ -202,12 +261,23 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                 aria-live="polite"
                 ref={logRef}
             >
+                {layer && (
+                    <div className="ans hi" dir="auto">
+                        {copy.greeting(entry.kind)}
+                    </div>
+                )}
                 {turns.map((turn) => {
                     if (turn.kind === 'q')
                         return (
                             <div key={turn.id} className="q" dir="auto">
                                 {turn.text}
                             </div>
+                        );
+                    if (turn.kind === 'note')
+                        return (
+                            <p key={turn.id} className="note" dir="auto">
+                                {turn.text}
+                            </p>
                         );
                     if (turn.kind === 'wait')
                         return (
@@ -282,7 +352,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                     );
                 })}
             </div>
-            {!closed && !handoffOpen && chips.length > 0 && (
+            {showChips && !handoffOpen && (
                 <div className="qs">
                     {chips.map((chip) => (
                         <button
@@ -309,7 +379,9 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                         type="text"
                         value={text}
                         onChange={(e) => setText(e.target.value)}
-                        placeholder={withContext ? copy.placeholder : copy.placeholderGeneral}
+                        placeholder={
+                            withContext ? copy.placeholder(entry.kind) : copy.placeholderGeneral
+                        }
                         aria-label={copy.inputLabel}
                     />
                     <button type="submit" className="snd" disabled={busy}>

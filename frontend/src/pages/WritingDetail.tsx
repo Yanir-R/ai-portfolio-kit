@@ -31,7 +31,7 @@ const WritingDetail: React.FC = () => {
             />
         );
     if (load.state === 'failed') return <LoadFailed copy={t(ERRORS).loadFailed} onRetry={retry} />;
-    return <PostArticle key={load.value.slug} entry={load.value} index={index} />;
+    return <PostArticle key={load.value.slug} entry={load.value} index={index} page />;
 };
 
 export default WritingDetail;

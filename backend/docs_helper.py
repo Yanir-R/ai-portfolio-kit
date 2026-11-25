@@ -71,9 +71,14 @@ def parse_project_metadata(content: str) -> Dict[str, Any]:
     """Parse project metadata from markdown content"""
     metadata: Dict[str, Any] = {}
     lines = content.split('\n')
+    # The `## Technical Details` section is the stack. Bold bullets elsewhere
+    # (features, deployment notes) are prose and must not become stack chips.
+    in_tech = False
 
     for i, line in enumerate(lines):
         line = line.strip()
+        if line.startswith('## '):
+            in_tech = 'technical details' in line.lower()
 
         # A recognised `## Section` takes its value from the next non-empty,
         # non-heading line. Section names double as metadata keys, so an entry
@@ -91,7 +96,7 @@ def parse_project_metadata(content: str) -> Dict[str, Any]:
                     break
 
         # Handle technical details format (- **Field**: Value)
-        elif line.startswith('- **') and '**:' in line:
+        elif in_tech and line.startswith('- **') and '**:' in line:
             match = re.match(r'- \*\*(.*?)\*\*:\s*(.*)', line)
             if match:
                 key = f"tech_{match.group(1).lower().replace(' ', '_').replace('-', '_')}"

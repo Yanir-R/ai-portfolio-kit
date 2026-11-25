@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router';
 import { HOME } from '@/copy/home';
 import { FEATURES } from '@/constants/links';
 import { useHomeChat } from '@/chat/useHomeChat';
 import AgentChat, { PhoneLayer } from '@/components/chat/AgentChat';
 import { SheetKey } from '@/content/sheets';
 import { PHONE_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
+import { useHistoryLayer, useLayerChrome } from '@/hooks/usePhoneLayer';
 import AnswerPlan from '@/components/chat/AnswerPlan';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { useTurnstile } from '@/hooks/useTurnstile';
@@ -25,17 +25,9 @@ export const WhatsAppIcon: React.FC = () => (
 /** What the history entry says about the phone chat, so Back closes what is open. */
 interface HeroState {
     ask?: string;
-    /** The page load that opened the layer (see VISIT). */
-    chatLayer?: number;
     chatSheet?: boolean;
 }
 
-// Marks history entries made by this page load. After a reload the entry
-// still says "open", but the conversation it showed is gone, so only an
-// entry with this load's mark opens the layer.
-const VISIT = Math.random();
-
-const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), a[href], [tabindex="0"]';
 // How far the sheet has to be pulled down before letting go closes it.
 const SWIPE_CLOSE_PX = 90;
 // How far a finger goes down before the sheet starts to follow it.
@@ -43,26 +35,6 @@ const PULL_START_PX = 10;
 // The parts of the first-screen card that may give way on a short phone (see site.css).
 const FIT_STEPS = 5;
 const FIT_MARGIN_PX = 4;
-
-/** Keeps Tab inside `box`, the open layer or sheet. */
-const trapTab = (event: KeyboardEvent, box: HTMLElement) => {
-    const items = [...box.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
-        (el) => el.offsetParent !== null
-    );
-    if (!items.length) return;
-    const first = items[0];
-    const last = items[items.length - 1];
-    if (
-        event.shiftKey &&
-        (document.activeElement === first || !box.contains(document.activeElement))
-    ) {
-        event.preventDefault();
-        last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-    }
-};
 
 /*
  * The first screen: who this is and what he builds, then the chat beside the
@@ -79,42 +51,30 @@ const HeroSection: React.FC = () => {
     const { openContact } = useSiteDialogs();
     const { containerRef: turnstileRef, getToken, reset: resetToken } = useTurnstile();
     const chat = useHomeChat({ getToken, resetToken });
-    const location = useLocation();
-    const navigate = useNavigate();
-    const state = location.state as HeroState | null;
     const phone = useMediaQuery(PHONE_QUERY);
-
-    const full = phone && state?.chatLayer === VISIT;
+    const layer = useHistoryLayer('chatLayer', phone);
+    const state = layer.state as HeroState | null;
+    const full = layer.open;
     const sheetOpen = full && !!state?.chatSheet;
 
     const chatRef = useRef<HTMLDivElement>(null);
     const sheetRef = useRef<HTMLDivElement>(null);
     const resumeRef = useRef<HTMLButtonElement>(null);
     const sheetOpener = useRef<HTMLElement | null>(null);
-    const here = location.pathname + location.search + location.hash;
 
-    const openLayer = useCallback(() => {
-        if (full || !phone) return;
-        navigate(here, { state: { chatLayer: VISIT } satisfies HeroState });
-    }, [full, phone, navigate, here]);
-
-    const closeLayer = useCallback(() => navigate(-1), [navigate]);
-
+    const { show, close } = layer;
+    const openLayer = useCallback(() => show(), [show]);
+    const closeLayer = close;
     const showSheet = useCallback(
         (key: SheetKey) => {
             chat.openSheet(key);
             if (sheetOpen) return;
             sheetOpener.current = document.activeElement as HTMLElement | null;
-            navigate(here, { state: { chatLayer: VISIT, chatSheet: true } satisfies HeroState });
+            show({ chatSheet: true });
         },
-        [chat, sheetOpen, navigate, here]
+        [chat, sheetOpen, show]
     );
-    const closeSheet = useCallback(() => navigate(-1), [navigate]);
-
-    // A reloaded page, or one widened past a phone, starts with the chat closed.
-    useEffect(() => {
-        if (state?.chatLayer && !full) navigate(here, { replace: true, state: null });
-    }, [state, full, navigate, here]);
+    const closeSheet = close;
 
     // A question carried from another page ("ask the agent about X" on the
     // blog) is asked once, as if typed here.
@@ -170,32 +130,14 @@ const HeroSection: React.FC = () => {
         };
     }, [phone, full]);
 
-    // While open: the page behind does not scroll, and the layer follows the
-    // visible viewport, so the input sits right above the keyboard.
-    useEffect(() => {
-        const el = chatRef.current;
-        if (!full || !el) return;
-        const root = document.documentElement;
-        const resume = resumeRef;
-        root.classList.add('chat-open');
-        const vv = window.visualViewport;
-        const fit = () => {
-            if (!vv) return;
-            el.style.setProperty('--vv-h', `${vv.height}px`);
-            el.style.setProperty('--vv-top', `${vv.offsetTop}px`);
-        };
-        fit();
-        vv?.addEventListener('resize', fit);
-        vv?.addEventListener('scroll', fit);
-        if (!el.contains(document.activeElement)) el.focus({ preventScroll: true });
-        return () => {
-            root.classList.remove('chat-open');
-            vv?.removeEventListener('resize', fit);
-            vv?.removeEventListener('scroll', fit);
-            // Back on the page, at the entry that reopens the conversation.
-            requestAnimationFrame(() => resume.current?.focus({ preventScroll: true }));
-        };
-    }, [full]);
+    // While open: the page behind is locked and the layer follows the visible
+    // viewport. Escape closes the top-most of the layer and its sheet, and Tab
+    // stays inside it.
+    useLayerChrome(chatRef, full, {
+        onEscape: sheetOpen ? closeSheet : closeLayer,
+        trapRef: sheetOpen ? sheetRef : chatRef,
+        returnRef: resumeRef,
+    });
 
     // The sheet takes focus when it rises and gives it back to the card that opened it.
     useEffect(() => {
@@ -206,21 +148,6 @@ const HeroSection: React.FC = () => {
             if (opener?.isConnected) opener.focus({ preventScroll: true });
         };
     }, [sheetOpen]);
-
-    // Escape closes the top-most of the two; Tab stays inside it.
-    useEffect(() => {
-        if (!full) return;
-        const onKey = (event: KeyboardEvent) => {
-            const box = sheetOpen ? sheetRef.current : chatRef.current;
-            if (event.key === 'Escape') {
-                event.preventDefault();
-                if (sheetOpen) closeSheet();
-                else closeLayer();
-            } else if (event.key === 'Tab' && box) trapTab(event, box);
-        };
-        document.addEventListener('keydown', onKey);
-        return () => document.removeEventListener('keydown', onKey);
-    }, [full, sheetOpen, closeSheet, closeLayer]);
 
     // The sheet follows a finger pulling it down: from the handle or header at
     // any time, or from its content only while that is scrolled to the top.
@@ -256,7 +183,7 @@ const HeroSection: React.FC = () => {
         if (close) closeSheet();
     };
 
-    const layer: PhoneLayer | undefined = phone
+    const phoneLayer: PhoneLayer | undefined = phone
         ? { full, engage: openLayer, close: closeLayer, showSheet }
         : undefined;
     // Under the chat on a phone: the five stops as a still explainer. The live
@@ -299,7 +226,7 @@ const HeroSection: React.FC = () => {
                 <AgentChat
                     chat={chat}
                     turnstileRef={turnstileRef}
-                    phone={layer}
+                    phone={phoneLayer}
                     rootRef={chatRef}
                     resumeRef={resumeRef}
                 >

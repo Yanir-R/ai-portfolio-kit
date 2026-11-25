@@ -7,9 +7,11 @@ import WritingBlocks from '@/components/writing/WritingBlocks';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import FailureCard, { ContactActions } from '@/components/chat/FailureCard';
 import HandoffCard from '@/components/chat/HandoffCard';
+import LayerHeader from '@/components/chat/LayerHeader';
 import { Arrow } from '@/components/site/Arrow';
 import { REDUCED_MOTION_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
 import { useLang } from '@/i18n/useLang';
+import { useLogFollowsViewport } from '@/hooks/usePhoneLayer';
 
 // The input's placeholder cycles through example questions while it is idle.
 const EXAMPLE_EVERY_MS = 2600;
@@ -345,23 +347,7 @@ const AgentChat: React.FC<{
 
     // The keyboard opening or closing changes the visible height: keep the
     // newest message in view, and note when little room is left.
-    const [short, setShort] = useState(false);
-    useEffect(() => {
-        const vv = window.visualViewport;
-        const log = logRef.current;
-        if (!full || !vv || !log) return;
-        const onResize = () => {
-            setShort(vv.height < SHORT_VIEW_PX);
-            // A frame later, once the layer has taken the new height.
-            requestAnimationFrame(() => (log.scrollTop = log.scrollHeight));
-        };
-        onResize();
-        vv.addEventListener('resize', onResize);
-        return () => {
-            vv.removeEventListener('resize', onResize);
-            setShort(false);
-        };
-    }, [full]);
+    const short = useLogFollowsViewport(logRef, full, SHORT_VIEW_PX);
     // Above the keyboard on a short screen, or once typing has started, the
     // suggestions give their room to the conversation.
     // On the phone layer a failure card already offers the next steps, and the
@@ -414,23 +400,9 @@ const AgentChat: React.FC<{
             tabIndex={full ? -1 : undefined}
             aria-modal={full ? true : undefined}
         >
-            <div className="ph">
-                <span className="who2">
-                    <i className="dot" />
-                    {copy.who} <small>{copy.whoNote}</small>
-                </span>
+            <LayerHeader onClose={full ? phone?.close : undefined}>
                 <span className="kk">{copy.step1}</span>
-                {full && (
-                    <button
-                        type="button"
-                        className="x"
-                        aria-label={copy.phone.close}
-                        onClick={phone?.close}
-                    >
-                        ✕
-                    </button>
-                )}
-            </div>
+            </LayerHeader>
             {phone && !full && live && (
                 <button type="button" className="resume" ref={resumeRef} onClick={phone.engage}>
                     {lastQuestion?.kind === 'user' && <small>{lastQuestion.text}</small>}
