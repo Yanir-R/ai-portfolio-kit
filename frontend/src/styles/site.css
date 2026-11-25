@@ -3238,6 +3238,92 @@ a.il {
 .v-sys .c .lk {
     grid-column: 2;
 }
+/*
+ * In the wide panel beside the chat the three systems stand side by side,
+ * wired left to right, so the whole drawing fits the panel's height without
+ * scrolling inside it. The phone sheet keeps them stacked.
+ */
+.vis {
+    container-type: inline-size;
+}
+@keyframes slide {
+    0% {
+        inset-inline-start: -4px;
+        opacity: 0;
+    }
+    15%,
+    85% {
+        opacity: 1;
+    }
+    to {
+        inset-inline-start: calc(100% - 6px);
+        opacity: 0;
+    }
+}
+@container (min-width: 400px) {
+    .v-sys {
+        flex-direction: row;
+        align-items: stretch;
+    }
+    /* The number sits beside the name; the sentence and links run full width under them. */
+    .v-sys .c {
+        flex: 1 1 0;
+        min-width: 0;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-rows: auto auto 1fr;
+        align-items: baseline;
+        gap: 4px 8px;
+        padding: var(--sp-2) 12px 12px;
+    }
+    .v-sys .c i {
+        grid-row: 1;
+        font-size: 1.7rem;
+    }
+    .v-sys .c b {
+        font-size: 1.05rem;
+    }
+    .v-sys .c span,
+    .v-sys .c .lk {
+        grid-column: 1 / -1;
+    }
+    .v-sys .c span {
+        font-size: 0.9rem;
+    }
+    .v-sys .c .lk {
+        align-self: end;
+        margin-top: 0;
+    }
+    .v-sys .w {
+        flex: none;
+        width: 58px;
+        height: auto;
+        margin: 0;
+        padding: var(--sp-1) 4px 0;
+        align-self: center;
+        border-inline-start: 0;
+        border-top: 2px dashed var(--ink);
+        justify-content: center;
+        text-align: center;
+        transform-origin: left;
+        animation-name: grow-x;
+    }
+    .v-sys .w em {
+        font-size: 0.74rem;
+        line-height: 1.2;
+    }
+    .v-sys .w::before {
+        top: -6px;
+        animation-name: slide;
+    }
+}
+@keyframes grow-x {
+    0% {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
 .vis a.btn {
     margin-top: 0;
 }
