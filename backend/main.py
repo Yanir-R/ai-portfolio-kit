@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from hmac import compare_digest
 from dotenv import load_dotenv
-from gemini_helper import Answer, get_gemini_response
+from gemini_helper import Answer, HandoffReason, get_gemini_response
 from context import get_knowledge, reading_brief
 from language import detect_language
 from selection import Selection, select
@@ -15,14 +15,14 @@ from docs_helper import (
 )
 from rate_limit import (
     auto_reply_limiter, booking_address_limiter, chat_limiter, contact_limiter,
-    enforce_rate_limit,
+    client_key, enforce_rate_limit,
 )
 import guard
 from prompt import HISTORY_TURNS, RULES
 import booking
 import site_mail
 from pydantic import BaseModel, EmailStr, Field
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Union
 import json
 import os
 import datetime
@@ -207,6 +207,10 @@ class ChatRequest(BaseModel):
     # Pieces already shown as cards in this conversation, so a follow-up does
     # not show them again. Slugs only, checked against the corpus.
     shown: List[str] = Field(default_factory=list, max_length=MAX_SHOWN_SLUGS)
+    # The page already offered a direct talk in this conversation (shown or
+    # dismissed), so it is not offered again. Forging it only changes what
+    # this visitor's own page shows.
+    handoff_offered: bool = False
 
 
 class ChatContext(BaseModel):
@@ -457,6 +461,70 @@ RECENT_REPLY = {
 }
 
 
+class HandoffCard(BaseModel):
+    """An offer to continue with Yanir directly, drawn under the answer.
+
+    `summary` is the model's short restatement of what the visitor said about
+    their need, prefilled (editable) into the contact window.
+    """
+
+    # "last_answer" when the card is offered because the visitor's daily
+    # answers are about to run out, whatever the model judged.
+    reason: Union[HandoffReason, Literal["last_answer"]]
+    summary: str = ""
+    # One line in Yanir's voice on the kind of work that fits this need, from
+    # the profile. Empty when the model gave none; the card then says the
+    # fixed line for `reason`.
+    fit: str = ""
+
+
+# A direct talk is offered no earlier than the visitor's third message: by then
+# there is enough of a conversation to summarise, and a first question about a
+# price is answered before it is turned into a meeting.
+HANDOFF_MIN_VISITOR_TURNS = 3
+
+
+def _handoff_card(
+    answer: Answer, chat_request: "ChatRequest", last_answer: bool = False
+) -> Optional[HandoffCard]:
+    """The card to offer with this answer, if this is the moment for it.
+
+    The model only judges the conversation (gemini_helper.Handoff). These rules
+    decide, so the card cannot appear on a failure, a decline, a first
+    question, or twice in one conversation.
+
+    `last_answer` is the visitor's last answer of the day. The next question
+    would be refused, so the way to keep going is offered now, while the
+    conversation is still open, rather than after the door has closed.
+    """
+    if not answer.written_by_model or answer.declined or chat_request.handoff_offered:
+        return None
+    handoff = answer.handoff
+    # A recap without the visitor's problem in it is not a reason to talk.
+    judged_ready = (
+        handoff is not None
+        and handoff.ready
+        and handoff.reason != "none"
+        and bool(handoff.pain)
+    )
+    summary = guard.clean_output(handoff.summary) if judged_ready else ""
+    fit = guard.clean_output(handoff.fit) if judged_ready else ""
+    if last_answer:
+        return HandoffCard(
+            reason=handoff.reason if judged_ready else "last_answer", summary=summary, fit=fit
+        )
+    if not judged_ready:
+        return None
+    visitor_turns = 1 + sum(
+        1
+        for message in chat_request.conversation_history or []
+        if message.type in _USER_MESSAGE_TYPES
+    )
+    if visitor_turns < HANDOFF_MIN_VISITOR_TURNS:
+        return None
+    return HandoffCard(reason=handoff.reason, summary=summary, fit=fit)
+
+
 class ChatResponse(BaseModel):
     """One shape for every chat reply.
 
@@ -489,6 +557,8 @@ class ChatResponse(BaseModel):
     # server wrote it. See guard.py. Absent on failure copy (busy, cut short),
     # which is not part of the conversation and is not replayed to the model.
     sig: Optional[str] = None
+    # Present when this is the moment to offer a direct talk; see _handoff_card.
+    handoff: Optional[HandoffCard] = None
 
 
 def _log_chat_audit(
@@ -500,6 +570,7 @@ def _log_chat_audit(
     shown: int = 0,
     history: Optional[Dict[str, int]] = None,
     answer: Optional[Answer] = None,
+    handoff: Optional[HandoffCard] = None,
 ) -> None:
     """One structured line per answer.
 
@@ -524,6 +595,8 @@ def _log_chat_audit(
                 "history": history,
                 "declined": answer.declined if answer else None,
                 "cached_tokens": answer.cached_tokens if answer else None,
+                # The reason only, never the summary: it is the visitor's words.
+                "handoff": handoff.reason if handoff else None,
             },
             ensure_ascii=False,
         ),
@@ -540,6 +613,7 @@ def _chat_reply(
     language: Optional[str] = None,
     declined: Optional[bool] = None,
     sign: bool = True,
+    handoff: Optional[HandoffCard] = None,
 ) -> ChatResponse:
     return ChatResponse(
         response=response,
@@ -551,6 +625,7 @@ def _chat_reply(
         language=language,
         declined=declined,
         sig=guard.sign_turn(response) if sign else None,
+        handoff=handoff,
     )
 
 
@@ -887,6 +962,11 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
         )
 
         blocks = _writing_blocks(selection, reading) if answer.from_model else []
+        handoff = _handoff_card(
+            answer,
+            chat_request,
+            last_answer=chat_limiter.remaining(client_key(request)) == 0,
+        )
         _log_chat_audit(
             language, selection, blocks,
             answered_by="model" if answer.from_model else None,
@@ -894,6 +974,7 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             shown=len(chat_request.shown),
             history=_history_counts(chat_request.conversation_history, turns),
             answer=answer,
+            handoff=handoff,
         )
 
         written = answer.written_by_model
@@ -908,6 +989,7 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             # "I'm getting more questions than I can keep up with" to the model
             # as something it said.
             sign=written,
+            handoff=handoff,
         )
 
     except HTTPException:

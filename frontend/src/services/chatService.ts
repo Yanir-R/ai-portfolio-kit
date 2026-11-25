@@ -2,7 +2,7 @@ import axios from 'axios';
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
 import { TURNSTILE_HEADER } from '@/constants/turnstile';
-import { AnswerTrace, ChatBlock, ChatContext, ChatMessage } from '@/types/chat';
+import { AnswerTrace, ChatBlock, ChatContext, ChatHandoff, ChatMessage } from '@/types/chat';
 
 /**
  * Kept well below the backend's MAX_HISTORY_MESSAGES (40), which rejects a
@@ -22,6 +22,7 @@ interface ChatResponse {
     answered_by?: 'model' | 'index' | null;
     language?: 'en' | 'he' | null;
     sig?: string | null;
+    handoff?: ChatHandoff | null;
 }
 
 /**
@@ -77,12 +78,15 @@ export const chatService = {
         message: string,
         conversationHistory: ChatMessage[],
         turnstileToken?: string | null,
-        context?: ChatContext | null
+        context?: ChatContext | null,
+        /** The offer to talk directly was already made in this conversation. */
+        handoffOffered = false
     ) => {
         try {
             const body = {
                 ...(context ? { context: { type: context.type, ref: context.ref } } : {}),
                 shown: shownSlugs(conversationHistory),
+                ...(handoffOffered ? { handoff_offered: true } : {}),
                 message,
                 conversation_history: conversationHistory.slice(-MAX_HISTORY_SENT).map((msg) => ({
                     type: msg.type,
@@ -120,6 +124,7 @@ export const chatService = {
                 answered_by: response.data.answered_by ?? null,
                 language: response.data.language ?? null,
                 sig: response.data.sig ?? null,
+                handoff: response.data.handoff ?? null,
             };
         } catch (error) {
             return { success: false as const, error: toChatFailure(error) };
