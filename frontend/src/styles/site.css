@@ -8840,7 +8840,8 @@ video.w-v {
  * WhatsApp fills the frame the way the email tab does: the steps' box takes
  * the spare height and spreads its three steps through it, and the button
  * follows right under the box, so there is no empty band between the text
- * and the button. On a wide screen the QR code sits beside it, at the top.
+ * and the button. On a wide screen the QR code sits beside it, centred on
+ * the steps' box (see the grid below).
  */
 .talk .tb.wa {
     align-items: stretch;
@@ -8855,7 +8856,37 @@ video.w-v {
     padding: 18px 16px;
 }
 .talk .tb.wa .wa-qr {
-    align-self: flex-start;
+    align-self: center;
+}
+/*
+ * On a wide screen the tab is a grid: intro, steps and button down the first
+ * column, and the QR code in the steps' row, so it is centred on the box
+ * itself whatever the intro and button heights are in either language.
+ */
+@media (min-width: 641px) {
+    .talk .tb.wa:not([hidden]) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: auto 1fr auto;
+        column-gap: 28px;
+        row-gap: 18px;
+    }
+    .talk .tb.wa .wa-main {
+        display: contents;
+    }
+    .talk .tb.wa .wa-main > p {
+        grid-area: 1 / 1;
+    }
+    .talk .tb.wa .wa-steps {
+        grid-area: 2 / 1;
+    }
+    .talk .tb.wa .wa-main .btn {
+        grid-area: 3 / 1;
+        justify-self: start;
+    }
+    .talk .tb.wa .wa-qr {
+        grid-area: 2 / 2;
+    }
 }
 .talk .tb.mail .v-form > .ts {
     margin-top: -18px;
