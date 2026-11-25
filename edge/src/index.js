@@ -50,6 +50,19 @@ const UNVERIFIED_DETAIL =
 const UNAVAILABLE_DETAIL =
     "The chat can't take messages right this moment. Give it a minute and send it again.";
 
+// The only paths the backend serves. Anything else - /.env, /.git/config,
+// /wp-login.php and the rest of what scanners try on every public host - is
+// answered here with a 404 instead of being forwarded, so it never wakes the
+// backend from zero instances or counts against its free allowance.
+function isBackendPath(pathname) {
+    return (
+        pathname === '/' ||
+        pathname === '/health' ||
+        pathname === '/chat-with-files' ||
+        pathname.startsWith('/api/')
+    );
+}
+
 function isProtected(request, pathname) {
     // Only POST. A CORS preflight is an OPTIONS request the browser sends on
     // its own, without the token, and it has to keep reaching the backend.
@@ -150,6 +163,9 @@ export default {
         }
 
         const incoming = new URL(request.url);
+        if (!isBackendPath(incoming.pathname)) {
+            return edgeReply(request, 404, 'Not found');
+        }
         const needsTurnstile = isProtected(request, incoming.pathname);
         if (needsTurnstile) {
             const refusal = await verifyTurnstile(request, env);

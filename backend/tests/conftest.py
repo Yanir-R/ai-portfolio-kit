@@ -48,9 +48,11 @@ class StubModels:
         self.outcomes = list(outcomes)
         self.repeat = repeat
         self.tried = []
+        self.configs = []
 
     def generate_content(self, model, contents, config):
         self.tried.append(model)
+        self.configs.append(config)
         outcome = self.outcomes[0] if self.repeat else self.outcomes.pop(0)
         if isinstance(outcome, Exception):
             raise outcome
@@ -64,6 +66,15 @@ def reset_model_cooldowns():
     gemini_helper._model_cooldowns.clear()
     yield
     gemini_helper._model_cooldowns.clear()
+
+
+@pytest.fixture(autouse=True)
+def reset_gemini_clients():
+    # The client is kept per process, so without this the first test's stub
+    # would answer for every test after it.
+    gemini_helper._clients.clear()
+    yield
+    gemini_helper._clients.clear()
 
 
 @pytest.fixture
