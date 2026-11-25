@@ -226,3 +226,27 @@ contact_limiter = SlidingWindowLimiter(
     per_key_limit=_int_env("RATE_LIMIT_CONTACT_PER_IP_PER_MINUTE", 3),
     global_limit=_int_env("RATE_LIMIT_CONTACT_GLOBAL_PER_MINUTE", 15),
 )
+
+# Limits keyed by the address a message goes TO, not by who sends it.
+#
+# The two limits above count senders. These count recipients, because the mail
+# form and the booking both send an email to whatever address the visitor typed:
+# the form's short auto-reply, and cal.com's confirmation. Typing someone else's
+# address would make Yanir's account write to a stranger, and spread across
+# enough browsers that is a way to get his address flagged as a spammer. One
+# auto-reply per address per day is all a real visitor ever needs; the global
+# ceiling caps the total whatever addresses are used. The notification to Yanir
+# is not limited here: it goes to him, and the per-sender limit already holds.
+auto_reply_limiter = SlidingWindowLimiter(
+    per_key_limit=1,
+    global_limit=_int_env("RATE_LIMIT_AUTO_REPLY_GLOBAL_PER_DAY", 40),
+    window_seconds=DAY_SECONDS,
+)
+
+# Two bookings per attendee address per day covers booking and rebooking after
+# a mistake; more than that from one address is not a person arranging a call.
+booking_address_limiter = SlidingWindowLimiter(
+    per_key_limit=2,
+    global_limit=_int_env("RATE_LIMIT_BOOKING_GLOBAL_PER_DAY", 20),
+    window_seconds=DAY_SECONDS,
+)
