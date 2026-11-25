@@ -341,7 +341,7 @@ class ParsedReply(NamedTuple):
     declined: Optional[bool] = None
     handoff: Optional[Handoff] = None
     # Titles the model says the answer drew on; checked against what it was
-    # actually sent before anything is shown (see main._writing_blocks).
+    # actually sent before anything is shown (see main._cited_sections).
     used: Tuple[str, ...] = ()
 
 
@@ -606,8 +606,8 @@ def get_gemini_response(
             # trusted: handing over a truncated answer on Yanir's behalf presents
             # an incomplete claim as a complete one.
             #
-            # The prompt asks for two to four sentences, so hitting a 1,500
-            # token ceiling means something already went wrong - usually
+            # The prompt asks for two to four sentences, so hitting the
+            # MAX_OUTPUT_TOKENS ceiling means something already went wrong - usually
             # thinking tokens consuming the shared budget. Saying so is more use
             # than a fragment.
             if usage["finish_reason"] == "MAX_TOKENS":
@@ -672,11 +672,8 @@ def get_gemini_response(
 def _read_usage(model_id: str, response) -> Dict[str, Optional[object]]:
     """Reads what the request cost, logs it, and hands it back to the caller.
 
-    These numbers were computed and dropped for a year: logged to Cloud Run
-    where nobody reads them, then discarded at the return boundary because the
-    function answered with a bare string. Returning them is the whole of what
-    the trace rail needed - no new measurement, only stopping the old one from
-    being thrown away.
+    They are both logged and returned, because the answer's trace on the site
+    shows them to the visitor.
 
     Every field is read straight off the SDK response, so a count the API did
     not report comes back `None`. That matters more here than the tidiness of a

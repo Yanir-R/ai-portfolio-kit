@@ -175,7 +175,12 @@ MAX_HISTORY_MESSAGES = 40
 # How many already-shown pieces a request may name. More than the corpus holds
 # is never needed.
 MAX_SHOWN_SLUGS = 40
-MAX_HISTORY_CONTENT_CHARS = 4_000
+
+# One replayed turn. It has to hold the longest answer the server itself sends:
+# the page replays every answer as history, so a ceiling below that would turn
+# one long answer into a 422 on every question after it. MAX_OUTPUT_TOKENS is
+# 4,000 tokens, which is roughly 16,000 characters of Hebrew or English.
+MAX_HISTORY_CONTENT_CHARS = 16_000
 
 # Frontend message types that represent something the visitor actually said.
 # Anything not listed here is UI chrome - 'system' and 'initial' are the greeting
@@ -211,6 +216,10 @@ class ChatRequest(BaseModel):
     # dismissed), so it is not offered again. Forging it only changes what
     # this visitor's own page shows.
     handoff_offered: bool = False
+    # Asked by clicking a starter question that opens a drawing: the projects
+    # the drawing shows are sent with it (selection.TOPIC_PROJECTS), so the
+    # answer covers what the drawing beside it shows.
+    topic: Optional[Literal["built", "legal", "pk"]] = None
 
 
 class ChatContext(BaseModel):
@@ -310,10 +319,10 @@ class AnswerTrace(BaseModel):
     What is *not* here is as considered as what is. There is no confidence
     score, because nothing verifies an answer against the corpus - and a site
     whose argument is that its AI can be caught out would be making exactly the
-    claim it warns about. Nor is there a claim about which document an answer
-    came *out of*: selection decides what the model was given, and no step
-    afterwards records which of those it leaned on. The distinction is the
-    difference between a receipt and a guess.
+    claim it warns about. The trace says what the model was *given*; which of
+    those documents the answer drew on is a separate field,
+    `ChatResponse.used`, taken from the model's own structured reply and kept
+    only where it names a document that was sent.
 
     `context_outcome` travels with the counts because "these documents were
     chosen for your question", "these were only the closest found" and "nothing
@@ -714,7 +723,11 @@ def _checked_answer_text(text: str, language: str) -> str:
     if _rules_echo.matches(text):
         logger.warning("Answer quoted the rules; replaced with a decline")
         return RULES_DECLINE.get(language, RULES_DECLINE["en"])
-    return _named_links(guard.clean_output(text), language)
+    # Named first, checked second: naming turns a bare address into a link,
+    # so the host check has to see the links naming made, not only the ones
+    # the model wrote. A bare address to an unknown host ends up as its name
+    # in plain text, never as something to click.
+    return guard.clean_output(_named_links(text, language))
 
 
 # A bare address in the middle of a Hebrew sentence reads as noise and breaks
@@ -1020,13 +1033,26 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             history=[turn["content"] for turn in turns],
             pinned=chat_request.context.ref if chat_request.context else None,
             shown=chat_request.shown,
+            topic=chat_request.topic,
         )
 
         if selection.writing_intent == "recent" and not chat_request.context:
             blocks = _writing_blocks(selection)
             _log_chat_audit(language, selection, blocks, answered_by="index")
+            # Its sources are the pieces it lists: every reply names what it
+            # stands on, a reply written without the model included.
+            titles = {entry["slug"]: entry["title"] for entry in get_all_writing()}
+            listed = [
+                Source(kind="writing", slug=slug, title=titles[slug])
+                for slug in selection.writing
+                if slug in titles
+            ]
             return _chat_reply(
-                RECENT_REPLY[language], blocks=blocks, answered_by="index", language=language
+                RECENT_REPLY[language],
+                blocks=blocks,
+                answered_by="index",
+                language=language,
+                used=listed,
             )
 
         # The chat budget is spent here and not at the top of the handler: every

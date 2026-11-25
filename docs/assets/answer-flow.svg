@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 490" role="img" aria-labelledby="t d" font-family="Assistant, 'Segoe UI', Arial, sans-serif">
+<title id="t">How a chat answer is made</title>
+<desc id="d">Six stations. The visitor asks; the edge and backend check the request; the server chooses which documents to send; one Gemini call returns JSON with the answer, declined, used and handoff; the server checks the answer; and only the server decides when to offer a direct talk.</desc>
+<defs>
+<pattern id="g" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#d5dff4" stroke-width="1"/></pattern>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0c1a44"/></marker>
+</defs>
+<rect width="960" height="490" fill="#e9effb"/>
+<rect width="960" height="490" fill="url(#g)"/>
+<text x="32" y="46" font-size="13" font-weight="700" fill="#1f45f0" letter-spacing=".5">HOW AN ANSWER IS MADE</text>
+<text x="32" y="78" font-size="26" font-weight="800" fill="#0c1a44">Six stations. The model writes; the server decides.</text>
+
+<g font-size="13" fill="#4f5c7c">
+<!-- station boxes: 3 per row -->
+<g>
+<rect x="32" y="104" width="280" height="132" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/>
+<circle cx="60" cy="132" r="14" fill="#ffc83d" stroke="#0c1a44" stroke-width="2"/><text x="60" y="137" text-anchor="middle" font-weight="800" fill="#0c1a44">1</text>
+<text x="84" y="138" font-size="17" font-weight="800" fill="#0c1a44">Asked here</text>
+<text x="52" y="170">A question, in Hebrew or English.</text>
+<text x="52" y="190">The page sends the starter's topic</text>
+<text x="52" y="210">with it when one was clicked.</text>
+</g>
+<g>
+<rect x="340" y="104" width="280" height="132" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/>
+<circle cx="368" cy="132" r="14" fill="#ffc83d" stroke="#0c1a44" stroke-width="2"/><text x="368" y="137" text-anchor="middle" font-weight="800" fill="#0c1a44">2</text>
+<text x="392" y="138" font-size="17" font-weight="800" fill="#0c1a44">Checks the request</text>
+<text x="360" y="170">Turnstile and the shared secret at</text>
+<text x="360" y="190">the edge, then size limits and per-</text>
+<text x="360" y="210">visitor and daily budgets.</text>
+</g>
+<g>
+<rect x="648" y="104" width="280" height="132" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/>
+<circle cx="676" cy="132" r="14" fill="#ffc83d" stroke="#0c1a44" stroke-width="2"/><text x="676" y="137" text-anchor="middle" font-weight="800" fill="#0c1a44">3</text>
+<text x="700" y="138" font-size="17" font-weight="800" fill="#0c1a44">Chooses what to read</text>
+<text x="668" y="170">Code, not the model: the profile</text>
+<text x="668" y="190">notes plus up to three documents</text>
+<text x="668" y="210">that match the question's words.</text>
+</g>
+<g>
+<rect x="32" y="264" width="280" height="132" rx="8" fill="#0c1a44" stroke="#0c1a44" stroke-width="2"/>
+<circle cx="60" cy="292" r="14" fill="#ffc83d" stroke="#ffc83d" stroke-width="2"/><text x="60" y="297" text-anchor="middle" font-weight="800" fill="#0c1a44">4</text>
+<text x="84" y="298" font-size="17" font-weight="800" fill="#fff">Reads and writes</text>
+<text x="52" y="330" fill="#d5dff4">One Gemini call with a JSON schema:</text>
+<text x="52" y="352" font-family="ui-monospace, Menlo, monospace" font-size="12" fill="#ffc83d">{ answer, declined, used, handoff }</text>
+<text x="52" y="374" fill="#d5dff4">Validated before anything is shown.</text>
+</g>
+<g>
+<rect x="340" y="264" width="280" height="132" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/>
+<circle cx="368" cy="292" r="14" fill="#ffc83d" stroke="#0c1a44" stroke-width="2"/><text x="368" y="297" text-anchor="middle" font-weight="800" fill="#0c1a44">5</text>
+<text x="392" y="298" font-size="17" font-weight="800" fill="#0c1a44">Checks the answer</text>
+<text x="360" y="330">Links only to known hosts. "used" is</text>
+<text x="360" y="350">kept only where it names a document</text>
+<text x="360" y="370">that was sent. Cards come from that.</text>
+</g>
+<g>
+<rect x="648" y="264" width="280" height="132" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/>
+<circle cx="676" cy="292" r="14" fill="#fff" stroke="#0c1a44" stroke-width="2"/><text x="676" y="297" text-anchor="middle" font-weight="800" fill="#0c1a44">6</text>
+<text x="700" y="298" font-size="17" font-weight="800" fill="#0c1a44">You and the owner talk</text>
+<text x="668" y="330">The model may say a call would help;</text>
+<text x="668" y="350">the server decides if the card shows:</text>
+<text x="668" y="370">third question on, once per chat.</text>
+</g>
+</g>
+<g stroke="#0c1a44" stroke-width="2" fill="none" marker-end="url(#a)">
+<path d="M314 170H336"/><path d="M622 170H644"/>
+<path d="M788 238V250H172V260"/>
+<path d="M314 330H336"/><path d="M622 330H644"/>
+</g>
+<rect x="32" y="418" width="896" height="52" rx="6" fill="#fff1c9" stroke="#0c1a44" stroke-width="1.5"/>
+<text x="48" y="440" font-size="14" font-weight="800" fill="#0c1a44">Deterministic by design.</text>
+<text x="48" y="459" font-size="14" fill="#0c1a44">Which documents, which cards, which links and when to offer a call are decided in code. The model never chooses them.</text>
+</svg>

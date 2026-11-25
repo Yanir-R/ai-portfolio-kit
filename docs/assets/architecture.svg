@@ -1,74 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" role="img" aria-labelledby="t d" font-family="Assistant, 'Segoe UI', Arial, sans-serif">
 <title id="t">AI Portfolio Kit architecture</title>
-<desc id="d">The visitor's browser loads the frontend from Cloudflare Pages and sends API calls to the edge Worker. The Worker adds a shared secret and forwards each call to the FastAPI backend on Cloud Run. The backend reads the Markdown corpus in backend/docs, calls the Gemini API, sends contact mail over SMTP, and receives its secrets from Secret Manager.</desc>
+<desc id="d">The visitor's browser loads the frontend from Cloudflare Pages and sends API calls to the edge Worker. The Worker checks Turnstile, adds a shared secret and forwards each call to the FastAPI backend on Cloud Run. The backend reads the Markdown corpus in backend/docs, calls the Gemini API, sends contact mail over SMTP, books calls on cal.com and receives its secrets from Secret Manager.</desc>
 <defs>
-<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2f5d8a"/></marker>
-<marker id="s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8f4a14"/></marker>
+<pattern id="g" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#d5dff4" stroke-width="1"/></pattern>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0c1a44"/></marker>
 </defs>
-<rect width="760" height="360" fill="#f7f8fa"/>
-<text x="16" y="27" font-size="14" font-weight="700" fill="#1c2530">How a request travels</text>
-
-<!-- Row 1 -->
-<rect x="16" y="44" width="190" height="64" rx="8" fill="#ffffff" stroke="#2f5d8a" stroke-width="1.4"/>
-<text x="111" y="72" text-anchor="middle" font-size="14" font-weight="650" fill="#1c2530">Visitor's browser</text>
-<text x="111" y="91" text-anchor="middle" font-size="13" fill="#4a5563">chat and contact form</text>
-
-<rect x="285" y="44" width="190" height="64" rx="8" fill="#ffffff" stroke="#2f5d8a" stroke-width="1.4"/>
-<text x="380" y="72" text-anchor="middle" font-size="14" font-weight="650" fill="#1c2530">Cloudflare Pages</text>
-<text x="380" y="91" text-anchor="middle" font-size="13" fill="#4a5563">frontend</text>
-
-<!-- Legend -->
-<path d="M554 64H592" fill="none" stroke="#2f5d8a" stroke-width="1.6" marker-end="url(#a)"/>
-<text x="602" y="69" font-size="13" fill="#2b4f73">request or data</text>
-<path d="M554 90H592" fill="none" stroke="#8f4a14" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#s)"/>
-<text x="602" y="95" font-size="13" fill="#7a3e0e">secrets at runtime</text>
-
-<!-- Row 2 -->
-<rect x="16" y="152" width="190" height="64" rx="8" fill="#ffffff" stroke="#2f5d8a" stroke-width="1.4"/>
-<text x="111" y="173" text-anchor="middle" font-size="14" font-weight="650" fill="#1c2530">Edge Worker</text>
-<text x="111" y="191" text-anchor="middle" font-size="13" fill="#4a5563">API front door</text>
-<text x="111" y="207" text-anchor="middle" font-size="13" fill="#4a5563">adds shared secret</text>
-
-<rect x="285" y="152" width="190" height="64" rx="8" fill="#e8f0f8" stroke="#2f5d8a" stroke-width="1.8"/>
-<text x="380" y="180" text-anchor="middle" font-size="14" font-weight="650" fill="#1c2530">Cloud Run backend</text>
-<text x="380" y="199" text-anchor="middle" font-size="13" fill="#4a5563">FastAPI</text>
-
-<rect x="554" y="152" width="190" height="64" rx="8" fill="#fdf3ea" stroke="#8f4a14" stroke-width="1.4"/>
-<text x="649" y="180" text-anchor="middle" font-size="14" font-weight="650" fill="#1c2530">Gemini API</text>
-<text x="649" y="199" text-anchor="middle" font-size="13" fill="#4a5563">external service</text>
-
-<!-- Row 3 -->
-<rect x="16" y="260" width="190" height="64" rx="8" fill="#ffffff" stroke="#8f4a14" stroke-width="1.4"/>
-<text x="111" y="288" text-anchor="middle" font-size="14" font-weight="650" fill="#1c2530">Secret Manager</text>
-<text x="111" y="307" text-anchor="middle" font-size="13" fill="#4a5563">keys and passwords</text>
-
-<rect x="285" y="260" width="190" height="64" rx="8" fill="#ffffff" stroke="#2f5d8a" stroke-width="1.4"/>
-<text x="380" y="288" text-anchor="middle" font-size="14" font-weight="650" fill="#1c2530">Markdown corpus</text>
-<text x="380" y="307" text-anchor="middle" font-size="13" fill="#4a5563">backend/docs</text>
-
-<rect x="554" y="260" width="190" height="64" rx="8" fill="#fdf3ea" stroke="#8f4a14" stroke-width="1.4"/>
-<text x="649" y="288" text-anchor="middle" font-size="14" font-weight="650" fill="#1c2530">SMTP</text>
-<text x="649" y="307" text-anchor="middle" font-size="13" fill="#4a5563">contact mail</text>
-
-<!-- Arrows -->
-<path d="M206 76H283" fill="none" stroke="#2f5d8a" stroke-width="1.6" marker-end="url(#a)"/>
-<text x="245" y="68" text-anchor="middle" font-size="13" fill="#2b4f73">site</text>
-
-<path d="M111 108V150" fill="none" stroke="#2f5d8a" stroke-width="1.6" marker-end="url(#a)"/>
-<text x="121" y="134" font-size="13" fill="#2b4f73">API calls</text>
-
-<path d="M206 184H283" fill="none" stroke="#2f5d8a" stroke-width="1.6" marker-end="url(#a)"/>
-<text x="245" y="176" text-anchor="middle" font-size="13" fill="#2b4f73">forwards</text>
-
-<path d="M475 184H552" fill="none" stroke="#2f5d8a" stroke-width="1.6" marker-end="url(#a)"/>
-<text x="514" y="176" text-anchor="middle" font-size="13" fill="#2b4f73">calls</text>
-
-<path d="M380 216V258" fill="none" stroke="#2f5d8a" stroke-width="1.6" marker-end="url(#a)"/>
-<text x="390" y="252" font-size="13" fill="#2b4f73">reads</text>
-
-<path d="M440 216V238H649V258" fill="none" stroke="#2f5d8a" stroke-width="1.6" marker-end="url(#a)"/>
-<text x="545" y="232" text-anchor="middle" font-size="13" fill="#2b4f73">contact mail</text>
-
-<path d="M150 260V238H320V218" fill="none" stroke="#8f4a14" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#s)"/>
-<text x="245" y="232" text-anchor="middle" font-size="13" fill="#7a3e0e">secrets</text>
+<rect width="960" height="400" fill="#e9effb"/><rect width="960" height="400" fill="url(#g)"/>
+<text x="32" y="46" font-size="13" font-weight="700" fill="#1f45f0" letter-spacing=".5">ARCHITECTURE</text>
+<text x="32" y="78" font-size="26" font-weight="800" fill="#0c1a44">One backend, a folder of markdown, no database.</text>
+<g font-size="13" fill="#4f5c7c">
+<rect x="32" y="112" width="200" height="76" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/>
+<text x="52" y="142" font-size="17" font-weight="800" fill="#0c1a44">Visitor's browser</text><text x="52" y="166">chat, booking, contact</text>
+<rect x="32" y="232" width="200" height="76" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/>
+<text x="52" y="262" font-size="17" font-weight="800" fill="#0c1a44">Cloudflare Pages</text><text x="52" y="286">React site, prerendered</text>
+<rect x="290" y="112" width="200" height="76" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/>
+<text x="310" y="142" font-size="17" font-weight="800" fill="#0c1a44">Edge Worker</text><text x="310" y="166">Turnstile, adds the secret</text>
+<rect x="548" y="112" width="200" height="196" rx="8" fill="#0c1a44" stroke="#0c1a44" stroke-width="2"/>
+<text x="568" y="142" font-size="17" font-weight="800" fill="#fff">Cloud Run backend</text>
+<text x="568" y="166" fill="#d5dff4">FastAPI, one process</text>
+<text x="568" y="198" fill="#ffc83d" font-weight="700">selection.py</text><text x="568" y="216" fill="#d5dff4">picks the documents</text>
+<text x="568" y="246" fill="#ffc83d" font-weight="700">guard.py</text><text x="568" y="264" fill="#d5dff4">checks input and output</text>
+<text x="568" y="290" fill="#d5dff4">rate limits in memory</text>
+<rect x="800" y="104" width="140" height="52" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/><text x="814" y="135" font-size="15" font-weight="800" fill="#0c1a44">Gemini API</text>
+<rect x="800" y="170" width="140" height="52" rx="8" fill="#ffc83d" stroke="#0c1a44" stroke-width="2"/><text x="814" y="194" font-size="14" font-weight="800" fill="#0c1a44">backend/docs</text><text x="814" y="212" fill="#0c1a44">markdown</text>
+<rect x="800" y="236" width="140" height="52" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/><text x="814" y="260" font-size="15" font-weight="800" fill="#0c1a44">SMTP</text><text x="814" y="278">contact mail</text>
+<rect x="800" y="302" width="140" height="52" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2"/><text x="814" y="326" font-size="15" font-weight="800" fill="#0c1a44">cal.com</text><text x="814" y="344">booking</text>
+<rect x="548" y="330" width="200" height="40" rx="8" fill="#fff" stroke="#0c1a44" stroke-width="2" stroke-dasharray="5 4"/><text x="568" y="355" font-weight="700" fill="#0c1a44">Secret Manager</text>
+</g>
+<g stroke="#0c1a44" stroke-width="2" fill="none" marker-end="url(#a)">
+<path d="M132 190V228"/><path d="M234 150H286"/><path d="M492 150H544"/>
+<path d="M750 130H796"/><path d="M750 196H796"/><path d="M750 262H796"/><path d="M750 300L796 326"/>
+<path d="M648 326V312" stroke-dasharray="5 4"/>
+</g>
+<g font-size="12" fill="#0c1a44" font-weight="700"><text x="140" y="214">loads the site</text><text x="240" y="140">API</text><text x="494" y="140">+ secret</text></g>
 </svg>

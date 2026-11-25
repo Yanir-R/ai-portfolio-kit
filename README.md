@@ -1,22 +1,53 @@
-# AI Portfolio Kit
+<p align="center">
+  <img src="docs/assets/logo.svg" width="80" alt="AI Portfolio Kit logo">
+</p>
 
-**A portfolio site with an AI chat that answers only from your own markdown files.**
+<h1 align="center">AI Portfolio Kit</h1>
+
+<p align="center">
+  <strong>A portfolio site with an AI agent that answers only from your own markdown.</strong><br>
+  Hebrew and English, documents chosen in code, structured model output, and a receipt under every answer.
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-0c1a44.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/React-19-0c1a44.svg" alt="React 19">
+  <img src="https://img.shields.io/badge/FastAPI-Python_3.12-0c1a44.svg" alt="FastAPI on Python 3.12">
+  <img src="https://img.shields.io/badge/Cloudflare-Pages_%2B_Worker-ffc83d.svg" alt="Cloudflare Pages and Worker">
+  <img src="https://img.shields.io/badge/Gemini-structured_output-ffc83d.svg" alt="Gemini structured output">
+</p>
+
+<p align="center">
+  <img src="docs/assets/site-home-en.png" width="820" alt="The site's home page in English: the headline, and beside it the agent's chat with four starter questions and the six stations it shows for every answer.">
+</p>
+
+<p align="center">
+  Live: <a href="https://yanirrot.com">yanirrot.com</a> (Hebrew) · <a href="https://yanirrot.com/en">yanirrot.com/en</a> (English)
+</p>
 
 A React + TypeScript frontend on Cloudflare Pages, a Cloudflare Worker as the API front door,
-and a FastAPI backend on Google Cloud Run that calls the Gemini API and sends contact mail over
-SMTP. The repository is MIT licensed and meant to be forked.
+and a FastAPI backend on Google Cloud Run that calls the Gemini API, sends contact mail over
+SMTP and books calls on cal.com. The repository is MIT licensed and meant to be forked.
 
 ## Why it exists
 
-- **A portfolio chat speaks for a real person.** It answers in the owner's first person, so an
-  invented employer or date is a false claim about someone, not just a wrong answer. The chat is
-  given the owner's markdown files and nothing else to answer from.
-- **No corpus means no answer.** If the profile documents are missing, the backend refuses to
-  call the model instead of answering from placeholders.
+- **The chat speaks for a real person.** It answers as the owner's agent, so an invented
+  employer or date is a false claim about someone, not just a wrong answer. It is given the
+  owner's markdown files and nothing else to answer from, and says so when they do not cover a
+  question.
+- **The model writes; the code decides.** Which documents a question gets, which cards and
+  links appear beside the answer, and when to offer a call with the owner are all decided by the
+  server. The model returns typed fields, and each one is checked before it is used.
+- **Every answer shows its receipt.** What was read, how long it took, and which documents the
+  answer drew on, under every reply, including the ones written without a model.
 - **A public API costs money per call.** The chat endpoint is unauthenticated and spends model
-  quota, so it sits behind an edge Worker with a shared secret and behind per-client and global
-  rate limits.
+  quota, so it sits behind an edge Worker with Turnstile and a shared secret, and behind
+  per-visitor and daily limits.
 - **Small enough to read.** One backend process, a folder of markdown, no database.
+
+<p align="center">
+  <img src="docs/assets/site-answer-he.png" width="820" alt="A real answer on the Hebrew site to the question what Yanir has built with agents: the answer in the chat, and beside it a drawing of three agent systems with the stations the answer went through.">
+</p>
 
 ## Quick start
 
@@ -52,8 +83,8 @@ npm run dev
 
 ## Fork setup
 
-Three committed values tie this repository to yanirrot.com. None of them is a
-secret, and a fork must change all three:
+Four committed values tie this repository to yanirrot.com. None of them is a
+secret, and a fork must change all four:
 
 | Value | File | This repository | In a fork |
 |---|---|---|---|
@@ -82,38 +113,36 @@ Details: [edge README](edge/README.md) and [frontend README](frontend/README.md)
 
 ## How it works
 
-```mermaid
-flowchart LR
-  B["Visitor's browser"]
-  P["Cloudflare Pages<br/>frontend"]
-  W["Edge Worker<br/>API front door"]
-  R["Cloud Run backend<br/>FastAPI"]
-  G["Gemini API"]
-  M[("Markdown corpus<br/>backend/docs")]
-  S["SMTP<br/>contact mail"]
-  K["Secret Manager"]
-  B -->|loads the site| P
-  B -->|API calls| W
-  W -->|adds shared secret| R
-  R -->|question and selected documents| G
-  R -->|reads| M
-  R -->|contact mail| S
-  K -.->|secrets at runtime| R
-```
-
 <p align="center">
-  <img src="docs/assets/architecture.svg" width="760" alt="Architecture: the visitor's browser loads the frontend from Cloudflare Pages and sends API calls to the edge Worker, which adds a shared secret and forwards them to the FastAPI backend on Cloud Run. The backend reads the markdown corpus, calls the Gemini API, sends contact mail over SMTP and receives its secrets from Secret Manager.">
+  <img src="docs/assets/architecture.svg" width="860" alt="Architecture: the visitor's browser loads the React site from Cloudflare Pages and sends API calls to the edge Worker, which checks Turnstile, adds a shared secret and forwards them to the FastAPI backend on Cloud Run. The backend reads the markdown in backend/docs, calls the Gemini API, sends contact mail over SMTP, books calls on cal.com and receives its secrets from Secret Manager.">
 </p>
 
 1. The browser loads a static bundle from Cloudflare Pages.
 2. API calls go to the API hostname, served by the Worker in `edge/`. The Worker adds a shared
    secret header and forwards the request to the backend.
 3. The backend checks the header, applies rate limits, picks the documents the question needs
-   from the markdown corpus and calls the Gemini API with them.
+   from the markdown corpus (in code, see `backend/selection.py`) and calls the Gemini API
+   with them, asking for a JSON reply.
 4. An email address left in the chat, or a message sent to the contact endpoint, is delivered to
    the owner's inbox over SMTP.
 
 The design is described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+### How an answer is made
+
+<p align="center">
+  <img src="docs/assets/answer-flow.svg" width="860" alt="Six stations: asked here; checks the request; chooses what to read, in code; reads and writes, with one Gemini call that returns answer, declined, used and handoff as JSON; checks the answer, keeping links to known hosts and only the documents that were sent; and a direct talk with the owner, offered by the server's rules.">
+</p>
+
+The model's reply is one JSON object, validated against `ModelReply` in
+`backend/gemini_helper.py`:
+
+| Field | What the server does with it |
+|---|---|
+| `answer` | Shown after the output checks in `backend/guard.py`: links only to known hosts, no images, no quoting of the rules. |
+| `declined` | The model says the documents did not cover the question. The page offers to pass the question to the owner. |
+| `used` | Titles of the documents the answer drew on. Kept only where they match a document that was sent; the sources row and the cards come from what is left. |
+| `handoff` | Whether a direct talk would help. The card shows only by the server's own rules: from the third question, once per conversation. |
 
 ## Limitations
 
@@ -130,9 +159,12 @@ Stated plainly, so you know what you are forking:
   model always follows that instruction cannot be proven offline (unverified).
 - **The profile documents are public.** Everything under `backend/docs/` is tracked in this
   repository and sent to the Gemini API; the profile folder is also served by `/api/content/`.
-- **The answer trace reports what the model was given, not what it used.** No step attributes an
-  answer to a document (`backend/main.py`, `backend/context.py`).
-- **Document selection is word overlap with English and Hebrew stopword lists.** A Hebrew
+- **Which documents an answer used is the model's own word.** `used` is checked against what was
+  sent, so it can only name a real document, but whether the answer leaned on it is the model's
+  claim, not a measurement (`backend/main.py`).
+- **Document selection is word overlap with English and Hebrew stopword lists.** A starter
+  question with a drawing also sends its topic, and the projects that drawing shows are always
+  included (`TOPIC_PROJECTS`). A Hebrew
   question is matched against the Hebrew documents in `backend/docs/he/`. Each document also
   matches on a hand-kept list of the phrasings visitors use (`backend/docs/search-phrases.json`),
   which a new document needs an entry in. At most three documents go beside the profile; every
@@ -153,6 +185,10 @@ Each item names the file or test that shows it. Tests are in `backend/tests/` an
 | With an empty corpus the model is not called | `test_context_layer.py::test_empty_corpus_is_refused_without_calling_the_model` |
 | The instruction given to the model states the grounding rules and fences the corpus | `test_context_layer.py::test_system_instruction_states_the_grounding_rules`, `::test_system_instruction_fences_the_corpus` |
 | Each question gets only the documents it needs; profile documents are always kept; an unknown subject gets the profile and a one-line list of the rest | `backend/selection.py`; `test_selection.py` |
+| A starter question with a drawing always sends the projects the drawing shows | `test_selection.py::test_the_built_starter_sends_the_systems_its_drawing_shows` |
+| The owner's name never decides which document a question gets | `test_selection.py::test_the_owners_name_does_not_pick_a_document` |
+| A reply written without the model still names its sources | `test_writing_phase2.py::test_the_latest_posts_reply_names_its_sources` |
+| A bare address to an unknown host never becomes a link | `test_guard.py::test_a_bare_address_to_an_unknown_host_never_becomes_a_link` |
 | Oversized or empty chat requests are rejected | `backend/main.py`; `test_context_layer.py::test_oversized_message_is_rejected`, `::test_empty_message_is_rejected`, `::test_unbounded_history_is_rejected` |
 | Interface banners are not replayed to the model as conversation | `test_context_layer.py::test_ui_chrome_is_not_replayed_as_conversation` |
 | Per-client and global rate limits, answering 429 with `Retry-After` | `backend/rate_limit.py` (code; no limiter test was read for this list) |
@@ -168,7 +204,7 @@ Each item names the file or test that shows it. Tests are in `backend/tests/` an
 | Frontend typecheck, lint, format check and build | scripts in `frontend/package.json`, run by `frontend-deploy.yml` |
 | The model follows the grounding rules for every question | (unverified) |
 | Real mail delivery through an SMTP server | (unverified) |
-| Frontend behaviour in a browser | (unverified) |
+| Frontend behaviour in a browser | Checked by hand with Playwright and a real browser before releases; no automated suite |
 | A full deployment working end to end | (unverified) |
 
 ## Documentation

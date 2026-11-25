@@ -34,7 +34,11 @@ const METADATA_HEADINGS = [
     'License',
 ];
 
-/** Only a real public address is linked; a private repository is said in words. */
+/**
+ * Only a real public address is linked; a private repository is said in words.
+ * The review engine's repository is private, and its page never links it even
+ * if its write-up is ever given an address: the second check is that guard.
+ */
 const publicRepository = (repository?: string): string | null =>
     repository?.startsWith('https://') && !/review-engine/i.test(repository) ? repository : null;
 

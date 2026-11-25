@@ -264,3 +264,18 @@ def test_a_name_with_a_full_stop_is_still_a_name(client, monkeypatch):
         lambda body: {"status": "success", "data": {"uid": "u", "start": body["start"]}},
     )
     assert client.post("/api/booking", json=_booking(name="J. R. Cohen")).status_code == 200
+
+
+@pytest.mark.parametrize("language", ["en", "he"])
+def test_a_bare_address_to_an_unknown_host_never_becomes_a_link(language):
+    """Bare addresses are turned into named links after the model answers. The
+    host check has to run on what that produces, or any address the model
+    writes bare would reach the page as a live link."""
+    text = main._checked_answer_text("See https://evil.example/x for more.", language)
+    assert "](" not in text
+    assert "evil.example/x" in text
+
+
+def test_a_bare_address_to_a_known_host_stays_a_link():
+    text = main._checked_answer_text("Docs: https://personakit.me/docs", "en")
+    assert "[personakit.me/docs](https://personakit.me/docs)" in text

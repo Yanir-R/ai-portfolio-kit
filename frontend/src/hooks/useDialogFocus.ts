@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
+import { trapTab } from '@/hooks/usePhoneLayer';
 
 /*
  * What every overlay on the site does the same way: the page behind stops
- * scrolling (unless `lockScroll` is false), Escape closes, focus moves into
- * the overlay on open and returns to whatever opened it on close.
+ * scrolling (unless `lockScroll` is false), Escape closes, Tab stays inside
+ * the overlay (the element marked aria-modal around the first focus), focus
+ * moves into the overlay on open and returns to whatever opened it on close.
  *
  * `onClose` is read through a ref, so a caller passing a new function on each
  * render does not re-run the open/close cycle and steal focus mid-typing.
@@ -25,6 +27,10 @@ export const useDialogFocus = <T extends HTMLElement>(onClose: () => void, lockS
 
         const onKey = (event: KeyboardEvent) => {
             if (event.key === 'Escape') closeRef.current();
+            if (event.key === 'Tab') {
+                const box = firstRef.current?.closest<HTMLElement>('[aria-modal="true"]');
+                if (box) trapTab(event, box);
+            }
         };
         document.addEventListener('keydown', onKey);
         return () => {
