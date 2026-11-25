@@ -3079,7 +3079,520 @@ const aiChat: Localized<ProjectPage> = {
     },
 };
 
+const agentFleet: Localized<ProjectPage> = {
+    he: {
+        lede: (
+            <>
+                יותר מ־40 סוכני AI שעובדים בשבילי ב־Grok Bot. <b>אני מדבר עם סוכן אחד</b>, הוא מעביר
+                את העבודה לקבוצה הנכונה, ואני מקבל בחזרה סיכום אחד. כל דבר שיוצא החוצה מחכה לאישור
+                שלי. זה הניסיון המעשי שעומד מאחורי הסוכנים שאני בונה ללקוחות.
+            </>
+        ),
+        facts: [
+            { value: '40+', label: 'סוכנים פעילים: שבע קבוצות, ועוד שבעה שמדווחים ישירות למרכז' },
+            { value: '1', label: 'כתובת: אני מבקש פעם אחת, ומקבל הודעה אחת במקום עשרות' },
+            { value: '0', label: 'פעולות החוצה בלי אישור שלי: לא פוסט, לא פנייה ולא שינוי בענן' },
+        ],
+        problem: {
+            tagline: TAG.he[0],
+            title: 'למה לא סוכן אחד שעושה הכול',
+            intro: 'מה קורה כשיש הרבה עבודה והרבה סוכנים, ואיך המערך מסדר את זה.',
+            columns: ['מה מפריע', 'במערך'],
+            rows: [
+                {
+                    before: 'סוכן ״כל־יכול״ שטועה, ואי אפשר לדעת איפה',
+                    lead: 'כל סוכן עושה דבר אחד.',
+                    rest: 'קל לבדוק אותו, לתקן אותו ולהחליף אותו בלי לגעת באחרים.',
+                },
+                {
+                    before: 'לזכור איזה סוכן עושה מה, ולרדוף אחרי כל אחד',
+                    lead: 'כתובת אחת.',
+                    rest: 'אני מבקש מהסוכן הראשי, והוא יודע למי להעביר.',
+                },
+                {
+                    before: 'סוכן אחד שמנהל עשרות אחרים הופך לצוואר בקבוק',
+                    lead: 'ראש לכל קבוצה.',
+                    rest: 'כל תחום מנוהל על ידי מי שמכיר אותו, ותקלה בתחום אחד לא עוצרת את השאר.',
+                },
+                {
+                    before: 'עשרות הודעות ביום מעשרות סוכנים',
+                    lead: 'דיווח במדרגות:',
+                    rest: 'סוכן לראש הקבוצה, ראש הקבוצה למרכז, ואליי מגיע סיכום אחד.',
+                },
+                {
+                    before: 'סוכן שפועל החוצה בלי לשאול',
+                    lead: 'טיוטות, לא פעולות.',
+                    rest: 'כל מה שנשלח, מתפרסם או משתנה מחכה ללחיצה שלי.',
+                },
+                {
+                    before: 'סוכן שנתקע בשקט, ואף אחד לא שם לב',
+                    lead: 'קבוצה ששומרת על המערך עצמו,',
+                    rest: 'ומדברת רק כשיש בעיה.',
+                },
+            ],
+        },
+        flow: {
+            tagline: TAG.he[1],
+            title: 'איך זה בנוי',
+            intro: 'מהבקשה שלי ועד הסיכום שחוזר אליי. השמות כאן הם של תחומים, לא של סוכנים.',
+            columns: [
+                { label: 'מי מבקש', people: ['אני'] },
+                {
+                    label: 'כתובת אחת',
+                    nodes: [
+                        {
+                            title: 'הסוכן הראשי',
+                            text: 'מקבל בקשות בצ׳אט ובשיחה קולית, ומחליט איזו קבוצה מטפלת בהן',
+                            tech: 'Grok Bot',
+                        },
+                    ],
+                },
+                {
+                    label: 'שבע קבוצות',
+                    nodes: [
+                        {
+                            title: 'ראש קבוצה, ותחתיו סוכנים שכל אחד עושה דבר אחד',
+                            text: '',
+                            family: [
+                                { name: 'ענן ותשתית', count: 3 },
+                                { name: 'אמינות המערך', count: 3 },
+                                { name: 'עסק עצמאי', count: 5 },
+                                { name: 'לינקדאין', count: 3 },
+                                { name: 'X', count: 3 },
+                                { name: 'Trinity Legal: הצעד הבא', count: 4 },
+                                { name: 'סטודיו וידאו', count: 6 },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    label: 'מה חוזר',
+                    nodes: [
+                        {
+                            title: 'סיכום אחד',
+                            text: 'כל קבוצה מדווחת למרכז, והוא שולח לי הודעה אחת',
+                        },
+                        {
+                            title: 'מחכה לאישור שלי',
+                            text: 'כל מה שיוצא החוצה נעצר כאן: פוסט, פנייה, לייק או שינוי',
+                            gate: true,
+                        },
+                    ],
+                },
+            ],
+            lane: {
+                label: 'ישירות למרכז',
+                nodes: [
+                    {
+                        title: 'שבעה סוכנים בלי קבוצה',
+                        text: 'טיוטות תוכן, משימות, ניירת של העסק, והזיכרון של המערך. דברים שהמרכז צריך עליהם יד ישירה',
+                    },
+                    {
+                        title: 'זיכרון שרק אחד רואה',
+                        text: 'הזיכרון האישי שלי פתוח לסוכן אחד בלבד, לקריאה, והוא עונה ממנו לאחרים',
+                    },
+                ],
+            },
+            legend: 'המספר ליד כל קבוצה: כמה סוכנים עובדים תחת ראש הקבוצה.',
+            techLegend: TECH_LEGEND.he,
+        },
+        mechanismsFirst: true,
+        mechanisms: {
+            tagline: '03 · התהליך',
+            title: 'איך עבודה עוברת במערך',
+            intro: 'שלוש דוגמאות אמיתיות, מהבקשה ועד מה שחוזר אליי.',
+            items: [
+                {
+                    title: 'בקשה אחת, סיכום אחד',
+                    text: 'כל בקשה, מכל סוג.',
+                    steps: [
+                        { text: 'אני מבקש בצ׳אט או בשיחה קולית' },
+                        { text: 'הסוכן הראשי מעביר לקבוצה המתאימה' },
+                        { text: 'ראש הקבוצה מחלק את העבודה', note: 'כל סוכן מקבל חלק אחד' },
+                        { text: 'כל סוכן מדווח למעלה, מדרגה אחרי מדרגה' },
+                        { text: 'אני מקבל הודעה אחת', ok: true },
+                    ],
+                },
+                {
+                    title: 'סרטון מקצה לקצה',
+                    text: 'שישה בעלי מקצוע, ערב אחד.',
+                    steps: [
+                        { text: 'ראש הסטודיו כותב תוכנית ותסריט' },
+                        { text: 'תמונות, קריינות וסאונד, לפי אותה תוכנית' },
+                        { text: 'בדיקת איכות באמצע', note: 'סצנה שלא עוברת חוזרת לתיקון' },
+                        { text: 'בדיקה נוספת על הסרטון המלא' },
+                        { text: 'יוצא רק אחרי שאישרתי', ok: true },
+                    ],
+                },
+                {
+                    title: 'מחקר שוק ל־Trinity Legal',
+                    text: 'האם משרדים קטנים נוספים באמת צריכים אותו?',
+                    steps: [
+                        { text: 'חוקרים את השוק', note: 'רק ממקורות ציבוריים, ומקור לכל מספר' },
+                        { text: 'מאתרים משרדים שמתאימים' },
+                        { text: 'כותבים טיוטות פנייה, ולא שולחים' },
+                        {
+                            text: '28 משרדים, 22 טיוטות',
+                            note: 'אף אחת לא נשלחה בלי אישור שלי',
+                            ok: true,
+                        },
+                    ],
+                },
+            ],
+            day: [
+                { when: 'כל בוקר', what: 'סיכום בוקר אחד' },
+                { when: 'במשך היום', what: 'בקשות לפי הצורך' },
+                { when: 'כל ערב', what: 'איסוף הפעילות מלינקדאין' },
+                { when: 'כל 12 שעות', what: 'בדיקה של שינויים ותקינות' },
+            ],
+        },
+        rules: {
+            tagline: '04 · הרשאות',
+            title: 'מה הם עושים לבד, ומה מחכה לי',
+            intro: 'כל סוכן מקבל רק את הגישה שהתפקיד שלו צריך. חלק מהקבוצות רק קוראות.',
+            levels: [
+                {
+                    tone: 'self',
+                    title: 'עושים לבד',
+                    pill: 'בלי אישור',
+                    text: 'קריאה, איסוף והכנה.',
+                    items: [
+                        { text: 'לאסוף ולנתח פעילות ברשתות' },
+                        { text: 'לבדוק את הענן', note: 'עלויות, תקינות והרשאות, בקריאה בלבד' },
+                        { text: 'לחקור ולסכם, עם מקורות' },
+                        { text: 'לכתוב טיוטות' },
+                    ],
+                },
+                {
+                    tone: 'ask',
+                    title: 'מחכה לאישור שלי',
+                    pill: 'עוצר ושואל',
+                    text: 'כל מה שיוצא החוצה או משנה משהו.',
+                    items: [
+                        {
+                            text: 'לייק או תגובה בשמי',
+                            note: 'לפני 23 לייקים בלינקדאין, הסוכן עצר ושאל',
+                        },
+                        { text: 'לשלוח פנייה' },
+                        { text: 'שינוי בענן', note: 'הסוכן מכין, אני מריץ' },
+                        { text: 'קוד שעולה לאוויר' },
+                    ],
+                },
+                {
+                    tone: 'no',
+                    title: 'לא זמין להם',
+                    pill: 'חסום',
+                    text: 'דברים שהמערך לא עושה.',
+                    items: [
+                        { text: 'לפרסם בשמי', note: 'הם כותבים, אני מפרסם בעצמי' },
+                        { text: 'לקרוא את הזיכרון האישי שלי', note: 'רק סוכן אחד, בקריאה בלבד' },
+                    ],
+                },
+            ],
+        },
+        fit: {
+            tagline: TAG.he[4],
+            title: 'מה זה אומר בשבילכם',
+            intro: 'המערך עצמו פרטי. מה שלמדתי ממנו נכנס לכל סוכן שאני בונה.',
+            card: {
+                title: 'רוצים צוות סוכנים בעסק?',
+                text: 'לא כל עסק צריך 40 סוכנים. אבל אותם עקרונות עובדים גם בשלושה:',
+                bullets: [
+                    'כתובת אחת לבקשות, וסיכום אחד בחזרה',
+                    'כל סוכן עושה דבר אחד, וקל לבדוק אותו',
+                    'כל פעולה החוצה מחכה לאישור של אדם',
+                ],
+            },
+            road: {
+                title: 'ככה אני בונה',
+                steps: [
+                    {
+                        title: 'קודם מבינים איפה הולך הזמן',
+                        text: 'ואיזו עבודה באמת אפשר להעביר לסוכן.',
+                    },
+                    { title: 'מתחילים בסוכן אחד, עם גבולות', text: 'מה לבד, מה באישור, ומה חסום.' },
+                    { title: 'מוסיפים סוכנים רק כשיש סיבה', text: 'וכל אחד מדווח למקום אחד.' },
+                ],
+            },
+        },
+        dev: {
+            summary: DEV.he,
+            tags: ['Grok Bot', 'סוכן ראשי, ראשי קבוצות ותתי־סוכנים', 'יומן אירועים משותף'],
+            note: 'המערכת פרטית.',
+        },
+        cta: 'רוצים סוכנים כאלה אצלכם?',
+    },
+    en: {
+        lede: (
+            <>
+                More than 40 AI agents working for me on Grok Bot. <b>I talk to one agent</b>, it
+                hands the work to the right group, and I get one summary back. Anything that goes
+                out to the world waits for my approval. This is the hands-on experience behind the
+                agents I build for clients.
+            </>
+        ),
+        facts: [
+            {
+                value: '40+',
+                label: 'active agents: seven groups, plus seven that report straight to the centre',
+            },
+            { value: '1', label: 'address: I ask once, and get one message instead of dozens' },
+            {
+                value: '0',
+                label: 'outward actions without my approval: no post, no outreach and no cloud change',
+            },
+        ],
+        problem: {
+            tagline: TAG.en[0],
+            title: 'Why not one agent that does everything',
+            intro: 'What happens when there is a lot of work and a lot of agents, and how the fleet sorts it out.',
+            columns: ['What gets in the way', 'In the fleet'],
+            rows: [
+                {
+                    before: 'An "all-purpose" agent gets something wrong, and you cannot tell where',
+                    lead: 'Each agent does one thing.',
+                    rest: 'Easy to check, fix and replace without touching the others.',
+                },
+                {
+                    before: 'Remembering which agent does what, and chasing each one',
+                    lead: 'One address.',
+                    rest: 'I ask the head agent, and it knows where to pass it.',
+                },
+                {
+                    before: 'One agent managing dozens becomes a bottleneck',
+                    lead: 'A lead for each group.',
+                    rest: 'Each field is run by one that knows it, and a fault in one field does not stop the rest.',
+                },
+                {
+                    before: 'Dozens of messages a day from dozens of agents',
+                    lead: 'Reporting in steps:',
+                    rest: 'agent to group lead, group lead to the centre, and one summary reaches me.',
+                },
+                {
+                    before: 'An agent acting in the world without asking',
+                    lead: 'Drafts, not actions.',
+                    rest: 'Anything sent, published or changed waits for my tap.',
+                },
+                {
+                    before: 'An agent that quietly gets stuck, and nobody notices',
+                    lead: 'A group that looks after the fleet itself,',
+                    rest: 'and speaks only when there is a problem.',
+                },
+            ],
+        },
+        flow: {
+            tagline: TAG.en[1],
+            title: 'How it is built',
+            intro: 'From my request to the summary that comes back. The names here are fields, not agents.',
+            columns: [
+                { label: 'Who asks', people: ['Me'] },
+                {
+                    label: 'One address',
+                    nodes: [
+                        {
+                            title: 'The head agent',
+                            text: 'Takes requests by chat and by voice, and decides which group handles them',
+                            tech: 'Grok Bot',
+                        },
+                    ],
+                },
+                {
+                    label: 'Seven groups',
+                    nodes: [
+                        {
+                            title: 'A group lead, with agents under it that each do one thing',
+                            text: '',
+                            family: [
+                                { name: 'Cloud and infrastructure', count: 3 },
+                                { name: 'Fleet reliability', count: 3 },
+                                { name: 'Freelance business', count: 5 },
+                                { name: 'LinkedIn', count: 3 },
+                                { name: 'X', count: 3 },
+                                { name: 'Trinity Legal: the next step', count: 4 },
+                                { name: 'Video studio', count: 6 },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    label: 'What comes back',
+                    nodes: [
+                        {
+                            title: 'One summary',
+                            text: 'Each group reports to the centre, which sends me one message',
+                        },
+                        {
+                            title: 'Waiting for my approval',
+                            text: 'Anything that goes out stops here: a post, outreach, a like or a change',
+                            gate: true,
+                        },
+                    ],
+                },
+            ],
+            lane: {
+                label: 'Straight to the centre',
+                nodes: [
+                    {
+                        title: 'Seven agents with no group',
+                        text: 'Content drafts, tasks, the business’s paperwork, and the fleet’s memory. Things the centre needs a direct hand on',
+                    },
+                    {
+                        title: 'Memory only one can see',
+                        text: 'My personal memory is open to one agent only, read-only, and it answers the others from it',
+                    },
+                ],
+            },
+            legend: 'The number next to each group: how many agents work under its lead.',
+            techLegend: TECH_LEGEND.en,
+        },
+        mechanismsFirst: true,
+        mechanisms: {
+            tagline: '03 · The process',
+            title: 'How work moves through the fleet',
+            intro: 'Three real examples, from the request to what comes back to me.',
+            items: [
+                {
+                    title: 'One request, one summary',
+                    text: 'Any request, of any kind.',
+                    steps: [
+                        { text: 'I ask by chat or by voice' },
+                        { text: 'The head agent passes it to the right group' },
+                        {
+                            text: 'The group lead splits the work',
+                            note: 'each agent gets one part',
+                        },
+                        { text: 'Each agent reports up, step by step' },
+                        { text: 'I get one message', ok: true },
+                    ],
+                },
+                {
+                    title: 'A video, end to end',
+                    text: 'Six specialists, one evening.',
+                    steps: [
+                        { text: 'The studio lead writes a plan and a script' },
+                        { text: 'Images, narration and sound, to the same plan' },
+                        {
+                            text: 'A quality check midway',
+                            note: 'a scene that fails goes back to be fixed',
+                        },
+                        { text: 'Another check on the full video' },
+                        { text: 'It goes out only after I approve', ok: true },
+                    ],
+                },
+                {
+                    title: 'Market research for Trinity Legal',
+                    text: 'Do more small law offices really need it?',
+                    steps: [
+                        {
+                            text: 'Research the market',
+                            note: 'public sources only, with a source for every number',
+                        },
+                        { text: 'Find offices that fit' },
+                        { text: 'Write outreach drafts, and do not send' },
+                        {
+                            text: '28 offices, 22 drafts',
+                            note: 'none sent without my approval',
+                            ok: true,
+                        },
+                    ],
+                },
+            ],
+            day: [
+                { when: 'Every morning', what: 'One morning summary' },
+                { when: 'During the day', what: 'Requests as needed' },
+                { when: 'Every evening', what: 'Collecting LinkedIn activity' },
+                { when: 'Every 12 hours', what: 'A check of changes and health' },
+            ],
+        },
+        rules: {
+            tagline: '04 · Permissions',
+            title: 'What they do alone, and what waits for me',
+            intro: 'Each agent gets only the access its job needs. Some groups can only read.',
+            levels: [
+                {
+                    tone: 'self',
+                    title: 'Do alone',
+                    pill: 'No approval',
+                    text: 'Reading, collecting and preparing.',
+                    items: [
+                        { text: 'Collect and analyse activity on networks' },
+                        {
+                            text: 'Check the cloud',
+                            note: 'cost, health and permissions, read-only',
+                        },
+                        { text: 'Research and summarise, with sources' },
+                        { text: 'Write drafts' },
+                    ],
+                },
+                {
+                    tone: 'ask',
+                    title: 'Waits for my approval',
+                    pill: 'Stops and asks',
+                    text: 'Anything that goes out or changes something.',
+                    items: [
+                        {
+                            text: 'A like or comment in my name',
+                            note: 'before 23 LinkedIn likes, the agent stopped and asked',
+                        },
+                        { text: 'Sending outreach' },
+                        { text: 'A cloud change', note: 'the agent prepares it, I run it' },
+                        { text: 'Code that goes live' },
+                    ],
+                },
+                {
+                    tone: 'no',
+                    title: 'Not available to them',
+                    pill: 'Blocked',
+                    text: 'Things the fleet does not do.',
+                    items: [
+                        { text: 'Publish in my name', note: 'they write, I publish myself' },
+                        { text: 'Read my personal memory', note: 'only one agent, read-only' },
+                    ],
+                },
+            ],
+        },
+        fit: {
+            tagline: TAG.en[4],
+            title: 'What it means for you',
+            intro: 'The fleet itself is private. What I learned from it goes into every agent I build.',
+            card: {
+                title: 'Want a team of agents in your business?',
+                text: 'Not every business needs 40 agents. But the same principles work with three:',
+                bullets: [
+                    'One address for requests, and one summary back',
+                    'Each agent does one thing, and is easy to check',
+                    'Every outward action waits for a person’s approval',
+                ],
+            },
+            road: {
+                title: 'How I build',
+                steps: [
+                    {
+                        title: 'First, see where the time goes',
+                        text: 'and which work can really move to an agent.',
+                    },
+                    {
+                        title: 'Start with one agent, with limits',
+                        text: 'what it does alone, what needs approval, and what is blocked.',
+                    },
+                    {
+                        title: 'Add agents only when there is a reason',
+                        text: 'and each one reports to one place.',
+                    },
+                ],
+            },
+        },
+        dev: {
+            summary: DEV.en,
+            tags: ['Grok Bot', 'Head agent, group leads and sub-agents', 'Shared event log'],
+            note: 'The system is private.',
+        },
+        cta: 'Want agents like these in your business?',
+    },
+};
+
 export const PROJECT_PAGES: Record<string, Localized<ProjectPage>> = {
+    'agent-fleet': agentFleet,
     'ai-chat-portfolio': aiChat,
     'trinity-legal': trinityLegal,
     'trinity-agent': trinityAgent,

@@ -40,6 +40,8 @@ export interface FlowNode {
     tech?: string;
     /** The one place every request passes through. */
     gate?: boolean;
+    /** Groups drawn as a list inside the node, each with how many it holds. */
+    family?: { name: string; count: number }[];
 }
 
 export interface FlowColumn {
@@ -120,6 +122,8 @@ export interface Mechanism {
 
 export interface MechanismSection extends PageHead {
     items: Mechanism[];
+    /** A strip under the cards: what runs when, such as every morning. */
+    day?: { when: string; what: string }[];
 }
 
 export interface FitSection extends PageHead {
@@ -137,6 +141,8 @@ export interface ProjectPage {
     rules: RulesSection;
     mechanisms: MechanismSection;
     fit: FitSection;
+    /** Show the mechanisms before who-may-do-what, when the page tells a process first. */
+    mechanismsFirst?: boolean;
     dev: { summary: string; tags: string[]; note: React.ReactNode };
     cta: string;
 }

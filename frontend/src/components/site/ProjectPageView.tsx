@@ -20,9 +20,21 @@ const Head: React.FC<PageHead> = ({ tagline, title, intro }) => (
 );
 
 const Node: React.FC<{ node: FlowNode }> = ({ node }) => (
-    <div className={node.gate ? 'pj-node gate' : 'pj-node'}>
+    <div
+        className={['pj-node', node.gate && 'gate', node.family && 'fam'].filter(Boolean).join(' ')}
+    >
         <b>{node.title}</b>
-        <span>{node.text}</span>
+        {node.text && <span>{node.text}</span>}
+        {node.family && (
+            <ul className="fl">
+                {node.family.map((group) => (
+                    <li key={group.name}>
+                        {group.name}
+                        <i>{group.count}</i>
+                    </li>
+                ))}
+            </ul>
+        )}
         {node.tech && <span className="tg">{node.tech}</span>}
     </div>
 );
@@ -172,12 +184,54 @@ const ProjectPageView: React.FC<{ page: ProjectPage; media?: React.ReactNode }> 
     media,
 }) => {
     const { problem, flow, rules, mechanisms, fit, dev } = page;
+    const mechanismsView = (
+        <section className="pj-sec">
+            <Head {...mechanisms} />
+            <div className="pj-mech">
+                {mechanisms.items.map((item, i) => (
+                    <div className="pj-m" key={item.title}>
+                        <h3>
+                            <i aria-hidden="true">{i + 1}</i>
+                            {item.title}
+                        </h3>
+                        <p>{item.text}</p>
+                        <ol className="pj-steps">
+                            {item.steps.map((step) => (
+                                <li key={step.text} className={step.ok ? 'ok' : undefined}>
+                                    {step.text}
+                                    {step.note && <small>{step.note}</small>}
+                                    {step.fork && (
+                                        <span className="fork">
+                                            <span className="g">{step.fork[0]}</span>
+                                            <span>{step.fork[1]}</span>
+                                        </span>
+                                    )}
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                ))}
+            </div>
+            {mechanisms.day && (
+                <div className="pj-day">
+                    {mechanisms.day.map((slot) => (
+                        <div key={slot.when}>
+                            <small>{slot.when}</small>
+                            <b>{slot.what}</b>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </section>
+    );
     return (
         <>
             <div className="pj-facts">
                 {page.facts.map((fact) => (
                     <div key={fact.label}>
-                        <b>{fact.value}</b>
+                        <b>
+                            <bdi dir="ltr">{fact.value}</bdi>
+                        </b>
                         <span>{fact.label}</span>
                     </div>
                 ))}
@@ -253,36 +307,9 @@ const ProjectPageView: React.FC<{ page: ProjectPage; media?: React.ReactNode }> 
                 </div>
             </section>
 
+            {page.mechanismsFirst && mechanismsView}
             <Rules rules={rules} />
-
-            <section className="pj-sec">
-                <Head {...mechanisms} />
-                <div className="pj-mech">
-                    {mechanisms.items.map((item, i) => (
-                        <div className="pj-m" key={item.title}>
-                            <h3>
-                                <i aria-hidden="true">{i + 1}</i>
-                                {item.title}
-                            </h3>
-                            <p>{item.text}</p>
-                            <ol className="pj-steps">
-                                {item.steps.map((step) => (
-                                    <li key={step.text} className={step.ok ? 'ok' : undefined}>
-                                        {step.text}
-                                        {step.note && <small>{step.note}</small>}
-                                        {step.fork && (
-                                            <span className="fork">
-                                                <span className="g">{step.fork[0]}</span>
-                                                <span>{step.fork[1]}</span>
-                                            </span>
-                                        )}
-                                    </li>
-                                ))}
-                            </ol>
-                        </div>
-                    ))}
-                </div>
-            </section>
+            {!page.mechanismsFirst && mechanismsView}
 
             <section className="pj-sec">
                 <Head {...fit} />
