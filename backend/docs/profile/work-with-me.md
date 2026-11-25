@@ -20,7 +20,7 @@ The same order holds when a system is adopted at a client: first understand the 
 
 ## TRAINING
 
-I am looking into opening a course on developing with Claude, Grok Bot and Hermes. The infrastructure for it is already in place. If that interests you, write to me.
+I am looking into opening a course on developing with Claude, Grok Bot and Hermes Agent (the base Trinity Agent is built on). The infrastructure for it is already in place. If that interests you, write to me.
 
 ## HOW AN ENGAGEMENT WORKS
 
@@ -36,7 +36,7 @@ I am also open to a full-time role or a contract.
 
 ## TRINITY
 
-Trinity is the name of my business. It is a name I connect with and have used for years for different things, and recently I decided it is the business name as well. PersonaKit is a set of tools I started developing: today it holds memory management, and I plan to add more systems to it. PersonaKit is available today as open source: you can download it and use it for free. Trinity CRM is one of the systems built under the Trinity name. A personal agent called Trinity may follow later; it is not something I offer to clients today.
+Trinity is the name of my business. It is a name I connect with and have used for years for different things, and recently I decided it is the business name as well. PersonaKit is a set of tools I started developing: today it holds memory management, and I plan to add more systems to it. PersonaKit is available today as open source: you can download it and use it for free. Trinity CRM is one of the systems built under the Trinity name. Trinity Agent, my personal always-on assistant, has its own site at https://personakit.me/trinity and PersonaKit is its memory layer. It is in a private pilot there by invitation; it is not part of the development work I offer clients.
 
 ## GETTING IN TOUCH
 

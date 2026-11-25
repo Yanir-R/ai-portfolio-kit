@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MAP_EDGES, MAP_NODES, SHEET_HEADS } from '@/content/sheets';
-import { PersonaKitLinks } from '@/components/chat/sheets/parts';
+import { PersonaKitLinks, TrinityLinks } from '@/components/chat/sheets/parts';
 import { PHONE_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
 import { useLang } from '@/i18n/useLang';
 
@@ -107,6 +107,7 @@ const SystemsMap: React.FC = () => {
                 <b>{node.name[lang]}</b>
                 <span>{node.text[lang]}</span> <em>{node.meta[lang]}</em>
                 {node.personakitLinks && <PersonaKitLinks />}
+                {node.trinityLinks && <TrinityLinks />}
             </div>
         </>
     );

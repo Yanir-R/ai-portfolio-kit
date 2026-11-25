@@ -141,8 +141,9 @@ export const CV_DOC: Localized<CvDoc> = {
                 text: 'Token-based access control and inference-cost optimization.',
             },
             {
-                name: 'Hermes agent',
-                text: 'Self-hosted 24/7 agent: custom persona, Obsidian-vault memory, Telegram interface.',
+                name: 'Trinity Agent',
+                href: LINKS.trinity,
+                text: 'Self-hosted 24/7 assistant on WhatsApp and Telegram, built on Hermes Agent, with PersonaKit as its memory layer.',
             },
             {
                 name: 'Live AI assistant',
@@ -244,8 +245,9 @@ export const CV_DOC: Localized<CvDoc> = {
                 text: 'בקרת גישה מבוססת טוקנים וחיסכון בעלויות הרצת המודלים.',
             },
             {
-                name: 'הסוכן Hermes',
-                text: 'סוכן שרץ אצלי 24/7: פרסונה משלו, זיכרון בכספת Obsidian, וממשק בטלגרם.',
+                name: 'Trinity Agent',
+                href: LINKS.trinity,
+                text: 'עוזר שרץ אצלי 24/7 בוואטסאפ ובטלגרם, בנוי על Hermes Agent, עם PersonaKit כשכבת הזיכרון.',
             },
             {
                 name: 'עוזר AI חי באתר',

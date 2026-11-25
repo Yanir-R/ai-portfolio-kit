@@ -10,3 +10,7 @@
 # none of them needs the rewrite. Unknown paths get 404.html or en/404.html with
 # a real 404 status: Cloudflare Pages does that whenever a top-level 404.html
 # exists and no rule here catches the path first. Do not add `/*` back.
+
+# Hermes was renamed Trinity Agent on 2026-11-25; old links keep working.
+/projects/hermes /projects/trinity-agent 301
+/en/projects/hermes /en/projects/trinity-agent 301

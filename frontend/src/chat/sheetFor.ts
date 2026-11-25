@@ -28,7 +28,7 @@ const BY_NAME: [RegExp, SheetKey][] = [
     [/trinity\s*legal|טריניטי\s*ליגל/i, 'legal'],
     [/persona\s*kit|פרסונה\s*קיט/i, 'pk'],
     [
-        /\bfleet\b|מערך\s*הסוכנים|צי\s*הסוכנים|review[\s-]*engine|מנוע\s*הביקורת|hermes|הרמס/i,
+        /\bfleet\b|מערך\s*הסוכנים|צי\s*הסוכנים|review[\s-]*engine|מנוע\s*הביקורת|trinity\s*agent|hermes|הרמס/i,
         'built',
     ],
 ];
@@ -38,7 +38,7 @@ const BY_SOURCE: [string, SheetKey][] = [
     ['personakit', 'pk'],
     ['agent-fleet', 'built'],
     ['review-engine', 'built'],
-    ['hermes', 'built'],
+    ['trinity-agent', 'built'],
 ];
 
 /** Answers that are only conversation get no drawing at all. */

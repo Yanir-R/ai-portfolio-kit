@@ -9,6 +9,8 @@ export const LINKS = {
     github: 'https://github.com/Yanir-R',
     personakit: 'https://personakit.me',
     personakitDocs: 'https://personakit.me/docs',
+    /** Trinity Agent, my always-on assistant, has its own page on the PersonaKit site. */
+    trinity: 'https://personakit.me/trinity',
     /** The repository of this site, which is public. */
     siteRepo: 'https://github.com/Yanir-R/ai-portfolio-kit',
 } as const;

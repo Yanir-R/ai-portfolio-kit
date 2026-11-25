@@ -166,9 +166,9 @@ export const HOME: Localized<HomeCopy> = {
             also: [
                 {
                     tag: 'רץ אצלי כל יום',
-                    title: 'מערכת הסוכנים Trinity',
-                    text: 'סוכנים בוואטסאפ ובטלגרם, עם כללי בטיחות, זיכרון ומשמרת לילה.',
-                    href: '/#fleet',
+                    title: 'Trinity Agent',
+                    text: 'העוזר האישי שלי בוואטסאפ ובטלגרם. מכין את העבודה לבד ושואל לפני כל פעולה. האתר שלו: personakit.me/trinity',
+                    href: '/projects/trinity-agent',
                 },
                 {
                     tag: 'קוד פתוח · חינם',
@@ -396,9 +396,9 @@ export const HOME: Localized<HomeCopy> = {
             also: [
                 {
                     tag: 'Runs for me every day',
-                    title: 'The Trinity agent system',
-                    text: 'Agents on WhatsApp and Telegram, with safety rules, memory and a night shift.',
-                    href: '/#fleet',
+                    title: 'Trinity Agent',
+                    text: 'My personal assistant on WhatsApp and Telegram. It does the groundwork and asks before it acts. Its site: personakit.me/trinity',
+                    href: '/projects/trinity-agent',
                 },
                 {
                     tag: 'Open source · Free',

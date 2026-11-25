@@ -663,6 +663,7 @@ export interface MapNode {
     wide: [number, number];
     phone: [number, number];
     personakitLinks?: boolean;
+    trinityLinks?: boolean;
 }
 
 export const MAP_NODES: MapNode[] = [
@@ -679,14 +680,15 @@ export const MAP_NODES: MapNode[] = [
     },
     {
         id: 'agents',
-        name: { he: 'מערכת הסוכנים Trinity', en: 'The Trinity agent system' },
+        name: { he: 'Trinity Agent', en: 'Trinity Agent' },
         text: {
-            he: 'סוכנים בוואטסאפ ובטלגרם, עם כללי בטיחות, זיכרון ומשמרת לילה.',
-            en: 'Agents on WhatsApp and Telegram, with safety rules, memory and a night shift.',
+            he: 'העוזר האישי שלי בוואטסאפ ובטלגרם, על Hermes Agent ועם PersonaKit כזיכרון. שואל לפני כל פעולה.',
+            en: 'My personal assistant on WhatsApp and Telegram, built on Hermes Agent with PersonaKit as its memory. It asks before it acts.',
         },
-        meta: { he: 'רץ אצלי כל יום', en: 'Runs for me every day' },
+        meta: { he: 'רץ אצלי כל יום · פיילוט פרטי', en: 'Runs for me every day · Private pilot' },
         wide: [130, 160],
         phone: [92, 138],
+        trinityLinks: true,
     },
     {
         id: 'legal',
@@ -747,6 +749,11 @@ export const MAP_EDGES: { from: string; to: string; label: Localized<string> }[]
     { from: 'agents', to: 'pk', label: { he: 'מזין זיכרון', en: 'feeds memory' } },
     { from: 'site', to: 'pk', label: { he: 'מציג', en: 'shows' } },
 ];
+
+export const TRINITY_LINKS: Localized<{ site: string }> = {
+    he: { site: 'personakit.me/trinity ↗︎' },
+    en: { site: 'personakit.me/trinity ↗︎' },
+};
 
 export const PERSONAKIT_LINKS: Localized<{ site: string; docs: string }> = {
     he: { site: 'personakit.me ↗︎', docs: 'התיעוד ↗︎' },
