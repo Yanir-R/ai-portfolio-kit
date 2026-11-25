@@ -7550,3 +7550,279 @@ video.w-v {
         grid-column: 1/-1;
     }
 }
+
+/*
+ * First screen fits the viewport (design change, 2026-11-25). On a desktop
+ * the opening panel is as tall as the screen below the top bar, the headline
+ * scales with the screen height, and the chat and the drawing share what is
+ * left, each scrolling inside. On a phone the chat starts compact (title,
+ * starters, input) and opens to full height on the first question
+ * (.chat.live).
+ */
+@media (min-width: 901px) and (min-height: 540px) {
+    #top {
+        height: calc(100svh - 74px - 14px);
+        min-height: 466px;
+        max-height: 1040px;
+        display: flex;
+        flex-direction: column;
+        padding-top: clamp(16px, 4vh, 38px);
+        padding-bottom: clamp(14px, 3vh, 30px);
+    }
+    #top .hero-top {
+        flex: none;
+    }
+    #top h1 {
+        font-size: clamp(2.5rem, 9.4vh, 5.4rem);
+    }
+    #top:lang(en) h1 {
+        font-size: clamp(2.2rem, 7vh, 4.6rem);
+    }
+    #top .hero-top p {
+        font-size: clamp(0.95rem, 2.1vh, 1.18rem);
+        line-height: 1.5;
+    }
+    #top .duo {
+        flex: 1;
+        min-height: 0;
+        height: auto;
+        margin-top: clamp(12px, 2.6vh, 28px);
+    }
+    #top .log {
+        height: auto;
+        min-height: 0;
+    }
+    #top .plan {
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+    #top .chat {
+        min-height: 0;
+    }
+}
+@media (min-width: 901px) and (min-height: 540px) and (max-height: 780px) {
+    #top .stg button span {
+        display: none;
+    }
+    #top .stg button {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+    #top .acts .btn {
+        padding-top: 9px;
+        padding-bottom: 9px;
+    }
+}
+@media (min-width: 901px) and (min-height: 540px) and (max-height: 640px) {
+    #top .hero-top p,
+    #top .tagline {
+        display: none;
+    }
+    #top .hero-top {
+        align-items: center;
+    }
+}
+
+/* WhatsApp in the hero is the icon tile at every width, beside the call button. */
+.acts {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    align-items: stretch;
+}
+.acts .wa {
+    flex: none;
+    width: 54px;
+    min-height: 48px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    background: #fff;
+    color: #0e7c4a;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 3px 3px 0 var(--btn);
+}
+.acts .wa::after {
+    content: none;
+}
+.acts .wa span {
+    display: none;
+}
+.acts .wa .wi {
+    display: block;
+    width: 28px;
+    height: 28px;
+}
+.acts .wa:hover {
+    background: var(--act-soft);
+}
+
+@media (max-width: 640px) {
+    #top .chat:not(.live) .log {
+        height: auto;
+        min-height: 0;
+        padding-top: 10px;
+        padding-bottom: 6px;
+    }
+    #top .chat:not(.live) .log > .m.y:first-child {
+        display: none;
+    }
+    #top .chat:not(.live) .ph small {
+        display: none;
+    }
+    #top .duo {
+        margin-top: 16px;
+    }
+    #top {
+        padding-top: 18px;
+    }
+}
+@media (max-width: 640px) and (max-height: 790px) {
+    #top .hero-top p,
+    #top .tagline {
+        display: none;
+    }
+    #top h1 {
+        font-size: clamp(2.1rem, 7.4vh, 3.2rem);
+    }
+}
+@media (max-width: 640px) and (max-height: 960px) {
+    #top:lang(en) .hero-top p,
+    #top:lang(en) .tagline {
+        display: none;
+    }
+    #top:lang(en) h1 {
+        font-size: clamp(1.8rem, 5.6vh, 2.8rem);
+    }
+}
+@media (max-width: 640px) and (max-height: 760px) {
+    #top .chat:not(.live) .stg button span {
+        display: none;
+    }
+}
+
+/*
+ * Contact dialog, tidied (design change, 2026-11-25): title and topic beside
+ * a 40px close button, the routes as one full-width segmented control, one
+ * helper line, the calendar with a single border, and the same spacing
+ * throughout (24px sides, 14px between parts; 16px and 12px on a phone,
+ * where the dialog fills the screen).
+ */
+.talk {
+    width: min(720px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 8px 8px 0 var(--btn);
+    overflow-y: auto;
+}
+.talk .th {
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px 14px;
+}
+.talk .th b#talk-title {
+    display: block;
+    font-size: 2.2rem;
+    margin-bottom: 6px;
+}
+.talk .th .tp {
+    display: block;
+    margin: 0;
+}
+.talk .th button {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 2px solid var(--ink);
+    box-shadow: none;
+    background: #fff;
+    color: var(--ink);
+    font-size: 1rem;
+}
+.talk .tt {
+    display: grid;
+    grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+    gap: 0;
+    margin: 0 24px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.talk .tt button {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 11px 6px;
+    font-size: 0.98rem;
+    background: #fff;
+}
+.talk .tt button + button {
+    border-inline-start: 2px solid var(--ink);
+}
+.talk .tt button[aria-selected='true'] {
+    background: var(--ink);
+    color: #fff;
+}
+.talk .tb {
+    padding: 14px 24px 20px;
+    gap: 14px;
+}
+.talk .tb > p:first-child {
+    color: var(--muted);
+    font-size: 0.98rem;
+}
+.talk .talk-cal {
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+}
+.talk .tb > a.fine {
+    align-self: flex-start;
+    color: var(--link);
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+@media (max-width: 640px) {
+    .talk {
+        width: 100vw;
+        max-width: 100vw;
+        height: 100dvh;
+        max-height: 100dvh;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .talk[open] {
+        display: flex;
+        flex-direction: column;
+    }
+    .talk .th {
+        padding: 16px 16px 12px;
+    }
+    .talk .th b#talk-title {
+        font-size: 1.9rem;
+    }
+    .talk .tt {
+        margin: 0 16px;
+    }
+    .talk .tb {
+        padding: 12px 16px 16px;
+        gap: 12px;
+        flex: 1;
+        min-height: 0;
+    }
+    .talk .talk-cal {
+        flex: 1;
+        height: auto;
+        min-height: 360px;
+    }
+    .talk .tb .btn,
+    .talk .v-form .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
