@@ -807,6 +807,7 @@ section {
 }
 .pick button {
     padding: 9px 15px;
+    min-height: 44px;
     font-weight: 700;
     font-size: 0.98rem;
     color: #fff;
@@ -5620,6 +5621,7 @@ footer a {
 }
 .w-idx .kd button {
     padding: 8px 6px;
+    min-height: 44px;
     font-weight: 800;
     font-size: 0.95rem;
     color: var(--ink);
@@ -6477,7 +6479,7 @@ html.panel .w-post {
         padding-bottom: 0;
     }
     .w-idx .tl button {
-        min-height: 38px;
+        min-height: 44px;
     }
     .w-back,
     .w-hero .hw,
