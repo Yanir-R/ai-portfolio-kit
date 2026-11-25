@@ -60,6 +60,8 @@ export type Entry =
           fromIndex: boolean;
           sheet?: SheetKey;
           asksEmail?: boolean;
+          /** The server's signature on this reply, sent back with it as history. */
+          sig?: string | null;
       }
     | { id: number; kind: 'summary'; process: ProcessId; team: string }
     | { id: number; kind: 'error'; text: string };
@@ -237,6 +239,7 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
                         content: e.text,
                         blocks: e.blocks,
                         is_email_collection: !!e.asksEmail,
+                        sig: e.sig,
                     },
                 ];
             return [];
@@ -314,6 +317,7 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             fromIndex,
             sheet,
             asksEmail,
+            sig: result.sig,
         });
         offerNext(askedNow);
 

@@ -13,7 +13,12 @@ from docs_helper import (
     get_project_by_slug, get_projects_in, PROJECT_LANGUAGES,
     get_all_writing, get_writing_by_slug, get_writing_index, writing_overview
 )
-from rate_limit import chat_limiter, contact_limiter, enforce_rate_limit
+from rate_limit import (
+    auto_reply_limiter, booking_address_limiter, chat_limiter, contact_limiter,
+    enforce_rate_limit,
+)
+import guard
+from prompt import RULES
 import booking
 import site_mail
 from pydantic import BaseModel, EmailStr, Field
@@ -186,6 +191,9 @@ class ChatMessage(BaseModel):
     content: str = Field(max_length=MAX_HISTORY_CONTENT_CHARS)
     is_email_collection: Optional[bool] = False
     email_collected: Optional[bool] = False
+    # The signature the server sent with an assistant reply. A replayed
+    # assistant turn without a valid one is not shown to the model; see guard.py.
+    sig: Optional[str] = Field(default=None, max_length=64)
 
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=MAX_MESSAGE_CHARS)
@@ -233,16 +241,24 @@ class BookingRequest(BaseModel):
 
 
 def _to_model_turns(history: Optional[List[ChatMessage]]) -> List[Dict[str, str]]:
-    """Maps the frontend's message list to Gemini roles, dropping UI chrome."""
+    """Maps the frontend's message list to Gemini roles, dropping UI chrome.
+
+    An assistant turn is kept only when it carries the signature this server
+    sent with it, so a request cannot put words in the assistant's mouth.
+    Fixed copy the page writes itself is unsigned and is dropped too, which
+    costs nothing: it was never part of what the model said.
+    """
     turns: List[Dict[str, str]] = []
     for message in history or []:
         if message.type in _USER_MESSAGE_TYPES:
             role = "user"
         elif message.type in _MODEL_MESSAGE_TYPES:
+            if not guard.turn_is_signed(message.content, message.sig):
+                continue
             role = "model"
         else:
             continue
-        turns.append({"role": role, "content": message.content})
+        turns.append({"role": role, "content": guard.clean_input(message.content)})
     return turns
 
 
@@ -444,6 +460,9 @@ class ChatResponse(BaseModel):
     answered_by: Optional[Literal["model", "index"]] = None
     # The language the question was read as, so the cards can match the answer.
     language: Optional[Literal["en", "he"]] = None
+    # Sent back with this reply when it is replayed as history, proving the
+    # server wrote it. See guard.py.
+    sig: Optional[str] = None
 
 
 def _log_chat_audit(
@@ -497,7 +516,26 @@ def _chat_reply(
         blocks=blocks or [],
         answered_by=answered_by,
         language=language,
+        sig=guard.sign_turn(response),
     )
+
+
+# Shown instead of an answer that recites the rules. One sentence, back to
+# the work, which is what the rules ask the model to say in that case anyway.
+RULES_DECLINE = {
+    "en": "That's not something I share here. Ask me about my work, my projects or what I write about.",
+    "he": "את זה אני לא משתף כאן. אפשר לשאול אותי על העבודה שלי, הפרויקטים או מה שאני כותב.",
+}
+
+_rules_echo = guard.RulesEcho(RULES)
+
+
+def _checked_answer_text(text: str, language: str) -> str:
+    """The model's answer after the output checks in guard.py."""
+    if _rules_echo.matches(text):
+        logger.warning("Answer quoted the rules; replaced with a decline")
+        return RULES_DECLINE.get(language, RULES_DECLINE["en"])
+    return guard.clean_output(text)
 
 
 def _answer_trace(
@@ -687,7 +725,12 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
     try:
         # A message that is nothing but an address: the visitor is leaving it,
         # whatever the conversation was doing before.
+        # Characters a person cannot see are removed before anything reads the
+        # message, so a hidden instruction never reaches the model.
+        chat_request.message = guard.clean_input(chat_request.message)
         message = chat_request.message.strip()
+        if not message:
+            raise HTTPException(status_code=422, detail="message is empty")
         if _EMAIL_ONLY_RE.match(message):
             try:
                 email = _validated_address(message)
@@ -820,7 +863,7 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
         )
 
         return _chat_reply(
-            answer.text,
+            _checked_answer_text(answer.text, language) if answer.from_model else answer.text,
             trace=_answer_trace(answer, selection, language),
             blocks=blocks,
             answered_by="model" if answer.from_model else None,
@@ -969,13 +1012,19 @@ async def _send_contact_email(
 async def contact(request: ContactRequest, http_request: Request):
     """Sends a contact message. Rate limited per client and globally."""
     enforce_rate_limit(http_request, contact_limiter, "contact")
+    # The short reply goes to the address the visitor typed, so it is limited
+    # by that address (see rate_limit.auto_reply_limiter). Past the limit the
+    # message still reaches Yanir; only the courtesy reply is skipped.
+    reply_allowed, _ = auto_reply_limiter.check(str(request.email).lower())
+    if not reply_allowed:
+        logger.warning("Auto-reply skipped: recipient or daily limit reached")
     await _send_contact_email(
         request.email,
         request.message,
         topic=request.topic,
         route="form",
         lang=request.lang,
-        reply_to_visitor=True,
+        reply_to_visitor=reply_allowed,
     )
     return {"status": "success", "message": "Email sent successfully"}
 
@@ -983,6 +1032,13 @@ async def contact(request: ContactRequest, http_request: Request):
 # Booking a slot further ahead than this is refused before cal.com is asked:
 # the page never offers one, so such a request did not come from it.
 BOOKING_HORIZON_DAYS = 120
+
+# cal.com puts the attendee's name and notes into the confirmation it emails to
+# the attendee's address. With someone else's address typed in, a link in
+# either would arrive in a stranger's inbox inside a real calendar invite from
+# Yanir. A person booking a call has no need for one there.
+_LINK_IN_NAME = re.compile(r"https?://|www\.|[/@<>]", re.IGNORECASE)
+_LINK_IN_NOTES = re.compile(r"https?://|www\.", re.IGNORECASE)
 
 
 @app.post("/api/booking")
@@ -995,6 +1051,15 @@ async def book_call(request: BookingRequest, http_request: Request):
     now = datetime.datetime.now(datetime.timezone.utc)
     if not now < start < now + datetime.timedelta(days=BOOKING_HORIZON_DAYS):
         raise HTTPException(status_code=422, detail="start is out of range")
+    if _LINK_IN_NAME.search(request.name) or _LINK_IN_NOTES.search(request.notes or ""):
+        raise HTTPException(status_code=422, detail="links are not accepted here")
+    allowed, retry_after = booking_address_limiter.check(str(request.email).lower())
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many bookings for this address",
+            headers={"Retry-After": str(retry_after)},
+        )
     try:
         result = await run_in_threadpool(
             booking.book,

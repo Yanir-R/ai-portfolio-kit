@@ -109,4 +109,9 @@ export interface ChatMessage {
     language?: 'en' | 'he' | null;
     /** The piece the question was asked about, shown above the question. */
     context?: ChatContext | null;
+    /**
+     * The server's signature on an assistant reply, sent back with it as
+     * history. A replayed reply without one is not shown to the model.
+     */
+    sig?: string | null;
 }

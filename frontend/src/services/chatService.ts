@@ -21,6 +21,7 @@ interface ChatResponse {
     blocks?: ChatBlock[];
     answered_by?: 'model' | 'index' | null;
     language?: 'en' | 'he' | null;
+    sig?: string | null;
 }
 
 /**
@@ -88,6 +89,7 @@ export const chatService = {
                     content: msg.content,
                     is_email_collection: msg.is_email_collection,
                     email_collected: msg.email_collected,
+                    ...(msg.sig ? { sig: msg.sig } : {}),
                 })),
             };
 
@@ -117,6 +119,7 @@ export const chatService = {
                 blocks: response.data.blocks ?? [],
                 answered_by: response.data.answered_by ?? null,
                 language: response.data.language ?? null,
+                sig: response.data.sig ?? null,
             };
         } catch (error) {
             return { success: false as const, error: toChatFailure(error) };
