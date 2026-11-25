@@ -1,11 +1,11 @@
 # Trinity Agent
 
 ## Overview
-My own always-on AI assistant. It runs all day on my machine, and I talk to it in a private chat on WhatsApp or Telegram, like messaging a person. It learns how I work, does the groundwork before I ask, and checks with me only where it counts. Its memory layer is PersonaKit, my open-source memory tool. It is built on Hermes Agent, the open-source project by Nous Research, run as a private distribution with a small, named set of my own changes. It has its own site, personakit.me/trinity, where it is now in a private pilot by invitation. The repositories are private.
+My own always-on AI assistant. It runs all day on my machine, and I talk to it in a private chat on WhatsApp or Telegram, like messaging a person. It learns how I work, does the groundwork before I ask, and checks with me only where it counts. Its memory has two layers. Its own record, meaning summaries of its work, the improvements it proposes, and its measurements and performance, lives in an Obsidian vault under git and updates itself every day. PersonaKit, my open-source memory tool, manages the shared memory between all my agents and my coding assistants, such as Claude Code, so they all work from the same approved picture. It is built on Hermes Agent, the open-source project by Nous Research, run as a private distribution with a small, named set of my own changes. It has its own site, personakit.me/trinity, where it is now in a private pilot by invitation. The repositories are private.
 
 ## Technical Details
 - **Base**: Hermes Agent (open source, by Nous Research), private distribution
-- **Memory layer**: PersonaKit, plus an Obsidian vault under git
+- **Memory**: an Obsidian vault under git for the agent's own record (work summaries, improvements, measurements and performance); PersonaKit for the memory shared between my agents and Claude Code
 - **Interface**: WhatsApp and Telegram
 - **Language**: Python and shell
 - **Models**: Claude first, Codex as a fallback when quota runs out
