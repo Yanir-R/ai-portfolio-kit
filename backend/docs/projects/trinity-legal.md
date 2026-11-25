@@ -22,6 +22,23 @@ At this stage it is full-stack product work and not yet AI work, and that is on 
 - An existing archive of 56,607 files (33.8 GB) was imported with an audit trail, and a person approves what the importer could not decide
 - Six scheduled jobs handle the background work
 
+## Who may do what
+Six roles, checked on the server for every request, not just hidden on screen:
+- **Viewer**: reads matters and documents. Cannot edit, see a full ID number, delete, read the activity log or manage people.
+- **Secretary**: reads, edits, uploads and sends to clients; sees full ID numbers (every view is logged). Can only request a deletion, not delete.
+- **Lawyer**: everything a secretary can, plus deleting to the trash (restorable) and the activity log.
+- **Office manager**: everything a lawyer can, plus inviting and removing people.
+- **Firm owner**: everything, and is the only one who can open a support window for the developer.
+- **Me, the developer**: sets up people, sees the activity log without client names, and never deletes anything. The firm can limit my access to matters and documents to a support window of 4, 24 or 72 hours that only the owner opens and closes; everything I do is marked in the log.
+
+## How it is built
+People (lawyers, secretaries, the owner) work in the browser app, the Word and Excel add-on, or the firm's Gmail. Every request goes through one server that checks who you are, which firm you belong to and what you may do, and logs the action. Behind it: the database, where each firm sees only its own data (enforced in the database itself), file storage that keeps every version as uploaded, and a malware scanner that wakes on every upload. Six scheduled jobs run in the background: database backup, checking files have not changed, a second scan, and clearing stuck uploads and locks.
+
+## Three mechanisms that protect the work
+- **Nobody overwrites anybody**: a document is taken on loan, edited in Word, and the save is checked against the version it started from; if someone saved meanwhile, a separate version is kept.
+- **No file opens before a scan**: an upload stays unavailable until the scanner has passed it, with a second scan at night as a safety net.
+- **The archive moved, and a person decided the hard cases**: the import tool mapped 56,607 files (33.8 GB), a person approved the sealed plan, and 651 files the tool could not place wait for a person rather than landing in a random matter.
+
 ## Project Type
 web-app
 
@@ -30,6 +47,9 @@ production
 
 ## Repository
 Private Repository
+
+## Media
+/projects/trinity-legal.png
 
 ## Featured
 false

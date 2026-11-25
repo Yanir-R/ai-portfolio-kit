@@ -25,6 +25,9 @@ production
 ## Repository
 Private Repository
 
+## Media
+/projects/agent-fleet.png
+
 ## Featured
 false
 

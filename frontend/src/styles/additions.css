@@ -622,3 +622,897 @@
         animation: none;
     }
 }
+
+/*
+ * A main project's drawn page (ProjectPageView): numbers, a before/today
+ * table, a drawing of how it is built, who may do what, three mechanisms and
+ * what it means for the reader. Section heads reuse the home page's .head.
+ */
+.w-post.pj {
+    max-width: 1136px;
+}
+.pj .pj-head {
+    max-width: 760px;
+}
+.pj h1.pj-t {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(3rem, 7vw, 5rem);
+    line-height: 0.95;
+    margin: 6px 0 0;
+}
+.pj .pj-lede {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    margin: 14px 0 0;
+    max-width: 70ch;
+    text-wrap: pretty;
+}
+.pj .pj-lede b {
+    font-weight: 800;
+}
+.pj .pj-lede a,
+.pj-fit a,
+.pj-dev .orig a {
+    color: var(--link);
+    font-weight: 800;
+}
+.pj .head {
+    margin-bottom: var(--sp-4);
+}
+.pj .head h2 {
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    text-wrap: balance;
+}
+.pj .head p {
+    max-width: 70ch;
+}
+.pj section.pj-sec {
+    padding: 0;
+    margin: var(--sp-6) 0 0;
+}
+.pj-media {
+    margin-top: var(--sp-4);
+}
+
+/* The numbers under the title. */
+.pj-facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: var(--sp-4);
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+}
+.pj-facts > div {
+    padding: 16px 20px;
+    border-inline-start: 1px solid var(--line);
+}
+.pj-facts > div:first-child {
+    border-inline-start: 0;
+}
+.pj-facts b {
+    display: block;
+    font-family: var(--display);
+    font-size: 2.6rem;
+    line-height: 1;
+}
+.pj-facts span {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+/* 01: before and today. */
+.pj-bt {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 1.05rem;
+}
+.pj-bt th {
+    text-align: start;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    background: var(--tint);
+    border-bottom: 2px solid var(--ink);
+}
+.pj-bt th.now {
+    background: var(--act-soft);
+    color: #5e4300;
+}
+.pj-bt td {
+    padding: 14px 20px;
+    vertical-align: top;
+    line-height: 1.55;
+    border-top: 1px solid var(--line);
+}
+.pj-bt tbody tr:first-child td {
+    border-top: 0;
+}
+.pj-bt td:first-child {
+    color: var(--muted);
+    width: 38%;
+    border-inline-end: 1px dashed var(--line);
+}
+.pj-bt td b {
+    font-weight: 800;
+}
+
+/* 02: the drawing on blueprint paper. */
+.pj-bp {
+    position: relative;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 28px 24px;
+    background-color: #f6f9ff;
+    background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 28px 28px;
+}
+.pj-cols {
+    display: grid;
+    grid-template-columns: 0.8fr 1.1fr 1fr 1.2fr;
+    align-items: center;
+}
+.pj-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    padding: 0 22px;
+}
+.pj-col + .pj-col::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: -2px;
+    top: 50%;
+    width: 22px;
+    border-top: 2px solid var(--ink);
+}
+.pj-col + .pj-col::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 14px;
+    top: calc(50% - 5px);
+    border: 5px solid transparent;
+    border-inline-start: 7px solid var(--ink);
+}
+.pj-col > small,
+.pj-lane > small {
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: var(--blue);
+}
+.pj-node {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 10px 12px;
+    line-height: 1.35;
+}
+.pj-node b {
+    display: block;
+    font-size: 1.02rem;
+}
+.pj-node > span:not(.tg) {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 2px;
+}
+.pj .tg {
+    display: inline-block;
+    background: var(--blue-soft);
+    color: var(--link);
+    font-weight: 700;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+.pj-node .tg {
+    margin-top: 6px;
+}
+.pj-node.gate {
+    border-width: 3px;
+    box-shadow: 4px 4px 0 var(--btn);
+}
+.pj-node.gate b::before {
+    content: '';
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--btn);
+    border: 2px solid var(--ink);
+    margin-inline-end: 6px;
+    vertical-align: 1px;
+}
+.pj-ppl {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.pj-ppl span {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-align: center;
+}
+.pj-lane {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 14px;
+    align-items: stretch;
+}
+.pj-lane > small {
+    align-self: center;
+}
+.pj-jobs {
+    margin-top: 22px;
+    border: 2px dashed var(--ink);
+    border-radius: 8px;
+    background: var(--paper);
+    padding: 10px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
+    font-size: 0.95rem;
+}
+.pj-jobs i {
+    font-style: normal;
+    color: var(--muted);
+}
+.pj-jobs i::before {
+    content: '· ';
+}
+.pj-legend {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+/* 03: who may do what. */
+.pj-perm-wrap {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.pj-perm {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+}
+.pj-perm th,
+.pj-perm td {
+    padding: 11px 10px;
+    text-align: center;
+    border-top: 1px solid var(--line);
+}
+.pj-perm thead th {
+    border-top: 0;
+    font-size: 0.92rem;
+    line-height: 1.25;
+    background: var(--tint);
+    border-bottom: 2px solid var(--ink);
+}
+.pj-perm th.corner,
+.pj-perm th[scope='row'] {
+    text-align: start;
+    padding-inline-start: 20px;
+}
+.pj-perm th[scope='row'] {
+    font-weight: 700;
+    width: 30%;
+}
+.pj-perm th[scope='row'] small {
+    display: block;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+.pj-perm .me {
+    background: var(--act-soft);
+}
+.pj-perm thead .me {
+    background: var(--btn);
+}
+.pj .y,
+.pj .x {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-style: normal;
+    font-weight: 900;
+    font-size: 0.9rem;
+}
+.pj .y {
+    background: var(--ink);
+    color: #fff;
+}
+.pj .x {
+    border: 2px solid var(--line);
+    color: var(--muted);
+}
+.pj-perm .t {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1.2;
+    padding: 3px 7px;
+    border-radius: 4px;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+}
+.pj-perm .t.dashed {
+    border-style: dashed;
+}
+.pj-keys {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    align-items: center;
+}
+.pj-keys .y,
+.pj-keys .x {
+    width: 20px;
+    height: 20px;
+    font-size: 0.72rem;
+    vertical-align: middle;
+    margin-inline-end: 4px;
+}
+.pj-roles {
+    display: none;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+.pj-role {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 10px;
+    align-items: start;
+}
+.pj-role.me {
+    background: var(--act-soft);
+    box-shadow: 4px 4px 0 var(--btn);
+}
+.pj-role b {
+    font-size: 1rem;
+    line-height: 1.3;
+}
+.pj-role .c {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.pj-role .c span {
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--ink);
+    color: #fff;
+}
+.pj-role .c span.mid {
+    background: var(--paper);
+    color: var(--ink);
+    border: 1.5px dashed var(--ink);
+}
+.pj-role small.no {
+    grid-column: 2;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+.pj-note {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+    margin-top: var(--sp-3);
+    background: var(--ink);
+    color: #fff;
+    border-radius: 8px;
+    padding: 18px 20px;
+    box-shadow: 5px 5px 0 var(--btn);
+}
+.pj-note .k {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--btn);
+    color: var(--ink);
+    display: grid;
+    place-items: center;
+    font-family: var(--display);
+    font-size: 1.5rem;
+}
+.pj-note p {
+    margin: 0;
+    line-height: 1.6;
+    font-size: 1.05rem;
+}
+.pj-note b {
+    color: var(--btn);
+}
+
+/* 03, other shape: what happens alone, what waits, what is blocked. */
+.pj-sub {
+    margin: var(--sp-4) 0 var(--sp-3);
+    font-size: 1.15rem;
+}
+.pj-lv {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-4);
+}
+.pj-lv.four {
+    grid-template-columns: repeat(4, 1fr);
+}
+.pj-lv .col {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 18px 20px;
+}
+.pj-lv .col.ask {
+    box-shadow: 5px 5px 0 var(--btn);
+    border-width: 3px;
+}
+.pj-lv .col.no {
+    border-style: dashed;
+    background: transparent;
+}
+.pj-lv h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.pj-lv .lvp {
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.pj-lv .self .lvp {
+    background: var(--ink);
+    color: #fff;
+}
+.pj-lv .ask .lvp {
+    background: var(--btn);
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+}
+.pj-lv .no .lvp {
+    border: 1.5px solid var(--line);
+    color: var(--muted);
+}
+.pj-lv .col > p {
+    margin: 6px 0 12px;
+    color: var(--muted);
+    line-height: 1.5;
+}
+.pj-lv ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.pj-lv li {
+    border-top: 1px solid var(--line);
+    padding-top: 8px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+.pj-lv li:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+.pj-lv li small {
+    display: block;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+/* 04: three mechanisms, each a line of steps. */
+.pj-mech {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-4);
+}
+.pj-m {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 20px;
+}
+.pj-m h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.pj-m h3 i,
+.pj-road b.s {
+    font-style: normal;
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--btn);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    font-size: 0.95rem;
+    font-weight: 900;
+    flex: none;
+}
+.pj-m > p {
+    margin: 8px 0 14px;
+    color: var(--muted);
+    line-height: 1.55;
+}
+.pj-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.pj-steps li {
+    position: relative;
+    padding: 0 0 14px;
+    padding-inline-start: 26px;
+    font-weight: 700;
+    font-size: 0.97rem;
+    line-height: 1.35;
+}
+.pj-steps li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 4px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+}
+.pj-steps li::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 10px;
+    top: 19px;
+    bottom: 0;
+    border-inline-start: 2px solid var(--ink);
+}
+.pj-steps li:last-child {
+    padding-bottom: 0;
+}
+.pj-steps li:last-child::after {
+    display: none;
+}
+.pj-steps li.ok::before {
+    background: var(--btn);
+}
+.pj-steps li small {
+    display: block;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+.pj-steps .fork {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+.pj-steps .fork span {
+    font-size: 0.8rem;
+    font-weight: 800;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    padding: 2px 7px;
+    background: var(--paper);
+}
+.pj-steps .fork span.g {
+    background: var(--act-soft);
+}
+
+/* 05: what it means for the reader, and how I build. */
+.pj-fit {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--sp-4);
+}
+.pj-fit .card {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 22px;
+}
+.pj-fit h3 {
+    margin: 0 0 8px;
+    font-size: 1.25rem;
+}
+.pj-fit p {
+    margin: 0;
+    line-height: 1.65;
+    max-width: 70ch;
+}
+.pj-fit ul {
+    margin: 10px 0 0;
+    padding-inline-start: 1.1em;
+    line-height: 1.7;
+}
+.pj-fit p.extra {
+    margin-top: 10px;
+}
+.pj-road {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.pj-road li {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 12px;
+    align-items: start;
+}
+.pj-road p {
+    line-height: 1.45;
+}
+.pj-road p b,
+.pj-road p span {
+    display: block;
+}
+.pj-road p span {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-top: 2px;
+}
+
+/* For developers: the stack, folded. */
+.pj-dev {
+    margin-top: var(--sp-6);
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+}
+.pj-dev summary {
+    cursor: pointer;
+    padding: 16px 20px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+}
+.pj-dev summary::-webkit-details-marker {
+    display: none;
+}
+.pj-dev summary::after {
+    content: '+';
+    font-size: 1.3rem;
+    line-height: 1;
+}
+.pj-dev[open] summary::after {
+    content: '–';
+}
+.pj-dev .in {
+    padding: 0 20px 18px;
+}
+.pj-dev .in .mt {
+    margin: 0;
+}
+.pj-dev .orig {
+    margin-top: 12px;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+.pj .w-end {
+    margin-top: var(--sp-5);
+}
+
+@media (max-width: 900px) {
+    .pj-lv.four {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 640px) {
+    .pj h1.pj-t {
+        font-size: 3.2rem;
+    }
+    .pj .pj-lede {
+        font-size: 1.08rem;
+    }
+    .pj .head {
+        margin-bottom: var(--sp-3);
+    }
+    .pj section.pj-sec {
+        margin-top: var(--sp-5);
+    }
+    .pj-facts {
+        grid-template-columns: 1fr;
+    }
+    .pj-facts > div {
+        border-inline-start: 0;
+        border-top: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 12px;
+        align-items: center;
+        padding: 12px 16px;
+    }
+    .pj-facts > div:first-child {
+        border-top: 0;
+    }
+    .pj-facts b {
+        font-size: 2rem;
+    }
+    .pj-facts span {
+        margin: 0;
+    }
+    /* Before and today become stacked pairs, each labelled. */
+    .pj-bt,
+    .pj-bt tbody,
+    .pj-bt tr,
+    .pj-bt td {
+        display: block;
+        width: auto;
+    }
+    .pj-bt thead {
+        display: none;
+    }
+    .pj-bt tbody tr {
+        padding: 12px 16px;
+        border-top: 1px solid var(--line);
+    }
+    .pj-bt tbody tr:first-child {
+        border-top: 0;
+    }
+    .pj-bt td,
+    .pj-bt td:first-child {
+        padding: 0;
+        border: 0;
+        width: auto;
+    }
+    .pj-bt td:first-child {
+        font-size: 0.92rem;
+        margin-bottom: 6px;
+    }
+    .pj-bt td:first-child::before {
+        content: attr(data-label) ': ';
+        font-weight: 800;
+    }
+    .pj-bt td:last-child::before {
+        content: attr(data-label);
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 800;
+        background: var(--act-soft);
+        color: #5e4300;
+        padding: 1px 6px;
+        border-radius: 4px;
+        margin-inline-end: 6px;
+        vertical-align: 2px;
+    }
+    /* The drawing runs top to bottom. */
+    .pj-bp {
+        padding: 16px;
+    }
+    .pj-cols {
+        grid-template-columns: 1fr;
+        gap: 26px;
+    }
+    .pj-col {
+        padding: 0;
+    }
+    .pj-col + .pj-col::before {
+        inset-inline-start: 50%;
+        top: -24px;
+        width: 0;
+        height: 18px;
+        border-top: 0;
+        border-inline-start: 2px solid var(--ink);
+    }
+    .pj-col + .pj-col::after {
+        inset-inline-start: calc(50% - 4px);
+        top: -9px;
+        border: 5px solid transparent;
+        border-top: 7px solid var(--ink);
+    }
+    .pj-ppl {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .pj-ppl span {
+        flex: 1;
+        white-space: nowrap;
+        font-size: 0.88rem;
+        padding: 6px 8px;
+    }
+    .pj-lane {
+        grid-template-columns: 1fr;
+    }
+    /* A wide matrix becomes one card per role; a narrow one stays a table. */
+    .pj-perm-wrap.cards {
+        display: none;
+    }
+    .pj-perm-wrap.cards ~ .pj-roles {
+        display: flex;
+    }
+    .pj-perm-wrap.cards ~ .pj-keys .k {
+        display: none;
+    }
+    .pj-perm th,
+    .pj-perm td {
+        padding: 9px 6px;
+        font-size: 0.9rem;
+    }
+    .pj-perm th.corner,
+    .pj-perm th[scope='row'] {
+        padding-inline-start: 12px;
+        width: 40%;
+    }
+    .pj-perm .t {
+        font-size: 0.74rem;
+        padding: 2px 5px;
+    }
+    .pj-note {
+        padding: 16px;
+    }
+    .pj-note .k {
+        width: 30px;
+        height: 30px;
+        font-size: 1.2rem;
+    }
+    .pj-note p {
+        font-size: 1rem;
+    }
+    .pj-lv,
+    .pj-lv.four,
+    .pj-mech,
+    .pj-fit {
+        grid-template-columns: 1fr;
+        gap: var(--sp-3);
+    }
+    .pj-lv .col {
+        padding: 14px 16px;
+    }
+}

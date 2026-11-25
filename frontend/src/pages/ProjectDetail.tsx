@@ -8,6 +8,8 @@ import { ArticleSkeleton } from '@/components/site/Skeleton';
 import { ERRORS } from '@/copy/errors';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { PersonaKitLinks } from '@/components/chat/sheets/parts';
+import ProjectPageView from '@/components/site/ProjectPageView';
+import { PROJECT_PAGES } from '@/content/projectPages';
 import { Tag } from '@/components/writing/parts';
 import { useLoad } from '@/hooks/useLoad';
 import { useLang } from '@/i18n/useLang';
@@ -68,27 +70,78 @@ const ProjectDetail: React.FC = () => {
     const repository = publicRepository(project.repository);
     const body = bodyOf(project.content);
 
+    const page = PROJECT_PAGES[project.slug]?.[lang];
+    const mediaView =
+        media &&
+        (projectService.isVideoFile(media) ? (
+            <video className="w-v" src={media} controls preload="metadata" />
+        ) : (
+            <span className="w-imgw">
+                <img className="w-img" src={media} alt="" />
+            </span>
+        ));
+    const end = (
+        <div className="w-end">
+            <b>{page?.cta ?? copy.cta.title}</b>
+            <span className="ac">
+                <Link
+                    className="w-chip"
+                    to={to('/')}
+                    state={{ ask: copy.cta.prompt(project.title) }}
+                >
+                    {copy.cta.ask}
+                </Link>
+                <button
+                    type="button"
+                    className="btn sm"
+                    onClick={() => openContact({ kind: 'call', topic: project.title })}
+                >
+                    {copy.cta.button}
+                </button>
+            </span>
+        </div>
+    );
+    const tags = (
+        <div className="mt">
+            <Tag tone="a">{copy.status[project.status] ?? project.status}</Tag>
+            {project.category && (
+                <Tag tone="n">{copy.category[project.category] ?? project.category}</Tag>
+            )}
+        </div>
+    );
+
+    // A main project has a drawn page: numbers, tables and a drawing of how it
+    // is built. Its write-up still feeds the chat; the page says the same in pictures.
+    if (page)
+        return (
+            <article className="w-post pj">
+                <Link className="w-back" to={to('/projects')}>
+                    {ARROW[lang === 'he' ? 'en' : 'he']} {copy.back}
+                </Link>
+                <div className="pj-head">
+                    {tags}
+                    <h1 className="pj-t" dir="auto">
+                        {page.title ?? project.title}
+                    </h1>
+                    <p className="pj-lede">{page.lede}</p>
+                </div>
+                <ProjectPageView
+                    page={page}
+                    media={mediaView && <div className="pj-media">{mediaView}</div>}
+                />
+                {end}
+            </article>
+        );
+
     return (
         <article className="w-post">
             <Link className="w-back" to={to('/projects')}>
                 {ARROW[lang === 'he' ? 'en' : 'he']} {copy.back}
             </Link>
-            <div className="mt">
-                <Tag tone="a">{copy.status[project.status] ?? project.status}</Tag>
-                {project.category && (
-                    <Tag tone="n">{copy.category[project.category] ?? project.category}</Tag>
-                )}
-            </div>
+            {tags}
             <h1 dir="auto">{project.title}</h1>
             {project.overview && <p className="by">{project.overview}</p>}
-            {media &&
-                (projectService.isVideoFile(media) ? (
-                    <video className="w-v" src={media} controls preload="metadata" />
-                ) : (
-                    <span className="w-imgw">
-                        <img className="w-img" src={media} alt="" />
-                    </span>
-                ))}
+            {mediaView}
             <div className="w-body" dir="auto">
                 {body && <Markdown>{body}</Markdown>}
                 {project.slug === 'personakit' && <PersonaKitLinks />}
@@ -119,25 +172,7 @@ const ProjectDetail: React.FC = () => {
                     )}
                 </div>
             </div>
-            <div className="w-end">
-                <b>{copy.cta.title}</b>
-                <span className="ac">
-                    <Link
-                        className="w-chip"
-                        to={to('/')}
-                        state={{ ask: copy.cta.prompt(project.title) }}
-                    >
-                        {copy.cta.ask}
-                    </Link>
-                    <button
-                        type="button"
-                        className="btn sm"
-                        onClick={() => openContact({ kind: 'call', topic: project.title })}
-                    >
-                        {copy.cta.button}
-                    </button>
-                </span>
-            </div>
+            {end}
         </article>
     );
 };
