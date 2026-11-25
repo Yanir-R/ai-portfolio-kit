@@ -195,9 +195,10 @@ const BookingFlow: React.FC<Props> = ({ topic, onBooked, onClose }) => {
                 <dl className="bk-sum">
                     <dt>{copy.when}</dt>
                     <dd>
-                        {fmt.dayYear.format(noon(day))} ·{' '}
-                        <span className="nw" dir="ltr">
-                            {clock(start)}–{clock(end)}
+                        {fmt.dayYear.format(noon(day))}
+                        <span className="sep"> · </span>
+                        <span className="tm">
+                            {clock(start)} {copy.until} {clock(end)}
                         </span>
                     </dd>
                     <dt>{copy.where}</dt>

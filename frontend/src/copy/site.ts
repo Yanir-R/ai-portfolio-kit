@@ -175,6 +175,8 @@ export interface BookingCopy {
     withValue: string;
     subject: string;
     addToCalendar: string;
+    /** Between two times; a dash reads in the wrong order inside Hebrew. */
+    until: string;
     close: string;
     doneFine: string;
     eventTitle: string;
@@ -225,6 +227,7 @@ export const CONTACT: Localized<ContactCopy> = {
             withValue: 'יניר רוט',
             subject: 'נושא',
             addToCalendar: 'הוספה ליומן',
+            until: 'עד',
             close: 'סגירה',
             doneFine: 'צריך לשנות? במייל האישור יש קישור לשינוי מועד ולביטול.',
             eventTitle: 'שיחת אבחון עם יניר רוט',
@@ -291,6 +294,7 @@ export const CONTACT: Localized<ContactCopy> = {
             withValue: 'Yanir Rot',
             subject: 'Subject',
             addToCalendar: 'Add to calendar',
+            until: 'to',
             close: 'Close',
             doneFine:
                 'Need to change it? The confirmation email has links to reschedule or cancel.',

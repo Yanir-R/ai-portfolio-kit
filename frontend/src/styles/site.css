@@ -8174,8 +8174,20 @@ video.w-v {
 .talk .tt[hidden] {
     display: none;
 }
-/* Close and Back are not ways onward: no arrow on them in either direction. */
-.talk .bk-row .btn.sec::after,
-[dir] .talk .bk-row .btn.sec::after {
+/* The booking buttons carry no arrow in either language. */
+.talk .bk-row .btn::after,
+[dir] .talk .bk-row .btn::after {
     content: none;
+}
+.bk-sum .tm {
+    white-space: nowrap;
+}
+/* On a phone the time goes on its own line, so no dot hangs at a line edge. */
+@media (max-width: 640px) {
+    .bk-sum .sep {
+        display: none;
+    }
+    .bk-sum .tm {
+        display: block;
+    }
 }
