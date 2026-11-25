@@ -5,7 +5,7 @@ import { BOOKING_TIME_ZONE } from '@/constants/booking';
 import { LINKS } from '@/constants/links';
 import { useLang } from '@/i18n/useLang';
 import { useTurnstile } from '@/hooks/useTurnstile';
-import { nextOnEnter } from '@/hooks/useKeyboardFit';
+import { nextOnEnter, pinned } from '@/hooks/useKeyboardFit';
 import { Booked, bookingService, Slot, SlotsByDay } from '@/services/bookingService';
 
 /*
@@ -147,7 +147,9 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
     // A refusal is shown where it can be read, keyboard or not.
     const errorRef = useRef<HTMLParagraphElement>(null);
     useEffect(() => {
-        if (error) errorRef.current?.scrollIntoView({ block: 'nearest' });
+        // Pinned above the phone keyboard, the error is already in view.
+        if (error && !pinned(errorRef.current))
+            errorRef.current?.scrollIntoView({ block: 'nearest' });
     }, [error]);
 
     // The free slots of the weeks on show, from today on.

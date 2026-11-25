@@ -5,7 +5,7 @@ import QrCode from '@/components/site/QrCode';
 import BookingFlow from '@/components/site/BookingFlow';
 import { useLang } from '@/i18n/useLang';
 import { useTurnstile } from '@/hooks/useTurnstile';
-import { nextOnEnter, useKeyboardFit } from '@/hooks/useKeyboardFit';
+import { nextOnEnter, pinned, useKeyboardFit } from '@/hooks/useKeyboardFit';
 import { PHONE_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
 import { contactService } from '@/services/contactService';
 import { ContactRequest } from '@/components/site/SiteDialogs';
@@ -164,7 +164,8 @@ const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topi
     // The outcome is shown where it can be read, keyboard or not.
     const noteRef = useRef<HTMLSpanElement>(null);
     useEffect(() => {
-        if (state !== 'idle') noteRef.current?.scrollIntoView({ block: 'nearest' });
+        if (state !== 'idle' && !pinned(noteRef.current))
+            noteRef.current?.scrollIntoView({ block: 'nearest' });
     }, [state]);
 
     const submit = async (event: React.FormEvent) => {

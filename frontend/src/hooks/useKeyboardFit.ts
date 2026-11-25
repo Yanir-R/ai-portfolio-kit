@@ -119,7 +119,27 @@ export const useKeyboardFit = (ref: React.RefObject<HTMLElement | null>, enabled
             window.clearTimeout(timer);
             timer = window.setTimeout(centre, SETTLE_MS);
         };
+        // A form that changes height (an error or a result above the pinned
+        // button, a field that grew) settles again around the focused field.
+        const resized = new ResizeObserver((entries) => {
+            if (!box.hasAttribute('data-kb')) return;
+            const field = document.activeElement;
+            for (const { target: form } of entries) {
+                if (!(form instanceof HTMLElement) || !form.offsetParent) continue;
+                // The focused field, or (once a tap on the button moved focus
+                // away) the form's last field, stays in view.
+                const target =
+                    field instanceof HTMLElement &&
+                    form.contains(field) &&
+                    field.matches('input, textarea, select')
+                        ? (field.closest('label') ?? field)
+                        : form.querySelector('label:last-of-type');
+                if (target) settle(target);
+            }
+        });
+        const watchForms = () => box.querySelectorAll('form').forEach((f) => resized.observe(f));
         const onFocus = () => {
+            watchForms();
             growAll();
             window.clearTimeout(timer);
             timer = window.setTimeout(centre, SETTLE_MS);
@@ -130,12 +150,14 @@ export const useKeyboardFit = (ref: React.RefObject<HTMLElement | null>, enabled
         vv.addEventListener('scroll', fit);
         box.addEventListener('focusin', onFocus);
         box.addEventListener('input', onInput);
+        watchForms();
         return () => {
             window.clearTimeout(timer);
             vv.removeEventListener('resize', fit);
             vv.removeEventListener('scroll', fit);
             box.removeEventListener('focusin', onFocus);
             box.removeEventListener('input', onInput);
+            resized.disconnect();
             box.removeAttribute('data-kb');
             box.style.removeProperty('--vv-h');
             box.style.removeProperty('--vv-top');
@@ -157,4 +179,11 @@ export const nextOnEnter = (event: React.KeyboardEvent<HTMLFormElement>) => {
     if (!next) return;
     event.preventDefault();
     next.focus();
+};
+
+/** Whether an element sits in a pinned (sticky) strip, so it is always in view. */
+export const pinned = (el: Element | null) => {
+    for (let at = el; at; at = at.parentElement)
+        if (getComputedStyle(at).position === 'sticky') return true;
+    return false;
 };
