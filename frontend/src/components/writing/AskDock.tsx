@@ -29,6 +29,7 @@ type Turn =
           blocks: ChatBlock[];
           sources: TraceSource[];
           fromPiece: boolean;
+          sig?: string | null;
       }
     | { id: number; kind: 'error'; text: string };
 
@@ -70,7 +71,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
         turns.flatMap((turn): ChatMessage[] => {
             if (turn.kind === 'q') return [{ type: 'user', content: turn.text }];
             if (turn.kind === 'answer')
-                return [{ type: 'ai', content: turn.text, blocks: turn.blocks }];
+                return [{ type: 'ai', content: turn.text, blocks: turn.blocks, sig: turn.sig }];
             return [];
         });
 
@@ -100,6 +101,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
             blocks: result.blocks,
             sources: result.trace?.sources ?? [],
             fromPiece: !!context,
+            sig: result.sig,
         });
     };
 

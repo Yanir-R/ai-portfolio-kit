@@ -9,6 +9,7 @@ import Blog from '@/pages/Blog';
 import WritingDetail from '@/pages/WritingDetail';
 import Projects from '@/pages/Projects';
 import ProjectDetail from '@/pages/ProjectDetail';
+import NotFound from '@/pages/NotFound';
 
 /*
  * Every page exists in both languages: Hebrew at the root, English under /en.
@@ -33,6 +34,8 @@ const App: React.FC = () => (
                     {PAGES.map((page) => (
                         <Route key={page.path} path={page.path} element={page.element} />
                     ))}
+                    {/* Any other address in this language: the site's 404 page. */}
+                    <Route path="*" element={<NotFound />} />
                 </Route>
             ))}
         </Routes>

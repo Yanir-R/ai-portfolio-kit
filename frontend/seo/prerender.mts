@@ -41,6 +41,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import Markdown from 'react-markdown';
 import { HOME_SHARE, PERSON, PERSONAKIT, siteGraph } from './facts.mjs';
 import { pageTitle, SECTION_TITLE, SITE_NAME } from '../src/copy/routes';
+import { ERRORS } from '../src/copy/errors';
 
 // Section headings that are metadata rather than prose, per docs_helper.py.
 // PROJECT_METADATA_SECTIONS and WRITING_SECTIONS there; keep in step.
@@ -640,6 +641,46 @@ export const renderPage = (indexHtml: string, page: Page, siteUrl: string) => {
                 `<!-- seo:head:start -->\n        ${headFor(page, siteUrl)}\n        <!-- seo:head:end -->`
         )
         .replace(ROOT, () => `<div id="root">${page.body}</div>`);
+};
+
+/**
+ * The 404 page of one language, written to 404.html (Hebrew) and en/404.html.
+ *
+ * Its existence is what turns Cloudflare Pages from single-page-app mode,
+ * where every unknown address is answered 200 with the home page, to answering
+ * an unknown address with the nearest 404.html and a real 404 status. Every
+ * real route already has its own prerendered file (buildPages), so nothing
+ * needs the old catch-all; a missing /assets/ file now gets a 404 that cannot
+ * be cached as a script, and a crawler is told the truth.
+ *
+ * No canonical and no hreflang: it is not a page, and it is never in the
+ * sitemap. The app boots on it as on any page and draws the same 404 inside
+ * the site's frame.
+ */
+export const renderNotFound = (indexHtml: string, lang: Lang) => {
+    if (!HEAD_BLOCK.test(indexHtml) || !HTML_TAG.test(indexHtml) || !indexHtml.includes(ROOT)) {
+        throw new Error(
+            'index.html is missing the seo:head markers, the <html lang> tag or the empty #root'
+        );
+    }
+    const copy = ERRORS[lang].notFound;
+    const e = escapeHtml;
+    const head = [
+        `<title>${e(copy.docTitle)}</title>`,
+        '<meta name="robots" content="noindex" />',
+    ].join('\n        ');
+    const home = localPath(lang, '/');
+    const body = shell(
+        lang,
+        `<h1>${e(copy.title)}</h1><p>${e(copy.text)} <a href="${home}">${e(copy.home)}</a></p>`
+    );
+    return indexHtml
+        .replace(HTML_TAG, `<html lang="${lang}" dir="${DIR[lang]}">`)
+        .replace(
+            HEAD_BLOCK,
+            () => `<!-- seo:head:start -->\n        ${head}\n        <!-- seo:head:end -->`
+        )
+        .replace(ROOT, () => `<div id="root">${body}</div>`);
 };
 
 /** Every address in both languages, each listing its twin (Google's sitemap hreflang form). */

@@ -362,3 +362,58 @@
     display: grid;
     gap: 4px;
 }
+
+/*
+ * The 404 page and the crash screen: the blog's page hero (.w-hero) with a row
+ * of ways on. The first is the site's yellow button; the rest are plain links
+ * in the link colour, like the hero's other links.
+ */
+.err-page {
+    padding-bottom: 40px;
+}
+.err-page p {
+    margin-bottom: 18px;
+}
+.err-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 22px;
+}
+.err-links a:not(.btn),
+.err-links button:not(.btn) {
+    font: inherit;
+    font-weight: 800;
+    color: var(--link);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.err-links a:not(.btn):focus-visible,
+.err-links button:not(.btn):focus-visible {
+    outline: 3px solid var(--btn);
+    outline-offset: 2px;
+}
+/* The whole-app fallback has no frame around it, so it brings its own margins. */
+.err-bare {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 64px 20px;
+    font-family: var(--body);
+    color: var(--ink);
+}
+.err-bare h1 {
+    font-family: var(--display);
+    font-size: clamp(2.6rem, 8vw, 4.4rem);
+    line-height: 1;
+    margin: 6px 0 18px;
+}
+@media (max-width: 760px) {
+    .err-page.w-hero {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}

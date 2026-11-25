@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { NotFoundError } from '@/api/client';
 
-export type Load<T> = { state: 'loading' } | { state: 'ready'; value: T } | { state: 'failed' };
+/** `notFound` is a 404 from the server; any other failure may succeed on a retry. */
+export type Load<T> =
+    { state: 'loading' } | { state: 'ready'; value: T } | { state: 'failed'; notFound: boolean };
 
 /**
  * One fetch, keyed: a new key (another slug or language) starts over, and
@@ -25,7 +28,12 @@ export const useLoad = <T>(key: string, fetch: () => Promise<T>): [Load<T>, () =
         let cancelled = false;
         fetchRef.current().then(
             (value) => !cancelled && setLoad({ key: full, value: { state: 'ready', value } }),
-            () => !cancelled && setLoad({ key: full, value: { state: 'failed' } })
+            (error: unknown) =>
+                !cancelled &&
+                setLoad({
+                    key: full,
+                    value: { state: 'failed', notFound: error instanceof NotFoundError },
+                })
         );
         return () => {
             cancelled = true;

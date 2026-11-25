@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useLoad } from '@/hooks/useLoad';
 import { CONTACT } from '@/copy/site';
 import { BOOKING_TIME_ZONE } from '@/constants/booking';
@@ -126,6 +126,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
         return { y, m: m - 1 };
     });
     const [day, setDay] = useState<string | null>(null);
+    const timesRef = useRef<HTMLDivElement>(null);
     const [slot, setSlot] = useState<Slot | null>(null);
     const [step, setStep] = useState<Step>('time');
     const [name, setName] = useState('');
@@ -210,7 +211,14 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
             setError(copy.taken);
             return;
         }
-        setError(copy.bookFailed);
+        // Each refusal says what to do next; see BookFailure.
+        const message = {
+            unverified: copy.unverified,
+            busy: copy.busy(outcome.retryAfter),
+            invalid: copy.invalid,
+            failed: copy.bookFailed,
+        }[outcome.reason];
+        setError(message);
     };
 
     const when = slot && day ? `${fmt.day.format(noon(day))} · ${clock(slot.start)}` : '';
@@ -332,18 +340,25 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             onChange={(e) => setNotes(e.target.value)}
                         />
                     </label>
-                    {error && (
-                        <p className="bk-err" role="alert">
-                            {error}
-                        </p>
-                    )}
-                    <div className="bk-row">
-                        <button type="submit" className="btn" disabled={sending}>
-                            {sending ? copy.sending : copy.submit}
-                        </button>
-                        <button type="button" className="btn sec" onClick={() => setStep('time')}>
-                            {copy.back}
-                        </button>
+                    {/* Pinned to the window's foot, so an error never pushes the buttons out of view. */}
+                    <div className="bk-foot">
+                        {error && (
+                            <p className="bk-err" role="alert">
+                                {error}
+                            </p>
+                        )}
+                        <div className="bk-row">
+                            <button type="submit" className="btn" disabled={sending}>
+                                {sending ? copy.sending : copy.submit}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn sec"
+                                onClick={() => setStep('time')}
+                            >
+                                {copy.back}
+                            </button>
+                        </div>
                     </div>
                     <small className="fine">{copy.fine}</small>
                 </form>
@@ -413,6 +428,13 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                                     onClick={() => {
                                         setDay(key);
                                         setError(null);
+                                        // On a phone the times open under the calendar.
+                                        requestAnimationFrame(() =>
+                                            timesRef.current?.scrollIntoView({
+                                                block: 'nearest',
+                                                behavior: 'smooth',
+                                            })
+                                        );
                                     }}
                                 >
                                     {Number(key.slice(8))}
@@ -434,7 +456,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                         </button>
                     </div>
                 )}
-                <div className="bk-sl">
+                <div className="bk-sl" ref={timesRef}>
                     {day ? (
                         <strong className="only-wide">{fmt.day.format(noon(day))}</strong>
                     ) : null}

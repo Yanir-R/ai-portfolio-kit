@@ -122,6 +122,22 @@ MAX_OUTPUT_TOKENS = 1_500
 # that one model is asked again without it (see get_gemini_response).
 THINKING_LEVEL = types.ThinkingLevel.LOW
 
+# Gemini's content filters, set explicitly rather than left to the model's
+# default, which for recent models is to block nothing. Every answer here is
+# published in Yanir's voice, so a reply that a filter would flag is one he
+# would not have written; blocking at medium likelihood costs a real visitor
+# nothing. A blocked reply arrives with no text and is answered with
+# EMPTY_RESPONSE_MESSAGE.
+SAFETY_SETTINGS = [
+    types.SafetySetting(category=category, threshold=types.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
+    for category in (
+        types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+        types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    )
+]
+
 # One client per API key for the life of the process.
 #
 # Building a client per request also builds a new HTTP connection pool per
@@ -239,6 +255,7 @@ def get_gemini_response(
     config = types.GenerateContentConfig(
         system_instruction=system_instruction,
         max_output_tokens=MAX_OUTPUT_TOKENS,
+        safety_settings=SAFETY_SETTINGS,
         thinking_config=types.ThinkingConfig(thinking_level=THINKING_LEVEL),
     )
     # The same request at the model's default thinking level, for a model that
@@ -246,6 +263,7 @@ def get_gemini_response(
     plain_config = types.GenerateContentConfig(
         system_instruction=system_instruction,
         max_output_tokens=MAX_OUTPUT_TOKENS,
+        safety_settings=SAFETY_SETTINGS,
     )
     contents = build_contents(user_question, conversation_history)
 

@@ -69,6 +69,21 @@ def reset_model_cooldowns():
 
 
 @pytest.fixture(autouse=True)
+def fresh_recipient_limits(monkeypatch):
+    # The per-recipient limits remember addresses for a day, and the tests reuse
+    # the same few addresses, so each test starts with empty ones.
+    import main
+    from rate_limit import DAY_SECONDS, SlidingWindowLimiter
+
+    monkeypatch.setattr(
+        main, "auto_reply_limiter", SlidingWindowLimiter(1, 40, DAY_SECONDS)
+    )
+    monkeypatch.setattr(
+        main, "booking_address_limiter", SlidingWindowLimiter(2, 20, DAY_SECONDS)
+    )
+
+
+@pytest.fixture(autouse=True)
 def reset_gemini_clients():
     # The client is kept per process, so without this the first test's stub
     # would answer for every test after it.

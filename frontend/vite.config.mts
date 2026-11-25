@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { siteConfig } from './site.config';
-import { buildPages, renderPage, sitemap, llmsTxt } from './seo/prerender.mjs';
+import { buildPages, renderNotFound, renderPage, sitemap, llmsTxt } from './seo/prerender.mjs';
 import { siteGraph } from './seo/facts.mjs';
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 
@@ -302,6 +302,11 @@ const emitDiscoveryFiles = (siteUrl: string, backendUrl: string, avatarUrl: stri
             mkdirSync(path.dirname(out), { recursive: true });
             writeFileSync(out, renderPage(indexHtml, page, siteUrl));
         }
+        // One 404 page per language. Pages serves the nearest 404.html with a
+        // 404 status, so /en/anything gets the English one. See renderNotFound.
+        writeFileSync(path.join(dir, '404.html'), renderNotFound(indexHtml, 'he'));
+        mkdirSync(path.join(dir, 'en'), { recursive: true });
+        writeFileSync(path.join(dir, 'en', '404.html'), renderNotFound(indexHtml, 'en'));
     },
 });
 

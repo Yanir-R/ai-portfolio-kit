@@ -16,6 +16,7 @@ from conftest import ApiError
 
 import context
 import gemini_helper
+import guard
 import main
 import prompt
 import selection
@@ -210,7 +211,9 @@ def test_clicked_quick_replies_are_attributed_to_the_visitor():
     turns = main._to_model_turns(
         [
             main.ChatMessage(type="quick", content="Tell me about your experience"),
-            main.ChatMessage(type="ai", content="I've been at..."),
+            main.ChatMessage(
+                type="ai", content="I've been at...", sig=guard.sign_turn("I've been at...")
+            ),
         ]
     )
 

@@ -7,6 +7,7 @@ import LangOffer from '@/components/site/LangOffer';
 import SiteFooter, { HireBand } from '@/components/site/SiteFooter';
 import { CALL_HASH, SiteDialogsProvider, useSiteDialogs } from '@/components/site/SiteDialogs';
 import { CV_HASH } from '@/components/site/CvDialog';
+import { ErrorBoundary } from '@/components/site/ErrorBoundary';
 
 /*
  * The frame of every page: top bar, the page, the hiring band and the footer.
@@ -66,6 +67,16 @@ const ScrollOnNavigate: React.FC = () => {
     return null;
 };
 
+/** The page, guarded: a page that throws shows the crash screen inside the frame. */
+const GuardedPage: React.FC = () => {
+    const { pathname } = useLocation();
+    return (
+        <ErrorBoundary key={pathname}>
+            <Outlet />
+        </ErrorBoundary>
+    );
+};
+
 const SiteLayout: React.FC = () => (
     <SiteDialogsProvider>
         <DocumentLang />
@@ -73,7 +84,7 @@ const SiteLayout: React.FC = () => (
         <LangOffer />
         <div className="wrap">
             <SiteNav />
-            <Outlet />
+            <GuardedPage />
             <HireBand />
             <SiteFooter />
         </div>

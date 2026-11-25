@@ -19,7 +19,42 @@ export interface Booked {
     end: string;
 }
 
-export type BookOutcome = { ok: true; booking: Booked } | { ok: false; reason: 'taken' | 'failed' };
+/*
+ * Why a booking did not go through, as a code: BookingFlow words it in the
+ * page's language. Each one tells the visitor something different to do.
+ *  - taken: the slot is gone (409), or it is already in the past (a 422 about
+ *    `start`): pick another time.
+ *  - unverified: the Worker's bot check refused it (403): send again.
+ *  - busy: rate limited (429): wait, for `retryAfter` seconds when known.
+ *  - invalid: the details were refused (any other 422): check name and email.
+ *  - failed: the server or the network failed (5xx, no answer): try again,
+ *    or book on cal.com directly.
+ */
+export type BookFailure = 'taken' | 'unverified' | 'busy' | 'invalid' | 'failed';
+
+export type BookOutcome =
+    { ok: true; booking: Booked } | { ok: false; reason: BookFailure; retryAfter?: number };
+
+const toBookFailure = (error: unknown): { reason: BookFailure; retryAfter?: number } => {
+    if (!axios.isAxiosError(error) || !error.response) return { reason: 'failed' };
+    const { status, data, headers } = error.response;
+    if (status === 409) return { reason: 'taken' };
+    if (status === 403) return { reason: 'unverified' };
+    if (status === 429) {
+        const retryAfter = Number(headers?.['retry-after']);
+        return {
+            reason: 'busy',
+            retryAfter: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
+        };
+    }
+    if (status === 422) {
+        // The backend's own 422s name the field; a stale start time is a slot
+        // problem, not a typo. FastAPI's validation 422 has a list as `detail`.
+        const detail = typeof data?.detail === 'string' ? data.detail : '';
+        return { reason: detail.startsWith('start') ? 'taken' : 'invalid' };
+    }
+    return { reason: 'failed' };
+};
 
 export interface BookingDetails {
     start: string;
@@ -57,8 +92,7 @@ export const bookingService = {
             return { ok: true, booking: data.booking };
         } catch (error) {
             console.error('Booking failed:', error);
-            const taken = axios.isAxiosError(error) && error.response?.status === 409;
-            return { ok: false, reason: taken ? 'taken' : 'failed' };
+            return { ok: false, ...toBookFailure(error) };
         }
     },
 };

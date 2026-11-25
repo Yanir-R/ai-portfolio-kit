@@ -97,7 +97,7 @@ Optional:
 | `FRONTEND_PROD_URL`, `FRONTEND_DEV_URL`, `FRONTEND_VITE_URL` | Individual origins |
 | `ORIGIN_SHARED_SECRET` | The edge Worker's `EDGE_SECRET`. Unset means "do not enforce" |
 
-Localhost origins are always allowed. There is no wildcard origin — `allow_credentials` is enabled, so the allowlist stays explicit.
+Localhost origins are always allowed. There is no wildcard origin; the allowlist stays explicit. The CORS answer allows `GET` and `POST` only and never allows credentials: the site sends no cookies, so no page needs them (see `tests/test_cors.py`).
 
 ### The edge secret
 
