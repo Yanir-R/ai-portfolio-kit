@@ -12,7 +12,7 @@ import { useSiteDialogs } from '@/components/site/SiteDialogs';
 const SiteNav: React.FC = () => {
     const { t, to } = useLang();
     const copy = t(NAV);
-    const { openCv, openContact } = useSiteDialogs();
+    const { openContact } = useSiteDialogs();
     const [open, setOpen] = useState(false);
     const close = () => setOpen(false);
 
@@ -27,21 +27,6 @@ const SiteNav: React.FC = () => {
                     {link.label}
                 </Link>
             ))}
-            <a
-                className="l"
-                role="button"
-                tabIndex={0}
-                aria-haspopup="dialog"
-                onClick={() => {
-                    close();
-                    openCv();
-                }}
-                onKeyDown={(e) =>
-                    (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openCv())
-                }
-            >
-                {copy.cv}
-            </a>
             <button
                 type="button"
                 className="mb"

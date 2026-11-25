@@ -1,4 +1,5 @@
 import React from 'react';
+import Avatar from '@/components/site/Avatar';
 import { Link } from 'react-router';
 import { FOOTER, HIRE } from '@/copy/site';
 import { LINKS, SITE_HOST } from '@/constants/links';
@@ -13,9 +14,12 @@ export const HireBand: React.FC = () => {
 
     return (
         <div className="rec" id="hire">
-            <div>
-                <b>{copy.title}</b>
-                <span>{copy.text}</span>
+            <div className="rec-who">
+                <Avatar size="sm" />
+                <div>
+                    <b>{copy.title}</b>
+                    <span>{copy.text}</span>
+                </div>
             </div>
             <div className="links">
                 <button type="button" className="btn sm" aria-haspopup="dialog" onClick={openCv}>

@@ -311,6 +311,7 @@ export default defineConfig(({ mode, command }) => {
         (isProd ? DEFAULT_SITE_URL.production : DEFAULT_SITE_URL.development)
     ).replace(/\/$/, '');
     const avatarUrl = env.VITE_AVATAR_URL || siteConfig.avatarUrl || '';
+    const avatarHiResUrl = env.VITE_AVATAR_HIRES_URL || siteConfig.avatarHiResUrl || '';
 
     // Fail the build rather than emit a bundle wired to nothing. `command`
     // narrows this to builds, so a dev server still starts on the development
@@ -385,6 +386,7 @@ export default defineConfig(({ mode, command }) => {
         define: {
             'import.meta.env.VITE_BACKEND_URL': JSON.stringify(resolvedBackendUrl),
             'import.meta.env.VITE_AVATAR_URL': JSON.stringify(avatarUrl),
+            'import.meta.env.VITE_AVATAR_HIRES_URL': JSON.stringify(avatarHiResUrl),
             // The one build value kept out of the repository: see constants/links.ts.
             'import.meta.env.VITE_WHATSAPP_NUMBER': JSON.stringify(env.VITE_WHATSAPP_NUMBER || ''),
         },

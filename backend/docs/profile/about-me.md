@@ -1,13 +1,27 @@
-I work on the half of AI engineering that starts after the demo works.
+## What I do
 
-Since Sep 2026 I have been building [PersonaKit](https://personakit.me) as its creator and lead developer: accountable, source-linked, user-controlled AI memory.
+I build AI agents and systems for businesses, and I start from the problem, not the technology. Before any code, I want to understand how you work, where the time goes and what information you already have. Sometimes the answer is an agent. Sometimes what is missing first is a system that holds the information, and then I build it so an agent can work with it later.
 
-Before that, from Aug 2025 to Sep 2026, I was the founding engineer, and first employee, at Stealth, building a multi-agent system that investigated production incidents: agents reading Kubernetes, AWS and observability telemetry, then writing up what actually broke. I came in on the chat frontend and ended up owning whether the pipeline was right: where a citation comes from, why a model would fake one, what a single question costs.
+## How I got here
 
-That last part is less abstract than it sounds. A single question could fan out across far more agents than it needed and burn a fortune in tokens reaching an answer nobody could check. The fixes were unglamorous: agent decomposition, context compaction, a circuit breaker, and a linter that reads generated queries before they run.
+From 2018 to 2025 I did frontend and full-stack work: a sports betting platform with more than 500K daily users, finance applications for major Israeli enterprises, and automation testing before that.
 
-I tend to leave systems behind rather than patches, and I don't ship a fix until I've reproduced the failure against production data. A green build has never convinced me on its own.
+In August 2025 I joined an AI startup as its first employee (Founding Engineer). It built a multi-agent system that investigates production incidents. I started on the chat interface and ended up owning whether the system's answers were right: where each citation comes from, why a model would invent one, and what each question costs.
 
-From 2018 to 2025 it was frontend and full-stack work: a sports betting platform at 500K daily users, finance applications for Israeli enterprises, automation testing before that. It is why I'm comfortable anywhere between a React component and a Helm chart.
+That is where I learned that the hard part of AI starts after the demo works. A single question could set off far more agents than it needed and burn money in tokens on the way to an answer nobody could check. The fixes were unglamorous: split the agents, cut down what they read, stop runaway loops in time, and check every generated query before it runs.
 
-The question I keep circling: how far can you trust a system that writes its own reasons? Most of what I build outside work is some attempt to answer it. Hermes is one: I run the open-source Hermes Agent (by Nous Research) all day on my own infrastructure, with parts I built around it; it keeps its memory in an Obsidian vault, and reaches me over Telegram. This site is another, and it will tell you when it doesn't know something rather than fill the gap.
+## What I build now
+
+Since September 2026 I have been building [PersonaKit](https://personakit.me) as its creator and lead developer. It is open-source personal AI memory: every memory links to its source, and you decide what is kept. It is free to download and use, and the docs are [here](https://personakit.me/docs).
+
+Alongside it I run more than 40 agents of my own for research, content, cloud monitoring and operations, and every sensitive action they take waits for my approval. And I build agents and systems for clients, as a freelancer.
+
+## What matters to me
+
+- **Systems, not patches.** I don't ship a fix until I have reproduced the failure on real data.
+- **An agent that can say "I don't know".** The chat on this site will tell you when it has no answer instead of making one up.
+- **A person approves what matters.** An action that cannot be undone does not go out without approval.
+
+## Let's talk
+
+If you have a process that takes too long, or information nobody can find, we start with a short diagnostic call of 20 to 30 minutes. After it you get a clear proposal. I am also open to a full-time role or a contract.

@@ -8,9 +8,8 @@ import { Localized } from '@/i18n/lang';
 export interface NavCopy {
     name: string;
     role: string;
-    /** Section anchors on the home page, then the blog. */
+    /** Section anchors on the home page, then the blog and the about page. */
     links: { label: string; href: string }[];
-    cv: string;
     menu: string;
     language: string;
     cta: string;
@@ -25,8 +24,8 @@ export const NAV: Localized<NavCopy> = {
             { label: 'מה כבר רץ', href: '/#proof' },
             { label: 'איך עובדים', href: '/#how' },
             { label: 'בלוג', href: '/blog' },
+            { label: 'אודות', href: '/about' },
         ],
-        cv: 'קורות חיים',
         menu: 'תפריט',
         language: 'שפה',
         cta: 'קבעו שיחת אבחון',
@@ -39,8 +38,8 @@ export const NAV: Localized<NavCopy> = {
             { label: "What's running", href: '/#proof' },
             { label: 'How I work', href: '/#how' },
             { label: 'Blog', href: '/blog' },
+            { label: 'About', href: '/about' },
         ],
-        cv: 'CV',
         menu: 'Menu',
         language: 'Language',
         cta: 'Book a call',
@@ -88,9 +87,9 @@ export interface CvCopy {
     /** Subject and body of the share message; the link is appended. */
     shareSubject: string;
     shareText: string;
-    loading: string;
-    failed: string;
     viewLabel: string;
+    /** The switch between the CV's English and Hebrew versions. */
+    docLang: string;
 }
 
 export const CV: Localized<CvCopy> = {
@@ -102,9 +101,8 @@ export const CV: Localized<CvCopy> = {
         byWhatsapp: 'שליחה בוואטסאפ',
         shareSubject: 'יניר רוט, קורות חיים',
         shareText: 'קורות החיים של יניר רוט:',
-        loading: 'טוען את קורות החיים…',
-        failed: 'קורות החיים לא נטענו. נסו לרענן את הדף.',
         viewLabel: 'קורות החיים',
+        docLang: 'שפת קורות החיים',
     },
     en: {
         title: 'CV · Yanir Rot',
@@ -114,9 +112,8 @@ export const CV: Localized<CvCopy> = {
         byWhatsapp: 'Send on WhatsApp',
         shareSubject: 'Yanir Rot, CV',
         shareText: "Yanir Rot's CV:",
-        loading: 'Loading the CV…',
-        failed: 'The CV did not load. Try reloading the page.',
         viewLabel: 'The CV',
+        docLang: 'CV language',
     },
 };
 

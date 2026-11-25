@@ -52,4 +52,12 @@ export const siteConfig = {
      * browser would loop trying to decode it as an image.
      */
     avatarUrl: 'https://i.ibb.co/XxxRNkSN/profile.jpg',
+
+    /**
+     * The 800x800 original of the same photograph, offered only to sharp
+     * (2x and up) screens where the photo is shown large - the 160px one on the
+     * about page. 176KB, so normal screens and the 44px footer copy keep the
+     * small rendition. Empty falls back to `avatarUrl` everywhere.
+     */
+    avatarHiResUrl: 'https://i.ibb.co/HTT81pn1/profile.jpg',
 } as const;

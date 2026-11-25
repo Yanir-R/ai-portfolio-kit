@@ -1,6 +1,7 @@
 import React from 'react';
 import { PROJECTS } from '@/copy/projects';
 import Markdown from '@/components/Markdown';
+import Avatar from '@/components/site/Avatar';
 import { LoadFailed, LoadingNote } from '@/components/site/PageStates';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { useLoad } from '@/hooks/useLoad';
@@ -20,11 +21,14 @@ const About: React.FC = () => {
     return (
         <>
             <div className="w-hero">
-                <div>
-                    <span className="tagline">{copy.tagline}</span>
-                    <h1>
-                        {copy.title} <em>{copy.em}</em>
-                    </h1>
+                <div className="w-who">
+                    <Avatar size="lg" />
+                    <div>
+                        <span className="tagline">{copy.tagline}</span>
+                        <h1>
+                            {copy.title} <em>{copy.em}</em>
+                        </h1>
+                    </div>
                 </div>
                 <p className="ac">
                     <button

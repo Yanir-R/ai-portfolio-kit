@@ -10,7 +10,7 @@ import ReactMarkdown from 'react-markdown';
  * these documents are also fed to a model.
  *
  * Elements are left plain: the container they are rendered into (.w-body on a
- * reading page, .cv-doc in the CV dialog) styles them, so one stylesheet owns
+ * reading page, for instance) styles them, so one stylesheet owns
  * the type. Only behaviour is set here: links open in a new tab, paragraphs
  * take their direction from their own text (list items keep the list's, so
  * the bullets stay on one side), images load lazily.

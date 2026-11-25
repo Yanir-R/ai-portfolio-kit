@@ -13,15 +13,209 @@
     background: var(--paper);
 }
 
-.cv-doc {
-    background: var(--paper);
+/*
+ * The CV sheet: a white page in the type and layout of Yanir's CV document,
+ * not the site's display faces. Its colours are the document's own.
+ */
+.cvs {
+    --cv-ink: #16181d;
+    --cv-muted: #5b6070;
+    --cv-rule: #d6d8de;
+    --cv-link: #1f3a8a;
+    background: #fff;
+    color: var(--cv-ink);
     border: 1.5px solid var(--ink);
     border-radius: 6px;
-    padding: 20px 24px;
+    padding: 40px 44px;
+    font-family: 'Inter Tight', 'Assistant', system-ui, sans-serif;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    text-align: start;
 }
-.cv-note {
+.cvs a {
+    color: var(--cv-link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.cvs h1,
+.cvs h2,
+.cvs h3,
+.cvs h4,
+.cvs p,
+.cvs ul {
     margin: 0;
-    color: var(--muted);
+}
+.cvs-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid var(--cv-ink);
+}
+.cvs h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 600;
+    font-size: 2.2rem;
+    line-height: 1.1;
+    letter-spacing: 0;
+    text-transform: none;
+}
+.cvs-role {
+    margin-top: 8px !important;
+    font-size: 0.76rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cv-muted);
+}
+.cvs-contact {
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+    text-align: end;
+}
+.cvs-contact > a {
+    color: var(--cv-muted);
+    text-decoration: none;
+}
+.cvs-contact span {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px 10px;
+}
+.cvs-sum {
+    margin: 14px 0 18px !important;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.02rem;
+    line-height: 1.55;
+}
+.cvs-main {
+    padding: 0;
+}
+.cvs-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 210px;
+    gap: 30px;
+}
+.cvs h2 {
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cv-muted);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--cv-rule);
+}
+.cvs-side h2:not(:first-child) {
+    margin-top: 16px;
+}
+.cvs h3 {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+.cvs h4 {
+    font-family: inherit;
+    font-size: 0.86rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+.cvs-role-block {
+    margin-bottom: 16px;
+}
+.cvs-org {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--cv-muted);
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    border-bottom: 1px dotted var(--cv-rule);
+}
+.cvs-org span:last-child {
+    white-space: nowrap;
+}
+.cvs-lede {
+    color: var(--cv-muted);
+    font-size: 0.78rem;
+    margin-bottom: 6px !important;
+}
+.cvs ul {
+    padding-inline-start: 16px;
+    display: grid;
+    gap: 5px;
+}
+.cvs li::marker {
+    color: var(--cv-muted);
+}
+.cvs strong {
+    font-weight: 600;
+}
+.cvs-earlier {
+    color: var(--cv-muted);
+}
+.cvs-earlier strong {
+    color: var(--cv-ink);
+}
+.cvs-side > div {
+    margin-bottom: 9px;
+}
+.cvs-side p {
+    font-size: 0.78rem;
+}
+/* The Hebrew sheet: the document's Latin faces have no Hebrew, so it is set in
+   the site's body face, without the spaced capitals Hebrew does not have. */
+.cvs:lang(he),
+.cvs:lang(he) h1,
+.cvs:lang(he) .cvs-sum {
+    font-family: 'Assistant', system-ui, sans-serif;
+}
+.cvs:lang(he) {
+    font-size: 0.92rem;
+}
+.cvs:lang(he) h1 {
+    font-weight: 800;
+}
+.cvs:lang(he) .cvs-role,
+.cvs:lang(he) h2 {
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 0.85rem;
+}
+.cvm .tb .cv-lang {
+    margin-inline-start: auto;
+    display: flex;
+    gap: 6px;
+}
+.cvm .tb .cv-lang [aria-pressed='true'] {
+    background: var(--ink);
+    color: #fff;
+}
+@media (max-width: 720px) {
+    .cvs {
+        padding: 22px 18px;
+    }
+    .cvs-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .cvs-contact {
+        justify-items: start;
+        text-align: start;
+    }
+    .cvs-contact span {
+        justify-content: flex-start;
+    }
+    .cvs-cols {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+    }
 }
 
 .state-note {
@@ -78,6 +272,12 @@
 .w-end .ac {
     flex-wrap: wrap;
 }
+/* The about hero's two buttons, side by side with room between them. */
+.w-hero .ac {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
 /* A line of about a post's length on the about page. */
 .w-post.about .w-body p {
     max-width: 65ch;
@@ -127,4 +327,47 @@
     .lang-offer .btn {
         white-space: nowrap;
     }
+}
+
+/* The photo: round, ink edge, the yellow offset shadow of the buttons. */
+.avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--btn);
+    flex: none;
+}
+.avatar.lg {
+    width: 160px;
+    height: 160px;
+}
+.avatar.sm {
+    width: 44px;
+    height: 44px;
+    border-color: var(--btn);
+    box-shadow: none;
+}
+.w-hero .w-who {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+@media (max-width: 640px) {
+    .avatar.lg {
+        width: 96px;
+        height: 96px;
+    }
+    .w-hero .w-who {
+        gap: 16px;
+    }
+}
+/* The hiring band's photo beside its title and line. */
+.rec > div.rec-who {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.rec-who > div {
+    display: grid;
+    gap: 4px;
 }
