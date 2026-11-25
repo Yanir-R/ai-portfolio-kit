@@ -128,3 +128,46 @@
         white-space: nowrap;
     }
 }
+
+/* The photo: round, ink edge, the yellow offset shadow of the buttons. */
+.avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--btn);
+    flex: none;
+}
+.avatar.lg {
+    width: 160px;
+    height: 160px;
+}
+.avatar.sm {
+    width: 44px;
+    height: 44px;
+    border-color: var(--btn);
+    box-shadow: none;
+}
+.w-hero .w-who {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+@media (max-width: 640px) {
+    .avatar.lg {
+        width: 96px;
+        height: 96px;
+    }
+    .w-hero .w-who {
+        gap: 16px;
+    }
+}
+/* The hiring band's photo beside its title and line. */
+.rec > div.rec-who {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.rec-who > div {
+    display: grid;
+    gap: 4px;
+}
