@@ -180,12 +180,12 @@ export const FLEET_GROUPS: FleetGroup[] = [
     },
     {
         name: {
-            he: 'Trinity Legal',
-            en: 'Trinity Legal',
+            he: 'Trinity Legal: הצעד הבא',
+            en: 'Trinity Legal: next step',
         },
         why: {
-            he: 'כי קל להתאהב ברעיון, וקשה לבדוק אותו ביושר.',
-            en: "Because it's easy to fall for an idea, and hard to test it honestly.",
+            he: 'כי Trinity Legal כבר עובד במשרד אמיתי. הקבוצה הזו מאתרת את המשרדים הבאים שהוא יחסוך להם הכי הרבה זמן.',
+            en: 'Because Trinity Legal already works in a real office. This group finds the next offices where it will save the most time.',
         },
         lead: {
             he: 'שאלה אחת: האם משרד קטן באמת צריך את זה?',
