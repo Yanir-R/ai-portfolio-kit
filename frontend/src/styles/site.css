@@ -8502,3 +8502,46 @@ video.w-v {
         display: none;
     }
 }
+
+/*
+ * Window polish (2026-11-25). The booking details keep their buttons, and any
+ * error above them, at the foot of the fixed-height window; WhatsApp starts
+ * right under the tabs like the other routes, and on a phone its button sits
+ * at the foot as Send does in the email tab; the email form's spacing stays
+ * even with the bot check's (invisible) holder in it.
+ */
+.talk .bk-form .bk-foot {
+    position: sticky;
+    bottom: -20px;
+    z-index: 1;
+    display: grid;
+    gap: 10px;
+    margin-inline: -4px;
+    padding: 10px 4px 20px;
+    background: var(--paper);
+}
+.talk .bk-form .bk-foot .bk-err {
+    margin: 0;
+}
+.talk .tb.wa {
+    align-items: flex-start;
+}
+.talk .tb.mail .v-form > .ts {
+    margin-top: -18px;
+}
+@media (max-width: 640px) {
+    .talk .bk-form .bk-foot {
+        bottom: -16px;
+        padding-bottom: 16px;
+    }
+    .talk .tb.wa {
+        flex: 1;
+    }
+    .talk .wa-main {
+        flex: 1;
+    }
+    .talk .wa-main .btn {
+        margin-top: auto;
+        align-self: stretch;
+    }
+}

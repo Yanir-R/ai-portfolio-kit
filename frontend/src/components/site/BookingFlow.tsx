@@ -339,18 +339,25 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             onChange={(e) => setNotes(e.target.value)}
                         />
                     </label>
-                    {error && (
-                        <p className="bk-err" role="alert">
-                            {error}
-                        </p>
-                    )}
-                    <div className="bk-row">
-                        <button type="submit" className="btn" disabled={sending}>
-                            {sending ? copy.sending : copy.submit}
-                        </button>
-                        <button type="button" className="btn sec" onClick={() => setStep('time')}>
-                            {copy.back}
-                        </button>
+                    {/* Pinned to the window's foot, so an error never pushes the buttons out of view. */}
+                    <div className="bk-foot">
+                        {error && (
+                            <p className="bk-err" role="alert">
+                                {error}
+                            </p>
+                        )}
+                        <div className="bk-row">
+                            <button type="submit" className="btn" disabled={sending}>
+                                {sending ? copy.sending : copy.submit}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn sec"
+                                onClick={() => setStep('time')}
+                            >
+                                {copy.back}
+                            </button>
+                        </div>
                     </div>
                     <small className="fine">{copy.fine}</small>
                 </form>
