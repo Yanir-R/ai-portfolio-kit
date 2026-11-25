@@ -371,3 +371,47 @@ def test_narrowing_reduces_what_the_request_pays_for():
     chosen = selection.select("What did you say about Cursor tokens?", corpus)
 
     assert chosen.knowledge.approx_tokens <= corpus.approx_tokens
+
+
+# --- a starter question's topic -----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "language, question",
+    [("he", "מה יניר בנה עם סוכנים?"), ("en", "What has Yanir built with agents?")],
+)
+def test_the_built_starter_sends_the_systems_its_drawing_shows(language, question):
+    """The drawing beside this starter shows the review engine, the agent fleet
+    and PersonaKit. Word matching alone sent catchup instead ("agents" is in
+    nearly every document, so it weighs nothing), and the answer and its
+    sources then described something other than the drawing."""
+    chosen = selection.select(question, context.get_knowledge(language), topic="built")
+
+    sent = {s.slug for s in chosen.knowledge.sections if not s.is_profile}
+    assert set(selection.TOPIC_PROJECTS["built"]) <= sent
+    assert len(sent) <= selection.MAX_DOCUMENTS
+    assert any(s.is_profile for s in chosen.knowledge.sections)
+
+
+def test_a_topic_drops_related_cards_for_writing_it_pushed_out():
+    """A card is only ever for something the answer was given."""
+    chosen = selection.select(
+        "What has Yanir built with agents?", context.get_knowledge("en"), topic="built"
+    )
+    sent = {s.slug for s in chosen.knowledge.sections}
+    assert set(chosen.writing) <= sent
+
+
+def test_an_unknown_topic_changes_nothing():
+    knowledge = context.get_knowledge("en")
+    question = "What does catchup do?"
+    assert selection.select(question, knowledge, topic="nope") == selection.select(
+        question, knowledge
+    )
+
+
+def test_the_owners_name_does_not_pick_a_document():
+    """Every document is about him; "why talk to Yanir?" once sent a JavaScript
+    post only because the post is signed."""
+    chosen = selection.select("Why talk to Yanir?", context.get_knowledge("en"))
+    assert not [s for s in chosen.knowledge.sections if s.source == "writing"]

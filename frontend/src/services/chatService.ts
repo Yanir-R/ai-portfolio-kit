@@ -8,6 +8,7 @@ import {
     ChatContext,
     ChatHandoff,
     ChatMessage,
+    ChatTopic,
     TraceSource,
 } from '@/types/chat';
 
@@ -89,13 +90,16 @@ export const chatService = {
         turnstileToken?: string | null,
         context?: ChatContext | null,
         /** The offer to talk directly was already made in this conversation. */
-        handoffOffered = false
+        handoffOffered = false,
+        /** Asked from a starter with a drawing: its projects are always sent. */
+        topic?: ChatTopic | null
     ) => {
         try {
             const body = {
                 ...(context ? { context: { type: context.type, ref: context.ref } } : {}),
                 shown: shownSlugs(conversationHistory),
                 ...(handoffOffered ? { handoff_offered: true } : {}),
+                ...(topic ? { topic } : {}),
                 message,
                 conversation_history: conversationHistory.slice(-MAX_HISTORY_SENT).map((msg) => ({
                     type: msg.type,

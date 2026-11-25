@@ -4281,10 +4281,17 @@ a.il {
 }
 #ytxt {
     grid-column: 2;
-    margin: 0;
+    display: grid;
     color: var(--ink);
     font-size: 1rem;
     min-height: 1.6em;
+}
+#ytxt > p {
+    grid-area: 1 / 1;
+    margin: 0;
+}
+#ytxt > .off {
+    visibility: hidden;
 }
 @media (max-width: 900px) {
     .pathbar,
@@ -6818,8 +6825,10 @@ html.panel .w-post {
     }
 }
 @media (max-width: 430px) {
+    /* On its own row the heading may wrap, so the longest one fits a 320px phone. */
     .w-end > b {
         flex-basis: 100%;
+        white-space: normal;
     }
 }
 .w-img {
@@ -7855,7 +7864,7 @@ video.w-v {
 }
 
 /*
- * First screen fits the viewport (design change, 2026-11-25). On a desktop
+ * First screen fits the viewport. On a desktop
  * the opening panel is as tall as the screen below the top bar, the headline
  * scales with the screen height, and the chat and the drawing share what is
  * left, each scrolling inside. On a phone the chat starts compact (title,
@@ -8025,7 +8034,7 @@ video.w-v {
 }
 
 /*
- * Contact dialog, tidied (design change, 2026-11-25): title and topic beside
+ * Contact dialog, tidied: title and topic beside
  * a 40px close button, the routes as one full-width segmented control, one
  * helper line, the calendar with a single border, and the same spacing
  * throughout (24px sides, 14px between parts; 16px and 12px on a phone,
@@ -8160,9 +8169,8 @@ video.w-v {
 }
 
 /*
- * The booking steps inside the "discovery call" tab (design change,
- * 2026-11-25): a step line, then the month beside the free times; the
- * details form; our own confirmation. On a phone a picked day folds the month
+ * The booking steps inside the "discovery call" tab: a step line, then the
+ * month beside the free times; the details form; our own confirmation. On a phone a picked day folds the month
  * into one amber row and the times sit three to a row.
  */
 .talk .stp {
@@ -8597,7 +8605,7 @@ video.w-v {
     align-items: baseline;
 }
 
-/* The post's source on LinkedIn: one tile with the mark (design change, 2026-11-25). */
+/* The post's source on LinkedIn: one tile with the mark. */
 .w-orig a.w-src {
     display: inline-flex;
     align-items: center;
@@ -8819,7 +8827,7 @@ video.w-v {
 }
 
 /*
- * Window polish (2026-11-25). The booking details keep their buttons, and any
+ * Window polish. The booking details keep their buttons, and any
  * error above them, at the foot of the fixed-height window; WhatsApp starts
  * right under the tabs like the other routes, and on a phone its button sits
  * at the foot as Send does in the email tab; the email form's spacing stays
@@ -8904,7 +8912,7 @@ video.w-v {
 }
 
 /*
- * Phone chat (design change, 2026-11-25). The card fills the rest of the first
+ * Phone chat. The card fills the rest of the first
  * screen; once the visitor starts it opens as a full-screen layer where only
  * the conversation scrolls and the chips and input stay pinned above the
  * keyboard; an answer's drawing rises over it as a sheet. Desktop and tablet
@@ -9401,7 +9409,7 @@ video.w-v {
 }
 
 /*
- * Booking without needless scrolling or empty bands (2026-11-25). On a wide
+ * Booking without needless scrolling or empty bands. On a wide
  * screen the name and email share a row, so the details step fits the
  * window. On a phone the calendar fills the frame, and a picked day's times
  * open under it instead of replacing it.
@@ -9490,7 +9498,7 @@ video.w-v {
 }
 
 /*
- * Phone keyboard in the contact window (2026-11-25). The window follows the
+ * Phone keyboard in the contact window. The window follows the
  * visible viewport, so nothing hides behind the keyboard. While the keyboard
  * is up (data-kb, set by useKeyboardFit) the routes and the intro line fold
  * away, forms keep their natural height and scroll as one box under the
@@ -9541,7 +9549,7 @@ video.w-v {
 }
 
 /*
- * WhatsApp tab, option A (Yanir, 2026-11-25). On a phone one card sized to its
+ * WhatsApp tab. On a phone one card sized to its
  * content holds the numbered steps, the button right under them and a short
  * note; the intro line, which repeats the steps, is dropped. On a wide screen
  * the card dissolves and the tab stays as it was, beside the QR code.
@@ -9593,7 +9601,7 @@ video.w-v {
 }
 
 /*
- * Keyboard up, one pinned button (2026-11-25). While a phone keyboard is open
+ * Keyboard up, one pinned button. While a phone keyboard is open
  * the send button ("book the call" / "send") is pinned whole at the foot of
  * the visible area on a white strip, and any error or result sits right above
  * it. Everything else is compact so the three booking fields show without
@@ -9833,7 +9841,7 @@ video.w-v {
 }
 
 /*
- * Chat on a blog post, on a phone (frames 5-6, approved 2026-11-25). The page
+ * Chat on a blog post, on a phone. The page
  * has one fixed bar that looks like an input and opens the same full-screen
  * layer as the home chat (header, viewport and keyboard handling shared in
  * site.css above and in usePhoneLayer); the article keeps room for it at its
@@ -10019,7 +10027,7 @@ video.w-v {
 }
 
 /*
- * The home chat on a computer (2026-11-25, option A). Once a question is
+ * The home chat on a computer. Once a question is
  * asked the panel leaves the first-screen fit: the chat and the drawing grow
  * to the screen's height, 16px from its edges, and each scrolls inside. The
  * headline above scrolls away with the page. Phones and narrow windows are
@@ -10938,7 +10946,7 @@ video.w-v {
 }
 
 /*
- * Side panel motion (2026-11-25). The panel slides in from its own edge (the
+ * Side panel motion. The panel slides in from its own edge (the
  * left in Hebrew, the right in English) with a soft ease and a slight fade,
  * and on close slides back out while the dimming fades, before it is removed.
  */
@@ -10970,7 +10978,7 @@ video.w-v {
 }
 
 /*
- * The process question as a card (option A, Yanir 2026-11-25). The question,
+ * The process question as a card. The question,
  * a blue kicker, the four processes as large buttons each with a quiet line
  * under its name, and the way out to the input. Two by two on a wide screen,
  * one column on a phone. Once answered it folds to the question, plus what was
@@ -11079,4 +11087,42 @@ video.w-v {
     .m.pick {
         animation: none;
     }
+}
+
+/*
+ * Hover feedback for the plain text links that had none: the footer line, the
+ * "all posts" and back links, the logo and the expandable questions. Links that
+ * are already link-coloured get an underline, the rest change colour, so
+ * nothing moves; pointer devices only, so a tap never leaves it stuck on.
+ */
+@media (hover: hover) {
+    footer a:hover,
+    .w-pn a:hover small {
+        color: var(--link);
+        text-decoration-thickness: 2px;
+    }
+    .all:hover,
+    .w-back:hover,
+    .w-orig a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .logo:hover,
+    .faq summary:hover,
+    .pj-dev summary:hover {
+        color: var(--link);
+    }
+}
+
+/*
+ * A native <dialog> (the contact window) blocks clicks behind it but not the
+ * wheel or a swipe, and the page would scroll under an open window. Every
+ * other overlay locks the page from its hook (useDialogFocus); this does the
+ * same for any open modal dialog, without script.
+ */
+html:has(dialog[open]) {
+    overflow: hidden;
+}
+dialog[open] {
+    overscroll-behavior: contain;
 }

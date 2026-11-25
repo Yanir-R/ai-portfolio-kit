@@ -35,6 +35,8 @@ type Turn =
           text: string;
           blocks: ChatBlock[];
           sources: TraceSource[];
+          /** The model said it had no answer: the row says no document matched. */
+          declined: boolean;
           fromPiece: boolean;
           sig?: string | null;
           /** The offer to continue with Yanir, folded once the conversation moves on. */
@@ -194,8 +196,9 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
             text: result.response,
             blocks: result.blocks,
             // What the answer drew on when the model said; otherwise what it
-            // was sent. An answer from the notes alone shows no line.
+            // was sent. An answer from the notes alone says so on the row.
             sources: result.used ?? result.trace?.sources ?? [],
+            declined: result.declined === true,
             fromPiece: !!context,
             sig: result.sig,
             handoff: result.handoff,
@@ -356,16 +359,20 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
                                 </Tag>
                                 <Markdown>{turn.text}</Markdown>
                                 <WritingBlocks blocks={turn.blocks} />
-                                {turn.sources.length > 0 && (
-                                    <div className="sr">
-                                        <u>{copy.sources}</u>
-                                        {turn.sources.map((s) => (
+                                <div className="sr">
+                                    <u>{copy.sources}</u>
+                                    {turn.declined ? (
+                                        <span>{t(CHAT).noSource}</span>
+                                    ) : turn.sources.length ? (
+                                        turn.sources.map((s) => (
                                             <span key={`${s.kind}-${s.slug}`} dir="auto">
                                                 {s.title}
                                             </span>
-                                        ))}
-                                    </div>
-                                )}
+                                        ))
+                                    ) : (
+                                        <span>{t(CHAT).fromNotes}</span>
+                                    )}
+                                </div>
                             </div>
                             {turn.handoff && (
                                 <HandoffCard

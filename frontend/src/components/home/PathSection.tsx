@@ -19,6 +19,7 @@ const PathSection: React.FC = () => {
                     {copy.years.map((y, i) => (
                         <button
                             key={y.year}
+                            type="button"
                             role="tab"
                             aria-selected={i === picked}
                             onClick={() => setPicked(i)}
@@ -29,12 +30,26 @@ const PathSection: React.FC = () => {
                         </button>
                     ))}
                 </div>
-                <p id="ytxt" aria-live="polite">
-                    <b>
-                        {year.year} · {year.label}.
-                    </b>{' '}
-                    {year.text}
-                </p>
+                {/* Every year's text is laid in the same cell, invisible, so the
+                    box is always as tall as the longest one and hovering a year
+                    never moves the page below it. The picked one is drawn over
+                    them and is the only one read out. */}
+                <div id="ytxt">
+                    {copy.years.map((y) => (
+                        <p key={y.year} className="off" aria-hidden="true">
+                            <b>
+                                {y.year} · {y.label}.
+                            </b>{' '}
+                            {y.text}
+                        </p>
+                    ))}
+                    <p aria-live="polite">
+                        <b>
+                            {year.year} · {year.label}.
+                        </b>{' '}
+                        {year.text}
+                    </p>
+                </div>
             </div>
         </section>
     );

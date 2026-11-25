@@ -72,6 +72,10 @@ export interface ChatCopy {
     noSource: string;
     /** The answer drew on Yanir's own notes, not on a project or post. */
     fromNotes: string;
+    /** The source of a fixed reply: the site's own copy, no document read. */
+    readySource: string;
+    /** The source of a list of posts: the site's index of its writing. */
+    indexSource: string;
     /** The link under an answer to its receipt. */
     behind: string;
     readyTag: string;
@@ -307,6 +311,8 @@ export const CHAT: Localized<ChatCopy> = {
         sources: 'מקורות',
         noSource: 'לא נמצא מסמך מתאים',
         fromNotes: 'מתוך מה שיניר כתב על עצמו',
+        readySource: 'תשובה קבועה של האתר',
+        indexSource: 'רשימת הפוסטים באתר',
         behind: 'מאחורי התשובה',
         readyTag: 'תשובה מוכנה · בלי AI',
         sentTag: 'נשלח ✓ · בלי AI',
@@ -670,6 +676,8 @@ export const CHAT: Localized<ChatCopy> = {
         sources: 'Sources',
         noSource: 'No matching document found',
         fromNotes: 'From what Yanir wrote about himself',
+        readySource: "The site's own fixed answer",
+        indexSource: "The site's list of posts",
         behind: 'Behind the answer',
         readyTag: 'Ready answer · no AI',
         sentTag: 'Sent ✓ · no AI',

@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { CHAT, PROCESS_IDS } from '@/copy/chat';
+import { CHAT, ChatCopy, PROCESS_IDS } from '@/copy/chat';
 import { SHEET_HEADS, SHEETS, SheetKey, sourceTitle } from '@/content/sheets';
 import { AnswerRecord, Entry, GREETING_ID, HomeChat } from '@/chat/useHomeChat';
 import Markdown from '@/components/Markdown';
@@ -72,6 +72,39 @@ const ReceiptIcon: React.FC = () => (
         />
     </svg>
 );
+
+/**
+ * What an answer drew on, as the labels of its sources row. Yanir's notes are
+ * sent with every question, so an answer the model wrote always names them,
+ * and then the projects and posts the model says it used. When the model did
+ * not say (failure copy, an older reply), what it was sent stands in. A
+ * declined answer drew on nothing.
+ */
+const answerSources = (
+    record: AnswerRecord,
+    copy: ChatCopy,
+    read: Parameters<typeof sourceTitle>[1]
+): string[] => {
+    if (record.declined) return [copy.noSource];
+    if (!record.used) {
+        const sent = record.sources.map((s) => sourceTitle(s, read));
+        return sent.length ? [...new Set(sent)] : [copy.noSource];
+    }
+    return [copy.fromNotes, ...record.used.map((s) => sourceTitle(s, read))];
+};
+
+/** The sources row under a reply. Every reply has one, a fixed reply included. */
+const Sources: React.FC<{ items: string[] }> = ({ items }) => {
+    const { t } = useLang();
+    return (
+        <div className="rc">
+            <u>{t(CHAT).sources}</u>
+            {items.map((label) => (
+                <span key={label}>{label}</span>
+            ))}
+        </div>
+    );
+};
 
 /** Six small dots: the first `lit` done, and the last one when the handoff was offered. */
 const Dots: React.FC<{ lit: number; last?: boolean }> = ({ lit, last }) => (
@@ -268,6 +301,7 @@ const EntryView: React.FC<{
                     {entry.tag === 'ready' && <span className="src">{copy.readyTag}</span>}
                     {entry.tag === 'sent' && <span className="src ok">{copy.sentTag}</span>}
                     {engage && entry.id === GREETING_ID ? copy.phone.greeting : entry.text}
+                    {entry.tag === 'ready' && <Sources items={[copy.readySource]} />}
                     {entry.sheet && (
                         <ArtCard
                             sheet={entry.sheet}
@@ -310,21 +344,16 @@ const EntryView: React.FC<{
                             shown={isShown(entry.sheet, record)}
                         />
                     )}
-                    {record && (
-                        <div className="rc">
-                            <u>{copy.sources}</u>
-                            {/* What the answer drew on when the model said so;
-                                otherwise what it was sent. */}
-                            {(record.used ?? record.sources).length ? (
-                                (record.used ?? record.sources).map((s) => (
-                                    <span key={`${s.kind}-${s.slug}`}>
-                                        {sourceTitle(s, t(SHEETS).read)}
-                                    </span>
-                                ))
-                            ) : (
-                                <span>{record.used ? copy.fromNotes : copy.noSource}</span>
-                            )}
-                        </div>
+                    {entry.fromIndex ? (
+                        <Sources
+                            items={
+                                entry.used?.length
+                                    ? entry.used.map((s) => sourceTitle(s, t(SHEETS).read))
+                                    : [copy.indexSource]
+                            }
+                        />
+                    ) : (
+                        record && <Sources items={answerSources(record, copy, t(SHEETS).read)} />
                     )}
                     {/* Every answer the model wrote ends with its stations and the
                         way to its receipt; a ready answer has neither. */}

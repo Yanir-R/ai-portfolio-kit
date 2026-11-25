@@ -30,6 +30,8 @@ QUESTIONS = (
     # --- described, not named -------------------------------------------------
     ("en", "Do you have a tool that remembers what I told my coding assistant?", (P, "personakit")),
     ("en", "Have you built software for a barbershop?", (P, "trinity-crm")),
+    ("en", "Can you connect an agent to our CRM?", (P, "trinity-crm")),
+    ("he", "אפשר לחבר סוכן ל־CRM שלנו?", (P, "trinity-crm")),
     ("en", "Did you make a booking system for a small business?", (P, "trinity-crm")),
     ("en", "Have you worked with lawyers?", (P, "trinity-legal")),
     ("en", "Any experience migrating files to the cloud for an office?", (P, "trinity-legal")),

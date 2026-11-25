@@ -9,15 +9,22 @@ backend/
 ├── docs/
 │   ├── profile/       # markdown the chat answers from — published, see warning
 │   ├── projects/      # per-project markdown, drives /api/projects and the chat
-│   └── templates/     # placeholders for forks; never sent to the model
-├── main.py            # FastAPI app, routes, CORS
-├── context.py         # assembles + caches the corpus, reports its token cost
+│   ├── writing/       # posts and articles, drive /api/writing and the chat
+│   ├── he/            # Hebrew twins of the above, used for Hebrew questions
+│   ├── templates/     # placeholders for forks; never sent to the model
+│   └── search-phrases.json  # how visitors phrase each document (selection only)
+├── main.py            # FastAPI app: schemas, routes, CORS, the chat flow
+├── selection.py       # picks the documents each question gets (deterministic)
+├── context.py         # assembles + caches the corpus, per-section
 ├── prompt.py          # the behavioural contract: grounding, voice, boundaries
-├── gemini_helper.py   # Gemini call, model fallback, failure copy
-├── docs_helper.py     # markdown/PDF loading
+├── gemini_helper.py   # the one Gemini call, its JSON schema, model fallback
+├── guard.py           # input and output checks, signed history turns
+├── language.py        # Hebrew or English, from the visitor's own words
+├── docs_helper.py     # markdown loading, project and writing metadata
 ├── rate_limit.py      # per-client + global rate limiting
+├── site_mail.py       # contact mail and the visitor's auto-reply
+├── booking.py         # the cal.com booking call
 ├── tests/             # offline regressions, run in CI
-├── evals/             # golden question set, run by hand
 ├── requirements.txt
 └── Dockerfile
 ```
@@ -32,21 +39,24 @@ backend/
 `context.py` and `prompt.py` split one question in two: *what may the chat know*, and *how
 may it answer*.
 
-**`context.py`** assembles the corpus from `docs/profile/` and `docs/projects/` and caches it
-against file mtimes, so the documents are parsed when they change rather than once per chat
-request. It logs the section count and token estimate on load, and warns past a threshold
-where sending everything on every request stops being obviously correct. At ~3.6k tokens
-against a context window in the hundreds of thousands, retrieval would be solving a problem
-this site does not have.
+**`context.py`** assembles the corpus from `docs/profile/`, `docs/projects/` and
+`docs/writing/` (or their Hebrew twins under `docs/he/`) and caches it against file mtimes, so
+the documents are parsed when they change rather than once per chat request.
+
+**`selection.py`** decides, in code, which documents a question gets: the profile notes always,
+plus at most three documents whose distinctive words the question shares. Every other document
+is named to the model in one line. A starter question on the site sends its topic, and the
+projects its drawing shows are always included. No model call is involved, so the same question
+always gets the same documents.
 
 An empty corpus is an error, not a fallback. `docs/templates/` holds placeholders for forks
 and is never sent to the model: a deploy with no profile documents makes the chat say it
 cannot reach its notes, rather than answering from `[brief story]` in a confident first person.
 
 **`prompt.py`** holds the system instruction — grounding, voice and boundaries. Grounding is
-the point of it: the chat answers in Yanir's first person on a page recruiters read, so an
-invented employer or date is a false claim attributed to a real person, not just a wrong
-answer. The model is told to answer only from the profile, to decline and offer email
+the point of it: the chat answers on Yanir's behalf, as his agent, on a page clients and
+recruiters read, so an invented employer or date is a false claim attributed to a real person,
+not just a wrong answer. The model is told to answer only from the profile, to decline and offer email
 follow-up when a question is not covered, and to treat both the corpus and the visitor's
 messages as data rather than instructions.
 
@@ -96,12 +106,13 @@ Optional:
 | `ALLOWED_ORIGINS` | Comma-separated origins added to the CORS allowlist |
 | `FRONTEND_PROD_URL`, `FRONTEND_DEV_URL`, `FRONTEND_VITE_URL` | Individual origins |
 | `ORIGIN_SHARED_SECRET` | The edge Worker's `EDGE_SECRET`. Unset means "do not enforce" |
+| `CHAT_TURN_SECRET` | Key that signs the chat's own replies so a forged history turn is not replayed to the model (`guard.py`). Unset: derived from the edge secret |
 
 Localhost origins are always allowed. There is no wildcard origin; the allowlist stays explicit. The CORS answer allows `GET` and `POST` only and never allows credentials: the site sends no cookies, so no page needs them (see `tests/test_cors.py`).
 
 ### The edge secret
 
-In production this service sits behind the Cloudflare Worker in [`edge/`](../edge/README.md), which adds `X-Edge-Auth` to every request it forwards. With `ORIGIN_SHARED_SECRET` set, anything arriving without a matching value gets a **403** — including a direct call to the `run.app` URL, which Cloud Run cannot hide. `/` and `/health` stay reachable without it so health probes keep working. The configured value is stripped of surrounding whitespace when it is read, so a trailing newline from a secret file does not break the match, and the comparison is constant-time so the value cannot be probed a byte at a time.
+In production this service sits behind the Cloudflare Worker in [`edge/`](../edge/README.md), which adds `X-Edge-Auth` to every request it forwards. With `ORIGIN_SHARED_SECRET` set, anything arriving without a matching value gets a **403** — including a direct call to the `run.app` URL, which Cloud Run cannot hide. `/health` stays reachable without it so health probes keep working. The configured value is stripped of surrounding whitespace when it is read, so a trailing newline from a secret file does not break the match, and the comparison is constant-time so the value cannot be probed a byte at a time.
 
 Unset means no enforcement, which is what makes a rollout safe: the Worker and the frontend can be moved over before the backend starts requiring the header. Leave it unset locally.
 
@@ -116,6 +127,8 @@ The chat and contact endpoints are unauthenticated and cost quota or money per c
 | `RATE_LIMIT_CHAT_WINDOW_SECONDS` | 86400 | the chat window is a day, not a minute |
 | `RATE_LIMIT_CONTACT_PER_IP_PER_MINUTE` | 3 | |
 | `RATE_LIMIT_CONTACT_GLOBAL_PER_MINUTE` | 15 | |
+| `RATE_LIMIT_AUTO_REPLY_GLOBAL_PER_DAY` | 40 | auto-replies to visitors, which go to an address the visitor typed |
+| `RATE_LIMIT_BOOKING_GLOBAL_PER_DAY` | 20 | calls booked on cal.com |
 
 Setting a limit to `0` disables that window. The global window is the cost guard — a per-IP limit alone is defeated by header spoofing or a botnet.
 
@@ -132,6 +145,8 @@ Over-limit requests get **429** with a `Retry-After` header.
 | `GET /api/content/{file_name}` | Resolved and confined to the profile dir |
 | `GET /api/projects` | Listing (content stripped) |
 | `GET /api/projects/{slug}` | Single project |
+| `GET /api/writing` | Posts and articles, with the topic and series overview |
+| `GET /api/writing/{slug}` | Single piece |
 | `POST /chat-with-files` | Rate limited |
 | `POST /api/contact` | Rate limited |
 | `POST /api/booking` | Rate limited with contact; books the fixed cal.com event (`booking.py`) |
@@ -146,7 +161,9 @@ Unexpected errors return an opaque `"Internal server error"`; details are logged
 
 ### Gemini models
 
-`gemini_helper.py` tries `-latest` aliases first, then falls back down a list. Pinning exact model names is what breaks: a retired name answers 404 and takes chat down with it. Fallback advances on 404/429/5xx read from the SDK's structured `APIError.code`, not substring matching.
+`gemini_helper.py` uses pinned stable model codes only, never `-latest` aliases (Google hot-swaps those on every release), and falls back down the list when one is unusable. Fallback advances on 404/429/5xx read from the SDK's structured `APIError.code`, not substring matching.
+
+The call asks for structured output: a JSON schema (`ModelReply`) with the answer text, whether it declined, which sent documents it drew on (`used`) and whether a direct talk would help (`handoff`). The server checks every field before using it: `used` is kept only where it names a document that was sent, and the handoff card is shown by the server's own rules, not by the model's word alone.
 
 ## Deployment
 
