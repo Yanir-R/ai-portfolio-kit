@@ -4413,6 +4413,10 @@ a.il {
 #sun .core-t {
     font-size: 15px;
 }
+/* "The head agent" is longer than its Hebrew and has to fit inside the circle. */
+#sun .core-t:lang(en) {
+    font-size: 12.5px;
+}
 #sun .core-s {
     font-size: 12.5px;
     fill: #dce4ff;
@@ -5119,25 +5123,108 @@ footer a {
     #map-svg .el {
         font-size: 10.5px;
     }
-    .fgr {
+    /*
+     * The agent fleet on a phone: one group card under the drawing, inside
+     * its frame, stepped with arrows or a sideways swipe. The drawing above
+     * lights the group shown, so the change is seen without scrolling.
+     */
+    .fpick {
+        margin: var(--sp-2) 6px 6px;
+        padding-top: var(--sp-3);
+        border-top: 1.5px dashed var(--line);
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: var(--sp-2);
-        margin-top: 10px;
+        touch-action: pan-y;
     }
-    .fgr button {
-        font: inherit;
+    .fp-row {
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr) 44px;
+        gap: var(--sp-2);
+        align-items: center;
+    }
+    .fp-name,
+    .fp-why {
+        display: grid;
+        text-align: center;
+    }
+    /* All groups share one cell; the hidden ones still hold its size. */
+    .fp-name > *,
+    .fp-why > * {
+        grid-area: 1 / 1;
+    }
+    .fp-name > .off,
+    .fp-why > .off {
+        visibility: hidden;
+    }
+    .fp-name > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+    }
+    .fp-name small {
+        font-size: 0.82rem;
         font-weight: 700;
-        font-size: 0.9rem;
-        min-height: 40px;
-        padding: 6px 12px;
-        border-radius: 999px;
-        border: 1.5px solid var(--ink);
+        color: var(--muted);
+    }
+    .fp-name b {
+        font-family: var(--display);
+        font-size: 1.9rem;
+        line-height: 1;
+    }
+    .fp-ar {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border-radius: 10px;
+        border: 2px solid var(--ink);
         background: var(--paper);
         color: var(--ink);
+        cursor: pointer;
     }
-    .fgr button[aria-pressed='true'] {
-        background: var(--btn);
+    .fp-ar.next {
+        background: var(--coral-soft);
+    }
+    /* The chevron points to the inline end: turned for "previous", and mirrored right to left. */
+    .fp-ar:not(.next) svg,
+    [dir='rtl'] .fp-ar.next svg {
+        transform: scaleX(-1);
+    }
+    [dir='rtl'] .fp-ar:not(.next) svg {
+        transform: none;
+    }
+    .fp-why > p {
+        margin: 0;
+        font-weight: 700;
+        color: var(--act-text);
+    }
+    .fp-dots {
+        display: flex;
+        justify-content: center;
+        gap: var(--sp-1);
+    }
+    .fp-dots i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--line);
+    }
+    .fp-dots i.on {
+        background: var(--ink);
+    }
+    /* Its content moved into the group card; the number tiles stay. */
+    .fside .fcard {
+        display: none;
+    }
+    /* Single agents are not tap targets here: a tap lands on its group. */
+    #sun .ag.sub,
+    #sun .ag.dir,
+    #sun .core {
+        pointer-events: none;
     }
     .fab {
         font-size: 0;
@@ -5167,11 +5254,6 @@ footer a {
     footer a {
         display: inline-block;
         padding: 8px 2px;
-    }
-}
-@media (min-width: 641px) {
-    .fgr {
-        display: none;
     }
 }
 .w-2 > div,

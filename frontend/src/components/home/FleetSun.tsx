@@ -24,6 +24,8 @@ const DIRECT_RAY = FLEET_GROUPS.length; // the ray index the direct reports answ
 const VIEWBOX = { wide: '-100 -14 720 548', phone: '40 40 440 440' };
 const TIP_EDGE = 120;
 const TOUCH_TIP_MS = 2600;
+// A finger has to travel this far sideways for a swipe to change the group.
+const SWIPE_PX = 40;
 
 const polar = (r: number, a: number) => [C + r * Math.cos(a), C + r * Math.sin(a)] as const;
 const f = (n: number) => n.toFixed(1);
@@ -78,6 +80,9 @@ const RAYS: Ray[] = (() => {
 })();
 
 const groupOf = (index: number) => (index === DIRECT_RAY ? FLEET_DIRECT : FLEET_GROUPS[index]);
+// The order the phone's group card steps through: the seven groups, then the
+// agents around the centre.
+const ORDER = [...FLEET_GROUPS.keys(), DIRECT_RAY];
 
 type Pick = { kind: 'ray'; index: number } | { kind: 'layer'; id: FleetLayer } | null;
 
@@ -88,6 +93,9 @@ const FleetSun: React.FC = () => {
     const touchRef = useRef(false);
     const timerRef = useRef<number>(0);
     const [pick, setPick] = useState<Pick>(null);
+    // On a phone one group is always shown, in the card under the drawing.
+    const [pos, setPos] = useState(0);
+    const swipeRef = useRef<{ x: number; y: number } | null>(null);
     const [tip, setTip] = useState<{ text: string; x: number; y: number; above: boolean } | null>(
         null
     );
@@ -125,12 +133,18 @@ const FleetSun: React.FC = () => {
         },
     });
 
-    const pickRay = (index: number) => setPick({ kind: 'ray', index });
+    const pickRay = (index: number) => {
+        setPick({ kind: 'ray', index });
+        if (phone) setPos(ORDER.indexOf(index));
+    };
+    // Steps the phone's group card, looping at both ends.
+    const step = (by: 1 | -1) => pickRay(ORDER[(pos + by + ORDER.length) % ORDER.length]);
+    const rtl = lang === 'he';
     const pickLayer = (id: FleetLayer) =>
         setPick((p) => (p?.kind === 'layer' && p.id === id ? null : { kind: 'layer', id }));
 
     const layer = pick?.kind === 'layer' ? pick.id : undefined;
-    const ray = pick?.kind === 'ray' ? pick.index : undefined;
+    const ray = pick?.kind === 'ray' ? pick.index : phone && !layer ? ORDER[pos] : undefined;
     const card =
         pick?.kind === 'ray' ? null : FLEET_LAYERS.find((l) => l.id === (layer ?? 'head'))!;
 
@@ -189,7 +203,7 @@ const FleetSun: React.FC = () => {
                                     cx={f(d.x)}
                                     cy={f(d.y)}
                                     r={d.r}
-                                    {...dotHandlers(d.line)}
+                                    {...(phone ? {} : dotHandlers(d.line))}
                                 />
                             ))}
                             {r.label && (
@@ -204,7 +218,7 @@ const FleetSun: React.FC = () => {
                         cx={C}
                         cy={C}
                         r={R.core}
-                        {...dotHandlers(FLEET_HEAD.line)}
+                        {...(phone ? {} : dotHandlers(FLEET_HEAD.line))}
                     />
                     <text className="core-t" x={C} y={C - 1} pointerEvents="none">
                         {ui.coreTitle}
@@ -214,17 +228,77 @@ const FleetSun: React.FC = () => {
                     </text>
                 </svg>
                 {phone && (
-                    <div className="fgr" role="group" aria-label={ui.groupsLabel}>
-                        {RAYS.map((r) => (
+                    <div
+                        className="fpick"
+                        role="group"
+                        aria-label={ui.groupsLabel}
+                        aria-live="polite"
+                        onTouchStart={(e) => {
+                            const t0 = e.touches[0];
+                            swipeRef.current = { x: t0.clientX, y: t0.clientY };
+                        }}
+                        onTouchEnd={(e) => {
+                            const from = swipeRef.current;
+                            swipeRef.current = null;
+                            if (!from) return;
+                            const dx = e.changedTouches[0].clientX - from.x;
+                            const dy = e.changedTouches[0].clientY - from.y;
+                            if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(dy)) return;
+                            // Reading right to left, the next group comes in from the left.
+                            step(dx < 0 !== rtl ? 1 : -1);
+                        }}
+                    >
+                        <div className="fp-row">
                             <button
-                                key={r.index}
                                 type="button"
-                                aria-pressed={ray === r.index}
-                                onClick={() => pickRay(r.index)}
+                                className="fp-ar"
+                                aria-label={ui.prevGroup}
+                                onClick={() => step(-1)}
                             >
-                                {r.name[lang]}
+                                <Chevron />
                             </button>
-                        ))}
+                            {/*
+                             * Every group is laid in the same cell and only the
+                             * one shown is visible, so the card keeps the height
+                             * of its longest group and nothing below it moves.
+                             */}
+                            <div className="fp-name">
+                                {ORDER.map((index, i) => (
+                                    <div
+                                        key={index}
+                                        className={i === pos ? undefined : 'off'}
+                                        aria-hidden={i !== pos}
+                                    >
+                                        <small>{ui.position(i + 1, ORDER.length)}</small>
+                                        <b>{groupOf(index).name[lang]}</b>
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                type="button"
+                                className="fp-ar next"
+                                aria-label={ui.nextGroup}
+                                onClick={() => step(1)}
+                            >
+                                <Chevron />
+                            </button>
+                        </div>
+                        <div className="fp-why">
+                            {ORDER.map((index, i) => (
+                                <p
+                                    key={index}
+                                    className={i === pos ? undefined : 'off'}
+                                    aria-hidden={i !== pos}
+                                >
+                                    {groupOf(index).why[lang]}
+                                </p>
+                            ))}
+                        </div>
+                        <div className="fp-dots" aria-hidden="true">
+                            {ORDER.map((index, i) => (
+                                <i key={index} className={i === pos ? 'on' : undefined} />
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
@@ -272,5 +346,19 @@ const FleetSun: React.FC = () => {
         </div>
     );
 };
+
+/* Points to the inline end ("next"); the stylesheet turns it for "previous" and for right to left. */
+const Chevron: React.FC = () => (
+    <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+        <path
+            d="M6 3l5 5-5 5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
 
 export default FleetSun;
