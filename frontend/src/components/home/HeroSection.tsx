@@ -11,6 +11,7 @@ import {
     useMediaQuery,
 } from '@/hooks/useMediaQuery';
 import { useHistoryLayer, useLayerChrome } from '@/hooks/usePhoneLayer';
+import { KEYBOARD_COVER_PX } from '@/hooks/useKeyboardFit';
 import AnswerPlan from '@/components/chat/AnswerPlan';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
 import { useTurnstile } from '@/hooks/useTurnstile';
@@ -40,8 +41,6 @@ const PULL_START_PX = 10;
 // The parts of the first-screen card that may give way on a short phone (see site.css).
 const FIT_STEPS = 5;
 const FIT_MARGIN_PX = 4;
-// This much of the screen hidden means a keyboard is up (as in useKeyboardFit).
-const KEYBOARD_COVER_PX = 120;
 // The parts of the open layer that give way above a keyboard (see site.css).
 const KB_FIT_STEPS = 5;
 // The grown chat keeps this much of the page around it, above and below.

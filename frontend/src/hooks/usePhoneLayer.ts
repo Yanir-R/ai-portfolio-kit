@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { useKeyboardFit } from '@/hooks/useKeyboardFit';
+import { KEYBOARD_COVER_PX, SETTLE_READS_MS, useKeyboardFit } from '@/hooks/useKeyboardFit';
 
 /*
  * A full-screen layer on a phone, shared by the home chat and the chat on a
@@ -132,15 +132,28 @@ export const useLogFollowsViewport = (
         const vv = window.visualViewport;
         const log = logRef.current;
         if (!enabled || !vv || !log) return;
+        /*
+         * Short only while a keyboard takes the room. A layer that has just
+         * opened can read the viewport mid-change (iOS hides or shows its
+         * toolbars as the page locks) and not be told when it settles, so a
+         * short screen with no keyboard never hides the suggestions, and the
+         * reading is taken again once the opening has settled.
+         */
+        const measure = () =>
+            setShort(vv.height < shortPx && window.innerHeight - vv.height > KEYBOARD_COVER_PX);
         const onResize = () => {
-            setShort(vv.height < shortPx);
+            measure();
             // A frame later, once the layer has taken the new height.
             requestAnimationFrame(() => (log.scrollTop = log.scrollHeight));
         };
         onResize();
+        const settle = SETTLE_READS_MS.map((ms) => window.setTimeout(measure, ms));
         vv.addEventListener('resize', onResize);
+        vv.addEventListener('scroll', measure);
         return () => {
+            settle.forEach((timer) => window.clearTimeout(timer));
             vv.removeEventListener('resize', onResize);
+            vv.removeEventListener('scroll', measure);
             setShort(false);
         };
     }, [enabled, logRef, shortPx]);
