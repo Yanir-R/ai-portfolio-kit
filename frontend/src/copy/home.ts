@@ -132,18 +132,19 @@ export const HOME: Localized<HomeCopy> = {
                     title: 'קודם מבינים, אחר כך בונים',
                     text: 'מתחילים מהתהליך ומהנתונים שלכם. AI נכנס רק כשהבסיס יציב ואמין.',
                     evidence:
-                        'את TrinityLegal בניתי ללקוח, משרד עורכי דין, מתוך ישיבות אפיון איתם. 56,607 קבצים כבר בענן, והשלב הבא יצא לדרך: שילוב AI בעבודה השוטפת של המשרד.',
+                        'ב־Trinity Legal, מערכת שבניתי למשרד עורכי דין מתוך ישיבות אפיון איתם. 56,607 קבצים כבר בענן, ועכשיו מתחיל השלב הבא: שילוב AI בעבודה השוטפת של המשרד.',
                 },
                 {
                     title: 'הסוכן שואל לפני שהוא פועל',
                     text: 'פעולה שאי אפשר לבטל לא יוצאת בלי אישור של בן אדם.',
                     evidence:
-                        'אצלי, כל הודעה שסוכן רוצה לשלוח מחכה לאישור שלי. האישור תקף רק לנמען הזה ולנוסח הזה.',
+                        'אצלי, כל הודעה שסוכן רוצה לשלוח מחכה לאישור שלי. האישור תקף רק לאותו נמען ולאותו נוסח.',
                 },
                 {
                     title: 'רואים מה הסוכן קרא',
-                    text: 'לא קופסה שחורה. לכל תשובה יש פירוט: מה הסוכן קיבל לקרוא, וכמה זמן זה לקח.',
-                    evidence: 'באתר הזה, מתחת לכל תשובה של הסוכן. נסו אותו בראש העמוד.',
+                    text: 'לא קופסה שחורה. לכל תשובה יש פירוט: על אילו מסמכים היא נשענת, וכמה זמן זה לקח.',
+                    evidence:
+                        'באתר הזה: מתחת לכל תשובה של הסוכן יש קישור ״מאחורי התשובה״. נסו אותו בראש העמוד.',
                 },
             ],
             alsoTitle: 'ועוד ארבע מערכות שבניתי',
@@ -361,19 +362,19 @@ export const HOME: Localized<HomeCopy> = {
                     title: 'Understand first, build second',
                     text: 'We start from your process and your data. AI comes in only when the foundation is stable and reliable.',
                     evidence:
-                        "I built TrinityLegal for a client, a law office, out of working sessions with the lawyers. 56,607 files are already in the cloud, and the next stage is under way: bringing AI into the office's daily work.",
+                        "At Trinity Legal, a system I built for a law office out of working sessions with the lawyers. 56,607 files are already in the cloud, and now the next stage begins: bringing AI into the office's daily work.",
                 },
                 {
                     title: 'The agent asks before it acts',
                     text: "An action that can't be undone does not go out without a person's approval.",
                     evidence:
-                        'In my own setup, every message an agent wants to send waits for my approval. The approval holds only for that recipient and that wording.',
+                        'In my own setup, every message an agent wants to send waits for my approval. The approval holds only for that same recipient and that same wording.',
                 },
                 {
                     title: 'You see what the agent read',
-                    text: 'Not a black box. Every answer comes with a breakdown: what the agent was given to read, and how long it took.',
+                    text: 'Not a black box. Every answer comes with a breakdown: which documents it rests on, and how long it took.',
                     evidence:
-                        'On this site, under every answer the agent gives. Try it at the top of the page.',
+                        'On this site: under every answer the agent gives there is a "Behind the answer" link. Try it at the top of the page.',
                 },
             ],
             alsoTitle: 'And four more systems I built',
