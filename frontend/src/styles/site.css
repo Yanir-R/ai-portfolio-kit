@@ -8922,3 +8922,6 @@ video.w-v {
         font-size: max(16px, 1em);
     }
 }
+.chat .qr.one[hidden] {
+    display: none;
+}

@@ -225,6 +225,9 @@ export interface PhoneLayer {
     showSheet: (sheet: SheetKey) => void;
 }
 
+// Visible height under which the open layer drops its suggestion chips.
+const SHORT_VIEW_PX = 480;
+
 /*
  * The chat side of the hero: the conversation, the suggestions under it and
  * the input. What happens on each action is decided in `useHomeChat`; this
@@ -292,16 +295,27 @@ const AgentChat: React.FC<{
     }, [full]);
 
     // The keyboard opening or closing changes the visible height: keep the
-    // newest message in view.
+    // newest message in view, and note when little room is left.
+    const [short, setShort] = useState(false);
     useEffect(() => {
         const vv = window.visualViewport;
         const log = logRef.current;
         if (!full || !vv || !log) return;
-        // A frame later, once the layer has taken the new height.
-        const toEnd = () => requestAnimationFrame(() => (log.scrollTop = log.scrollHeight));
-        vv.addEventListener('resize', toEnd);
-        return () => vv.removeEventListener('resize', toEnd);
+        const onResize = () => {
+            setShort(vv.height < SHORT_VIEW_PX);
+            // A frame later, once the layer has taken the new height.
+            requestAnimationFrame(() => (log.scrollTop = log.scrollHeight));
+        };
+        onResize();
+        vv.addEventListener('resize', onResize);
+        return () => {
+            vv.removeEventListener('resize', onResize);
+            setShort(false);
+        };
     }, [full]);
+    // Above the keyboard on a short screen, or once typing has started, the
+    // suggestions give their room to the conversation.
+    const hideChips = full && (short || text.trim() !== '');
 
     // When the question is already known, only the address is missing.
     const placeholder = chat.awaitingEmail
@@ -394,7 +408,12 @@ const AgentChat: React.FC<{
                     <span>{copy.phone.teaser}</span>
                 </div>
             )}
-            <div className="qr one" data-l={chat.quick.label} aria-label={copy.suggestionsLabel}>
+            <div
+                className="qr one"
+                hidden={hideChips}
+                data-l={chat.quick.label}
+                aria-label={copy.suggestionsLabel}
+            >
                 {chat.quick.items.map((item) => (
                     <button
                         key={item.label}
