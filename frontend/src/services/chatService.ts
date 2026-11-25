@@ -2,7 +2,14 @@ import axios from 'axios';
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
 import { TURNSTILE_HEADER } from '@/constants/turnstile';
-import { AnswerTrace, ChatBlock, ChatContext, ChatHandoff, ChatMessage } from '@/types/chat';
+import {
+    AnswerTrace,
+    ChatBlock,
+    ChatContext,
+    ChatHandoff,
+    ChatMessage,
+    TraceSource,
+} from '@/types/chat';
 
 /**
  * Kept well below the backend's MAX_HISTORY_MESSAGES (40), which rejects a
@@ -23,6 +30,8 @@ interface ChatResponse {
     language?: 'en' | 'he' | null;
     sig?: string | null;
     handoff?: ChatHandoff | null;
+    declined?: boolean | null;
+    used?: TraceSource[] | null;
 }
 
 /**
@@ -125,6 +134,11 @@ export const chatService = {
                 language: response.data.language ?? null,
                 sig: response.data.sig ?? null,
                 handoff: response.data.handoff ?? null,
+                // The model's own word on whether it answered, and which
+                // projects and posts the answer drew on. Null when it did not
+                // say, so callers fall back to what was sent.
+                declined: response.data.declined ?? null,
+                used: response.data.used ?? null,
             };
         } catch (error) {
             return { success: false as const, error: toChatFailure(error) };

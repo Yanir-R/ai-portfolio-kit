@@ -34,18 +34,18 @@ def _answered(text, cached=None):
 
 
 def test_a_structured_reply_gives_both_fields():
-    assert _parse_reply('{"answer": "I built it.", "declined": false}') == ("I built it.", False, None)
+    assert _parse_reply('{"answer": "I built it.", "declined": false}') == ("I built it.", False, None, ())
 
 
 def test_plain_text_is_the_answer_with_the_flag_unknown():
-    assert _parse_reply("  I built it.  ") == ("I built it.", None, None)
+    assert _parse_reply("  I built it.  ") == ("I built it.", None, None, ())
 
 
 def test_broken_json_never_shows_a_brace():
     # Cut short mid-object: the answer field is still readable.
-    assert _parse_reply('{"answer": "I built \\"it\\".", "decl') == ('I built "it".', None, None)
+    assert _parse_reply('{"answer": "I built \\"it\\".", "decl') == ('I built "it".', None, None, ())
     # Nothing readable: empty, which the caller turns into its own copy.
-    assert _parse_reply('{"answ') == ("", None, None)
+    assert _parse_reply('{"answ') == ("", None, None, ())
 
 
 _READY = {
@@ -60,7 +60,7 @@ _SUMMARY = "I run a small accounting office. Client intake email eats our mornin
 
 
 def test_a_ready_handoff_is_read_beside_the_answer():
-    text, declined, handoff = _parse_reply(
+    text, declined, handoff, _ = _parse_reply(
         json.dumps({"answer": "It depends.", "declined": False, "handoff": _READY})
     )
 
@@ -72,7 +72,7 @@ def test_a_ready_handoff_is_read_beside_the_answer():
 
 def test_a_broken_handoff_only_drops_the_handoff():
     for broken in ({"ready": "yes"}, dict(_READY, reason="bribe"), "ready", None):
-        text, declined, handoff = _parse_reply(
+        text, declined, handoff, _ = _parse_reply(
             json.dumps({"answer": "A.", "declined": False, "handoff": broken})
         )
         assert (text, declined, handoff) == ("A.", False, None)
@@ -91,7 +91,7 @@ _LONG_EN = (
 
 
 def _part(**fields):
-    _, _, handoff = _parse_reply(
+    _, _, handoff, _ = _parse_reply(
         json.dumps({"answer": "A.", "declined": False, "handoff": dict(_READY, **fields)})
     )
     return handoff
@@ -127,7 +127,7 @@ def test_a_long_summary_never_ends_mid_sentence(answer_with):
 
 @pytest.mark.parametrize("fit", ["I can build this in 2 weeks.", "It costs about ₪5,000.", "Saves 40% of the time."])
 def test_a_fit_line_with_a_figure_is_dropped(fit):
-    _, _, handoff = _parse_reply(
+    _, _, handoff, _ = _parse_reply(
         json.dumps({"answer": "A.", "declined": False, "handoff": dict(_READY, fit=fit)})
     )
 
