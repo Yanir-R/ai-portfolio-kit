@@ -176,8 +176,9 @@ def test_build_contents_drops_unknown_roles_and_blank_turns():
         ],
     )
 
-    assert [c["role"] for c in contents] == ["user", "user"]
-    assert contents[0]["parts"][0]["text"] == "kept"
+    # The unanswered turn and the question are one visitor turn of two parts.
+    assert [c["role"] for c in contents] == ["user"]
+    assert [p["text"] for p in contents[0]["parts"]] == ["kept", "q"]
 
 
 def test_build_contents_bounds_replayed_history():
@@ -185,7 +186,25 @@ def test_build_contents_bounds_replayed_history():
 
     contents = build_contents("q", history)
 
-    assert len(contents) == prompt.HISTORY_TURNS + 1
+    replayed = [part["text"] for turn in contents for part in turn["parts"]]
+    assert replayed == [f"m{i}" for i in range(50 - prompt.HISTORY_TURNS, 50)] + ["q"]
+
+
+def test_build_contents_opens_with_the_visitor_and_alternates():
+    history = [
+        {"role": "model", "content": "an answer whose question fell out of the window"},
+        {"role": "user", "content": "first"},
+        {"role": "model", "content": "reply"},
+        {"role": "user", "content": "asked, but the answer failed"},
+    ]
+
+    contents = build_contents("next", history)
+
+    assert [c["role"] for c in contents] == ["user", "model", "user"]
+    assert [p["text"] for p in contents[-1]["parts"]] == [
+        "asked, but the answer failed",
+        "next",
+    ]
 
 
 def test_ui_chrome_is_not_replayed_as_conversation():

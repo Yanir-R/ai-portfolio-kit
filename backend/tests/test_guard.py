@@ -34,7 +34,7 @@ def client(monkeypatch):
 def _model_says(monkeypatch, text, seen=None):
     """The model answers `text`; what it was given is appended to `seen`."""
 
-    def answer(api_key, question, knowledge, turns):
+    def answer(api_key, question, knowledge, turns, reading=""):
         if seen is not None:
             seen.append({"question": question, "turns": turns})
         return Answer(text=text, model="stub-model")

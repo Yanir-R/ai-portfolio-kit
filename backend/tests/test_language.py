@@ -111,7 +111,7 @@ def client(monkeypatch):
 
 
 def _stub_model(monkeypatch, given):
-    def answer(api_key, question, knowledge, turns):
+    def answer(api_key, question, knowledge, turns, reading=""):
         given.append(knowledge)
         return Answer(text="An answer.", model="a-model")
 
