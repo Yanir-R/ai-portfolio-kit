@@ -8,8 +8,9 @@ import { chatService, ChatFailure } from '@/services/chatService';
 import { useTurnstile } from '@/hooks/useTurnstile';
 import { FailureCase, failureCase, failureText as describeFailure } from '@/chat/failure';
 import FailureCard, { ContactActions } from '@/components/chat/FailureCard';
+import HandoffCard from '@/components/chat/HandoffCard';
 import { useLang } from '@/i18n/useLang';
-import { ChatBlock, ChatContext, ChatMessage, TraceSource } from '@/types/chat';
+import { ChatBlock, ChatContext, ChatHandoff, ChatMessage, TraceSource } from '@/types/chat';
 import { WritingEntry } from '@/types/writing';
 
 /*
@@ -32,6 +33,8 @@ type Turn =
           sources: TraceSource[];
           fromPiece: boolean;
           sig?: string | null;
+          /** The offer to continue with Yanir, folded once the conversation moves on. */
+          handoff?: ChatHandoff | null;
       }
     | {
           id: number;
@@ -73,10 +76,21 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
     const [busy, setBusy] = useState(false);
     // The day's answers are spent: the input row becomes the routes to Yanir.
     const [closed, setClosed] = useState(false);
+    // Offered at most once per conversation; the server is told.
+    const [handoffOffered, setHandoffOffered] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useLayoutEffect(() => {
         const log = logRef.current;
-        if (log) log.scrollTop = log.scrollHeight;
+        if (!log) return;
+        const end = log.scrollHeight - log.clientHeight;
+        const hand = log.querySelector<HTMLElement>('.hand:last-child');
+        // An offer that fits shows whole, so every route to Yanir is in view
+        // and the end of the answer fills what room is left above it. One
+        // taller than the pane starts at its title instead.
+        if (!hand || hand.offsetHeight <= log.clientHeight) return void (log.scrollTop = end);
+        const above = hand.getBoundingClientRect().top - log.getBoundingClientRect().top;
+        log.scrollTop = Math.min(end, log.scrollTop + above - 12);
     }, [turns]);
 
     const context: ChatContext | null = withContext
@@ -85,7 +99,11 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
 
     const add = (...items: NewTurn[]) =>
         setTurns((prev) => [
-            ...prev.filter((turn) => turn.kind !== 'wait' && turn.kind !== 'pick'),
+            ...prev
+                .filter((turn) => turn.kind !== 'wait' && turn.kind !== 'pick')
+                .map((turn) =>
+                    turn.kind === 'answer' && turn.handoff ? { ...turn, handoff: null } : turn
+                ),
             ...items.map((item) => ({ ...item, id: nextId.current++ }) as Turn),
         ]);
 
@@ -117,7 +135,8 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
             question,
             history(),
             await getToken(),
-            context
+            context,
+            handoffOffered
         );
         resetToken();
         setBusy(false);
@@ -129,8 +148,21 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
             sources: result.trace?.sources ?? [],
             fromPiece: !!context,
             sig: result.sig,
+            handoff: result.handoff,
         });
+        if (result.handoff) setHandoffOffered(true);
     };
+
+    /** "I'll keep asking the agent": the offer folds, the input takes focus, nothing else changes. */
+    const keepAsking = () => {
+        setTurns((prev) =>
+            prev.map((turn) =>
+                turn.kind === 'answer' && turn.handoff ? { ...turn, handoff: null } : turn
+            )
+        );
+        inputRef.current?.focus({ preventScroll: true });
+    };
+    const handoffOpen = turns.some((turn) => turn.kind === 'answer' && !!turn.handoff);
 
     const pickChip = (chip: Chip) => {
         if (busy) return;
@@ -218,27 +250,39 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
                             />
                         );
                     return (
-                        <div key={turn.id} className="ans">
-                            <Tag tone="a">
-                                {turn.fromPiece ? copy.answeredFromPiece : copy.answered}
-                            </Tag>
-                            <Markdown>{turn.text}</Markdown>
-                            <WritingBlocks blocks={turn.blocks} />
-                            {turn.sources.length > 0 && (
-                                <div className="sr">
-                                    <u>{copy.sources}</u>
-                                    {turn.sources.map((s) => (
-                                        <span key={`${s.kind}-${s.slug}`} dir="auto">
-                                            {s.title}
-                                        </span>
-                                    ))}
-                                </div>
+                        <React.Fragment key={turn.id}>
+                            <div className="ans">
+                                <Tag tone="a">
+                                    {turn.fromPiece ? copy.answeredFromPiece : copy.answered}
+                                </Tag>
+                                <Markdown>{turn.text}</Markdown>
+                                <WritingBlocks blocks={turn.blocks} />
+                                {turn.sources.length > 0 && (
+                                    <div className="sr">
+                                        <u>{copy.sources}</u>
+                                        {turn.sources.map((s) => (
+                                            <span key={`${s.kind}-${s.slug}`} dir="auto">
+                                                {s.title}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            {turn.handoff && (
+                                <HandoffCard
+                                    handoff={turn.handoff}
+                                    onKeep={
+                                        turn.handoff.reason === 'last_answer'
+                                            ? undefined
+                                            : keepAsking
+                                    }
+                                />
                             )}
-                        </div>
+                        </React.Fragment>
                     );
                 })}
             </div>
-            {!closed && chips.length > 0 && (
+            {!closed && !handoffOpen && chips.length > 0 && (
                 <div className="qs">
                     {chips.map((chip) => (
                         <button
@@ -261,6 +305,7 @@ const AskDock: React.FC<{ entry: WritingEntry }> = ({ entry }) => {
             ) : (
                 <form onSubmit={submit}>
                     <input
+                        ref={inputRef}
                         type="text"
                         value={text}
                         onChange={(e) => setText(e.target.value)}

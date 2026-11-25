@@ -105,6 +105,28 @@ export interface ChatCopy {
         mailShort: string;
         whatsapp: string;
     };
+    /** The offer to continue with Yanir, drawn under an answer at the right moment. */
+    handoff: {
+        title: string;
+        /**
+         * The opening line when the model gave no fit line of its own, one per
+         * reason the server offered the card for.
+         */
+        leads: {
+            business_context: string;
+            pricing: string;
+            timeline: string;
+            how_to_start: string;
+        };
+        /** Always follows the opening line: what the call is for. */
+        callLine: string;
+        /** The visitor's last answer of the day, with nothing to summarise. */
+        lastText: string;
+        /** Over the box that holds the summary. */
+        label: string;
+        mail: string;
+        keep: string;
+    };
     compare: {
         ask: string;
         pickProcess: string;
@@ -328,6 +350,21 @@ export const CHAT: Localized<ChatCopy> = {
             mailShort: 'מייל',
             mail: 'כתבו לי במייל',
             whatsapp: 'וואטסאפ',
+        },
+        handoff: {
+            title: 'מכאן אני ממשיך אישית',
+            leads: {
+                business_context: 'ממה שסיפרתם, זה כבר נשמע כמו פרויקט.',
+                pricing: 'המחיר תלוי בהיקף ובמערכות שיש לכם, ולכן אני לא זורק מספר באוויר.',
+                timeline: 'לוח הזמנים תלוי בעיקר במערכות שצריך להתחבר אליהן.',
+                how_to_start: 'מתחילים תמיד בשיחת אבחון קצרה, בלי התחייבות.',
+            },
+            callLine: 'בשיחה של 20 עד 30 דקות אגיד לכם בכנות מה אפשר לבנות ומתי.',
+            lastText:
+                'זו התשובה האחרונה של הסוכן להיום. אם תרצו להמשיך, אני זמין ישירות, ואגיד לכם בכנות מה אפשר לבנות ומתי.',
+            label: 'מה שסיפרתם עד עכשיו',
+            mail: 'שלחו לי את הסיכום במייל',
+            keep: 'אמשיך לשאול את הסוכן',
         },
         compare: {
             ask: 'מה סוכן ישנה אצלנו?',
@@ -635,6 +672,23 @@ export const CHAT: Localized<ChatCopy> = {
             mailShort: 'Email',
             mail: 'Email me',
             whatsapp: 'WhatsApp',
+        },
+        handoff: {
+            title: "I'll take it from here",
+            leads: {
+                business_context: "From what you've told me, this already sounds like a project.",
+                pricing:
+                    "The price depends on the scope and the systems you use, so I won't throw out a number blind.",
+                timeline: 'The timeline depends mostly on the systems it has to connect to.',
+                how_to_start: 'It always starts with a short discovery call, with no commitment.',
+            },
+            callLine:
+                "In a 20 to 30 minute call I'll tell you honestly what can be built and when.",
+            lastText:
+                "That was the agent's last answer for today. If you'd like to keep going, I'm available directly and will tell you honestly what can be built and when.",
+            label: "What you've told me so far",
+            mail: 'Email me this summary',
+            keep: "I'll keep asking the agent",
         },
         compare: {
             ask: 'What would an agent change for us?',

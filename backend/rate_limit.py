@@ -45,7 +45,7 @@ import os
 import threading
 import time
 from collections import deque
-from typing import Deque, Dict, Tuple
+from typing import Deque, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, Request
 
@@ -145,6 +145,25 @@ class SlidingWindowLimiter:
                 self._global.append(now)
 
         return True, 0
+
+    def remaining(self, key: str) -> Optional[int]:
+        """How many more requests `key` may make now, or None when unlimited.
+
+        Read-only: nothing is recorded. The smaller of the caller's own budget
+        and the shared one, since either running out closes the door.
+        """
+        now = time.monotonic()
+        left: List[int] = []
+        with self._lock:
+            if self.per_key_limit:
+                window = self._keys.get(key)
+                if window is not None:
+                    self._prune(window, now)
+                left.append(self.per_key_limit - (len(window) if window else 0))
+            if self.global_limit:
+                self._prune(self._global, now)
+                left.append(self.global_limit - len(self._global))
+        return max(0, min(left)) if left else None
 
 
 def client_key(request: Request) -> str:

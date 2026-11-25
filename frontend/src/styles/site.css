@@ -9388,3 +9388,49 @@ video.w-v {
         max-width: 100%;
     }
 }
+
+/* The offer to continue with Yanir (HandoffCard): the visitor's need in their
+   own words, on white with the amber bar on the reading side. */
+.hand-sum {
+    margin: 10px 0 0;
+    padding: 10px 16px;
+    background: #fff;
+    border-inline-start: 4px solid var(--btn);
+    border-radius: 4px;
+}
+.hand-sum span {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+}
+.m.lim .hand-sum p {
+    margin-top: 2px;
+}
+.hand-keep {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 2px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.hand-keep:hover {
+    color: var(--ink);
+}
+@media (max-width: 640px) {
+    /* The whole summary still goes to the contact window. */
+    .m.lim .hand-sum p {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}

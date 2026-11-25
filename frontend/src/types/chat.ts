@@ -97,6 +97,18 @@ export interface ChatContext {
     lang?: 'en' | 'he';
 }
 
+/**
+ * The server's offer to continue with Yanir directly (see _handoff_card in
+ * main.py). `summary` is what the visitor said about their need, in their
+ * words; empty when the offer is only because the day's answers run out.
+ */
+export interface ChatHandoff {
+    reason: 'business_context' | 'pricing' | 'timeline' | 'how_to_start' | 'last_answer';
+    summary: string;
+    /** Yanir's line on the kind of work that fits, from the profile; empty for none. */
+    fit?: string;
+}
+
 export interface ChatMessage {
     type: MessageType;
     content: string;
