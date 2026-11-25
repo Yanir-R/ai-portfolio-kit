@@ -424,6 +424,8 @@ export default defineConfig(({ mode, command }) => {
         // read them as undefined on any build that sets no env var.
         define: {
             'import.meta.env.VITE_BACKEND_URL': JSON.stringify(resolvedBackendUrl),
+            // The site's own address, for the links the share line hands out.
+            'import.meta.env.VITE_SITE_URL': JSON.stringify(resolvedSiteUrl),
             'import.meta.env.VITE_AVATAR_URL': JSON.stringify(avatarUrl),
             'import.meta.env.VITE_AVATAR_HIRES_URL': JSON.stringify(avatarHiResUrl),
             // The one build value kept out of the repository: see constants/links.ts.

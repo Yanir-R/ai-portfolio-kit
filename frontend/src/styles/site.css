@@ -11080,3 +11080,93 @@ video.w-v {
         animation: none;
     }
 }
+
+/* Share line in the footer of a post, an article or a project page (ShareBox.tsx). */
+.sh {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-2) var(--sp-3);
+    scroll-margin-top: 96px;
+}
+.sh.solo {
+    margin-top: var(--sp-card);
+    padding-top: var(--sp-3);
+    border-top: 1.5px dashed var(--line);
+    color: var(--muted);
+    font-weight: 700;
+}
+.sh-r {
+    display: inline-flex;
+    gap: 8px;
+}
+.sh-b {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 800 0.92rem var(--body);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0;
+}
+.sh-b.wide {
+    width: auto;
+    padding: 0 14px;
+}
+.sh-b:hover {
+    background: var(--blue-soft);
+}
+.sh-b.done {
+    background: #e7f6ec;
+    border-color: var(--wa);
+    color: var(--wa);
+}
+.sh-b svg,
+.sh-top svg {
+    width: 20px;
+    height: 20px;
+    flex: none;
+}
+.sh svg.ln,
+.sh-top svg.ln {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.sh-b:focus-visible,
+.sh-top:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 2px;
+}
+.sh-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-inline-start: 12px;
+    font-weight: 800;
+    color: var(--blue);
+    text-decoration: none;
+    vertical-align: middle;
+}
+.sh-top svg {
+    width: 16px;
+    height: 16px;
+}
+@media (max-width: 640px) {
+    /* .w-orig stacks on a phone; the share line stays one row. */
+    .sh {
+        flex-direction: row;
+    }
+}
