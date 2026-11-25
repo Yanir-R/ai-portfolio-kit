@@ -8905,7 +8905,10 @@ video.w-v {
 /*
  * When the card does not fit the first screen, HeroSection raises data-fit
  * one step at a time until the input is in view: first the hint, then the
- * third starter, the greeting, the teaser, and last the starters' subtitles.
+ * teaser, the greeting, the third starter, and last the starters' subtitles.
+ * The starters go late so that as many as fit are shown at their own height
+ * (spare room only stretches them afterwards), and the open layer keeps the
+ * same starters as the card, so opening it never adds a question.
  */
 @media (max-width: 640px) {
     #top .chat.phone:not(.full)[data-fit='1'] .m.st0 > small,
@@ -8915,10 +8918,10 @@ video.w-v {
     #top .chat.phone:not(.full)[data-fit='5'] .m.st0 > small {
         display: none;
     }
-    #top .chat.phone:not(.full)[data-fit='2'] .stg button:nth-child(n + 3),
-    #top .chat.phone:not(.full)[data-fit='3'] .stg button:nth-child(n + 3),
-    #top .chat.phone:not(.full)[data-fit='4'] .stg button:nth-child(n + 3),
-    #top .chat.phone:not(.full)[data-fit='5'] .stg button:nth-child(n + 3) {
+    #top .chat.phone:not(.full)[data-fit='2'] .tz,
+    #top .chat.phone:not(.full)[data-fit='3'] .tz,
+    #top .chat.phone:not(.full)[data-fit='4'] .tz,
+    #top .chat.phone:not(.full)[data-fit='5'] .tz {
         display: none;
     }
     #top .chat.phone:not(.full)[data-fit='3'] .log > .m.y:first-child,
@@ -8926,8 +8929,10 @@ video.w-v {
     #top .chat.phone:not(.full)[data-fit='5'] .log > .m.y:first-child {
         display: none;
     }
-    #top .chat.phone:not(.full)[data-fit='4'] .tz,
-    #top .chat.phone:not(.full)[data-fit='5'] .tz {
+    #top .chat.phone:not(.full):not(.live)[data-fit='4'] .stg button:nth-child(n + 3),
+    #top .chat.phone:not(.full):not(.live)[data-fit='5'] .stg button:nth-child(n + 3),
+    #top .chat.phone[data-fit='4'] .stg button:nth-child(n + 3),
+    #top .chat.phone[data-fit='5'] .stg button:nth-child(n + 3) {
         display: none;
     }
     #top .chat.phone:not(.full)[data-fit='5'] .stg button span {
@@ -8977,12 +8982,12 @@ video.w-v {
     font-size: 16px;
     pointer-events: none;
 }
-/* iOS zooms the page into any field under 16px. */
+/* iOS zooms the page into any field under 16px; this beats every form's own size. */
 @media (pointer: coarse) {
     input,
     textarea,
     select {
-        font-size: max(16px, 1em);
+        font-size: max(16px, 1em) !important;
     }
 }
 .chat .qr.one[hidden] {
@@ -9012,24 +9017,6 @@ video.w-v {
         flex-direction: column;
         gap: 14px;
     }
-    .talk .tb > .bk-two:not(.has-day) {
-        flex: 1;
-    }
-    .talk .bk-two .bk-cal {
-        display: flex;
-        flex-direction: column;
-    }
-    .talk .bk-two:not(.has-day) .bk-cal {
-        flex: 1;
-    }
-    .talk .bk-two:not(.has-day) .bk-cal .cg {
-        flex: 1;
-        grid-auto-rows: minmax(36px, 56px);
-        align-content: space-evenly;
-    }
-    .talk .bk-two.has-day .bk-pick.only-phone {
-        display: none;
-    }
     .talk .bk-sl .only-wide {
         display: block;
     }
@@ -9052,6 +9039,252 @@ video.w-v {
         height: 100%;
         min-height: 72px;
         resize: none;
+    }
+}
+
+/*
+ * The calendar shows four weeks from this one and is as tall as they are:
+ * 44px days, nothing stretched. Free days are filled and bold, days without
+ * a free time (and past ones) are plain, today has a ring, and a day that
+ * starts a new month carries the month's short name.
+ */
+.bk-cal .cg {
+    grid-template-rows: auto;
+    grid-auto-rows: 44px;
+    align-content: start;
+}
+.bk-cal .cg i {
+    align-self: end;
+}
+.bk-cal .cg button {
+    display: grid;
+    place-content: center;
+    gap: 1px;
+    height: 44px;
+    padding: 0;
+}
+.bk-cal .cg button.f {
+    color: var(--ink);
+}
+.bk-cal .cg button.td {
+    box-shadow: inset 0 0 0 2px var(--ink);
+}
+.bk-cal .cg button small {
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--muted);
+}
+.bk-cal .cg button.f[aria-pressed='true'] small {
+    color: #fff;
+}
+.bk-cal .mv {
+    width: 44px;
+    height: 44px;
+}
+
+/*
+ * Phone keyboard in the contact window (2026-11-25). The window follows the
+ * visible viewport, so nothing hides behind the keyboard. While the keyboard
+ * is up (data-kb, set by useKeyboardFit) the routes and the intro line fold
+ * away, forms keep their natural height and scroll as one box under the
+ * title, and no button is pinned.
+ */
+@media (max-width: 640px) {
+    .talk[open] {
+        top: var(--vv-top, 0px);
+        bottom: auto;
+        height: var(--vv-h, 100dvh);
+        max-height: var(--vv-h, 100dvh);
+    }
+    .talk .bk-form .bk-foot {
+        position: static;
+        margin-inline: 0;
+        padding: 4px 0 0;
+    }
+    .talk[data-kb] .tt,
+    .talk[data-kb] .tb > p:first-child,
+    .talk[data-kb] .tb > .stp {
+        display: none;
+    }
+    .talk[data-kb] .th {
+        padding-bottom: 8px;
+    }
+    .talk[data-kb] .th b#talk-title {
+        font-size: 1.4rem;
+        margin-bottom: 0;
+    }
+    .talk[data-kb] .th .tp {
+        display: none;
+    }
+    .talk[data-kb] .tb > .bk-form {
+        flex: none;
+        grid-template-rows: none;
+    }
+    .talk[data-kb] .tb > .bk-form textarea {
+        height: auto;
+    }
+    .talk[data-kb] .tb.mail .v-form,
+    .talk[data-kb] .tb.mail .v-form label:has(textarea),
+    .talk[data-kb] .tb.mail .v-form textarea {
+        flex: none;
+    }
+    .talk[data-kb] .tb.mail .v-form textarea {
+        min-height: 96px;
+    }
+}
+
+/*
+ * WhatsApp tab, option A (Yanir, 2026-11-25). On a phone one card sized to its
+ * content holds the numbered steps, the button right under them and a short
+ * note; the intro line, which repeats the steps, is dropped. On a wide screen
+ * the card dissolves and the tab stays as it was, beside the QR code.
+ */
+.talk .wa-card {
+    display: contents;
+}
+.talk .wa-card .nt {
+    display: none;
+}
+/* The button's own 8px gap keeps label and arrow together. */
+.talk .btn .out {
+    flex: none;
+}
+@media (max-width: 640px) {
+    .talk .tb.wa .wa-main {
+        flex: none;
+    }
+    .talk .tb.wa .wa-main > p {
+        display: none;
+    }
+    .talk .wa-card {
+        display: grid;
+        gap: 18px;
+        padding: 18px 16px 14px;
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+    }
+    .talk .tb.wa .wa-steps {
+        flex: none;
+        align-content: start;
+        gap: 14px;
+        padding: 0;
+        border: 0;
+    }
+    .talk .wa-card .btn {
+        justify-content: center;
+    }
+    .talk .wa-card .nt {
+        display: block;
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.86rem;
+    }
+}
+/* The way forward is the one to take: the next-weeks arrow is filled. */
+.bk-cal .mv:not(:disabled):not(:has(.back)) {
+    background: var(--soft, #fff1c9);
+}
+
+/*
+ * Keyboard up, one pinned button (2026-11-25). While a phone keyboard is open
+ * the send button ("book the call" / "send") is pinned whole at the foot of
+ * the visible area on a white strip, and any error or result sits right above
+ * it. Everything else is compact so the three booking fields show without
+ * scrolling on a 390x844 phone; "back" and the fine print fold away (the day
+ * row's "change" link does what "back" does). With the keyboard closed nothing here applies.
+ */
+@media (max-width: 640px) {
+    .talk[data-kb] .th {
+        height: 56px;
+        padding: 8px 12px 8px 16px;
+    }
+    .talk[data-kb] .th button {
+        width: 40px;
+        height: 40px;
+    }
+    .talk[data-kb] .tb {
+        padding-top: 8px;
+        padding-bottom: 0;
+        gap: 10px;
+        /* Centre a focused field between the title and the pinned button. */
+        scroll-padding-block: 8px 72px;
+    }
+    .talk[data-kb] .bk-pick {
+        min-height: 40px;
+        padding-block: 6px;
+    }
+    .talk[data-kb] .bk-form,
+    .talk[data-kb] .tb.mail .v-form {
+        gap: 10px;
+    }
+    .talk[data-kb] .bk-form label,
+    .talk[data-kb] .tb.mail .v-form label {
+        gap: 4px;
+        font-size: 14px;
+    }
+    .talk[data-kb] .bk-form input,
+    .talk[data-kb] .tb.mail .v-form input {
+        height: 44px;
+        padding: 9px 12px;
+        line-height: 22px;
+    }
+    .talk[data-kb] .bk-form textarea[data-grow] {
+        height: var(--grow-h, 44px);
+        min-height: 44px;
+        max-height: 88px;
+        padding: 9px 12px;
+        line-height: 22px;
+        overflow-y: auto;
+    }
+    /* The fine print waits for the keyboard to close; the strip ends the form. */
+    .talk[data-kb] .bk-form > .fine {
+        display: none;
+    }
+    /*
+     * Room to scroll the day row fully away on a short screen, so it never
+     * ends half under the title; it sits above the strip, which ends the form.
+     */
+    .talk[data-kb] .bk-form::after {
+        content: '';
+        height: 40px;
+    }
+    .talk[data-kb] .bk-form > .bk-foot {
+        order: 1;
+    }
+    .talk[data-kb] .bk-form > .bk-foot,
+    .talk[data-kb] .tb.mail .v-form .v-btns {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        display: grid;
+        gap: 6px;
+        margin: 0 -16px;
+        padding: 8px 16px;
+        background: #fff;
+        border-top: 1px solid var(--ink);
+    }
+    .talk[data-kb] .bk-foot .bk-row {
+        display: block;
+    }
+    .talk[data-kb] .bk-foot .bk-back {
+        display: none;
+    }
+    .talk[data-kb] .bk-foot .btn,
+    .talk[data-kb] .tb.mail .v-form .v-btns .btn {
+        width: 100%;
+        min-height: 48px;
+        height: 48px;
+        margin: 0;
+    }
+    .talk[data-kb] .tb.mail .v-form .v-btns .note {
+        order: -1;
+    }
+    .talk[data-kb] .tb.mail .v-form .v-btns .note:empty {
+        display: none;
+    }
+    .talk[data-kb] .tb.mail > .fine {
+        padding-bottom: 12px;
     }
 }
 

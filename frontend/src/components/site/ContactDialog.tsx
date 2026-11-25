@@ -5,6 +5,8 @@ import QrCode from '@/components/site/QrCode';
 import BookingFlow from '@/components/site/BookingFlow';
 import { useLang } from '@/i18n/useLang';
 import { useTurnstile } from '@/hooks/useTurnstile';
+import { nextOnEnter, pinned, useKeyboardFit } from '@/hooks/useKeyboardFit';
+import { PHONE_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
 import { contactService } from '@/services/contactService';
 import { ContactRequest } from '@/components/site/SiteDialogs';
 
@@ -33,6 +35,8 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
     // Once the call is booked there is nothing left to choose between.
     const [booked, setBooked] = useState(false);
     const waLink = whatsappUrl(copy.whatsapp.first(request.topic));
+    // On a phone the window fills the screen and has to make room for the keyboard.
+    useKeyboardFit(ref, useMediaQuery(PHONE_QUERY));
 
     useEffect(() => {
         const dialog = ref.current;
@@ -107,17 +111,22 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
             <div className="tb wa" role="tabpanel" hidden={kind !== 'whatsapp'}>
                 <div className="wa-main">
                     <p>{copy.whatsapp.text}</p>
-                    <ol className="wa-steps">
-                        {copy.whatsapp.steps.map((step, i) => (
-                            <li key={step}>
-                                <span aria-hidden="true">{i + 1}</span>
-                                {step}
-                            </li>
-                        ))}
-                    </ol>
-                    <a className="btn" href={waLink} target="_blank" rel="noopener">
-                        {copy.whatsapp.open}
-                    </a>
+                    {/* On a phone one card holds the steps, the button and a note. */}
+                    <div className="wa-card">
+                        <ol className="wa-steps">
+                            {copy.whatsapp.steps.map((step, i) => (
+                                <li key={step}>
+                                    <span aria-hidden="true">{i + 1}</span>
+                                    {step}
+                                </li>
+                            ))}
+                        </ol>
+                        <a className="btn" href={waLink} target="_blank" rel="noopener">
+                            {copy.whatsapp.open}
+                            <OutArrow />
+                        </a>
+                        <p className="nt">{copy.whatsapp.note}</p>
+                    </div>
                 </div>
                 {/* On a computer the chat usually lives on the phone: scan to open it there. */}
                 <figure className="wa-qr">
@@ -129,6 +138,20 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
     );
 };
 
+/* "Opens elsewhere", drawn: iOS shows the ↗ character as an emoji tile. */
+const OutArrow: React.FC = () => (
+    <svg className="out" viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+        <path
+            d="M5 11l6-6M6 5h5v5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+
 type SendState = 'idle' | 'sending' | 'sent' | 'failed';
 
 const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topic }) => {
@@ -138,6 +161,12 @@ const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topi
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState(initial);
     const [state, setState] = useState<SendState>('idle');
+    // The outcome is shown where it can be read, keyboard or not.
+    const noteRef = useRef<HTMLSpanElement>(null);
+    useEffect(() => {
+        if (state !== 'idle' && !pinned(noteRef.current))
+            noteRef.current?.scrollIntoView({ block: 'nearest' });
+    }, [state]);
 
     const submit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -155,7 +184,7 @@ const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topi
 
     return (
         <>
-            <form className="v-form" onSubmit={submit}>
+            <form className="v-form" onSubmit={submit} onKeyDown={nextOnEnter}>
                 <label>
                     {copy.email}
                     <input
@@ -163,6 +192,11 @@ const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topi
                         dir="ltr"
                         required
                         autoComplete="email"
+                        inputMode="email"
+                        autoCapitalize="off"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        enterKeyHint="next"
                         placeholder={copy.emailPlaceholder}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -174,6 +208,7 @@ const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topi
                     <textarea
                         rows={4}
                         required
+                        enterKeyHint="enter"
                         maxLength={2000}
                         placeholder={copy.messagePlaceholder}
                         value={message}
@@ -190,7 +225,7 @@ const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topi
                     >
                         {copy.send}
                     </button>
-                    <span className="note" aria-live="polite">
+                    <span className="note" aria-live="polite" ref={noteRef}>
                         {note}
                     </span>
                 </div>

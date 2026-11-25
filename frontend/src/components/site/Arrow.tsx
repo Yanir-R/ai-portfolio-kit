@@ -18,7 +18,7 @@ export const Arrow: React.FC<{ children: React.ReactNode; out?: boolean }> = ({
         <>
             {children}
             {NBSP}
-            {out ? '↗' : ARROW[lang]}
+            {out ? '↗︎' : ARROW[lang]}
         </>
     );
 };

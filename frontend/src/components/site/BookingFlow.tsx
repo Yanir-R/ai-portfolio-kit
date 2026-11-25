@@ -1,10 +1,11 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLoad } from '@/hooks/useLoad';
 import { CONTACT } from '@/copy/site';
 import { BOOKING_TIME_ZONE } from '@/constants/booking';
 import { LINKS } from '@/constants/links';
 import { useLang } from '@/i18n/useLang';
 import { useTurnstile } from '@/hooks/useTurnstile';
+import { nextOnEnter, pinned } from '@/hooks/useKeyboardFit';
 import { Booked, bookingService, Slot, SlotsByDay } from '@/services/bookingService';
 
 /*
@@ -15,7 +16,10 @@ import { Booked, bookingService, Slot, SlotsByDay } from '@/services/bookingServ
  */
 
 type Step = 'time' | 'details' | 'done';
-type Month = { y: number; m: number };
+
+/** Weeks on show at once: a rolling view from this week on, never a past month. */
+const WEEKS = 4;
+const VIEW_DAYS = WEEKS * 7;
 
 /** Today's date in Israel, YYYY-MM-DD. */
 const todayInIsrael = () =>
@@ -23,9 +27,16 @@ const todayInIsrael = () =>
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const dayKey = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
-const daysIn = (y: number, m: number) => new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
 /** A day key at noon UTC: the same calendar day in every time zone near Israel. */
 const noon = (key: string) => new Date(`${key}T12:00:00Z`);
+/** The day key `by` days after `key`. */
+const addDays = (key: string, by: number) => {
+    const d = noon(key);
+    d.setUTCDate(d.getUTCDate() + by);
+    return dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+};
+/** The Sunday that starts the week of `key`. */
+const weekStart = (key: string) => addDays(key, -noon(key).getUTCDay());
 const israelClock = new Intl.DateTimeFormat('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
@@ -121,10 +132,8 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
     const copy = t(CONTACT).booking;
     const locale = lang === 'he' ? 'he-IL' : 'en-GB';
     const today = useMemo(() => todayInIsrael(), []);
-    const [month, setMonth] = useState<Month>(() => {
-        const [y, m] = today.split('-').map(Number);
-        return { y, m: m - 1 };
-    });
+    // Which four weeks are on show: 0 is the view that starts with this week.
+    const [page, setPage] = useState(0);
     const [day, setDay] = useState<string | null>(null);
     const timesRef = useRef<HTMLDivElement>(null);
     const [slot, setSlot] = useState<Slot | null>(null);
@@ -135,14 +144,19 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
     const [sending, setSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [booked, setBooked] = useState<Booked | null>(null);
+    // A refusal is shown where it can be read, keyboard or not.
+    const errorRef = useRef<HTMLParagraphElement>(null);
+    useEffect(() => {
+        // Pinned above the phone keyboard, the error is already in view.
+        if (error && !pinned(errorRef.current))
+            errorRef.current?.scrollIntoView({ block: 'nearest' });
+    }, [error]);
 
-    // The free slots of the month on show, from today on.
-    const monthFirst = dayKey(month.y, month.m, 1);
-    const [load, reloadSlots] = useLoad(monthFirst, () =>
-        bookingService.slots(
-            monthFirst < today ? today : monthFirst,
-            dayKey(month.y, month.m, daysIn(month.y, month.m))
-        )
+    // The free slots of the weeks on show, from today on.
+    const viewFirst = addDays(weekStart(today), page * VIEW_DAYS);
+    const viewLast = addDays(viewFirst, VIEW_DAYS - 1);
+    const [load, reloadSlots] = useLoad(viewFirst, () =>
+        bookingService.slots(viewFirst < today ? today : viewFirst, viewLast)
     );
 
     const fmt = useMemo(
@@ -152,6 +166,8 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                 year: 'numeric',
                 timeZone: 'UTC',
             }),
+            // The month's name on the day a new month starts inside the view.
+            monthShort: new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' }),
             day: new Intl.DateTimeFormat(locale, {
                 weekday: 'long',
                 day: 'numeric',
@@ -164,14 +180,9 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
 
     const days: SlotsByDay = load.state === 'ready' ? load.value : {};
     const times = day ? (days[day] ?? []) : [];
-    const [ty, tm] = today.split('-').map(Number);
-    const atFirstMonth = month.y === ty && month.m === tm - 1;
-    const shiftMonth = (by: number) => {
+    const shiftView = (by: number) => {
         setDay(null);
-        setMonth(({ y, m }) => ({
-            y: y + Math.floor((m + by) / 12),
-            m: (((m + by) % 12) + 12) % 12,
-        }));
+        setPage((n) => Math.max(0, n + by));
     };
 
     const pickTime = (s: Slot) => {
@@ -306,7 +317,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                         {copy.change}
                     </button>
                 </div>
-                <form className="bk-form" onSubmit={submit}>
+                <form className="bk-form" onSubmit={submit} onKeyDown={nextOnEnter}>
                     <label>
                         {copy.name}
                         <input
@@ -314,6 +325,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             required
                             maxLength={120}
                             autoComplete="name"
+                            enterKeyHint="next"
                             placeholder={copy.namePlaceholder}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -326,6 +338,11 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             dir="ltr"
                             required
                             autoComplete="email"
+                            inputMode="email"
+                            autoCapitalize="off"
+                            autoCorrect="off"
+                            spellCheck={false}
+                            enterKeyHint="next"
                             placeholder={copy.emailPlaceholder}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -335,15 +352,17 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                         {copy.about}
                         <textarea
                             rows={2}
+                            data-grow
                             maxLength={1000}
+                            enterKeyHint="enter"
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                         />
                     </label>
-                    {/* Pinned to the window's foot, so an error never pushes the buttons out of view. */}
+                    {/* Pinned to the window's foot on a wide screen, so an error never pushes the buttons out of view. */}
                     <div className="bk-foot">
                         {error && (
-                            <p className="bk-err" role="alert">
+                            <p className="bk-err" role="alert" ref={errorRef}>
                                 {error}
                             </p>
                         )}
@@ -353,7 +372,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             </button>
                             <button
                                 type="button"
-                                className="btn sec"
+                                className="btn sec bk-back"
                                 onClick={() => setStep('time')}
                             >
                                 {copy.back}
@@ -367,15 +386,15 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
         );
     }
 
-    // Step 1: the month, and the free times of the day picked.
-    const first = new Date(Date.UTC(month.y, month.m, 1)).getUTCDay();
-    const cells: (string | null)[] = [
-        ...Array.from({ length: first }, () => null),
-        ...Array.from({ length: daysIn(month.y, month.m) }, (_, i) =>
-            dayKey(month.y, month.m, i + 1)
-        ),
-    ];
-    const anyFree = Object.values(days).some((list) => list.length > 0);
+    // Step 1: four weeks from this one, and the free times of the day picked.
+    const cells = Array.from({ length: VIEW_DAYS }, (_, i) => addDays(viewFirst, i));
+    // "November 2026", or "November – December 2026" when the weeks cross a month.
+    const title =
+        viewFirst.slice(0, 7) === viewLast.slice(0, 7)
+            ? fmt.month.format(noon(viewFirst))
+            : fmt.month.formatRange(noon(viewFirst), noon(viewLast));
+    // Counted over the weeks on show: an empty page says so under the grid.
+    const anyFree = cells.some((key) => key >= today && !!days[key]?.length);
 
     return (
         <>
@@ -389,7 +408,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                 <div className="bk-cal">
                     <div className="ch">
                         <div className="cm">
-                            <strong>{fmt.month.format(noon(dayKey(month.y, month.m, 15)))}</strong>
+                            <strong>{title}</strong>
                             <span>{copy.meta}</span>
                         </div>
                         <div className="mvs">
@@ -397,8 +416,8 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                                 type="button"
                                 className="mv"
                                 aria-label={copy.prevMonth}
-                                disabled={atFirstMonth}
-                                onClick={() => shiftMonth(-1)}
+                                disabled={page === 0}
+                                onClick={() => shiftView(-1)}
                             >
                                 <Chevron back />
                             </button>
@@ -406,7 +425,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                                 type="button"
                                 className="mv"
                                 aria-label={copy.nextMonth}
-                                onClick={() => shiftMonth(1)}
+                                onClick={() => shiftView(1)}
                             >
                                 <Chevron />
                             </button>
@@ -416,14 +435,22 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                         {copy.weekdays.map((w) => (
                             <i key={w}>{w}</i>
                         ))}
-                        {cells.map((key, i) =>
-                            key ? (
+                        {cells.map((key, i) => {
+                            const free = key >= today && !!days[key]?.length;
+                            const newMonth = i > 0 && key.endsWith('-01');
+                            const classes = [
+                                free && 'f',
+                                key < today && 'past',
+                                key === today && 'td',
+                            ].filter(Boolean);
+                            return (
                                 <button
                                     key={key}
                                     type="button"
-                                    className={days[key]?.length ? 'f' : undefined}
-                                    disabled={!days[key]?.length}
+                                    className={classes.join(' ') || undefined}
+                                    disabled={!free}
                                     aria-pressed={key === day}
+                                    aria-current={key === today ? 'date' : undefined}
                                     aria-label={fmt.day.format(noon(key))}
                                     onClick={() => {
                                         setDay(key);
@@ -437,12 +464,15 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                                         );
                                     }}
                                 >
+                                    {newMonth && (
+                                        <small aria-hidden="true">
+                                            {fmt.monthShort.format(noon(key))}
+                                        </small>
+                                    )}
                                     {Number(key.slice(8))}
                                 </button>
-                            ) : (
-                                <span key={`pad-${i}`} />
-                            )
-                        )}
+                            );
+                        })}
                     </div>
                     {load.state === 'loading' && <p className="fine">{copy.loading}</p>}
                     {load.state === 'failed' && <p className="bk-err">{copy.failed}</p>}

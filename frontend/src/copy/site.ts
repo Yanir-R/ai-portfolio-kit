@@ -144,6 +144,8 @@ export interface ContactCopy {
         steps: [string, string, string];
         scan: string;
         open: string;
+        /** Under the button on a phone: what tapping it does. */
+        note: string;
         first: (topic?: string) => string;
     };
 }
@@ -207,7 +209,7 @@ export const CONTACT: Localized<ContactCopy> = {
         tabs: { call: 'שיחת אבחון', mail: 'מייל', whatsapp: 'וואטסאפ' },
         call: {
             text: '20 עד 30 דקות בשיחת וידאו. בוחרים שעה, והנושא מצורף להזמנה כדי שלא תתחילו מאפס.',
-            open: 'פתיחת היומן בחלון חדש ↗',
+            open: 'פתיחת היומן בחלון חדש ↗︎',
         },
         booking: {
             steps: ['יום ושעה', 'פרטים', 'אישור'],
@@ -215,9 +217,9 @@ export const CONTACT: Localized<ContactCopy> = {
             meta: '30 דק׳ · וידאו · שעון ישראל',
             loading: 'טוען את השעות הפנויות…',
             failed: 'היומן לא נטען כרגע. אפשר לקבוע דרך הקישור למטה.',
-            none: 'אין שעות פנויות בחודש הזה. נסו את החודש הבא.',
-            prevMonth: 'החודש הקודם',
-            nextMonth: 'החודש הבא',
+            none: 'אין זמנים פנויים בשבועות האלה.',
+            prevMonth: 'השבועות הקודמים',
+            nextMonth: 'השבועות הבאים',
             pickDay: 'בחרו יום ביומן, והשעות הפנויות יופיעו כאן.',
             timesNote: 'שעון ישראל. לחיצה על שעה ממשיכה לפרטים.',
             otherDay: 'יום אחר',
@@ -276,7 +278,8 @@ export const CONTACT: Localized<ContactCopy> = {
                 'אני חוזר אליכם בוואטסאפ.',
             ],
             scan: 'סריקה פותחת את השיחה בטלפון',
-            open: 'פתיחת וואטסאפ ↗',
+            open: 'פתיחת וואטסאפ',
+            note: 'נפתח באפליקציית וואטסאפ, עם הודעה אליי.',
             first: (topic) => (topic ? `היי יניר, לגבי ${topic}: ` : 'היי יניר, '),
         },
     },
@@ -288,7 +291,7 @@ export const CONTACT: Localized<ContactCopy> = {
         tabs: { call: 'Discovery call', mail: 'Email', whatsapp: 'WhatsApp' },
         call: {
             text: '20 to 30 minutes on a video call. Pick a time, and the subject goes with the invite so you do not start from scratch.',
-            open: 'Open the calendar in a new tab ↗',
+            open: 'Open the calendar in a new tab ↗︎',
         },
         booking: {
             steps: ['Day and time', 'Details', 'Confirmed'],
@@ -296,9 +299,9 @@ export const CONTACT: Localized<ContactCopy> = {
             meta: '30 min · video · Israel time',
             loading: 'Loading the free times…',
             failed: 'The calendar did not load just now. You can book through the link below.',
-            none: 'No free times this month. Try the next one.',
-            prevMonth: 'Previous month',
-            nextMonth: 'Next month',
+            none: 'No free times in these weeks.',
+            prevMonth: 'Earlier weeks',
+            nextMonth: 'Later weeks',
             pickDay: 'Pick a day on the calendar and the free times show here.',
             timesNote: 'Israel time. Pick a time to continue.',
             otherDay: 'Another day',
@@ -358,7 +361,8 @@ export const CONTACT: Localized<ContactCopy> = {
                 'I get back to you on WhatsApp.',
             ],
             scan: 'Scan to open the chat on your phone',
-            open: 'Open WhatsApp ↗',
+            open: 'Open WhatsApp',
+            note: 'Opens in the WhatsApp app, with a message to me.',
             first: (topic) => (topic ? `Hi Yanir, about ${topic}: ` : 'Hi Yanir, '),
         },
     },

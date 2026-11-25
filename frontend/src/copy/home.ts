@@ -152,7 +152,7 @@ export const HOME: Localized<HomeCopy> = {
                 },
                 {
                     tag: 'קוד פתוח · חינם',
-                    title: 'PersonaKit ↗',
+                    title: 'PersonaKit ↗︎',
                     text: 'זיכרון לסוכני AI שאפשר לקרוא, לבדוק ולתקן. מורידים ומשתמשים: personakit.me',
                     open: true,
                 },
@@ -379,7 +379,7 @@ export const HOME: Localized<HomeCopy> = {
                 },
                 {
                     tag: 'Open source · Free',
-                    title: 'PersonaKit ↗',
+                    title: 'PersonaKit ↗︎',
                     text: 'Memory for AI agents that you can read, check and correct. Download and use: personakit.me',
                     open: true,
                 },

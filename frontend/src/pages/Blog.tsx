@@ -212,7 +212,7 @@ const SeriesBlock: React.FC<{
                             <React.Fragment key={href}>
                                 {' '}
                                 <a className="w-out" href={href} target="_blank" rel="noopener">
-                                    {href.replace(/^https:\/\//, '')} ↗
+                                    {href.replace(/^https:\/\//, '')} ↗︎
                                 </a>
                             </React.Fragment>
                         ))}
