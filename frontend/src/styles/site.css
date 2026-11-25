@@ -8523,8 +8523,26 @@ video.w-v {
 .talk .bk-form .bk-foot .bk-err {
     margin: 0;
 }
+/*
+ * WhatsApp fills the frame the way the email tab does: the steps' box takes
+ * the spare height and spreads its three steps through it, and the button
+ * follows right under the box, so there is no empty band between the text
+ * and the button. On a wide screen the QR code sits beside it, at the top.
+ */
 .talk .tb.wa {
-    align-items: flex-start;
+    align-items: stretch;
+}
+.talk .tb.wa .wa-main {
+    flex: 1;
+}
+.talk .tb.wa .wa-steps {
+    flex: 1;
+    align-content: space-evenly;
+    gap: 18px;
+    padding: 18px 16px;
+}
+.talk .tb.wa .wa-qr {
+    align-self: flex-start;
 }
 .talk .tb.mail .v-form > .ts {
     margin-top: -18px;
@@ -8534,14 +8552,7 @@ video.w-v {
         bottom: -16px;
         padding-bottom: 16px;
     }
-    .talk .tb.wa {
-        flex: 1;
-    }
-    .talk .wa-main {
-        flex: 1;
-    }
     .talk .wa-main .btn {
-        margin-top: auto;
         align-self: stretch;
     }
 }
