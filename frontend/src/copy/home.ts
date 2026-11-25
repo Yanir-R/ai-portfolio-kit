@@ -125,8 +125,8 @@ export const HOME: Localized<HomeCopy> = {
             tagline: 'איך אני עובד',
             title: 'שלוש הבטחות.',
             em: 'והוכחה לכל אחת.',
-            text: 'מה אני מבטיח לפני שמכניסים סוכן לעסק, ואיפה זה כבר קרה. שמות הלקוחות נשארים אצלי.',
-            evidenceLabel: 'איפה זה קרה',
+            text: 'מה אני מבטיח לפני שמכניסים סוכן לעסק, ואיפה זה קורה היום. שמות הלקוחות נשארים אצלי.',
+            evidenceLabel: 'איפה זה קורה',
             promises: [
                 {
                     title: 'קודם מבינים, אחר כך בונים',
@@ -354,8 +354,8 @@ export const HOME: Localized<HomeCopy> = {
             tagline: 'How I work',
             title: 'Three promises.',
             em: 'And proof for each.',
-            text: 'What I promise before an agent goes into a business, and where it has already happened. Client names stay with me.',
-            evidenceLabel: 'Where it happened',
+            text: 'What I promise before an agent goes into a business, and where it happens today. Client names stay with me.',
+            evidenceLabel: 'Where it happens',
             promises: [
                 {
                     title: 'Understand first, build second',
