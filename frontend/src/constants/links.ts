@@ -17,14 +17,26 @@ export const LINKS = {
 export const SITE_HOST = 'yanirrot.com';
 
 /*
- * Parts of the design that are not live yet. Off means the part is not
- * rendered at all, so nothing half-working reaches a visitor.
+ * The business WhatsApp number, digits only with the country code. It is
+ * shown on the page, but it is not kept in this repository: the build reads
+ * it from VITE_WHATSAPP_NUMBER (a repository variable in CI). Empty means the
+ * WhatsApp routes are not rendered.
+ */
+const WHATSAPP_NUMBER = (import.meta.env.VITE_WHATSAPP_NUMBER ?? '').replace(/\D/g, '');
+
+/** A chat with the business number, the visitor's first line prefilled. */
+export const whatsappUrl = (text?: string): string =>
+    `https://wa.me/${WHATSAPP_NUMBER}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
+
+/*
+ * Parts of the design that can be off. Off means the part is not rendered at
+ * all, so nothing half-working reaches a visitor.
  *
- *   whatsapp  - the WhatsApp routes. The number is never in this repository.
+ *   whatsapp  - the WhatsApp routes, on when the build has a number.
  *   cvPdf     - a CV file to download. While off, the CV dialog shows the
  *               on-site view only.
  */
 export const FEATURES = {
-    whatsapp: false,
+    whatsapp: WHATSAPP_NUMBER.length > 0,
     cvPdf: false,
 } as const;

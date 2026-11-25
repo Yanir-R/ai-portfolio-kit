@@ -385,6 +385,8 @@ export default defineConfig(({ mode, command }) => {
         define: {
             'import.meta.env.VITE_BACKEND_URL': JSON.stringify(resolvedBackendUrl),
             'import.meta.env.VITE_AVATAR_URL': JSON.stringify(avatarUrl),
+            // The one build value kept out of the repository: see constants/links.ts.
+            'import.meta.env.VITE_WHATSAPP_NUMBER': JSON.stringify(env.VITE_WHATSAPP_NUMBER || ''),
         },
     };
 });

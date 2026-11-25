@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CONTACT, ContactKind } from '@/copy/site';
-import { FEATURES, LINKS } from '@/constants/links';
+import { FEATURES, LINKS, whatsappUrl } from '@/constants/links';
 import { useLang } from '@/i18n/useLang';
 import { useTurnstile } from '@/hooks/useTurnstile';
 import { contactService } from '@/services/contactService';
@@ -100,6 +100,14 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
                 {kind === 'whatsapp' && (
                     <>
                         <p>{copy.whatsapp.text}</p>
+                        <a
+                            className="btn"
+                            href={whatsappUrl(copy.whatsapp.first(request.topic))}
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            {copy.whatsapp.open}
+                        </a>
                         <p className="fine">{copy.whatsapp.fine}</p>
                     </>
                 )}

@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router';
 import { DIR } from '@/i18n/lang';
 import { useLang } from '@/i18n/useLang';
 import SiteNav from '@/components/site/SiteNav';
+import LangOffer from '@/components/site/LangOffer';
 import SiteFooter, { HireBand } from '@/components/site/SiteFooter';
 import { SiteDialogsProvider, useSiteDialogs } from '@/components/site/SiteDialogs';
 import { CV_HASH } from '@/components/site/CvDialog';
@@ -45,6 +46,7 @@ const SiteLayout: React.FC = () => (
     <SiteDialogsProvider>
         <DocumentLang />
         <ScrollOnNavigate />
+        <LangOffer />
         <div className="wrap">
             <SiteNav />
             <Outlet />

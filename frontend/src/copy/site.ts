@@ -51,6 +51,14 @@ export const NAV: Localized<NavCopy> = {
 export const LANG_LABEL: Localized<string> = { he: 'עב', en: 'EN' };
 export const LANG_NAME: Localized<string> = { he: 'עברית', en: 'English' };
 
+/** Shown on Hebrew pages to visitors from outside Israel, so it is English only. */
+export const LANG_OFFER = {
+    label: 'Language',
+    text: 'This site is also in English.',
+    go: 'View in English',
+    dismiss: 'Stay in Hebrew',
+} as const;
+
 export const HIRE: Localized<{ title: string; text: string; cv: string; linkedin: string }> = {
     he: {
         title: 'מחפשים מפתח לצוות?',
@@ -132,7 +140,7 @@ export interface ContactCopy {
         failed: string;
         fine: string;
     };
-    whatsapp: { text: string; fine: string };
+    whatsapp: { text: string; fine: string; open: string; first: (topic?: string) => string };
 }
 
 export const CONTACT: Localized<ContactCopy> = {
@@ -160,7 +168,9 @@ export const CONTACT: Localized<ContactCopy> = {
         },
         whatsapp: {
             text: 'הודעה במילים שלכם, ויניר חוזר אליכם אישית.',
-            fine: 'הדרך הזו תיפתח כשהמענה למספרים חדשים יהיה מוכן. בינתיים: שיחה או מייל.',
+            fine: 'המענה הראשון הוא הודעה אוטומטית עם קישור לקביעת שיחה.',
+            open: 'פתיחת וואטסאפ ↗',
+            first: (topic) => (topic ? `היי יניר, לגבי ${topic}: ` : 'היי יניר, '),
         },
     },
     en: {
@@ -187,7 +197,9 @@ export const CONTACT: Localized<ContactCopy> = {
         },
         whatsapp: {
             text: 'A message in your own words, and Yanir gets back to you personally.',
-            fine: 'This route opens once replies to new numbers are ready. Until then: a call or an email.',
+            fine: 'The first reply is an automatic note with a link to book a call.',
+            open: 'Open WhatsApp ↗',
+            first: (topic) => (topic ? `Hi Yanir, about ${topic}: ` : 'Hi Yanir, '),
         },
     },
 };
