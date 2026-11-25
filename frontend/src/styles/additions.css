@@ -30,7 +30,7 @@
     font-family: 'Inter Tight', 'Assistant', system-ui, sans-serif;
     font-size: 0.84rem;
     line-height: 1.5;
-    text-align: left;
+    text-align: start;
 }
 .cvs a {
     color: var(--cv-link);
@@ -72,7 +72,7 @@
     display: grid;
     justify-items: end;
     gap: 4px;
-    text-align: right;
+    text-align: end;
 }
 .cvs-contact > a {
     color: var(--cv-muted);
@@ -147,7 +147,7 @@
     margin-bottom: 6px !important;
 }
 .cvs ul {
-    padding-left: 16px;
+    padding-inline-start: 16px;
     display: grid;
     gap: 5px;
 }
@@ -169,6 +169,34 @@
 .cvs-side p {
     font-size: 0.78rem;
 }
+/* The Hebrew sheet: the document's Latin faces have no Hebrew, so it is set in
+   the site's body face, without the spaced capitals Hebrew does not have. */
+.cvs:lang(he),
+.cvs:lang(he) h1,
+.cvs:lang(he) .cvs-sum {
+    font-family: 'Assistant', system-ui, sans-serif;
+}
+.cvs:lang(he) {
+    font-size: 0.92rem;
+}
+.cvs:lang(he) h1 {
+    font-weight: 800;
+}
+.cvs:lang(he) .cvs-role,
+.cvs:lang(he) h2 {
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 0.85rem;
+}
+.cvm .tb .cv-lang {
+    margin-inline-start: auto;
+    display: flex;
+    gap: 6px;
+}
+.cvm .tb .cv-lang [aria-pressed='true'] {
+    background: var(--ink);
+    color: #fff;
+}
 @media (max-width: 720px) {
     .cvs {
         padding: 22px 18px;
@@ -179,7 +207,7 @@
     }
     .cvs-contact {
         justify-items: start;
-        text-align: left;
+        text-align: start;
     }
     .cvs-contact span {
         justify-content: flex-start;
@@ -243,6 +271,12 @@
 /* On a narrow screen the actions under a piece wrap instead of overflowing. */
 .w-end .ac {
     flex-wrap: wrap;
+}
+/* The about hero's two buttons, side by side with room between them. */
+.w-hero .ac {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 /* A line of about a post's length on the about page. */
 .w-post.about .w-body p {
