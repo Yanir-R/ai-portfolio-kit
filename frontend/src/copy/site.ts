@@ -139,7 +139,13 @@ export interface ContactCopy {
         failed: string;
         fine: string;
     };
-    whatsapp: { text: string; fine: string; open: string; first: (topic?: string) => string };
+    whatsapp: {
+        text: string;
+        steps: [string, string, string];
+        scan: string;
+        open: string;
+        first: (topic?: string) => string;
+    };
 }
 
 /** The booking steps inside the "discovery call" tab. */
@@ -252,7 +258,12 @@ export const CONTACT: Localized<ContactCopy> = {
         },
         whatsapp: {
             text: 'הודעה במילים שלכם, ויניר חוזר אליכם אישית.',
-            fine: 'המענה הראשון הוא הודעה אוטומטית עם קישור לקביעת שיחה.',
+            steps: [
+                'כותבים ליניר במילים שלכם.',
+                'מיד מגיעה הודעה אוטומטית עם קישור לשיחה.',
+                'יניר חוזר אליכם אישית בוואטסאפ.',
+            ],
+            scan: 'סריקה פותחת את השיחה בטלפון',
             open: 'פתיחת וואטסאפ ↗',
             first: (topic) => (topic ? `היי יניר, לגבי ${topic}: ` : 'היי יניר, '),
         },
@@ -323,7 +334,12 @@ export const CONTACT: Localized<ContactCopy> = {
         },
         whatsapp: {
             text: 'A message in your own words, and Yanir gets back to you personally.',
-            fine: 'The first reply is an automatic note with a link to book a call.',
+            steps: [
+                'Write to Yanir in your own words.',
+                'An automatic note arrives at once, with a booking link.',
+                'Yanir gets back to you personally on WhatsApp.',
+            ],
+            scan: 'Scan to open the chat on your phone',
             open: 'Open WhatsApp ↗',
             first: (topic) => (topic ? `Hi Yanir, about ${topic}: ` : 'Hi Yanir, '),
         },
