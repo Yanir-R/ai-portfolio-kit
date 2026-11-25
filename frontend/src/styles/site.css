@@ -10705,13 +10705,14 @@ video.w-v {
     }
 }
 
-/* Home proof: three systems in one even row; the parts below are phones only. */
-.mini {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.pr h3 .pn,
+/*
+ * Home proof: numbered promises, then the three systems as one box. Wide,
+ * the systems are three columns with the way to every project in the heading
+ * row; narrow, they are rows and that link sits under them. The booking band
+ * is for phones only.
+ */
 .pband,
-.mini .ch {
+.ah .proj-all {
     display: none;
 }
 .pr .ev .story {
@@ -10726,9 +10727,95 @@ video.w-v {
     text-decoration: underline;
     text-underline-offset: 3px;
 }
+.pr h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+.pr h3 .pn {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    background: var(--btn);
+    font-family: var(--body, inherit);
+    font-style: normal;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.mini {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: var(--paper);
+    overflow: hidden;
+}
+.mini a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-auto-rows: min-content;
+    align-content: center;
+    column-gap: var(--sp-3);
+    border: 0;
+    border-radius: 0;
+    padding: 14px var(--sp-3);
+}
+.mini a + a {
+    border-inline-start: 2px solid var(--line);
+}
+.mini a:hover {
+    transform: none;
+    background: var(--bg);
+}
+.mini a > :not(.ch) {
+    grid-column: 1;
+    justify-self: start;
+}
+.mini .ch {
+    display: block;
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: center;
+    width: 10px;
+    height: 10px;
+    border-top: 2.4px solid var(--muted);
+    border-inline-end: 2.4px solid var(--muted);
+    transform: rotate(45deg);
+}
+[dir='rtl'] .mini .ch {
+    transform: rotate(-45deg);
+}
+@media (min-width: 901px) {
+    .pr h3 {
+        font-size: 1.9rem;
+        line-height: 1.05;
+    }
+    .ah .proj-all {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        margin: 0;
+    }
+    .also2 + .proj-all {
+        display: none;
+    }
+    .ah {
+        align-items: center;
+    }
+}
 @media (max-width: 900px) {
     .mini {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .mini a + a {
+        border-inline-start: 0;
+        border-top: 1.5px solid var(--line);
     }
 }
 @media (max-width: 640px) {
@@ -10738,27 +10825,8 @@ video.w-v {
         gap: 4px;
     }
     .pr h3 {
-        display: flex;
-        align-items: center;
-        gap: var(--sp-2);
         font-size: 1.5rem;
         line-height: 1.1;
-    }
-    .pr h3 .pn {
-        display: inline-flex;
-        flex: none;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        border: 2px solid var(--ink);
-        background: var(--btn);
-        font-family: inherit;
-        font-style: normal;
-        font-size: 0.9rem;
-        font-weight: 800;
-        line-height: 1;
     }
     .pr p {
         font-size: 0.95rem;
@@ -10796,47 +10864,6 @@ video.w-v {
     /* The systems: one box, a row each, the whole row a link. */
     .also2 {
         margin-top: var(--sp-4);
-    }
-    .mini {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 0;
-        border: 2px solid var(--ink);
-        border-radius: 8px;
-        background: var(--paper);
-        overflow: hidden;
-    }
-    .mini a {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: var(--sp-3);
-        align-items: center;
-        border: 0;
-        border-radius: 0;
-        padding: 12px var(--sp-3);
-    }
-    .mini a + a {
-        border-top: 1.5px solid var(--line);
-    }
-    .mini a:hover {
-        transform: none;
-        background: var(--bg);
-    }
-    .mini a > :not(.ch) {
-        grid-column: 1;
-        justify-self: start;
-    }
-    .mini .ch {
-        display: block;
-        grid-column: 2;
-        grid-row: 1 / span 3;
-        width: 10px;
-        height: 10px;
-        border-top: 2.4px solid var(--muted);
-        border-inline-end: 2.4px solid var(--muted);
-        transform: rotate(45deg);
-    }
-    [dir='rtl'] .mini .ch {
-        transform: rotate(-45deg);
     }
     .mini b {
         font-size: 1.05rem;

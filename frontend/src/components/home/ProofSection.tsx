@@ -58,6 +58,10 @@ const ProofSection: React.FC = () => {
             <div className="also2">
                 <div className="ah">
                     <b>{copy.alsoTitle}</b>
+                    {/* Wide screens: the way to every project sits beside the heading. */}
+                    <Link className="proj-all" to={to('/projects')}>
+                        <Arrow>{copy.allProjects}</Arrow>
+                    </Link>
                 </div>
                 <div className="mini">
                     {copy.also.map((item, i) => {
