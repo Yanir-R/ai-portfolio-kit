@@ -21,6 +21,12 @@ This site, yanirrot.com, and the project I am building right now. A visitor asks
 - Booking a call (cal.com) and sending email happen inside the site; a visitor can also leave an email address in the chat
 - Diagrams next to an answer, chosen in code from the question and the documents, never by the model
 
+## Who decides what
+- **The visitor** asks, books a call or sends an email. A visitor cannot change the agent's instructions or what it knows.
+- **The model** only writes the answer, from the documents it was given.
+- **Code** chooses which documents (up to three besides my profile) the model sees, chooses any diagram next to an answer, decides when the card to continue with me appears, and enforces the limits.
+- **I** change the agent's instructions only in code, by pull request, and add knowledge only as a document with a test question; a new document without one fails the tests.
+
 ## Project Type
 web-app
 

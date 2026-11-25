@@ -2537,7 +2537,550 @@ const catchup: Localized<ProjectPage> = {
 };
 
 /** The main projects that have a drawn page, by document slug. */
+const aiChat: Localized<ProjectPage> = {
+    he: {
+        lede: (
+            <>
+                האתר הזה, והפרויקט שאני בונה עכשיו. <b>סוכן שעונה בשמי, רק ממה שכתבתי</b>:
+                הפרויקטים, הפוסטים, קורות החיים ואיך אני עובד. הקוד בוחר את המסמכים שהשאלה צריכה,
+                המודל מקבל רק אותם, וכשאין בהם תשובה הסוכן אומר את זה ומעביר את השאלה אליי. מתחת לכל
+                תשובה אפשר לראות על מה היא נשענה.
+            </>
+        ),
+        facts: [
+            { value: '3', label: 'מסמכים לכל היותר לכל תשובה, מלבד הפרופיל שלי' },
+            {
+                value: '83',
+                label: 'שאלות אמיתיות בעברית ובאנגלית שבודקות שכל שאלה מגיעה למסמך הנכון',
+            },
+            { value: '0', label: 'הוראות שהסוכן מקבל מטקסט של מבקר או מתוך מסמך' },
+        ],
+        problem: {
+            tagline: TAG.he[0],
+            title: 'למה צ׳אט על אתר הוא לא סתם צ׳אט',
+            intro: 'מה שמשתבש בצ׳אטים של אתרים, ומה עשיתי כאן במקום.',
+            columns: ['הבעיה', 'באתר הזה'],
+            rows: [
+                {
+                    before: 'הצ׳אט ממציא תשובה כשאין לו מידע',
+                    lead: 'עונה רק מהמסמכים שלי.',
+                    rest: 'אין בהם תשובה? הוא אומר את זה ומציע להעביר את השאלה אליי.',
+                },
+                {
+                    before: 'אין דרך לדעת על מה התשובה נשענת',
+                    lead: '״מאחורי התשובה״ מתחת לכל תשובה:',
+                    rest: 'אילו מסמכים המודל קיבל, וכמה זמן וטוקנים זה לקח.',
+                },
+                {
+                    before: 'מישהו כותב ״תתעלם מההוראות שלך״',
+                    lead: 'טקסט של מבקר הוא תוכן, לא הוראה.',
+                    rest: 'אותו דבר לגבי טקסט בתוך המסמכים.',
+                },
+                {
+                    before: 'בוט אחד יכול לשרוף את כל התקציב בלילה',
+                    lead: 'מגבלות שהקוד אוכף:',
+                    rest: '20 תשובות למבקר ביום, 300 לכל האתר, ותקרת הוצאה חודשית.',
+                },
+                {
+                    before: 'השיחה נגמרת, והמבקר לא יודע מה עכשיו',
+                    lead: 'מהשאלה השלישית מופיע כרטיס',
+                    rest: 'שמציע להמשיך איתי אישית: שיחה, מייל או וואטסאפ, בלי לצאת מהאתר.',
+                },
+            ],
+        },
+        flow: {
+            tagline: TAG.he[1],
+            title: 'איך זה בנוי',
+            intro: 'מהשאלה של המבקר ועד התשובה, דרך שער אחד ובלי מסד נתונים.',
+            columns: [
+                { label: 'מי שואל', people: ['מבקר באתר', 'עברית או אנגלית'] },
+                {
+                    label: 'בקצה',
+                    nodes: [
+                        {
+                            title: 'האתר',
+                            text: 'כל עמוד מוכן מראש למנועי חיפוש',
+                            tech: 'React · Cloudflare Pages',
+                        },
+                        {
+                            title: 'השער',
+                            text: 'בודק שזה אדם ושהבקשה הגיעה מהאתר. אחרת היא לא עוברת',
+                            tech: 'Worker · Turnstile',
+                            gate: true,
+                        },
+                    ],
+                },
+                {
+                    label: 'השרת',
+                    nodes: [
+                        { title: 'מגבלות', text: '20 למבקר, 300 ביום' },
+                        {
+                            title: 'בחירת מסמכים',
+                            text: 'עד 3 מסמכים שעונים על השאלה',
+                            tech: 'FastAPI · Cloud Run',
+                        },
+                        {
+                            title: 'המודל',
+                            text: 'כותב תשובה רק ממה שקיבל, עם מודלי גיבוי',
+                            tech: 'Gemini',
+                        },
+                    ],
+                },
+                {
+                    label: 'מה חוזר',
+                    nodes: [
+                        { title: 'תשובה', text: 'עם ״מאחורי התשובה״ ודיאגרמה כשהיא באמת עוזרת' },
+                        { title: 'דרך אליי', text: 'שיחה, מייל או וואטסאפ, בתוך האתר' },
+                    ],
+                },
+            ],
+            lane: {
+                label: 'הידע',
+                nodes: [
+                    {
+                        title: 'מסמכים בעברית ובאנגלית',
+                        text: 'פרויקטים, פוסטים, קורות חיים',
+                        tech: 'Markdown',
+                    },
+                    {
+                        title: 'ביטויים לכל מסמך',
+                        text: 'ובנק שאלות שבודק אותם בכל שינוי',
+                        tech: 'pytest',
+                    },
+                ],
+            },
+            legend: 'אין מסד נתונים ואין אימון: הסוכן יודע רק מה שכתוב בתיקייה.',
+            techLegend: TECH_LEGEND.he,
+        },
+        rules: {
+            tagline: TAG.he[2],
+            title: 'מי מחליט מה',
+            intro: 'המודל כותב. כל השאר נקבע בקוד, כי קוד נותן אותה תשובה בכל פעם.',
+            matrix: {
+                corner: 'פעולה',
+                columns: ['המבקר', 'המודל', 'הקוד', 'אני'],
+                me: 3,
+                rows: [
+                    { label: 'לשאול שאלה', cells: ['y', 'x', 'x', 'x'] },
+                    { label: 'לבחור אילו מסמכים המודל רואה', cells: ['x', 'x', 'y', 'x'] },
+                    { label: 'לנסח את התשובה', cells: ['x', 'y', 'x', 'x'] },
+                    { label: 'לבחור דיאגרמה ליד תשובה', cells: ['x', 'x', 'y', 'x'] },
+                    { label: 'להחליט מתי מופיע כרטיס ההמשך', cells: ['x', 'x', 'y', 'x'] },
+                    {
+                        label: 'לשנות את ההוראות של הסוכן',
+                        cells: ['x', 'x', 'x', { tag: 'בקוד, דרך PR' }],
+                    },
+                    {
+                        label: 'לשנות מה הסוכן יודע',
+                        cells: ['x', 'x', 'x', { tag: 'מסמך + שאלת בדיקה' }],
+                    },
+                ],
+                cards: [
+                    {
+                        name: 'המבקר',
+                        yes: ['לשאול', 'לקבוע שיחה', 'לשלוח מייל'],
+                        no: 'לא: לבחור מסמכים, לשנות הוראות או ידע',
+                    },
+                    {
+                        name: 'המודל',
+                        yes: ['לנסח תשובה'],
+                        no: 'לא: לבחור מסמכים, דיאגרמות או מתי מופיע הכרטיס',
+                    },
+                    {
+                        name: 'הקוד',
+                        yes: ['לבחור מסמכים', 'לבחור דיאגרמה', 'להציג את הכרטיס', 'לאכוף מגבלות'],
+                    },
+                    {
+                        name: 'אני',
+                        yes: [],
+                        maybe: ['הוראות: בקוד', 'ידע: מסמך + שאלת בדיקה'],
+                        me: true,
+                    },
+                ],
+                keys: { yes: 'יכול', no: 'לא יכול' },
+            },
+            note: (
+                <>
+                    <b>מסמך חדש בלי שאלת בדיקה מפיל את הבדיקות.</b> כך אי אפשר להוסיף ידע שהסוכן לא
+                    יודע להגיע אליו.
+                </>
+            ),
+        },
+        mechanisms: {
+            tagline: TAG.he[3],
+            title: 'שלושה מנגנונים שמחזיקים את זה אמין',
+            intro: 'סוכן שמדבר בשמי צריך להיות זהיר יותר ממני.',
+            items: [
+                {
+                    title: 'תשובה רק ממה שכתוב',
+                    text: 'מבקר שואל על משהו שלא כתבתי עליו.',
+                    steps: [
+                        { text: 'הקוד מחפש מסמכים שעונים על השאלה' },
+                        { text: 'המודל מקבל רק אותם, עד שלושה' },
+                        {
+                            text: 'אין התאמה?',
+                            ok: true,
+                            fork: ['יש: תשובה ממקור', 'אין: ״לא כתבתי על זה, אעביר ליניר״'],
+                        },
+                    ],
+                },
+                {
+                    title: 'תקציב שלא נשרף',
+                    text: 'מישהו שולח מאות בקשות בלילה.',
+                    steps: [
+                        { text: 'השער בודק שזה אדם ושזה מהאתר' },
+                        { text: '20 תשובות למבקר, 300 לכל האתר ביום' },
+                        { text: 'ותקרת הוצאה חודשית אצל הספק' },
+                        { text: 'כל הודעת מגבלה מובילה ליצירת קשר איתי', ok: true },
+                    ],
+                },
+                {
+                    title: '״מאחורי התשובה״',
+                    text: 'מבקר רוצה לדעת על מה התשובה נשענת.',
+                    steps: [
+                        { text: 'כל תשובה שומרת את המסלול שלה' },
+                        { text: 'אילו מסמכים נשלחו, כמה טוקנים וכמה זמן' },
+                        { text: 'קישור שקט מתחת לתשובה פותח את הכול', ok: true },
+                    ],
+                },
+            ],
+        },
+        fit: {
+            tagline: TAG.he[4],
+            title: 'מה זה אומר בשבילכם',
+            intro: 'אותו מבנה מתאים לכל ארגון שרוצה סוכן שעונה מהמסמכים שלו.',
+            card: {
+                title: 'רוצים סוכן שעונה ללקוחות מהמסמכים שלכם?',
+                text: 'נהלים, מחירונים, שאלות נפוצות או מסמכי מוצר. אני בונה סוכן כזה עם אותם כללים:',
+                bullets: [
+                    'עונה רק ממה שכתוב, ואומר כשאין תשובה',
+                    'מראה על מה כל תשובה נשענת',
+                    'מגבלות תקציב ושער מבוטים מהיום הראשון',
+                    'ומעביר אליכם את מי שצריך אדם',
+                ],
+                extra: (
+                    <>
+                        והקוד של האתר הזה פתוח:{' '}
+                        {ext('https://github.com/Yanir-R/ai-portfolio-kit', 'GitHub')}
+                    </>
+                ),
+            },
+            road: {
+                title: 'איך אני בונה את זה',
+                steps: [
+                    { title: 'קודם המסמכים', text: 'מה כתוב, מה חסר, ומה הלקוחות באמת שואלים.' },
+                    {
+                        title: 'בנק שאלות',
+                        text: 'שאלות אמיתיות שבודקות שכל אחת מגיעה למסמך הנכון.',
+                    },
+                    { title: 'רק אז הסוכן', text: 'עם שער, מגבלות ו״מאחורי התשובה״.' },
+                ],
+            },
+        },
+        dev: {
+            summary: DEV.he,
+            tags: [
+                'React 19 · TypeScript · Vite',
+                'Cloudflare Pages + Worker',
+                'FastAPI · Cloud Run',
+                'Gemini עם מודלי גיבוי',
+                'Secret Manager',
+                'GitHub Actions + סקירת AI',
+                'MIT',
+            ],
+            note: <>הקוד פתוח: {ext('https://github.com/Yanir-R/ai-portfolio-kit', 'GitHub')}</>,
+        },
+        cta: 'רוצים סוכן כזה על המסמכים שלכם?',
+    },
+    en: {
+        lede: (
+            <>
+                This site, and the project I am building right now.{' '}
+                <b>An agent that answers in my name, only from what I wrote</b>: my projects, posts,
+                resume and how I work. Code picks the documents a question needs, the model gets
+                only those, and when they do not cover it the agent says so and passes the question
+                to me. Under every answer you can see what it relied on.
+            </>
+        ),
+        facts: [
+            { value: '3', label: 'documents at most per answer, besides my profile' },
+            {
+                value: '83',
+                label: 'real questions in Hebrew and English that check each one reaches the right document',
+            },
+            {
+                value: '0',
+                label: 'instructions the agent takes from a visitor’s text or from inside a document',
+            },
+        ],
+        problem: {
+            tagline: TAG.en[0],
+            title: 'Why a site chat is not just a chat',
+            intro: 'What goes wrong with chat on websites, and what I did here instead.',
+            columns: ['The problem', 'On this site'],
+            rows: [
+                {
+                    before: 'The chat makes up an answer when it has no information',
+                    lead: 'It answers only from my documents.',
+                    rest: 'Nothing there? It says so and offers to pass the question to me.',
+                },
+                {
+                    before: 'There is no way to tell what an answer rests on',
+                    lead: '"Behind the answer" under every answer:',
+                    rest: 'which documents the model got, and the time and tokens it took.',
+                },
+                {
+                    before: 'Someone types "ignore your instructions"',
+                    lead: 'A visitor’s text is content, not an instruction.',
+                    rest: 'The same goes for text inside the documents.',
+                },
+                {
+                    before: 'One bot can burn the whole budget overnight',
+                    lead: 'Limits enforced in code:',
+                    rest: '20 answers per visitor a day, 300 for the whole site, and a monthly spend cap.',
+                },
+                {
+                    before: 'The chat ends and the visitor does not know what next',
+                    lead: 'From the third question, a card',
+                    rest: 'offers to continue with me personally: a call, email or WhatsApp, without leaving the site.',
+                },
+            ],
+        },
+        flow: {
+            tagline: TAG.en[1],
+            title: 'How it is built',
+            intro: 'From the visitor’s question to the answer, through one gate and with no database.',
+            columns: [
+                { label: 'Who asks', people: ['A visitor', 'Hebrew or English'] },
+                {
+                    label: 'At the edge',
+                    nodes: [
+                        {
+                            title: 'The site',
+                            text: 'Every page prerendered for search engines',
+                            tech: 'React · Cloudflare Pages',
+                        },
+                        {
+                            title: 'The gate',
+                            text: 'Checks it is a person and the request came from the site, or it does not pass',
+                            tech: 'Worker · Turnstile',
+                            gate: true,
+                        },
+                    ],
+                },
+                {
+                    label: 'The server',
+                    nodes: [
+                        { title: 'Limits', text: '20 per visitor, 300 a day' },
+                        {
+                            title: 'Picking documents',
+                            text: 'Up to 3 documents that answer the question',
+                            tech: 'FastAPI · Cloud Run',
+                        },
+                        {
+                            title: 'The model',
+                            text: 'Writes only from what it was given, with fallback models',
+                            tech: 'Gemini',
+                        },
+                    ],
+                },
+                {
+                    label: 'What comes back',
+                    nodes: [
+                        {
+                            title: 'An answer',
+                            text: 'With "behind the answer", and a diagram when it really helps',
+                        },
+                        {
+                            title: 'A way to me',
+                            text: 'A call, email or WhatsApp, inside the site',
+                        },
+                    ],
+                },
+            ],
+            lane: {
+                label: 'The knowledge',
+                nodes: [
+                    {
+                        title: 'Documents in Hebrew and English',
+                        text: 'Projects, posts, resume',
+                        tech: 'Markdown',
+                    },
+                    {
+                        title: 'Phrases per document',
+                        text: 'And a question bank that checks them on every change',
+                        tech: 'pytest',
+                    },
+                ],
+            },
+            legend: 'No database and no training: the agent knows only what is written in the folder.',
+            techLegend: TECH_LEGEND.en,
+        },
+        rules: {
+            tagline: TAG.en[2],
+            title: 'Who decides what',
+            intro: 'The model writes. Everything else is decided in code, because code gives the same answer every time.',
+            matrix: {
+                corner: 'Action',
+                columns: ['Visitor', 'Model', 'Code', 'Me'],
+                me: 3,
+                rows: [
+                    { label: 'Ask a question', cells: ['y', 'x', 'x', 'x'] },
+                    { label: 'Choose which documents the model sees', cells: ['x', 'x', 'y', 'x'] },
+                    { label: 'Write the answer', cells: ['x', 'y', 'x', 'x'] },
+                    { label: 'Choose a diagram next to an answer', cells: ['x', 'x', 'y', 'x'] },
+                    {
+                        label: 'Decide when the follow-up card appears',
+                        cells: ['x', 'x', 'y', 'x'],
+                    },
+                    {
+                        label: 'Change the agent’s instructions',
+                        cells: ['x', 'x', 'x', { tag: 'in code, by PR' }],
+                    },
+                    {
+                        label: 'Change what the agent knows',
+                        cells: ['x', 'x', 'x', { tag: 'document + test question' }],
+                    },
+                ],
+                cards: [
+                    {
+                        name: 'Visitor',
+                        yes: ['Ask', 'Book a call', 'Send email'],
+                        no: 'No: choose documents, change instructions or knowledge',
+                    },
+                    {
+                        name: 'Model',
+                        yes: ['Write the answer'],
+                        no: 'No: choose documents, diagrams or when the card shows',
+                    },
+                    {
+                        name: 'Code',
+                        yes: [
+                            'Choose documents',
+                            'Choose a diagram',
+                            'Show the card',
+                            'Enforce limits',
+                        ],
+                    },
+                    {
+                        name: 'Me',
+                        yes: [],
+                        maybe: ['Instructions: in code', 'Knowledge: document + test question'],
+                        me: true,
+                    },
+                ],
+                keys: { yes: 'Can', no: 'Cannot' },
+            },
+            note: (
+                <>
+                    <b>A new document without a test question fails the tests.</b> So no knowledge
+                    can be added that the agent cannot reach.
+                </>
+            ),
+        },
+        mechanisms: {
+            tagline: TAG.en[3],
+            title: 'Three mechanisms that keep it trustworthy',
+            intro: 'An agent that speaks in my name has to be more careful than I am.',
+            items: [
+                {
+                    title: 'Answers only from what is written',
+                    text: 'A visitor asks about something I never wrote about.',
+                    steps: [
+                        { text: 'Code looks for documents that answer the question' },
+                        { text: 'The model gets only those, up to three' },
+                        {
+                            text: 'No match?',
+                            ok: true,
+                            fork: [
+                                'Match: an answer with a source',
+                                'None: "I have not written about that, I will pass it to Yanir"',
+                            ],
+                        },
+                    ],
+                },
+                {
+                    title: 'A budget that does not burn',
+                    text: 'Someone sends hundreds of requests overnight.',
+                    steps: [
+                        { text: 'The gate checks it is a person, from the site' },
+                        { text: '20 answers per visitor, 300 for the site, a day' },
+                        { text: 'And a monthly spend cap at the provider' },
+                        { text: 'Every limit message leads to contacting me', ok: true },
+                    ],
+                },
+                {
+                    title: '"Behind the answer"',
+                    text: 'A visitor wants to know what an answer rests on.',
+                    steps: [
+                        { text: 'Every answer keeps its own trace' },
+                        { text: 'Which documents were sent, how many tokens and how long' },
+                        { text: 'A quiet link under the answer opens it all', ok: true },
+                    ],
+                },
+            ],
+        },
+        fit: {
+            tagline: TAG.en[4],
+            title: 'What it means for you',
+            intro: 'The same structure fits any organisation that wants an agent answering from its own documents.',
+            card: {
+                title: 'Want an agent that answers customers from your documents?',
+                text: 'Procedures, price lists, FAQs or product documents. I build such an agent with the same rules:',
+                bullets: [
+                    'Answers only from what is written, and says when there is no answer',
+                    'Shows what each answer rests on',
+                    'Budget limits and a bot gate from day one',
+                    'And hands over whoever needs a person',
+                ],
+                extra: (
+                    <>
+                        And this site’s code is open:{' '}
+                        {ext('https://github.com/Yanir-R/ai-portfolio-kit', 'GitHub')}
+                    </>
+                ),
+            },
+            road: {
+                title: 'How I build it',
+                steps: [
+                    {
+                        title: 'Documents first',
+                        text: 'What is written, what is missing, and what customers really ask.',
+                    },
+                    {
+                        title: 'A question bank',
+                        text: 'Real questions that check each one reaches the right document.',
+                    },
+                    {
+                        title: 'Only then the agent',
+                        text: 'With a gate, limits and "behind the answer".',
+                    },
+                ],
+            },
+        },
+        dev: {
+            summary: DEV.en,
+            tags: [
+                'React 19 · TypeScript · Vite',
+                'Cloudflare Pages + Worker',
+                'FastAPI · Cloud Run',
+                'Gemini with fallback models',
+                'Secret Manager',
+                'GitHub Actions + AI review',
+                'MIT',
+            ],
+            note: (
+                <>
+                    The code is open: {ext('https://github.com/Yanir-R/ai-portfolio-kit', 'GitHub')}
+                </>
+            ),
+        },
+        cta: 'Want an agent like this on your documents?',
+    },
+};
+
 export const PROJECT_PAGES: Record<string, Localized<ProjectPage>> = {
+    'ai-chat-portfolio': aiChat,
     'trinity-legal': trinityLegal,
     'trinity-agent': trinityAgent,
     personakit: personaKit,
