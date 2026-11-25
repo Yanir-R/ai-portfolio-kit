@@ -10744,6 +10744,27 @@ video.w-v {
     #top.grown .plan:not(.showvis, .showmap, .showcmp) .sum {
         margin-top: var(--sp-3) !important;
     }
+    /*
+     * What the widened gaps cannot fill is shared above and below the
+     * drawing, so it sits in the middle of the panel with no empty band
+     * under it (Yanir, 2026-11-25). Auto margins only take spare room: a
+     * drawing taller than the panel still starts at its top and scrolls.
+     */
+    #top.grown .plan.showvis .vis > :first-child,
+    #top.grown .plan.showmap .map > :first-child {
+        margin-top: auto;
+    }
+    #top.grown .plan.showvis .vis > :last-child,
+    #top.grown .plan.showmap .map > :last-child {
+        margin-bottom: auto;
+    }
+    #top.grown .plan.showmap .map {
+        flex: 1;
+        min-height: 0;
+    }
+    #top.grown .plan.showcmp .cmp {
+        align-content: center;
+    }
 }
 
 /*

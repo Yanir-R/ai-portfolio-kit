@@ -1,11 +1,13 @@
 /**
- * Projects that have a full drawn page come first on the projects list, in
- * this order; the rest follow in the order the API returns them.
+ * The projects that lead the projects list, in this order: the ones with a full
+ * drawn page, with the agent fleet right after PersonaKit. The rest follow in
+ * the order the API returns them.
  */
 export const RICH_PROJECTS = [
     'trinity-legal',
     'trinity-agent',
     'personakit',
+    'agent-fleet',
     'review-engine',
     'catchup',
     'ai-chat-portfolio',
