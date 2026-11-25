@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useLoad } from '@/hooks/useLoad';
 import { CONTACT } from '@/copy/site';
 import { BOOKING_TIME_ZONE } from '@/constants/booking';
@@ -126,6 +126,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
         return { y, m: m - 1 };
     });
     const [day, setDay] = useState<string | null>(null);
+    const timesRef = useRef<HTMLDivElement>(null);
     const [slot, setSlot] = useState<Slot | null>(null);
     const [step, setStep] = useState<Step>('time');
     const [name, setName] = useState('');
@@ -427,6 +428,13 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                                     onClick={() => {
                                         setDay(key);
                                         setError(null);
+                                        // On a phone the times open under the calendar.
+                                        requestAnimationFrame(() =>
+                                            timesRef.current?.scrollIntoView({
+                                                block: 'nearest',
+                                                behavior: 'smooth',
+                                            })
+                                        );
                                     }}
                                 >
                                     {Number(key.slice(8))}
@@ -448,7 +456,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                         </button>
                     </div>
                 )}
-                <div className="bk-sl">
+                <div className="bk-sl" ref={timesRef}>
                     {day ? (
                         <strong className="only-wide">{fmt.day.format(noon(day))}</strong>
                     ) : null}
