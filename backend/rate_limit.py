@@ -15,15 +15,15 @@ State is per-process and in-memory, so the effective global ceiling is
 
 Both deployment paths run a single process per instance (the workflow's
 generated Dockerfile and backend/Dockerfile both use plain uvicorn), and Cloud
-Run is capped at 4 instances, so the chat ceiling is 12 x 4 = 48 answers a day
-for as long as those instances stay up. Switching to gunicorn with multiple
+Run is capped at 4 instances, so the chat ceiling is 300 x 4 = 1,200 answers a
+day for as long as those instances stay up. Switching to gunicorn with multiple
 workers would multiply it again - see the note in backend/Dockerfile.
 
 That ceiling is not a hard daily cap. The service scales to zero, and a new
 instance starts with empty windows, so the count restarts on every cold start.
-The limit that does hold across restarts is the upstream one: the Gemini quota
-itself, which on the free tier cannot bill. Before moving to a paid tier, back
-this with a shared counter or a billing budget alert.
+The limit that does hold across restarts is the money one: the Gemini project
+is on a paid tier and carries a monthly spend cap set in Google AI Studio, which
+stops billing whatever these counters say.
 
 Keeping the state in-process is intentional: a shared counter would mean running
 Redis for a portfolio site.
@@ -33,12 +33,11 @@ different questions. Contact is a rate: how often may somebody send. Chat is a
 budget: how many answers is one visitor entitled to - which is only meaningful
 over a span long enough to matter, so it runs over a day.
 
-The chat budget is set by what is upstream, and upstream is a daily volume
-rather than a per-minute throughput: Gemini's free tier grants 20 requests per
-DAY per model, so this site's real capacity is roughly 20 chat answers a day per
-model, 60 across the three the fallback chain tries. A per-minute window would
-renew 1,440 times a day and cap nothing that matters. Everything below is sized
-to fit inside the daily ceiling rather than to look generous.
+The chat budget is a daily volume rather than a per-minute throughput, because
+what it protects is a daily spend: a per-minute window would renew 1,440 times a
+day and cap nothing that matters. The upstream quota (thousands of requests a
+day on the paid tier) is far above anything here, so the numbers below are set
+by what a real visitor needs and by what a day of abuse may cost, not by Gemini.
 """
 
 import logging
@@ -206,19 +205,19 @@ def enforce_rate_limit(request: Request, limiter: "SlidingWindowLimiter", label:
     )
 
 
-# Ten answers per visitor per day: enough to hold a real conversation about the
-# work, few enough that nobody drains the quota.
+# Twenty answers per visitor per day: room for a real conversation about the
+# work, and for the visitor who comes back later the same day.
 #
-# The global ceiling is per instance and Cloud Run runs up to four, so the worst
-# case is 4 x 12 = 48 upstream calls a day, under the ~60 the three-model
-# fallback chain can serve on the free tier. It is a cost guard rather than a
-# fairness one: it still holds when the per-visitor key is spoofed or when
-# traffic is spread across many addresses.
+# The global ceiling is per instance. It is a cost guard rather than a fairness
+# one: it still holds when the per-visitor key is spoofed or when traffic is
+# spread across many addresses. It is set well above a busy day, because when it
+# fills it closes the chat for every visitor on that instance; the spend cap on
+# the Gemini project is what bounds the money.
 DAY_SECONDS = 24 * 60 * 60
 
 chat_limiter = SlidingWindowLimiter(
-    per_key_limit=_int_env("RATE_LIMIT_CHAT_PER_IP_PER_DAY", 10),
-    global_limit=_int_env("RATE_LIMIT_CHAT_GLOBAL_PER_DAY", 12),
+    per_key_limit=_int_env("RATE_LIMIT_CHAT_PER_IP_PER_DAY", 20),
+    global_limit=_int_env("RATE_LIMIT_CHAT_GLOBAL_PER_DAY", 300),
     window_seconds=_int_env("RATE_LIMIT_CHAT_WINDOW_SECONDS", DAY_SECONDS),
 )
 

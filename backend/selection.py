@@ -12,8 +12,8 @@ documents belong in the request? Three rules shape it, and each comes from
 something already decided in this project or in Yanir's own published work.
 
 **Deterministic, not a model call.** An LLM framing pass would be a second
-Gemini call per message, and the free tier grants twenty requests a day per
-model - it would halve the number of visitors the site can serve. This is the
+Gemini call per message - double the cost and the wait for every answer, and
+twice as fast through the daily chat budget. This is the
 "mostly deterministic routing, model only when ambiguous" split, and here the
 deterministic half is sufficient.
 

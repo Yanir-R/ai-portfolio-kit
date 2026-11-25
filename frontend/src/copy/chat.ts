@@ -75,13 +75,28 @@ export interface ChatCopy {
     mailAsk: string;
     invalidEmail: string;
     offline: string;
+    /**
+     * What the chat says when a send does not get an answer. Every one of these
+     * ends in a way to reach Yanir: a limit is a moment the visitor still wants
+     * something, so it is shown as the next step rather than as an error.
+     */
     errors: {
         tooLong: string;
-        rateLimited: string;
-        rateLimitedIn: string;
-        /** The day's answer budget is spent; the wait is hours, so no countdown. */
-        dailyLimit: string;
         failed: string;
+        /** A short rate limit; `{t}` is the wait in words, from `waitWords`. */
+        wait: string;
+        waitWords: { half: string; one: string; two: string };
+        /** The day's answer budget is spent. */
+        dailyTitle: string;
+        daily: string;
+        /** The input's placeholder while the day's budget is spent. */
+        closed: string;
+        /** The input row's line when the agent cannot answer at all. */
+        direct: string;
+        retry: string;
+        call: string;
+        mail: string;
+        whatsapp: string;
     };
     compare: {
         ask: string;
@@ -292,12 +307,18 @@ export const CHAT: Localized<ChatCopy> = {
         offline:
             'הסוכן לא זמין כרגע: הוא לא מצליח להגיע לחומרים שלו, ולכן לא יענה בכלל במקום לנחש. אפשר עדיין לקבוע שיחה.',
         errors: {
-            tooLong: 'ההודעה ארוכה מדי. נסו לקצר אותה.',
-            rateLimited: 'יותר מדי הודעות ברגע אחד. חכו רגע ונסו שוב.',
-            rateLimitedIn: 'יותר מדי הודעות ברגע אחד. נסו שוב בעוד {n} שניות.',
-            dailyLimit:
-                'הסוכן ענה היום על כל השאלות שהוא יכול. אפשר לקבוע שיחה או לכתוב לי במייל, ואחזור אליכם.',
-            failed: 'ההודעה לא נשלחה. נסו לשלוח אותה שוב.',
+            tooLong: 'זה כבר נשמע כמו בריף. שלחו לי אותו במייל, ואחזור אליכם.',
+            failed: 'ההודעה לא עברה. נסו שוב, או דברו איתי ישירות.',
+            wait: 'רגע, יותר מדי הודעות בבת אחת. אפשר לשאול שוב בעוד {t}, או לדבר איתי ישירות.',
+            waitWords: { half: 'חצי דקה', one: 'דקה', two: 'שתי דקות' },
+            dailyTitle: 'מכאן אני ממשיך אישית',
+            daily: 'הסוכן ענה היום על כל מה שהוא יכול, ואת השאר עדיף שנעשה יחד: 20 דקות שיחה, ואגיד לכם בכנות אם סוכן שווה את זה אצלכם.',
+            closed: 'השאלות לסוכן נגמרו להיום. אני זמין ישירות:',
+            direct: 'אני זמין ישירות:',
+            retry: 'נסו שוב',
+            call: 'קבעו שיחת אבחון, 20 דקות',
+            mail: 'כתבו לי במייל',
+            whatsapp: 'וואטסאפ',
         },
         compare: {
             ask: 'מה סוכן ישנה אצלנו?',
@@ -590,12 +611,19 @@ export const CHAT: Localized<ChatCopy> = {
         offline:
             "The agent is unavailable right now: it can't reach its material, so it won't answer at all rather than guess. You can still book a call.",
         errors: {
-            tooLong: 'That message is too long. Try a shorter one.',
-            rateLimited: 'Too many messages just now. Give it a moment and try again.',
-            rateLimitedIn: 'Too many messages just now. Try again in {n} seconds.',
-            dailyLimit:
-                "The agent has answered all it can for today. You can book a call or email me, and I'll get back to you.",
-            failed: 'That message did not go through. Try sending it again.',
+            tooLong:
+                "That already sounds like a brief. Send it to me by email and I'll get back to you.",
+            failed: "That didn't go through. Try again, or talk to me directly.",
+            wait: 'Too many messages at once. You can ask again in {t}, or talk to me directly.',
+            waitWords: { half: 'half a minute', one: 'a minute', two: 'two minutes' },
+            dailyTitle: "I'll take it from here",
+            daily: "The agent has answered all it can for today, and the rest is better done together: a 20-minute call, and I'll tell you honestly whether an agent is worth it for you.",
+            closed: "The agent is done for today. I'm available directly:",
+            direct: "I'm available directly:",
+            retry: 'Try again',
+            call: 'Book a 20-minute call',
+            mail: 'Email me',
+            whatsapp: 'WhatsApp',
         },
         compare: {
             ask: 'What would an agent change for us?',

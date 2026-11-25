@@ -5,6 +5,7 @@ import { Entry, GREETING_ID, HomeChat } from '@/chat/useHomeChat';
 import Markdown from '@/components/Markdown';
 import WritingBlocks from '@/components/writing/WritingBlocks';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
+import FailureCard, { ContactActions } from '@/components/chat/FailureCard';
 import { Arrow } from '@/components/site/Arrow';
 import { REDUCED_MOTION_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
 import { useLang } from '@/i18n/useLang';
@@ -207,7 +208,18 @@ const EntryView: React.FC<{
             );
         }
         case 'error':
-            return <div className="m y">{entry.text}</div>;
+            return (
+                <FailureCard
+                    failure={entry.failure}
+                    text={entry.text}
+                    question={entry.question}
+                    onRetry={
+                        entry.failure === 'failed' || entry.failure === 'wait'
+                            ? () => chat.retry(entry.question)
+                            : undefined
+                    }
+                />
+            );
     }
 };
 
@@ -224,6 +236,16 @@ export interface PhoneLayer {
     /** A diagram card under an answer was tapped. */
     showSheet: (sheet: SheetKey) => void;
 }
+
+/** The latest question that got no answer, carried into the contact window. */
+const lastUnanswered = (entries: Entry[]): string => {
+    for (let i = entries.length - 1; i >= 0; i--) {
+        const e = entries[i];
+        if (e.kind === 'error') return e.question;
+        if (e.kind === 'user') return e.text;
+    }
+    return '';
+};
 
 // Visible height under which the open layer drops its suggestion chips.
 const SHORT_VIEW_PX = 480;
@@ -315,7 +337,10 @@ const AgentChat: React.FC<{
     }, [full]);
     // Above the keyboard on a short screen, or once typing has started, the
     // suggestions give their room to the conversation.
-    const hideChips = full && (short || text.trim() !== '');
+    // On the phone layer a failure card already offers the next steps, and the
+    // chips under it would push the input off a short screen.
+    const failureShown = chat.entries[chat.entries.length - 1]?.kind === 'error';
+    const hideChips = chat.closed || (full && (short || text.trim() !== '' || failureShown));
 
     // When the question is already known, only the address is missing.
     const placeholder = chat.awaitingEmail
@@ -437,7 +462,16 @@ const AgentChat: React.FC<{
                     onChange={(e) => setText(e.target.value)}
                 />
             )}
-            {phone && !full ? (
+            {chat.closed || chat.offline ? (
+                // Nothing typed can be answered now, so the input row becomes
+                // the routes to Yanir. Only these two states: a single failed
+                // send or a short wait keeps the input, because asking again
+                // can still work.
+                <div className="lim-strip">
+                    <b>{chat.closed ? copy.errors.closed : copy.errors.direct}</b>
+                    <ContactActions lead="call" question={lastUnanswered(chat.entries)} />
+                </div>
+            ) : phone && !full ? (
                 <div className="inp">
                     <button
                         type="button"
