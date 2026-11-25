@@ -230,3 +230,38 @@ def test_the_note_follows_the_question_language(calls):
 def test_a_question_off_any_page_carries_no_brief(calls):
     _post("What have you written about AI memory?")
     assert calls[0][4] == ""
+
+
+@pytest.mark.parametrize("message", ["What are your latest posts?", "מה כתבת לאחרונה?"])
+def test_the_latest_posts_reply_names_its_sources(calls, message):
+    """Every reply carries its sources, one written without the model too:
+    here they are exactly the pieces the list shows."""
+    reply = _post(message)
+    assert reply["answered_by"] == "index"
+    listed = reply["blocks"][0]["items"]
+    assert [s["slug"] for s in reply["used"]] == [
+        slug for slug in listed if slug in {s["slug"] for s in reply["used"]}
+    ]
+    assert {s["slug"] for s in reply["used"]} == set(listed)
+    assert all(s["kind"] == "writing" for s in reply["used"])
+
+
+def test_a_starter_topic_reaches_selection(calls, monkeypatch):
+    """The starter's topic travels with the question, and an unknown one is
+    refused rather than ignored, since only the page sends it."""
+    seen = {}
+    real = main.select
+
+    def spy(*args, **kwargs):
+        seen["topic"] = kwargs.get("topic")
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(main, "select", spy)
+    _post("What has Yanir built with agents?", topic="built")
+    assert seen["topic"] == "built"
+
+    client = TestClient(main.app)
+    bad = client.post(
+        "/chat-with-files", json={"message": "hi", "conversation_history": [], "topic": "x"}
+    )
+    assert bad.status_code == 422

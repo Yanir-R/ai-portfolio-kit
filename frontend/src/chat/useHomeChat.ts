@@ -3,7 +3,14 @@ import { CHAT, ProcessId } from '@/copy/chat';
 import { SheetKey } from '@/content/sheets';
 import { useLang } from '@/i18n/useLang';
 import { chatService, ChatFailure, MAX_HISTORY_SENT } from '@/services/chatService';
-import { AnswerTrace, ChatBlock, ChatHandoff, ChatMessage, TraceSource } from '@/types/chat';
+import {
+    AnswerTrace,
+    ChatBlock,
+    ChatHandoff,
+    ChatMessage,
+    isChatTopic,
+    TraceSource,
+} from '@/types/chat';
 import { classify } from '@/chat/intents';
 import { sheetFor } from '@/chat/sheetFor';
 import { FailureCase, failureCase, failureText as describeFailure } from '@/chat/failure';
@@ -70,6 +77,8 @@ export type Entry =
           record: AnswerRecord | null;
           blocks: ChatBlock[];
           fromIndex: boolean;
+          /** What a reply made without the model lists: its sources row. */
+          used?: TraceSource[] | null;
           sheet?: SheetKey;
           asksEmail?: boolean;
           /** The server's signature on this reply, sent back with it as history. */
@@ -336,7 +345,8 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             sent,
             await getToken(),
             null,
-            handoffOffered
+            handoffOffered,
+            isChatTopic(picked) ? picked : null
         );
         window.clearInterval(clock);
         resetToken();
@@ -377,6 +387,7 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             record,
             blocks: result.blocks,
             fromIndex,
+            used: result.used,
             sheet,
             asksEmail,
             sig: result.sig,

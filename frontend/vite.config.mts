@@ -66,7 +66,7 @@ const DOCS_ROOT = path.resolve(__dirname, '../backend/docs');
 // allowed: it also gates Gemini's grounding, so declining it made Gemini less
 // likely to cite the site, and for a site whose job is to be found by people
 // asking an assistant about AI agents, being cited by Gemini matters more than
-// staying out of its training set (Yanir's call, 2026-11-24). Cloudflare's AI
+// staying out of its training set. Cloudflare's AI
 // Crawler block does not cover it - it is a robots token, not a fetcher - so
 // robots.txt is where this decision lives. Applebot-Extended stays declined.
 const ANSWER_TIME_CRAWLERS = [
@@ -333,10 +333,14 @@ export default defineConfig(({ mode, command }) => {
     // which is how CI injects these.
     const env = loadEnv(mode, __dirname, 'VITE_');
     const isProd = mode === 'production';
+    // Only a production build falls back to the committed API. `npm run dev`
+    // talks to the local backend unless VITE_BACKEND_URL says otherwise, so a
+    // fork's dev server never spends the owner's chat budget by accident.
     const backendUrl =
         env.VITE_BACKEND_URL ||
-        siteConfig.backendUrl ||
-        (isProd ? DEFAULT_BACKEND_URL.production : DEFAULT_BACKEND_URL.development);
+        (isProd
+            ? siteConfig.backendUrl || DEFAULT_BACKEND_URL.production
+            : DEFAULT_BACKEND_URL.development);
     const siteUrl = (
         env.VITE_SITE_URL ||
         siteConfig.url ||

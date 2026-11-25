@@ -16,7 +16,7 @@ const LayerHeader: React.FC<{ onClose?: () => void; children?: React.ReactNode }
     return (
         <div className="ph">
             <span className="who2">
-                <i className="dot" />
+                <i className="dot" aria-hidden="true" />
                 {copy.who} <small>{copy.whoNote}</small>
             </span>
             {children}

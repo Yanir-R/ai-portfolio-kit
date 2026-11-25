@@ -1,11 +1,10 @@
 """Choosing which of Yanir's documents a question actually needs.
 
-Until now every chat request carried the whole corpus. That was defensible on
-cost - ten documents against a context window measured in hundreds of thousands
-of tokens - but it made the site unable to say anything true about *this*
-answer. A panel reporting "10 documents" under every reply reports a property of
-the deployment, not of the reply, and phrasing it as "from" made an attribution
-claim nothing here could back.
+Sending the whole corpus with every request would be affordable - a few dozen
+documents against a context window of hundreds of thousands of tokens - but it
+would leave the site unable to say anything true about *this* answer. A panel
+reporting "33 documents" under every reply reports a property of the
+deployment, not of the reply.
 
 So this module answers one question: given what the visitor asked, which
 documents belong in the request? Three rules shape it, and each comes from
@@ -31,10 +30,9 @@ a phrase there can route a question but cannot become a claim. A test fails when
 a document has no entry or an entry names no document, which is what keeps the
 list from rotting quietly.
 
-**A miss is graded, not answered by sending everything.** The first version
-sent the whole corpus whenever nothing matched, on the reasoning that a larger
-prompt beats a dropped document. It also meant the least-understood questions
-got the least selective answer. Now there are three results:
+**A miss is graded, not answered by sending everything.** Sending the whole
+corpus whenever nothing matched would give the least-understood questions the
+least selective answer. Instead there are three results:
 
 - NARROWED: a document accounts for a real share of the question. It and any
   other document that does are sent, up to a small maximum.
@@ -103,6 +101,10 @@ MIN_TERM_LENGTH = 3
 # documents that is a real limit of the measure, and the answer is to keep
 # grammar out of the scoring rather than to tune the threshold around it.
 #
+# The owner's name is here too. Every document is about him, so his name
+# cannot tell one from another; "why talk to Yanir?" matched a JavaScript post
+# only because it happens to be signed. A fork replaces the name.
+#
 # Greetings belong here for the plainest reason available: they carry no topic,
 # which is the whole definition of the list. Without them "hello there" produced
 # a term that matched no document, which reads as an unknown subject and sends
@@ -119,6 +121,9 @@ _STOPWORDS: FrozenSet[str] = frozenset(
     their there here they them then than this that these those have has had did
     does done been being from tell told say said get got give given know known
     like want need make made use used using work works worked thing things stuff
+    our ours talk talking
+
+    yanir yanirs
 
     one two three four five six seven eight nine ten
     first second third fourth fifth last next previous former latter
@@ -143,7 +148,10 @@ _HEBREW_STOPWORDS: FrozenSet[str] = frozenset(
     לי לך לו לה לנו לכם להם בי בך בו בה בנו בהם אותי אותך אותו אותה אותנו אותם
     פה כאן שם אז עכשיו היום אחר אחרת אחרים כזה כזאת כאלה
     יכול יכולה אפשר צריך צריכה רוצה רוצים עושה עשית עשה לעשות
-    ספר תספר ספרי תגיד תגידי אמר תן תני דבר דברים משהו
+    ספר תספר ספרי תגיד תגידי אמר תן תני דבר דברים משהו פעם פעמים
+
+    יניר ליניר שיניר ויניר מיניר
+    לדבר דווקא
 
     אחד אחת שתיים שניים שלוש ארבע חמש שש שבע שמונה תשע עשר
     ראשון ראשונה שני שנייה שלישי אחרון אחרונה הבא הבאה הקודם הקודמת
@@ -349,6 +357,18 @@ FRAMING_TURNS = HISTORY_TURNS
 # each answer a quarter of is not asking about five documents, and the ones
 # left out are still named to the model in one line each.
 MAX_DOCUMENTS = 3
+
+# The projects behind each starter question's drawing. The page sends the
+# starter's topic with the question, and these are always sent with it, so the
+# answer and the drawing beside it describe the same systems. Word matching
+# alone cannot be trusted with this: "agents" is in nearly every document, so
+# it weighs nothing, and "what has Yanir built with agents?" would reach only
+# whichever project happens to share the word "built".
+TOPIC_PROJECTS: Dict[str, Tuple[str, ...]] = {
+    "built": ("review-engine", "agent-fleet", "personakit"),
+    "legal": ("trinity-legal",),
+    "pk": ("personakit",),
+}
 
 # The share of the whole question the best document must account for to count
 # as a match rather than as the closest thing found. "The whole question"
@@ -651,17 +671,54 @@ def _pinned_to(selection: Selection, knowledge: Knowledge, pinned: str) -> Selec
     )
 
 
+def _with_projects(selection: Selection, knowledge: Knowledge, slugs: Tuple[str, ...]) -> Selection:
+    """`selection` with the projects in `slugs` always sent in full.
+
+    They take the first places; whatever the search chose fills what is left
+    of MAX_DOCUMENTS, so the writing a question reaches still has room when
+    the topic needs fewer than the limit. Slugs not in the corpus are skipped.
+    """
+    wanted = tuple(
+        s for slug in slugs for s in knowledge.sections if s.source == "project" and s.slug == slug
+    )
+    if not wanted:
+        return selection
+    others = [
+        s for s in selection.knowledge.sections if not s.is_profile and s not in wanted
+    ][: max(MAX_DOCUMENTS - len(wanted), 0)]
+    kept = set(others) | set(wanted)
+    chosen = tuple(s for s in knowledge.sections if s.is_profile or s in kept)
+    # A related piece of writing that no longer fits is not shown as a card
+    # either: a card is only ever for something the answer was given.
+    sent = {s.slug for s in chosen if s.source == "writing"}
+    writing = selection.writing
+    if selection.writing_intent == WRITING_RELATED:
+        writing = tuple(slug for slug in writing if slug in sent)
+    return replace(
+        selection,
+        knowledge=_with_the_rest_listed(chosen, knowledge),
+        outcome=NARROWED,
+        writing=writing,
+        writing_total=len(writing) if selection.writing_intent == WRITING_RELATED else selection.writing_total,
+        writing_intent=selection.writing_intent if writing or selection.writing_intent != WRITING_RELATED else "",
+    )
+
+
 def select(
     question: str,
     knowledge: Knowledge,
     history: Iterable[str] | None = None,
     pinned: Optional[str] = None,
     shown: Iterable[str] = (),
+    topic: Optional[str] = None,
 ) -> Selection:
-    """`_select`, then the piece the visitor is reading, when there is one."""
+    """`_select`, then the piece the visitor is reading and the projects of the
+    starter question's topic, when there are any."""
     selection = _select(question, knowledge, history, tuple(shown or ()))
     if pinned and not knowledge.is_empty:
         selection = _pinned_to(selection, knowledge, pinned)
+    if topic and not knowledge.is_empty:
+        selection = _with_projects(selection, knowledge, TOPIC_PROJECTS.get(topic, ()))
     return selection
 
 

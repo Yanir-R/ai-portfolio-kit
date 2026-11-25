@@ -90,6 +90,17 @@ export interface ChatBlock {
     total?: number | null;
 }
 
+/**
+ * The starter drawings whose projects the server always sends with the
+ * question (backend selection.TOPIC_PROJECTS), so the answer covers what the
+ * drawing beside it shows. Keep the two lists in step.
+ */
+export const CHAT_TOPICS = ['built', 'legal', 'pk'] as const;
+export type ChatTopic = (typeof CHAT_TOPICS)[number];
+
+export const isChatTopic = (value: string | undefined): value is ChatTopic =>
+    (CHAT_TOPICS as readonly string[]).includes(value ?? '');
+
 /** Asked from a piece's own page. */
 export interface ChatContext {
     type: 'writing';

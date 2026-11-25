@@ -100,10 +100,8 @@ def kind_of(label: str) -> str:
 class Section:
     """One document in the corpus, kept whole.
 
-    The corpus used to exist only as one joined string, which was enough while
-    every request got all of it. Selecting documents per question needs them
-    addressable individually, so the join moved from build time to `Knowledge.text`
-    and this is what it joins.
+    Selecting documents per question needs each one addressable on its own, so
+    the corpus is kept as sections and joined only in `Knowledge.text`.
     """
 
     label: str
@@ -180,9 +178,8 @@ class Knowledge:
         """How many documents of each kind are here, as (kind, count).
 
         This describes what was put in front of the model for a request - not
-        which documents an answer drew on. Nothing tracks that: no attribution
-        step exists, so a list of the documents an answer used would describe
-        machinery this project does not have.
+        which documents an answer drew on. That is `ChatResponse.used`, from
+        the model's structured reply, checked against what was sent.
 
         Kinds with no documents are omitted rather than reported as zero.
         """
