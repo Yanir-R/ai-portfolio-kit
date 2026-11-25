@@ -73,8 +73,10 @@ export const usePanelFill = (ref: RefObject<HTMLElement | null>, key: unknown) =
                     set('--fz', zoom.toFixed(3));
                     spare -= ART_HEIGHT * (zoom - 1);
                 }
-                const gap = Math.min(GAP_MAX, GAP + Math.max(0, spare) / (kids.length - 1));
-                set('--fg', `${Math.floor(gap)}px`);
+                // Widen from the gap the drawing has now, so it never outgrows the panel.
+                const base = parseFloat(getComputedStyle(vis).rowGap) || GAP;
+                const gap = Math.min(GAP_MAX, base + Math.max(0, spare) / (kids.length - 1));
+                if (gap > base) set('--fg', `${Math.floor(gap)}px`);
                 return;
             }
 
