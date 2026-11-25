@@ -216,7 +216,7 @@ export interface SheetCopy {
 
 export const SHEETS: Localized<SheetCopy> = {
     he: {
-        cta: 'קבעו שיחת אבחון, 20 דקות',
+        cta: 'קבעו שיחת אבחון',
         pk: {
             points: [
                 {
@@ -405,7 +405,7 @@ export const SHEETS: Localized<SheetCopy> = {
         },
     },
     en: {
-        cta: 'Book a discovery call, 20 minutes',
+        cta: 'Book a discovery call',
         pk: {
             points: [
                 {
