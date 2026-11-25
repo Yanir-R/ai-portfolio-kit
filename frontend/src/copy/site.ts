@@ -88,8 +88,6 @@ export interface CvCopy {
     /** Subject and body of the share message; the link is appended. */
     shareSubject: string;
     shareText: string;
-    loading: string;
-    failed: string;
     viewLabel: string;
 }
 
@@ -102,8 +100,6 @@ export const CV: Localized<CvCopy> = {
         byWhatsapp: 'שליחה בוואטסאפ',
         shareSubject: 'יניר רוט, קורות חיים',
         shareText: 'קורות החיים של יניר רוט:',
-        loading: 'טוען את קורות החיים…',
-        failed: 'קורות החיים לא נטענו. נסו לרענן את הדף.',
         viewLabel: 'קורות החיים',
     },
     en: {
@@ -114,8 +110,6 @@ export const CV: Localized<CvCopy> = {
         byWhatsapp: 'Send on WhatsApp',
         shareSubject: 'Yanir Rot, CV',
         shareText: "Yanir Rot's CV:",
-        loading: 'Loading the CV…',
-        failed: 'The CV did not load. Try reloading the page.',
         viewLabel: 'The CV',
     },
 };
