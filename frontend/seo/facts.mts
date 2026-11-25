@@ -73,11 +73,11 @@ export const PERSON = {
  * they all still agree.
  */
 export const HOME_SHARE = {
-    title: 'יניר רוט | סוכני AI לעסקים',
+    title: 'יניר רוט | פיתוח סוכני AI ומערכות CRM לעסקים',
     description:
         'סוכנים ומערכות לעסקים קטנים, למשרדים ולרשויות. הצעד הראשון הוא שיחת אבחון של 20 דקות.',
     headline: 'אני בונה סוכני AI לעסקים. ומתחיל מהבעיה, לא מהטכנולוגיה.',
-    titleEn: 'Yanir Rot | AI agents for businesses',
+    titleEn: 'Yanir Rot | AI agent and CRM development for businesses',
     descriptionEn:
         'Agents and systems for small businesses, offices and local authorities. It starts with a 20-minute discovery call.',
 } as const;
