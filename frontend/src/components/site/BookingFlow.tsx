@@ -91,7 +91,12 @@ const Stepper: React.FC<{ at: number; names: string[]; label: string }> = ({
     </ol>
 );
 
-const BookingFlow: React.FC<Props> = ({ topic, onBooked }) => {
+interface StepsProps extends Props {
+    getToken: () => Promise<string | null>;
+    resetToken: () => void;
+}
+
+const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetToken }) => {
     const { t, lang } = useLang();
     const copy = t(CONTACT).booking;
     const locale = lang === 'he' ? 'he-IL' : 'en-GB';
@@ -109,7 +114,6 @@ const BookingFlow: React.FC<Props> = ({ topic, onBooked }) => {
     const [sending, setSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [booked, setBooked] = useState<Booked | null>(null);
-    const { containerRef: turnstileRef, getToken, reset: resetToken } = useTurnstile();
 
     // The free slots of the month on show, from today on.
     const monthFirst = dayKey(month.y, month.m, 1);
@@ -308,7 +312,6 @@ const BookingFlow: React.FC<Props> = ({ topic, onBooked }) => {
                             onChange={(e) => setNotes(e.target.value)}
                         />
                     </label>
-                    <div ref={turnstileRef} />
                     {error && (
                         <p className="bk-err" role="alert">
                             {error}
@@ -430,6 +433,22 @@ const BookingFlow: React.FC<Props> = ({ topic, onBooked }) => {
                 </div>
             </div>
             {fallback}
+        </>
+    );
+};
+
+/*
+ * The bot check sits outside the steps, in one element that stays mounted
+ * from the first step on. It used to live inside the details form, which does
+ * not exist when the hook mounts on the first step, so no widget was ever
+ * rendered and every booking went out without a token.
+ */
+const BookingFlow: React.FC<Props> = (props) => {
+    const { containerRef, getToken, reset } = useTurnstile();
+    return (
+        <>
+            <BookingSteps {...props} getToken={getToken} resetToken={reset} />
+            <div ref={containerRef} />
         </>
     );
 };
