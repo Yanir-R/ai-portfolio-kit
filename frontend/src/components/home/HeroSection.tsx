@@ -38,6 +38,8 @@ const VISIT = Math.random();
 const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), a[href], [tabindex="0"]';
 // How far the sheet has to be pulled down before letting go closes it.
 const SWIPE_CLOSE_PX = 90;
+// How far a finger goes down before the sheet starts to follow it.
+const PULL_START_PX = 10;
 // The parts of the first-screen card that may give way on a short phone (see site.css).
 const FIT_STEPS = 5;
 const FIT_MARGIN_PX = 4;
@@ -208,18 +210,30 @@ const HeroSection: React.FC = () => {
         return () => document.removeEventListener('keydown', onKey);
     }, [full, sheetOpen, closeSheet, closeLayer]);
 
-    // The sheet follows a finger pulling it down from the top of its content.
+    // The sheet follows a finger pulling it down: from the handle or header at
+    // any time, or from its content only while that is scrolled to the top.
+    // Nothing moves until the finger has clearly gone down, so a swipe up
+    // always reaches the content's own scrolling untouched.
     const pull = useRef<{ y: number; dy: number } | null>(null);
     const onTouchStart = (event: React.TouchEvent) => {
         const scroller = sheetRef.current?.querySelector('.plan');
-        if (scroller && scroller.scrollTop > 0) return;
+        const onHandle = (event.target as Element).closest('.grab, .ph');
+        if (!onHandle && scroller && scroller.scrollTop > 0) return;
         pull.current = { y: event.touches[0].clientY, dy: 0 };
     };
     const onTouchMove = (event: React.TouchEvent) => {
         const panel = sheetRef.current;
         if (!pull.current || !panel) return;
-        pull.current.dy = Math.max(0, event.touches[0].clientY - pull.current.y);
-        panel.style.transform = `translateY(${pull.current.dy}px)`;
+        const dy = event.touches[0].clientY - pull.current.y;
+        if (dy < 0 && pull.current.dy === 0) {
+            // Going up: this is a scroll, not a pull.
+            pull.current = null;
+            return;
+        }
+        pull.current.dy = Math.max(0, dy);
+        if (pull.current.dy > PULL_START_PX) {
+            panel.style.transform = `translateY(${pull.current.dy}px)`;
+        }
     };
     const onTouchEnd = () => {
         const panel = sheetRef.current;
