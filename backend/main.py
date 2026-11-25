@@ -793,16 +793,6 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
         # Normal chat flow - answer from the cached corpus (profile, projects,
         # writing).
         #
-        # The chat budget is spent here and not at the top of the handler: every
-        # reply above this line is produced without calling the model, and a
-        # budget sized to the model's daily quota should only count model calls.
-        enforce_rate_limit(request, chat_limiter, "chat-with-files")
-
-        if not GEMINI_API_KEY:
-            logger.error("GEMINI_API_KEY is not set; chat cannot answer")
-            raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
-
-        #
         # Which documents this question needs, rather than all of them. The
         # selection is held in a local so the trace describes the request that
         # was actually made - calling select() again for the trace could
@@ -830,6 +820,16 @@ async def chat_with_files(chat_request: ChatRequest, request: Request):
             return _chat_reply(
                 RECENT_REPLY[language], blocks=blocks, answered_by="index", language=language
             )
+
+        # The chat budget is spent here and not at the top of the handler: every
+        # reply above this line, including the "what did you write lately" list,
+        # is produced without calling the model, and a budget sized to the
+        # model's daily quota should only count model calls.
+        enforce_rate_limit(request, chat_limiter, "chat-with-files")
+
+        if not GEMINI_API_KEY:
+            logger.error("GEMINI_API_KEY is not set; chat cannot answer")
+            raise HTTPException(status_code=500, detail=INTERNAL_ERROR_DETAIL)
 
         # Asked from a piece's page: the model is told which piece "it" and
         # "this" mean. The title comes from the corpus, never from the request.

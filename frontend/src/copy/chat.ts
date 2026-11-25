@@ -75,7 +75,14 @@ export interface ChatCopy {
     mailAsk: string;
     invalidEmail: string;
     offline: string;
-    errors: { tooLong: string; rateLimited: string; rateLimitedIn: string; failed: string };
+    errors: {
+        tooLong: string;
+        rateLimited: string;
+        rateLimitedIn: string;
+        /** The day's answer budget is spent; the wait is hours, so no countdown. */
+        dailyLimit: string;
+        failed: string;
+    };
     compare: {
         ask: string;
         pickProcess: string;
@@ -288,6 +295,8 @@ export const CHAT: Localized<ChatCopy> = {
             tooLong: 'ההודעה ארוכה מדי. נסו לקצר אותה.',
             rateLimited: 'יותר מדי הודעות ברגע אחד. חכו רגע ונסו שוב.',
             rateLimitedIn: 'יותר מדי הודעות ברגע אחד. נסו שוב בעוד {n} שניות.',
+            dailyLimit:
+                'הסוכן ענה היום על כל השאלות שהוא יכול. אפשר לקבוע שיחה או לכתוב ליניר במייל, והוא יחזור אליכם.',
             failed: 'ההודעה לא נשלחה. נסו לשלוח אותה שוב.',
         },
         compare: {
@@ -584,6 +593,8 @@ export const CHAT: Localized<ChatCopy> = {
             tooLong: 'That message is too long. Try a shorter one.',
             rateLimited: 'Too many messages just now. Give it a moment and try again.',
             rateLimitedIn: 'Too many messages just now. Try again in {n} seconds.',
+            dailyLimit:
+                "The agent has answered all it can for today. You can book a call or email Yanir, and he'll get back to you.",
             failed: 'That message did not go through. Try sending it again.',
         },
         compare: {
