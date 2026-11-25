@@ -151,10 +151,11 @@ SAFETY_SETTINGS = [
 HandoffReason = Literal["business_context", "pricing", "timeline", "how_to_start", "none"]
 
 # Longest part of a summary, and of the fit line, the site passes on. The model
-# is asked for less; this is the ceiling for one that ignores it, so the card
-# never fills with a wall of text.
-HANDOFF_PART_MAX_CHARS = 110
-HANDOFF_FIT_MAX_CHARS = 160
+# is asked for about half of this, so a normal reply never comes near it; the
+# ceiling is for one that ignores the request, so the card never fills with a
+# wall of text.
+HANDOFF_PART_MAX_CHARS = 160
+HANDOFF_FIT_MAX_CHARS = 200
 
 # A fit line is Yanir promising something in his own voice, so it may not
 # carry a figure: no price, no duration, no count the profile did not make
@@ -163,11 +164,29 @@ HANDOFF_FIT_MAX_CHARS = 160
 _FIGURE_RE = re.compile(r"[0-9$€£₪%]")
 
 
-def _clip(text: str, limit: int) -> str:
+# Where a sentence ends: its closing mark, then a space or the end. Hebrew and
+# English use the same marks.
+_SENTENCE_END_RE = re.compile(r"(?<=[.!?])\s+")
+
+
+def _whole_sentences(text: str, limit: int) -> str:
+    """`text` cut to the whole sentences that fit in `limit`, or nothing.
+
+    Never mid-sentence: the summary is the visitor's words, shown in the card
+    and prefilled into the booking and the email, and a sentence that stops
+    halfway puts words in their mouth. A part whose first sentence is already
+    too long is dropped rather than sliced.
+    """
     text = " ".join(text.split())
     if len(text) <= limit:
         return text
-    return text[:limit].rsplit(" ", 1)[0] + "…"
+    kept = ""
+    for sentence in _SENTENCE_END_RE.split(text):
+        candidate = f"{kept} {sentence}".strip()
+        if len(candidate) > limit:
+            break
+        kept = candidate
+    return kept
 
 
 class Handoff(BaseModel):
@@ -205,27 +224,27 @@ class Handoff(BaseModel):
     situation: str = Field(
         description=(
             "When ready: who the visitor is, as they said it, one short "
-            "sentence in their language and first person (e.g. 'I run a salon "
+            "complete sentence (under 90 characters) in their language and first person (e.g. 'I run a salon "
             "with two branches.'). Empty if they did not say."
         )
     )
     pain: str = Field(
         description=(
             "When ready: the problem in the visitor's own words, one short "
-            "sentence, first person (e.g. 'We get a lot of WhatsApp messages "
+            "complete sentence (under 90 characters), first person (e.g. 'We get a lot of WhatsApp messages "
             "about appointments.'). Empty when ready is false."
         )
     )
     goal: str = Field(
         description=(
-            "When ready: what the visitor wants instead, one short sentence, "
-            "first person (e.g. 'I want an agent that books against our "
+            "When ready: what the visitor wants instead, one short complete "
+            "sentence (under 90 characters), first person (e.g. 'I want an agent that books against our "
             "calendar.'). Empty if they did not say."
         )
     )
     fit: str = Field(
         description=(
-            "When ready: one sentence in Yanir's voice (first person, in the "
+            "When ready: one complete sentence (under 120 characters) in Yanir's voice (first person, in the "
             "visitor's language) naming the kind of thing he builds that fits "
             "this pain, taken only from the PROFILE. No prices, durations or "
             "numbers, no promises of results. Empty when the PROFILE does not "
@@ -296,12 +315,12 @@ def _parse_handoff(value: object) -> Optional[Handoff]:
         handoff = Handoff.model_validate(value)
     except ValueError:
         return None
-    fit = _clip(handoff.fit, HANDOFF_FIT_MAX_CHARS)
+    fit = _whole_sentences(handoff.fit, HANDOFF_FIT_MAX_CHARS)
     return handoff.model_copy(
         update={
-            "situation": _clip(handoff.situation, HANDOFF_PART_MAX_CHARS),
-            "pain": _clip(handoff.pain, HANDOFF_PART_MAX_CHARS),
-            "goal": _clip(handoff.goal, HANDOFF_PART_MAX_CHARS),
+            "situation": _whole_sentences(handoff.situation, HANDOFF_PART_MAX_CHARS),
+            "pain": _whole_sentences(handoff.pain, HANDOFF_PART_MAX_CHARS),
+            "goal": _whole_sentences(handoff.goal, HANDOFF_PART_MAX_CHARS),
             "fit": "" if _FIGURE_RE.search(fit) else fit,
         }
     )
