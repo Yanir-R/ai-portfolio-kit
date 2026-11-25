@@ -34,13 +34,19 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
 
     useEffect(() => {
         const dialog = ref.current;
-        if (dialog && !dialog.open) dialog.showModal();
+        if (dialog && !dialog.open) {
+            dialog.showModal();
+            // Focus the window itself, not the close button: the browser would
+            // otherwise ring the X as if the visitor had tabbed to it.
+            dialog.focus();
+        }
     }, []);
 
     return (
         <dialog
             ref={ref}
             className="talk"
+            tabIndex={-1}
             aria-labelledby="talk-title"
             onClose={onClose}
             // A click on the backdrop lands on the dialog element itself.
@@ -170,7 +176,7 @@ const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topi
                 <div ref={turnstileRef} />
                 <div className="v-btns">
                     <button
-                        className="btn sm"
+                        className="btn"
                         type="submit"
                         disabled={state === 'sending' || state === 'sent'}
                     >
