@@ -5,7 +5,7 @@ import { useLang } from '@/i18n/useLang';
 import SiteNav from '@/components/site/SiteNav';
 import LangOffer from '@/components/site/LangOffer';
 import SiteFooter, { HireBand } from '@/components/site/SiteFooter';
-import { SiteDialogsProvider, useSiteDialogs } from '@/components/site/SiteDialogs';
+import { CALL_HASH, SiteDialogsProvider, useSiteDialogs } from '@/components/site/SiteDialogs';
 import { CV_HASH } from '@/components/site/CvDialog';
 
 /*
@@ -25,11 +25,15 @@ const DocumentLang: React.FC = () => {
 
 const ScrollOnNavigate: React.FC = () => {
     const { pathname, hash } = useLocation();
-    const { openCv } = useSiteDialogs();
+    const { openCv, openContact } = useSiteDialogs();
 
     useEffect(() => {
         if (hash === CV_HASH) {
             openCv();
+            return;
+        }
+        if (hash === CALL_HASH) {
+            openContact({ kind: 'call' });
             return;
         }
         if (hash) {
@@ -37,7 +41,7 @@ const ScrollOnNavigate: React.FC = () => {
             return;
         }
         window.scrollTo(0, 0);
-    }, [pathname, hash, openCv]);
+    }, [pathname, hash, openCv, openContact]);
 
     return null;
 };

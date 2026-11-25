@@ -125,7 +125,8 @@ export interface ContactCopy {
     topic: string;
     pref: string;
     tabs: Record<ContactKind, string>;
-    call: { text: string; open: string; frameTitle: string };
+    call: { text: string; open: string };
+    booking: BookingCopy;
     mail: {
         email: string;
         emailPlaceholder: string;
@@ -140,6 +141,46 @@ export interface ContactCopy {
     whatsapp: { text: string; fine: string; open: string; first: (topic?: string) => string };
 }
 
+/** The booking steps inside the "discovery call" tab. */
+export interface BookingCopy {
+    steps: [string, string, string];
+    stepsLabel: string;
+    meta: string;
+    loading: string;
+    failed: string;
+    none: string;
+    prevMonth: string;
+    nextMonth: string;
+    pickDay: string;
+    timesNote: string;
+    otherDay: string;
+    change: string;
+    name: string;
+    namePlaceholder: string;
+    email: string;
+    emailPlaceholder: string;
+    about: string;
+    submit: string;
+    sending: string;
+    back: string;
+    fine: string;
+    taken: string;
+    bookFailed: string;
+    doneTitle: string;
+    doneText: string;
+    when: string;
+    where: string;
+    whereValue: string;
+    withWhom: string;
+    withValue: string;
+    subject: string;
+    addToCalendar: string;
+    close: string;
+    doneFine: string;
+    eventTitle: string;
+    weekdays: [string, string, string, string, string, string, string];
+}
+
 export const CONTACT: Localized<ContactCopy> = {
     he: {
         title: 'לדבר עם יניר',
@@ -150,7 +191,44 @@ export const CONTACT: Localized<ContactCopy> = {
         call: {
             text: '20 עד 30 דקות בשיחת וידאו. בוחרים שעה, והנושא מצורף להזמנה כדי שלא תתחילו מאפס.',
             open: 'פתיחת היומן בחלון חדש ↗',
-            frameTitle: 'היומן לקביעת שיחת אבחון',
+        },
+        booking: {
+            steps: ['יום ושעה', 'פרטים', 'אישור'],
+            stepsLabel: 'שלבי קביעת השיחה',
+            meta: '30 דק׳ · וידאו · שעון ישראל',
+            loading: 'טוען את השעות הפנויות…',
+            failed: 'היומן לא נטען כרגע. אפשר לקבוע דרך הקישור למטה.',
+            none: 'אין שעות פנויות בחודש הזה. נסו את החודש הבא.',
+            prevMonth: 'החודש הקודם',
+            nextMonth: 'החודש הבא',
+            pickDay: 'בחרו יום ביומן, והשעות הפנויות יופיעו כאן.',
+            timesNote: 'השעות לפי שעון ישראל',
+            otherDay: 'יום אחר',
+            change: 'שינוי',
+            name: 'שם מלא',
+            namePlaceholder: 'השם שלכם',
+            email: 'מייל',
+            emailPlaceholder: 'name@company.co.il',
+            about: 'על מה נדבר?',
+            submit: 'קביעת השיחה',
+            sending: 'קובע…',
+            back: 'חזרה',
+            fine: 'האישור והקישור לשיחה נשלחים למייל שכתבתם.',
+            taken: 'השעה הזאת נתפסה הרגע. בחרו שעה אחרת.',
+            bookFailed: 'השיחה לא נקבעה. נסו שוב, או קבעו דרך הקישור למטה.',
+            doneTitle: 'השיחה נקבעה',
+            doneText: 'אישור עם הקישור לשיחה נשלח למייל שלכם.',
+            when: 'מתי',
+            where: 'איפה',
+            whereValue: 'שיחת וידאו, הקישור במייל',
+            withWhom: 'עם מי',
+            withValue: 'יניר רוט',
+            subject: 'נושא',
+            addToCalendar: 'הוספה ליומן',
+            close: 'סגירה',
+            doneFine: 'צריך לשנות? במייל האישור יש קישור לשינוי מועד ולביטול.',
+            eventTitle: 'שיחת אבחון עם יניר רוט',
+            weekdays: ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'],
         },
         mail: {
             email: 'המייל שלכם',
@@ -179,7 +257,45 @@ export const CONTACT: Localized<ContactCopy> = {
         call: {
             text: '20 to 30 minutes on a video call. Pick a time, and the subject goes with the invite so you do not start from scratch.',
             open: 'Open the calendar in a new tab ↗',
-            frameTitle: 'Calendar for booking a discovery call',
+        },
+        booking: {
+            steps: ['Day and time', 'Details', 'Confirmed'],
+            stepsLabel: 'Booking steps',
+            meta: '30 min · video · Israel time',
+            loading: 'Loading the free times…',
+            failed: 'The calendar did not load just now. You can book through the link below.',
+            none: 'No free times this month. Try the next one.',
+            prevMonth: 'Previous month',
+            nextMonth: 'Next month',
+            pickDay: 'Pick a day on the calendar and the free times show here.',
+            timesNote: 'Times are in Israel time',
+            otherDay: 'Another day',
+            change: 'Change',
+            name: 'Full name',
+            namePlaceholder: 'Your name',
+            email: 'Email',
+            emailPlaceholder: 'name@company.com',
+            about: 'What should we talk about?',
+            submit: 'Book the call',
+            sending: 'Booking…',
+            back: 'Back',
+            fine: 'The confirmation and the call link go to the email you entered.',
+            taken: 'That time was just taken. Pick another one.',
+            bookFailed: 'The call was not booked. Try again, or book through the link below.',
+            doneTitle: 'The call is booked',
+            doneText: 'A confirmation with the call link is on its way to your email.',
+            when: 'When',
+            where: 'Where',
+            whereValue: 'Video call, link in the email',
+            withWhom: 'With',
+            withValue: 'Yanir Rot',
+            subject: 'Subject',
+            addToCalendar: 'Add to calendar',
+            close: 'Close',
+            doneFine:
+                'Need to change it? The confirmation email has links to reschedule or cancel.',
+            eventTitle: 'Discovery call with Yanir Rot',
+            weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         },
         mail: {
             email: 'Your email',

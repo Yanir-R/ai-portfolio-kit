@@ -1,17 +1,8 @@
 /*
- * Parts the design files did not draw, in the same tokens: the booking
- * calendar inside the contact window, the CV as readable text, and plain
- * states (loading, empty, failed). Kept apart from site.css so that file
+ * Parts the design files did not draw, in the same tokens: the CV as
+ * readable text, and plain states (loading, empty, failed). Kept apart from site.css so that file
  * stays a faithful port of the design.
  */
-
-.talk-cal {
-    width: 100%;
-    height: min(560px, 62vh);
-    border: 1.5px solid var(--line);
-    border-radius: 8px;
-    background: var(--paper);
-}
 
 /*
  * The CV sheet: a white page in the type and layout of Yanir's CV document,

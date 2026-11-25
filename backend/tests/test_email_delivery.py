@@ -7,6 +7,7 @@ these assert what is handed to it and what the visitor is told.
 """
 
 import asyncio
+from email.utils import parseaddr
 
 import pytest
 
@@ -58,13 +59,19 @@ def test_a_collected_address_is_emailed_and_confirmed(smtp):
     assert len(smtp.sent) == 1
     message = smtp.sent[0]
     assert message["To"] == RECEIVER
-    assert message["From"] == SENDER
+    # The site's account sends it, under a display name.
+    assert parseaddr(message["From"])[1] == SENDER
     # The visitor's address has to survive into the body, or the notification
     # arrives with no way to reply to it.
-    # MIMEMultipart holds parts, not text; the body is the first one.
-    body = message.get_payload()[0].get_payload()
+    # MIMEMultipart holds parts, not text; the plain-text body is the first one.
+    body = message.get_payload()[0].get_payload(decode=True).decode("utf-8")
     assert "visitor@example.com" in body
     assert "wants to talk" in body
+
+    # Replying to the notification answers the visitor.
+    assert message["Reply-To"] == "visitor@example.com"
+    # An address left in chat gets no auto-reply: only the mail form sends one.
+    assert len(smtp.sent) == 1
 
     assert reply.response == main.EMAIL_RECEIVED_MESSAGE
     assert reply.email_collected is True

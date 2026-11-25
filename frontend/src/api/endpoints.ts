@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
     CHAT_STATUS: '/api/chat/status',
     CHAT: '/chat-with-files',
     CONTACT: '/api/contact',
+    BOOKING: '/api/booking',
     PROJECTS: '/api/projects',
     PROJECT: (slug: string) => `/api/projects/${encodeURIComponent(slug)}`,
     WRITING: '/api/writing',

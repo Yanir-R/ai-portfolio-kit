@@ -18,6 +18,9 @@ export interface ContactRequest {
     pref?: string;
 }
 
+/** A link to any page with this hash opens the booking window, e.g. from an email. */
+export const CALL_HASH = '#call';
+
 interface SiteDialogsApi {
     openContact: (request: ContactRequest) => void;
     openCv: () => void;

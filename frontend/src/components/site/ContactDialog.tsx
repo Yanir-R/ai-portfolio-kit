@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CONTACT, ContactKind } from '@/copy/site';
-import { FEATURES, LINKS, whatsappUrl } from '@/constants/links';
+import { FEATURES, whatsappUrl } from '@/constants/links';
+import BookingFlow from '@/components/site/BookingFlow';
 import { useLang } from '@/i18n/useLang';
 import { useTurnstile } from '@/hooks/useTurnstile';
 import { contactService } from '@/services/contactService';
@@ -16,14 +17,6 @@ import { ContactRequest } from '@/components/site/SiteDialogs';
  */
 const KINDS: ContactKind[] = FEATURES.whatsapp ? ['call', 'mail', 'whatsapp'] : ['call', 'mail'];
 
-/** The booking page, embedded, with the subject prefilled as the invite's note. */
-export const bookingUrl = (note?: string): string => {
-    const url = new URL(LINKS.booking);
-    url.searchParams.set('embed', 'true');
-    if (note) url.searchParams.set('notes', note);
-    return url.toString();
-};
-
 interface Props {
     request: ContactRequest;
     onChange: (request: ContactRequest) => void;
@@ -36,6 +29,8 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
     const ref = useRef<HTMLDialogElement>(null);
     const kind = KINDS.includes(request.kind) ? request.kind : 'call';
     const note = [request.topic, request.pref, request.message].filter(Boolean).join(' · ');
+    // Once the call is booked there is nothing left to choose between.
+    const [booked, setBooked] = useState(false);
 
     useEffect(() => {
         const dialog = ref.current;
@@ -73,6 +68,7 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
             <div
                 className="tt"
                 role="tablist"
+                hidden={booked}
                 style={{ '--n': KINDS.length } as React.CSSProperties}
             >
                 {KINDS.map((k) => (
@@ -90,19 +86,20 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
             <div className="tb" role="tabpanel">
                 {kind === 'call' && (
                     <>
-                        <p>{copy.call.text}</p>
-                        <iframe
-                            className="talk-cal"
-                            src={bookingUrl(note)}
-                            title={copy.call.frameTitle}
-                            loading="lazy"
+                        {!booked && <p>{copy.call.text}</p>}
+                        <BookingFlow
+                            topic={note || undefined}
+                            onBooked={() => setBooked(true)}
+                            onClose={() => ref.current?.close()}
                         />
-                        <a className="fine" href={LINKS.booking} target="_blank" rel="noopener">
-                            {copy.call.open}
-                        </a>
                     </>
                 )}
-                {kind === 'mail' && <MailForm initial={request.message ?? request.topic ?? ''} />}
+                {kind === 'mail' && (
+                    <MailForm
+                        initial={request.message ?? request.topic ?? ''}
+                        topic={request.topic}
+                    />
+                )}
                 {kind === 'whatsapp' && (
                     <>
                         <p>{copy.whatsapp.text}</p>
@@ -124,8 +121,8 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
 
 type SendState = 'idle' | 'sending' | 'sent' | 'failed';
 
-const MailForm: React.FC<{ initial: string }> = ({ initial }) => {
-    const { t } = useLang();
+const MailForm: React.FC<{ initial: string; topic?: string }> = ({ initial, topic }) => {
+    const { t, lang } = useLang();
     const copy = t(CONTACT).mail;
     const { containerRef: turnstileRef, getToken, reset: resetToken } = useTurnstile();
     const [email, setEmail] = useState('');
@@ -136,7 +133,10 @@ const MailForm: React.FC<{ initial: string }> = ({ initial }) => {
         event.preventDefault();
         if (state === 'sending' || state === 'sent') return;
         setState('sending');
-        const ok = await contactService.send(email.trim(), message.trim(), await getToken());
+        const ok = await contactService.send(
+            { email: email.trim(), message: message.trim(), topic, lang },
+            await getToken()
+        );
         resetToken();
         setState(ok ? 'sent' : 'failed');
     };
