@@ -60,6 +60,8 @@ const holdPage = () => {
     const root = document.documentElement;
     const body = document.body;
     const y = window.scrollY;
+    const address = () => location.pathname + location.search + location.hash;
+    const at = address();
     const before = { position: body.style.position, top: body.style.top, width: body.style.width };
     body.style.position = 'fixed';
     body.style.top = `${-y}px`;
@@ -68,7 +70,9 @@ const holdPage = () => {
         body.style.position = before.position;
         body.style.top = before.top;
         body.style.width = before.width;
-        // Back exactly where the visitor was, without the page's smooth scrolling.
+        // Back exactly where the visitor was, without the page's smooth
+        // scrolling; unless the layer closed by going somewhere else.
+        if (address() !== at) return;
         const behaviour = root.style.scrollBehavior;
         root.style.scrollBehavior = 'auto';
         window.scrollTo(0, y);

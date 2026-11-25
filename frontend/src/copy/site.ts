@@ -11,6 +11,12 @@ export interface NavCopy {
     /** Section anchors on the home page, then the blog and the about page. */
     links: { label: string; href: string }[];
     menu: string;
+    /** The phone's full-screen menu: one row per place, with a line on what is there. */
+    rows: { label: string; note: string; href: string }[];
+    closeMenu: string;
+    /** On the row of the page the visitor is on. */
+    here: string;
+    whatsapp: string;
     language: string;
     cta: string;
 }
@@ -27,6 +33,17 @@ export const NAV: Localized<NavCopy> = {
             { label: 'אודות', href: '/about' },
         ],
         menu: 'תפריט',
+        rows: [
+            { label: 'מה אני בונה', note: 'סוכני AI ומערכות CRM שמותאמות לעסק', href: '/#build' },
+            { label: 'מה כבר רץ', note: 'מערכות שעובדות היום אצל לקוחות ואצלי', href: '/#proof' },
+            { label: 'פרויקטים', note: 'כל הפרויקטים, אחד אחד', href: '/projects' },
+            { label: 'איך עובדים', note: 'משיחת אבחון ועד מערכת שרצה', href: '/#how' },
+            { label: 'בלוג', note: 'פוסטים ומאמרים שכתבתי', href: '/blog' },
+            { label: 'אודות', note: 'מי אני, וקורות החיים שלי', href: '/about' },
+        ],
+        closeMenu: 'סגירת התפריט',
+        here: 'אתם כאן',
+        whatsapp: 'וואטסאפ',
         language: 'שפה',
         cta: 'קבעו שיחת אבחון',
     },
@@ -41,6 +58,29 @@ export const NAV: Localized<NavCopy> = {
             { label: 'About', href: '/about' },
         ],
         menu: 'Menu',
+        rows: [
+            {
+                label: 'What I build',
+                note: 'AI agents and CRM systems fitted to the business',
+                href: '/#build',
+            },
+            {
+                label: "What's running",
+                note: 'Systems working today, for clients and for me',
+                href: '/#proof',
+            },
+            { label: 'Projects', note: 'Every project, one by one', href: '/projects' },
+            {
+                label: 'How I work',
+                note: 'From a diagnostic call to a running system',
+                href: '/#how',
+            },
+            { label: 'Blog', note: 'Posts and articles I wrote', href: '/blog' },
+            { label: 'About', note: 'Who I am, and my resume', href: '/about' },
+        ],
+        closeMenu: 'Close the menu',
+        here: 'You are here',
+        whatsapp: 'WhatsApp',
         language: 'Language',
         cta: 'Book a call',
     },
@@ -73,9 +113,9 @@ export const HIRE: Localized<{ title: string; text: string; cv: string; linkedin
     },
 };
 
-export const FOOTER: Localized<{ name: string; blog: string; about: string }> = {
-    he: { name: 'יניר רוט', blog: 'בלוג', about: 'אודות' },
-    en: { name: 'Yanir Rot', blog: 'Blog', about: 'About' },
+export const FOOTER: Localized<{ name: string; projects: string; blog: string; about: string }> = {
+    he: { name: 'יניר רוט', projects: 'פרויקטים', blog: 'בלוג', about: 'אודות' },
+    en: { name: 'Yanir Rot', projects: 'Projects', blog: 'Blog', about: 'About' },
 };
 
 export interface CvCopy {

@@ -5,6 +5,7 @@ import { LINKS } from '@/constants/links';
 import { useLang } from '@/i18n/useLang';
 import SectionHead from '@/components/home/SectionHead';
 import { SpineNode } from '@/components/home/Spine';
+import { Arrow } from '@/components/site/Arrow';
 
 /** Three promises, each with where it already happened, and four more systems. */
 const ProofSection: React.FC = () => {
@@ -56,6 +57,9 @@ const ProofSection: React.FC = () => {
                     })}
                 </div>
             </div>
+            <Link className="all proj-all" to={to('/projects')}>
+                <Arrow>{copy.allProjects}</Arrow>
+            </Link>
         </section>
     );
 };

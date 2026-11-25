@@ -31,6 +31,8 @@ export interface HomeCopy {
         evidenceLabel: string;
         promises: { title: string; text: string; evidence: string }[];
         alsoTitle: string;
+        /** Under the cards: the way to every project. */
+        allProjects: string;
         also: { tag: string; title: string; text: string; href?: string; open?: boolean }[];
     };
     fleet: SectionHead & {
@@ -145,6 +147,7 @@ export const HOME: Localized<HomeCopy> = {
                 },
             ],
             alsoTitle: 'ועוד ארבע מערכות שבניתי',
+            allProjects: 'לכל הפרויקטים',
             also: [
                 {
                     tag: 'רץ אצלי כל יום',
@@ -374,6 +377,7 @@ export const HOME: Localized<HomeCopy> = {
                 },
             ],
             alsoTitle: 'And four more systems I built',
+            allProjects: 'All projects',
             also: [
                 {
                     tag: 'Runs for me every day',
