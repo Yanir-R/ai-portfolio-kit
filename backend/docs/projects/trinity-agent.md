@@ -22,6 +22,19 @@ My own always-on AI assistant. It runs all day on my machine, and I talk to it i
 - Trinity Agent's own site: [personakit.me/trinity](https://personakit.me/trinity)
 - PersonaKit, its memory layer: [personakit.me](https://personakit.me), with the docs at [personakit.me/docs](https://personakit.me/docs)
 
+## What it does alone, and what waits for me
+- **On its own, no approval**: reading and preparing, such as summing up what is open with a supplier, a one-page brief for tomorrow's meeting, spotting a calendar clash, or drafting a reply in my style.
+- **Asks first**: anything that sends, changes or removes something, such as sending a reply, moving or cancelling an event, booking a call or archiving an email.
+- **Not available at all**: deleting an email for good, promoting a skill, hook or memory by itself (it proposes, a person approves), or reaching another person's account.
+
+## How it is built
+I write in a private WhatsApp or Telegram chat. The agent runs all the time on my computer and reads, searches, summarises and drafts on its own; anything that would send, change or remove stops at an "asks first" gate and waits for my tap. It acts in mail and calendar only when an account is connected, and it treats text inside an email as information, not instructions. Memory has two layers: the agent's own record in Obsidian under git, and PersonaKit as the memory shared by all my agents and developer tools.
+
+## Three mechanisms that keep it trustworthy
+- **Memory that proves itself**: each finished session is recorded in about 10 ms with no model call; a nightly run must declare which sources it covered and which pages it changed, code checks that, and the result is one reviewable commit.
+- **Improvements only with evidence**: a pattern counts only on two different days or three times in one day, becomes a proposal with evidence, and goes in only if a person approves.
+- **No message goes out without a tap**: it drafts, sends me the draft with a button, and sends only after I tap.
+
 ## Project Type
 web-app
 
@@ -33,6 +46,9 @@ https://personakit.me/trinity
 
 ## Repository
 Private Repository
+
+## Media
+/projects/trinity-agent.png
 
 ## Featured
 false

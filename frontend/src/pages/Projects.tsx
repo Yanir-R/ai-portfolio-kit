@@ -8,6 +8,7 @@ import { CardsSkeleton } from '@/components/site/Skeleton';
 import { useLoad } from '@/hooks/useLoad';
 import { useLang } from '@/i18n/useLang';
 import { projectService } from '@/services/projectService';
+import { orderProjects } from '@/content/projectOrder';
 
 /** The write-ups, featured first, as cards in the blog's article style. */
 const Projects: React.FC = () => {
@@ -30,7 +31,7 @@ const Projects: React.FC = () => {
             {value.state === 'failed' && <LoadFailed copy={copy.failed} onRetry={retry} />}
             {value.state === 'ready' && (
                 <div className="w-arts proj">
-                    {value.value.map((project) => (
+                    {orderProjects(value.value).map((project) => (
                         <article key={project.slug} className="w-art">
                             {project.media_url &&
                                 !projectService.isVideoFile(project.media_url) && (

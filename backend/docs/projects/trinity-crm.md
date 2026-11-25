@@ -25,6 +25,9 @@ in-development
 ## Repository
 Private Repository
 
+## Media
+/projects/trinity-crm.png
+
 ## Featured
 false
 
