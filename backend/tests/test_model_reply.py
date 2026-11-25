@@ -78,13 +78,51 @@ def test_a_broken_handoff_only_drops_the_handoff():
         assert (text, declined, handoff) == ("A.", False, None)
 
 
-def test_a_long_part_is_cut_at_a_word():
-    long = dict(_READY, pain="word " * 100)
+_LONG_HE = (
+    "יש לנו משרד רואי חשבון עם שמונה עובדים. "
+    "כל בוקר מישהו מבזבז שעתיים על מיון מיילים מלקוחות, העברת מסמכים לתיקים ומענה על אותן שאלות שוב ושוב, "
+    "וזה פשוט לא נגמר, גם בעונת הדוחות וגם מחוץ לה."
+)
+_LONG_EN = (
+    "We run an accounting office with eight people. "
+    "Every morning someone spends two hours sorting client email, filing documents and answering "
+    "the same questions over and over, and it never ends."
+)
 
-    _, _, handoff = _parse_reply(json.dumps({"answer": "A.", "declined": False, "handoff": long}))
 
-    assert len(handoff.pain) <= gemini_helper.HANDOFF_PART_MAX_CHARS + 1
-    assert handoff.pain.endswith("word…")
+def _part(**fields):
+    _, _, handoff = _parse_reply(
+        json.dumps({"answer": "A.", "declined": False, "handoff": dict(_READY, **fields)})
+    )
+    return handoff
+
+
+@pytest.mark.parametrize("long, first", [
+    (_LONG_HE, "יש לנו משרד רואי חשבון עם שמונה עובדים."),
+    (_LONG_EN, "We run an accounting office with eight people."),
+])
+def test_a_long_part_keeps_only_whole_sentences(long, first):
+    assert _part(pain=long).pain == first
+
+
+def test_a_part_whose_first_sentence_is_too_long_is_dropped_not_sliced():
+    one_sentence = "word " * 60 + "end."
+
+    assert _part(pain=one_sentence).pain == ""
+    assert _part(fit=one_sentence).fit == ""
+
+
+def test_parts_within_the_limit_are_never_touched():
+    for text in ("יש לי מספרה עם שני סניפים", "We get a lot of WhatsApp messages about appointments."):
+        assert _part(pain=text).pain == text
+
+
+def test_a_long_summary_never_ends_mid_sentence(answer_with):
+    answer_with(_ready_answer(handoff=_part(situation=_LONG_EN, pain=_LONG_HE, goal=_LONG_EN)))
+
+    summary = _ask("What would it cost?", conversation_history=_two_earlier_turns())["handoff"]["summary"]
+
+    assert summary.endswith(".") and "…" not in summary
 
 
 @pytest.mark.parametrize("fit", ["I can build this in 2 weeks.", "It costs about ₪5,000.", "Saves 40% of the time."])

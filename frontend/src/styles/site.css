@@ -9443,15 +9443,6 @@ video.w-v {
 .hand-keep:hover {
     color: var(--ink);
 }
-@media (max-width: 640px) {
-    /* The whole summary still goes to the contact window. */
-    .m.lim .hand-sum p {
-        display: -webkit-box;
-        -webkit-line-clamp: 4;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-}
 
 /*
  * Chat on a blog post, on a phone (frames 5-6, approved 2026-11-25). The page
