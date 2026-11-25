@@ -144,6 +144,8 @@ export interface ContactCopy {
         steps: [string, string, string];
         scan: string;
         open: string;
+        /** Under the button on a phone: what tapping it does. */
+        note: string;
         first: (topic?: string) => string;
     };
 }
@@ -271,12 +273,13 @@ export const CONTACT: Localized<ContactCopy> = {
         whatsapp: {
             text: 'הודעה במילים שלכם, ויניר חוזר אליכם אישית.',
             steps: [
-                'כותבים ליניר במילים שלכם.',
+                'כותבים לי במילים שלכם.',
                 'מיד מגיעה הודעה אוטומטית עם קישור לשיחה.',
-                'יניר חוזר אליכם אישית בוואטסאפ.',
+                'אני חוזר אליכם בוואטסאפ.',
             ],
             scan: 'סריקה פותחת את השיחה בטלפון',
-            open: 'פתיחת וואטסאפ ↗︎',
+            open: 'פתיחת וואטסאפ',
+            note: 'נפתח באפליקציית וואטסאפ, עם הודעה אליי.',
             first: (topic) => (topic ? `היי יניר, לגבי ${topic}: ` : 'היי יניר, '),
         },
     },
@@ -353,12 +356,13 @@ export const CONTACT: Localized<ContactCopy> = {
         whatsapp: {
             text: 'A message in your own words, and Yanir gets back to you personally.',
             steps: [
-                'Write to Yanir in your own words.',
+                'Write to me in your own words.',
                 'An automatic note arrives at once, with a booking link.',
-                'Yanir gets back to you personally on WhatsApp.',
+                'I get back to you on WhatsApp.',
             ],
             scan: 'Scan to open the chat on your phone',
-            open: 'Open WhatsApp ↗︎',
+            open: 'Open WhatsApp',
+            note: 'Opens in the WhatsApp app, with a message to me.',
             first: (topic) => (topic ? `Hi Yanir, about ${topic}: ` : 'Hi Yanir, '),
         },
     },

@@ -8982,12 +8982,12 @@ video.w-v {
     font-size: 16px;
     pointer-events: none;
 }
-/* iOS zooms the page into any field under 16px. */
+/* iOS zooms the page into any field under 16px; this beats every form's own size. */
 @media (pointer: coarse) {
     input,
     textarea,
     select {
-        font-size: max(16px, 1em);
+        font-size: max(16px, 1em) !important;
     }
 }
 .chat .qr.one[hidden] {
@@ -9081,4 +9081,107 @@ video.w-v {
 .bk-cal .mv {
     width: 44px;
     height: 44px;
+}
+
+/*
+ * Phone keyboard in the contact window (2026-11-25). The window follows the
+ * visible viewport, so nothing hides behind the keyboard. While the keyboard
+ * is up (data-kb, set by useKeyboardFit) the routes and the intro line fold
+ * away, forms keep their natural height and scroll as one box under the
+ * title, and no button is pinned.
+ */
+@media (max-width: 640px) {
+    .talk[open] {
+        top: var(--vv-top, 0px);
+        bottom: auto;
+        height: var(--vv-h, 100dvh);
+        max-height: var(--vv-h, 100dvh);
+    }
+    .talk .bk-form .bk-foot {
+        position: static;
+        margin-inline: 0;
+        padding: 4px 0 0;
+    }
+    .talk[data-kb] .tt,
+    .talk[data-kb] .tb > p:first-child,
+    .talk[data-kb] .tb > .stp {
+        display: none;
+    }
+    .talk[data-kb] .th {
+        padding-bottom: 8px;
+    }
+    .talk[data-kb] .th b#talk-title {
+        font-size: 1.4rem;
+        margin-bottom: 0;
+    }
+    .talk[data-kb] .th .tp {
+        display: none;
+    }
+    .talk[data-kb] .tb > .bk-form {
+        flex: none;
+        grid-template-rows: none;
+    }
+    .talk[data-kb] .tb > .bk-form textarea {
+        height: auto;
+    }
+    .talk[data-kb] .tb.mail .v-form,
+    .talk[data-kb] .tb.mail .v-form label:has(textarea),
+    .talk[data-kb] .tb.mail .v-form textarea {
+        flex: none;
+    }
+    .talk[data-kb] .tb.mail .v-form textarea {
+        min-height: 96px;
+    }
+}
+
+/*
+ * WhatsApp tab, option A (Yanir, 2026-11-25). On a phone one card sized to its
+ * content holds the numbered steps, the button right under them and a short
+ * note; the intro line, which repeats the steps, is dropped. On a wide screen
+ * the card dissolves and the tab stays as it was, beside the QR code.
+ */
+.talk .wa-card {
+    display: contents;
+}
+.talk .wa-card .nt {
+    display: none;
+}
+.talk .btn .out {
+    flex: none;
+    margin-inline-start: 8px;
+}
+@media (max-width: 640px) {
+    .talk .tb.wa .wa-main {
+        flex: none;
+    }
+    .talk .tb.wa .wa-main > p {
+        display: none;
+    }
+    .talk .wa-card {
+        display: grid;
+        gap: 18px;
+        padding: 18px 16px 14px;
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+    }
+    .talk .tb.wa .wa-steps {
+        flex: none;
+        align-content: start;
+        gap: 14px;
+        padding: 0;
+        border: 0;
+    }
+    .talk .wa-card .btn {
+        justify-content: center;
+    }
+    .talk .wa-card .nt {
+        display: block;
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.86rem;
+    }
+}
+/* The way forward is the one to take: the next-weeks arrow is filled. */
+.bk-cal .mv:not(:disabled):not(:has(.back)) {
+    background: var(--soft, #fff1c9);
 }

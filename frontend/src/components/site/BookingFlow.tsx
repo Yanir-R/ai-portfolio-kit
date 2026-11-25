@@ -1,10 +1,11 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLoad } from '@/hooks/useLoad';
 import { CONTACT } from '@/copy/site';
 import { BOOKING_TIME_ZONE } from '@/constants/booking';
 import { LINKS } from '@/constants/links';
 import { useLang } from '@/i18n/useLang';
 import { useTurnstile } from '@/hooks/useTurnstile';
+import { nextOnEnter } from '@/hooks/useKeyboardFit';
 import { Booked, bookingService, Slot, SlotsByDay } from '@/services/bookingService';
 
 /*
@@ -143,6 +144,11 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
     const [sending, setSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [booked, setBooked] = useState<Booked | null>(null);
+    // A refusal is shown where it can be read, keyboard or not.
+    const errorRef = useRef<HTMLParagraphElement>(null);
+    useEffect(() => {
+        if (error) errorRef.current?.scrollIntoView({ block: 'nearest' });
+    }, [error]);
 
     // The free slots of the weeks on show, from today on.
     const viewFirst = addDays(weekStart(today), page * VIEW_DAYS);
@@ -309,7 +315,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                         {copy.change}
                     </button>
                 </div>
-                <form className="bk-form" onSubmit={submit}>
+                <form className="bk-form" onSubmit={submit} onKeyDown={nextOnEnter}>
                     <label>
                         {copy.name}
                         <input
@@ -317,6 +323,7 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             required
                             maxLength={120}
                             autoComplete="name"
+                            enterKeyHint="next"
                             placeholder={copy.namePlaceholder}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -329,6 +336,11 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                             dir="ltr"
                             required
                             autoComplete="email"
+                            inputMode="email"
+                            autoCapitalize="off"
+                            autoCorrect="off"
+                            spellCheck={false}
+                            enterKeyHint="next"
                             placeholder={copy.emailPlaceholder}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -339,14 +351,15 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                         <textarea
                             rows={2}
                             maxLength={1000}
+                            enterKeyHint="enter"
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                         />
                     </label>
-                    {/* Pinned to the window's foot, so an error never pushes the buttons out of view. */}
+                    {/* Pinned to the window's foot on a wide screen, so an error never pushes the buttons out of view. */}
                     <div className="bk-foot">
                         {error && (
-                            <p className="bk-err" role="alert">
+                            <p className="bk-err" role="alert" ref={errorRef}>
                                 {error}
                             </p>
                         )}
@@ -447,12 +460,12 @@ const BookingSteps: React.FC<StepsProps> = ({ topic, onBooked, getToken, resetTo
                                         );
                                     }}
                                 >
-                                    {Number(key.slice(8))}
                                     {newMonth && (
                                         <small aria-hidden="true">
                                             {fmt.monthShort.format(noon(key))}
                                         </small>
                                     )}
+                                    {Number(key.slice(8))}
                                 </button>
                             );
                         })}
