@@ -9,9 +9,11 @@ import { AnswerTrace } from '@/types/chat';
  *   1. A question picked from the starters carries its own drawing.
  *   2. Nothing in Yanir's material matched: the "ask Yanir" sheet.
  *   3. A question about price or a map, by its words.
- *   4. The documents the answer drew on, by the most specific one: the
- *      model's own list when it gave one, else what it was sent.
- *   5. Otherwise the answer's own receipt: what was read and measured.
+ *   4. A project the question names by name.
+ *   5. The documents the answer drew on: the first in the model's own list
+ *      that has a drawing (it lists the main one first), else the most
+ *      specific of what it was sent.
+ *   6. Otherwise the answer's own receipt: what was read and measured.
  */
 const BY_WORDS: [RegExp, SheetKey][] = [
     [
@@ -19,6 +21,16 @@ const BY_WORDS: [RegExp, SheetKey][] = [
         'price',
     ],
     [/מפה|מפת|\bmap\b/i, 'map'],
+];
+
+// A project the question names by name, in either language.
+const BY_NAME: [RegExp, SheetKey][] = [
+    [/trinity\s*legal|טריניטי\s*ליגל/i, 'legal'],
+    [/persona\s*kit|פרסונה\s*קיט/i, 'pk'],
+    [
+        /\bfleet\b|מערך\s*הסוכנים|צי\s*הסוכנים|review[\s-]*engine|מנוע\s*הביקורת|hermes|הרמס/i,
+        'built',
+    ],
 ];
 
 const BY_SOURCE: [string, SheetKey][] = [
@@ -44,6 +56,14 @@ export const sheetFor = (
     if (trace.context_outcome && NO_SHEET_OUTCOMES.has(trace.context_outcome)) return undefined;
     const byWords = BY_WORDS.find(([re]) => re.test(question));
     if (byWords) return byWords[1];
+    const byName = BY_NAME.find(([re]) => re.test(question));
+    if (byName) return byName[1];
+    // The model lists what it drew on, the main one first: its drawing wins.
+    const drawn = (slug: string) => BY_SOURCE.find(([s]) => s === slug)?.[1];
+    if (used) {
+        const main = used.map((s) => drawn(s.slug)).find(Boolean);
+        if (main) return main;
+    }
     const slugs = new Set((used ?? trace.sources ?? []).map((s) => s.slug));
     const bySource = BY_SOURCE.find(([slug]) => slugs.has(slug));
     if (bySource) return bySource[1];
