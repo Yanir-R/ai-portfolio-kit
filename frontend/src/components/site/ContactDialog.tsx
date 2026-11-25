@@ -52,23 +52,29 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
             onClick={(event) => event.target === ref.current && ref.current?.close()}
         >
             <div className="th">
-                <b id="talk-title">{copy.title}</b>
+                <div>
+                    <b id="talk-title">{copy.title}</b>
+                    {request.topic && (
+                        <span className="tp">
+                            {copy.topic} <b>{request.topic}</b>
+                            {request.pref && (
+                                <>
+                                    {' · '}
+                                    {copy.pref} <b>{request.pref}</b>
+                                </>
+                            )}
+                        </span>
+                    )}
+                </div>
                 <button type="button" aria-label={copy.close} onClick={() => ref.current?.close()}>
                     ✕
                 </button>
             </div>
-            {request.topic && (
-                <div className="tp">
-                    {copy.topic} <b>{request.topic}</b>
-                    {request.pref && (
-                        <>
-                            {' · '}
-                            {copy.pref} <b>{request.pref}</b>
-                        </>
-                    )}
-                </div>
-            )}
-            <div className="tt" role="tablist">
+            <div
+                className="tt"
+                role="tablist"
+                style={{ '--n': KINDS.length } as React.CSSProperties}
+            >
                 {KINDS.map((k) => (
                     <button
                         key={k}

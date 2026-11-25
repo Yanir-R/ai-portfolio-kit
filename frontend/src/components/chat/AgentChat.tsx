@@ -244,6 +244,10 @@ const AgentChat: React.FC<{
           ? copy.placeholder
           : copy.examplePrefix + copy.examples[example % copy.examples.length];
 
+    // "live" once a question has been asked: on a phone the chat starts
+    // compact and opens to its full height from then on.
+    const live = chat.entries.some((e) => e.kind === 'user');
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!text.trim() || chat.busy) return;
@@ -252,7 +256,7 @@ const AgentChat: React.FC<{
     };
 
     return (
-        <div className="chat" aria-label={copy.panelLabel}>
+        <div className={live ? 'chat live' : 'chat'} aria-label={copy.panelLabel}>
             <div className="ph">
                 <span className="who2">
                     <i className="dot" />
