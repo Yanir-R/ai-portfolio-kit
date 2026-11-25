@@ -80,7 +80,9 @@ export interface ChatCopy {
     /**
      * What the chat says when a send does not get an answer. Every one of these
      * ends in a way to reach Yanir: a limit is a moment the visitor still wants
-     * something, so it is shown as the next step rather than as an error.
+     * something, so it is shown as the next step rather than as an error. The
+     * bubbles are the agent's; the daily handoff card and the direct-contact
+     * row are Yanir taking over, so they stay in his first person (his call).
      */
     errors: {
         tooLong: string;
@@ -316,15 +318,15 @@ export const CHAT: Localized<ChatCopy> = {
             failed: 'ההודעה לא עברה. נסו שוב, או דברו עם יניר ישירות.',
             wait: 'רגע, יותר מדי הודעות בבת אחת. אפשר לשאול שוב בעוד {t}, או לדבר עם יניר ישירות.',
             waitWords: { half: 'חצי דקה', one: 'דקה', two: 'שתי דקות' },
-            dailyTitle: 'מכאן יניר ממשיך',
-            daily: 'עניתי היום על כל מה שאני יכול, ואת השאר עדיף לעשות עם יניר: שיחה של 20 עד 30 דקות, והוא יגיד לכם בכנות אם סוכן שווה את זה אצלכם.',
-            closed: 'השאלות לסוכן נגמרו להיום. יניר זמין ישירות:',
-            direct: 'יניר זמין ישירות:',
+            dailyTitle: 'מכאן אני ממשיך אישית',
+            daily: 'הסוכן ענה היום על כל מה שהוא יכול, ואת השאר עדיף שנעשה יחד: שיחה של 20 עד 30 דקות, ואגיד לכם בכנות אם סוכן שווה את זה אצלכם.',
+            closed: 'השאלות לסוכן נגמרו להיום. אני זמין ישירות:',
+            direct: 'אני זמין ישירות:',
             retry: 'נסו שוב',
             call: 'קבעו שיחת אבחון',
             callShort: 'קבעו שיחה',
             mailShort: 'מייל',
-            mail: 'כתבו ליניר במייל',
+            mail: 'כתבו לי במייל',
             whatsapp: 'וואטסאפ',
         },
         compare: {
@@ -623,15 +625,15 @@ export const CHAT: Localized<ChatCopy> = {
             failed: "That didn't go through. Try again, or talk to Yanir directly.",
             wait: 'Too many messages at once. You can ask again in {t}, or talk to Yanir directly.',
             waitWords: { half: 'half a minute', one: 'a minute', two: 'two minutes' },
-            dailyTitle: 'Yanir takes it from here',
-            daily: "I've answered all I can for today, and the rest is better done with Yanir: a 20 to 30 minute call, and he'll tell you honestly whether an agent is worth it for you.",
-            closed: 'The agent is done for today. Yanir is available directly:',
-            direct: 'Yanir is available directly:',
+            dailyTitle: "I'll take it from here",
+            daily: "The agent has answered all it can for today, and the rest is better done together: a 20 to 30 minute call, and I'll tell you honestly whether an agent is worth it for you.",
+            closed: "The agent is done for today. I'm available directly:",
+            direct: "I'm available directly:",
             retry: 'Try again',
             call: 'Book a discovery call',
             callShort: 'Book a call',
             mailShort: 'Email',
-            mail: 'Email Yanir',
+            mail: 'Email me',
             whatsapp: 'WhatsApp',
         },
         compare: {
