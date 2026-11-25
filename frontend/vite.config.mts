@@ -3,7 +3,14 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { siteConfig } from './site.config';
-import { buildPages, renderNotFound, renderPage, sitemap, llmsTxt } from './seo/prerender.mjs';
+import {
+    buildPages,
+    homeBody,
+    renderNotFound,
+    renderPage,
+    sitemap,
+    llmsTxt,
+} from './seo/prerender.mjs';
 import { siteGraph } from './seo/facts.mjs';
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 
@@ -297,7 +304,8 @@ const emitDiscoveryFiles = (siteUrl: string, backendUrl: string, avatarUrl: stri
     writeBundle(options: { dir?: string }) {
         const dir = options.dir || path.resolve(__dirname, 'dist');
         const indexHtml = readFileSync(path.join(dir, 'index.html'), 'utf8');
-        for (const page of buildPages(DOCS_ROOT, siteUrl)) {
+        const pages = buildPages(DOCS_ROOT, siteUrl);
+        for (const page of pages) {
             const out = path.join(dir, page.file);
             mkdirSync(path.dirname(out), { recursive: true });
             writeFileSync(out, renderPage(indexHtml, page, siteUrl));
@@ -307,6 +315,16 @@ const emitDiscoveryFiles = (siteUrl: string, backendUrl: string, avatarUrl: stri
         writeFileSync(path.join(dir, '404.html'), renderNotFound(indexHtml, 'he'));
         mkdirSync(path.join(dir, 'en'), { recursive: true });
         writeFileSync(path.join(dir, 'en', '404.html'), renderNotFound(indexHtml, 'en'));
+        // Last, because every file above starts from the empty #root: the Hebrew
+        // home is index.html itself, and a crawler that runs no JavaScript
+        // should find the page's text there too.
+        writeFileSync(
+            path.join(dir, 'index.html'),
+            indexHtml.replace(
+                '<div id="root"></div>',
+                () => `<div id="root">${homeBody('he', pages)}</div>`
+            )
+        );
     },
 });
 

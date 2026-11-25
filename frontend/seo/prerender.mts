@@ -39,7 +39,7 @@ import path from 'node:path';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Markdown from 'react-markdown';
-import { HOME_SHARE, PERSON, PERSONAKIT, siteGraph } from './facts.mjs';
+import { HOME_SHARE, PERSON, PERSONAKIT, TRINITY, siteGraph } from './facts.mjs';
 import { pageTitle, SECTION_TITLE, SITE_NAME } from '../src/copy/routes';
 import { ERRORS } from '../src/copy/errors';
 
@@ -72,6 +72,13 @@ export type Page = {
     description: string;
     lang: Lang; // the page's language: its address, its chrome and its locale
     alternates: Record<Lang, string>; // the same page in each language
+    // The address search engines should index for this content, when it is not
+    // this page's own: a post shows as written at both addresses, so the one in
+    // its own language is canonical, and a short post folded into its article
+    // points at the article. Such a page is left out of the sitemap and has no
+    // hreflang, since its twin is not a translation.
+    canonical?: string;
+    single?: boolean; // the content exists in one language only; see isSingleLanguage
     image?: string; // absolute or site-relative
     card?: boolean; // the image is a 1200x630 share card
     ogType: 'website' | 'article' | 'profile';
@@ -144,6 +151,7 @@ const languageOf = (text: string): Lang =>
 /** Strip markdown to one plain line, cut at a word near `max` characters. */
 const plain = (md: string, max = 160) => {
     const text = md
+        .replace(/^#{1,6} .*$/gm, '')
         .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
         .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
         .replace(/[*_`>#]/g, '')
@@ -249,9 +257,21 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
     };
     const website = { '@id': `${siteUrl}/#website` };
 
-    const writing = readDir(path.join(docsRoot, 'writing'), WRITING_META).sort((a, b) =>
+    const allWriting = readDir(path.join(docsRoot, 'writing'), WRITING_META).sort((a, b) =>
         (b.sections.date || '').localeCompare(a.sections.date || '')
     );
+    const bySlug = Object.fromEntries(allWriting.map((w) => [w.slug, w]));
+    // A post that is the short version of an article is read from the article
+    // and not listed beside it (src/services/writingService.ts, same rule). It
+    // keeps its page, which names the article as canonical.
+    const foldedInto = (w: Doc) =>
+        (w.sections.kind || '').toLowerCase() === 'post'
+            ? (w.sections.related || '')
+                  .split('\n')
+                  .map((l) => l.replace(/^[-*]\s*/, '').trim())
+                  .find((slug) => (bySlug[slug]?.sections.kind || '').toLowerCase() === 'article')
+            : undefined;
+    const writing = allWriting.filter((w) => !foldedInto(w));
     const projects = readDir(path.join(docsRoot, 'projects'), PROJECT_META);
     const projectsHe = Object.fromEntries(
         readDir(path.join(docsRoot, 'he', 'projects'), PROJECT_META).map((d) => [d.slug, d])
@@ -285,19 +305,14 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                     card: true,
                     ogType: 'website',
                     jsonLd: siteGraph(siteUrl),
-                    body: shell(
-                        lang,
-                        `<h1>${escapeHtml(HOME_SHARE.titleEn)}</h1>` +
-                            `<p>${escapeHtml(HOME_SHARE.descriptionEn)}</p>` +
-                            `<p>${escapeHtml(PERSON.description)}</p>`
-                    ),
+                    body: '', // filled in once the project pages exist; see homeBody
                 })
             );
         }
 
         // ---- writing -----------------------------------------------------
         // A piece is written in one language; both addresses show it as is.
-        for (const w of writing) {
+        for (const w of allWriting) {
             const contentLang = languageOf(w.body);
             const description = plain(w.sections.summary || w.body);
             const image = firstImage(w.sections.media);
@@ -305,6 +320,11 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
             const original = w.sections.url;
             const isArticle = (w.sections.kind || '').toLowerCase() === 'article';
             const route = `/blog/${w.slug}`;
+            const article = foldedInto(w);
+            const canonical = article
+                ? localPath(languageOf(bySlug[article].body), `/blog/${article}`)
+                : localPath(contentLang, route);
+            const ownUrl = `${siteUrl}${localPath(contentLang, route)}`;
             const footer = original
                 ? `<p>${escapeHtml(copy.publishedOn(source))} <a href="${escapeHtml(original)}">${escapeHtml(original)}</a></p>`
                 : source
@@ -318,17 +338,21 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                     ogType: 'article',
                     published: w.sections.date,
                     section: 'writing',
-                    llms: `- [${w.title}](${url(route)}) (${w.sections.date || 'undated'}): ${description}`,
+                    canonical,
+                    single: true,
+                    llms: article
+                        ? undefined
+                        : `- [${w.title}](${ownUrl}) (${w.sections.date || 'undated'}): ${description}`,
                     jsonLd: {
                         '@context': 'https://schema.org',
                         '@graph': [
                             {
                                 '@type': isArticle ? 'Article' : 'BlogPosting',
-                                '@id': `${url(route)}#post`,
+                                '@id': `${ownUrl}#post`,
                                 headline: w.title.slice(0, 110),
                                 description,
-                                url: url(route),
-                                mainEntityOfPage: url(route),
+                                url: ownUrl,
+                                mainEntityOfPage: `${siteUrl}${canonical}`,
                                 inLanguage: contentLang,
                                 ...(w.sections.date ? { datePublished: w.sections.date } : {}),
                                 ...(image ? { image: absolute(siteUrl, image) } : {}),
@@ -377,7 +401,7 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                             author: person,
                             isPartOf: website,
                             blogPost: writing.map((w) => ({
-                                '@id': `${url(`/blog/${w.slug}`)}#post`,
+                                '@id': `${siteUrl}${localPath(languageOf(w.body), `/blog/${w.slug}`)}#post`,
                             })),
                         },
                         breadcrumbs(siteUrl, lang, [[sections.blog, '/blog']]),
@@ -416,10 +440,17 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
             const image = firstImage(english.sections.media);
             const repo = english.sections.repository;
             const route = `/projects/${p.slug}`;
+            // A project with no Hebrew twin shows its English text at the Hebrew
+            // address too; the English address is the one to index.
+            const canonical = localPath(contentLang, route);
+            const ownUrl = `${siteUrl}${canonical}`;
             const isPersonaKit = p.slug === 'personakit';
+            const isTrinity = p.slug === 'trinity-agent';
             const extraLinks = isPersonaKit
                 ? `<p><a href="${PERSONAKIT.url}">personakit.me</a> · <a href="${PERSONAKIT.docs}">${copy.docs}</a></p>`
-                : '';
+                : isTrinity
+                  ? `<p><a href="${TRINITY.url}">${TRINITY.url.replace('https://', '')}</a></p>`
+                  : '';
             projectPages.push(
                 page(route, {
                     title: p.title,
@@ -427,16 +458,18 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                     image,
                     ogType: 'article',
                     section: 'projects',
-                    llms: `- [${p.title}](${url(route)}): ${description}`,
+                    canonical,
+                    single: !projectsHe[english.slug],
+                    llms: `- [${p.title}](${ownUrl}): ${description}`,
                     jsonLd: {
                         '@context': 'https://schema.org',
                         '@graph': [
                             {
                                 '@type': 'CreativeWork',
-                                '@id': `${url(route)}#project`,
+                                '@id': `${ownUrl}#project`,
                                 name: p.title,
                                 description,
-                                url: url(route),
+                                url: ownUrl,
                                 inLanguage: contentLang,
                                 ...(image ? { image: absolute(siteUrl, image) } : {}),
                                 creator: person,
@@ -453,7 +486,9 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                                     : {}),
                                 ...(isPersonaKit
                                     ? { sameAs: [PERSONAKIT.url, PERSONAKIT.docs] }
-                                    : {}),
+                                    : isTrinity
+                                      ? { sameAs: TRINITY.url }
+                                      : {}),
                             },
                             breadcrumbs(siteUrl, lang, [
                                 [sections.projects, '/projects'],
@@ -492,7 +527,7 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                                 itemListElement: projectPages.map((pg, i) => ({
                                     '@type': 'ListItem',
                                     position: i + 1,
-                                    url: `${siteUrl}${pg.path}`,
+                                    url: `${siteUrl}${pg.canonical ?? pg.path}`,
                                     name: pg.title,
                                 })),
                             },
@@ -554,7 +589,36 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
         }
     }
 
+    const enHome = pages.find((p) => p.path === '/en');
+    if (enHome) enHome.body = homeBody('en', pages);
     return pages;
+};
+
+/**
+ * The home page's text for crawlers: what I do, how to start, and a link to
+ * every project, about and the blog. The Hebrew one goes into index.html itself
+ * (vite.config.mts), which is the page served at /.
+ */
+export const homeBody = (lang: Lang, pages: Page[]) => {
+    const e = escapeHtml;
+    const he = lang === 'he';
+    const projects = pages.filter((p) => p.lang === lang && p.section === 'projects');
+    const sections = SECTION_TITLE[lang];
+    return shell(
+        lang,
+        `<h1>${e(he ? HOME_SHARE.headline : HOME_SHARE.titleEn)}</h1>` +
+            `<p>${e(he ? HOME_SHARE.description : HOME_SHARE.descriptionEn)}</p>` +
+            `<p>${e(he ? PERSON.descriptionHe : PERSON.description)}</p>` +
+            `<p><a href="${PERSON.bookingUrl}">${he ? 'קביעת שיחת היכרות' : 'Book a call'}</a></p>` +
+            `<h2>${e(sections.projects)}</h2><ul>` +
+            projects
+                .map(
+                    (p) =>
+                        `<li><a href="${p.canonical ?? p.path}">${e(p.title)}</a> - ${e(p.description)}</li>`
+                )
+                .join('') +
+            `</ul>`
+    );
 };
 
 /** hreflang for both twins, with Hebrew, the site's default, as x-default. */
@@ -570,6 +634,9 @@ const LOCALE: Record<Lang, string> = { he: 'he_IL', en: 'en_US' };
 /** The <head> block that replaces the one between the seo:head markers. */
 export const headFor = (page: Page, siteUrl: string) => {
     const url = `${siteUrl}${page.path}`;
+    const canonical = `${siteUrl}${page.canonical ?? page.path}`;
+    // hreflang only between real translations, and only on the indexed address.
+    const translated = !page.canonical || page.canonical === page.path;
     // The site name follows the page's language, so the title reads in one script.
     const title = page.docTitle ?? pageTitle(page.title, page.lang);
     const image = absolute(siteUrl, page.image) || `${siteUrl}${SHARE_CARD[page.lang]}`;
@@ -581,8 +648,8 @@ export const headFor = (page: Page, siteUrl: string) => {
         `<meta name="title" content="${e(title)}" />`,
         `<meta name="description" content="${e(page.description)}" />`,
         `<meta name="author" content="${PERSON.name}" />`,
-        `<link rel="canonical" href="${url}" />`,
-        ...hreflang(siteUrl, page.alternates),
+        `<link rel="canonical" href="${canonical}" />`,
+        ...(translated && !isSingleLanguage(page) ? hreflang(siteUrl, page.alternates) : []),
         `<meta property="og:type" content="${page.ogType}" />`,
         `<meta property="og:site_name" content="${SITE_NAME[page.lang]}" />`,
         `<meta property="og:locale" content="${LOCALE[page.lang]}" />`,
@@ -683,22 +750,39 @@ export const renderNotFound = (indexHtml: string, lang: Lang) => {
         .replace(ROOT, () => `<div id="root">${body}</div>`);
 };
 
-/** Every address in both languages, each listing its twin (Google's sitemap hreflang form). */
+/**
+ * A page whose content exists in one language only: a post, or a project with
+ * no Hebrew twin. Its other address shows the same text in the other chrome,
+ * which is not a translation, so it carries no hreflang.
+ */
+const isSingleLanguage = (page: Pick<Page, 'single'>) => Boolean(page.single);
+
+/**
+ * Every indexed address (Google's sitemap hreflang form). Translated pages list
+ * their twin; a single-language page is listed once, at its canonical address.
+ */
 export const sitemap = (siteUrl: string, pages: Page[]) => {
     const today = new Date().toISOString().slice(0, 10);
-    const home: Pick<Page, 'path' | 'alternates' | 'published' | 'section'> = {
+    const home: Pick<
+        Page,
+        'path' | 'alternates' | 'published' | 'section' | 'canonical' | 'single'
+    > = {
         path: '/',
         alternates: twins('/'),
     };
-    const entries = [home, ...pages].map((p) => ({
-        loc: `${siteUrl}${p.path}`,
-        priority: p.path === '/' || p.path === '/en' ? '1.0' : p.section ? '0.6' : '0.8',
-        lastmod: p.published || today,
-        links: [
-            ...LANGS.map((l) => [l, p.alternates[l]] as const),
-            ['x-default', p.alternates.he] as const,
-        ],
-    }));
+    const entries = [home, ...pages]
+        .filter((p) => !p.canonical || p.canonical === p.path)
+        .map((p) => ({
+            loc: `${siteUrl}${p.path}`,
+            priority: p.path === '/' || p.path === '/en' ? '1.0' : p.section ? '0.6' : '0.8',
+            lastmod: p.published || today,
+            links: isSingleLanguage(p)
+                ? []
+                : [
+                      ...LANGS.map((l) => [l, p.alternates[l]] as const),
+                      ['x-default', p.alternates.he] as const,
+                  ],
+        }));
     return [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
@@ -745,8 +829,14 @@ export const llmsTxt = (siteUrl: string, pages: Page[]) =>
         'An engagement starts with a 20 to 30 minute call, then a proposal and a price (fixed or hourly). No published rate.',
         `Book a call: ${PERSON.bookingUrl}. Also open to a full-time role or a contract. Works in Hebrew and English.`,
         '',
+        '## בעברית',
+        '',
+        `${PERSON.nameHe}, ${PERSON.jobTitleHe}. ${PERSON.descriptionHe}`,
+        'עבודה מתחילה בשיחת אבחון קצרה של 20 עד 30 דקות, ואחריה הצעה ומחיר.',
+        '',
         '## Background',
         '',
+        `- ${TRINITY.name}: his own always-on AI assistant, built on the open-source Hermes Agent with PersonaKit as its memory; a private pilot by invitation: ${TRINITY.url}.`,
         `- Creator and lead developer of PersonaKit, open-source memory for AI assistants: ${PERSONAKIT.url} (docs: ${PERSONAKIT.docs}).`,
         '- Aug 2025 to Sep 2026: Founding Engineer, and first employee, at Stealth: a multi-agent system that investigated production incidents from Kubernetes, AWS and observability telemetry.',
         '- 2018 to 2025: frontend and full-stack work, including a sports betting platform at 500K daily users and finance applications for Israeli enterprises.',
@@ -766,7 +856,9 @@ export const llmsTxt = (siteUrl: string, pages: Page[]) =>
         '',
         '## Writing',
         '',
-        ...pages.filter((p) => p.lang === 'en' && p.section === 'writing').map((p) => p.llms!),
+        ...pages
+            .filter((p) => p.lang === 'en' && p.section === 'writing' && p.llms)
+            .map((p) => p.llms!),
         '',
         '## Elsewhere',
         '',

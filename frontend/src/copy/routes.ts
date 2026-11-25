@@ -13,8 +13,8 @@ export type Section = 'about' | 'projects' | 'blog';
 export const SITE_NAME: Localized<string> = { he: 'יניר רוט', en: 'Yanir Rot' };
 
 export const HOME_TITLE: Localized<string> = {
-    he: 'יניר רוט | סוכני AI לעסקים',
-    en: 'Yanir Rot | AI agents for businesses',
+    he: 'יניר רוט | פיתוח סוכני AI ומערכות CRM לעסקים',
+    en: 'Yanir Rot | AI agent and CRM development for businesses',
 };
 
 export const SECTION_TITLE: Localized<Record<Section, string>> = {
