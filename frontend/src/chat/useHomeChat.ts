@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CHAT, ProcessId } from '@/copy/chat';
 import { SheetKey } from '@/content/sheets';
 import { useLang } from '@/i18n/useLang';
-import { chatService, ChatFailure, MAX_HISTORY_SENT } from '@/services/chatService';
+import { chatService, MAX_HISTORY_SENT } from '@/services/chatService';
 import {
     AnswerTrace,
     ChatBlock,
@@ -13,7 +13,8 @@ import {
 } from '@/types/chat';
 import { classify } from '@/chat/intents';
 import { sheetFor } from '@/chat/sheetFor';
-import { FailureCase, failureCase, failureText as describeFailure } from '@/chat/failure';
+import { FailureCase } from '@/chat/failure';
+import { AgentOutcome, foldHandoffs, useAgentSession } from '@/chat/useAgentSession';
 
 /*
  * The home chat as a small, deterministic state machine.
@@ -161,18 +162,12 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
         label: '',
         items: [],
     });
-    const [busy, setBusy] = useState(false);
+    const { busy, closed, handoffOffered, send } = useAgentSession({ getToken, resetToken });
     const [mailWait, setMailWait] = useState<{ sheet: 'mail' | 'ask'; question?: string } | null>(
         null
     );
     const [asked, setAsked] = useState<Set<string>>(new Set());
     const [offline, setOffline] = useState(false);
-    // The day's answers are spent. Nothing typed can be answered until the
-    // budget renews, so the input gives way to the routes to Yanir.
-    const [closed, setClosed] = useState(false);
-    // The offer to talk directly is made at most once per conversation; the
-    // server is told, so it does not offer it again.
-    const [handoffOffered, setHandoffOffered] = useState(false);
 
     // The greeting is always in the page's current language.
     const entries = useMemo(
@@ -205,10 +200,9 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             // open offer to talk directly folds once the conversation moves
             // on: asking on is the same choice as "I'll keep asking the agent".
             // An open process card folds too: anything said answers it.
-            ...prev
-                .filter((e) => e.kind !== 'starters' && e.kind !== 'working')
-                .map((e) => (e.kind === 'answer' && e.handoff ? { ...e, handoff: null } : e))
-                .map((e) => (e.kind === 'pick' && e.open ? { ...e, open: false } : e)),
+            ...foldHandoffs(prev.filter((e) => e.kind !== 'starters' && e.kind !== 'working')).map(
+                (e) => (e.kind === 'pick' && e.open ? { ...e, open: false } : e)
+            ),
             ...items.map((item) => ({ ...item, id: nextId.current++ }) as Entry),
         ]);
     }, []);
@@ -295,27 +289,16 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
 
     /** Folds away the offer to talk directly. Nothing else in the conversation changes. */
     const foldHandoff = useCallback(() => {
-        setEntries((prev) =>
-            prev.map((e) => (e.kind === 'answer' && e.handoff ? { ...e, handoff: null } : e))
-        );
+        setEntries(foldHandoffs);
     }, []);
 
-    /** A send that got no answer: said in the log, and the input closed if the day is spent. */
-    const failed = (failure: ChatFailure, question: string) => {
-        const kind = failureCase(failure);
-        if (kind === 'daily') setClosed(true);
-        push({
-            kind: 'error',
-            text: describeFailure(copy.errors, failure),
-            failure: kind,
-            question,
-        });
-    };
+    /** A send that got no answer, said in the log. */
+    const failed = (outcome: Extract<AgentOutcome, { ok: false }>, question: string) =>
+        push({ kind: 'error', text: outcome.text, failure: outcome.failure, question });
 
     /** A question for the agent: the stations light while it runs, then the answer's drawing opens. */
     const ask = async (text: string, picked?: SheetKey) => {
         if (busy) return;
-        setBusy(true);
         setQuick({ label: '', items: [] });
         push({ kind: 'user', text }, { kind: 'working' });
         const askedNow = markAsked(text);
@@ -340,25 +323,17 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
         const sent = history();
         const turn = entries.filter((e) => e.kind === 'user').length + 1;
         const prior = sent.slice(-MAX_HISTORY_SENT).filter((m) => m.type === 'user').length;
-        const result = await chatService.sendMessage(
-            text,
-            sent,
-            await getToken(),
-            null,
-            handoffOffered,
-            isChatTopic(picked) ? picked : null
-        );
+        const outcome = await send(text, sent, { topic: isChatTopic(picked) ? picked : null });
         window.clearInterval(clock);
-        resetToken();
-        setBusy(false);
 
-        if (!result.success) {
-            failed(result.error, text);
+        if (!outcome.ok) {
+            failed(outcome, text);
             setPlan({ kind: 'base' });
             offerNext(askedNow);
             return;
         }
 
+        const result = outcome.reply;
         const trace = result.trace;
         const fromIndex = result.answered_by === 'index';
         const record: AnswerRecord | null = trace
@@ -395,7 +370,6 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
             sig: result.sig,
             handoff: result.handoff,
         });
-        if (result.handoff) setHandoffOffered(true);
         offerNext(askedNow);
 
         if (fromIndex || !record) {
@@ -417,25 +391,20 @@ export const useHomeChat = ({ getToken, resetToken }: Options) => {
     const sendMail = async (text: string, email: string) => {
         if (busy) return;
         const waiting = mailWait ?? { sheet: 'mail' as const };
-        setBusy(true);
         push({ kind: 'user', text });
         const rest = text.replace(email, '').trim();
         const message = waiting.question
             ? [waiting.question, rest].filter(Boolean).join('\n\n')
             : text;
-        const result = await chatService.sendMessage(
+        const outcome = await send(
             message.includes(email) ? message : `${email} ${message}`,
-            history(),
-            await getToken()
+            history()
         );
-        resetToken();
-        setBusy(false);
-
-        if (!result.success) {
-            failed(result.error, rest || text);
+        if (!outcome.ok) {
+            failed(outcome, rest || text);
             return;
         }
-        if (!result.email_collected) {
+        if (!outcome.reply.email_collected) {
             push({ kind: 'agent', text: copy.invalidEmail, asksEmail: true });
             return;
         }
