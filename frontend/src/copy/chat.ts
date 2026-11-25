@@ -296,7 +296,7 @@ export const CHAT: Localized<ChatCopy> = {
             rateLimited: 'יותר מדי הודעות ברגע אחד. חכו רגע ונסו שוב.',
             rateLimitedIn: 'יותר מדי הודעות ברגע אחד. נסו שוב בעוד {n} שניות.',
             dailyLimit:
-                'הסוכן ענה היום על כל השאלות שהוא יכול. אפשר לקבוע שיחה או לכתוב ליניר במייל, והוא יחזור אליכם.',
+                'הסוכן ענה היום על כל השאלות שהוא יכול. אפשר לקבוע שיחה או לכתוב לי במייל, ואחזור אליכם.',
             failed: 'ההודעה לא נשלחה. נסו לשלוח אותה שוב.',
         },
         compare: {
@@ -594,7 +594,7 @@ export const CHAT: Localized<ChatCopy> = {
             rateLimited: 'Too many messages just now. Give it a moment and try again.',
             rateLimitedIn: 'Too many messages just now. Try again in {n} seconds.',
             dailyLimit:
-                "The agent has answered all it can for today. You can book a call or email Yanir, and he'll get back to you.",
+                "The agent has answered all it can for today. You can book a call or email me, and I'll get back to you.",
             failed: 'That message did not go through. Try sending it again.',
         },
         compare: {
