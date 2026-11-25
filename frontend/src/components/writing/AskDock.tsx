@@ -290,7 +290,9 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
                     return (
                         <div key={turn.id} className="ans">
                             <Tag tone="a">
-                                {turn.fromPiece ? copy.answeredFromPiece : copy.answered}
+                                {turn.fromPiece
+                                    ? copy.answeredFromPiece(entry.kind)
+                                    : copy.answered}
                             </Tag>
                             <Markdown>{turn.text}</Markdown>
                             <WritingBlocks blocks={turn.blocks} />

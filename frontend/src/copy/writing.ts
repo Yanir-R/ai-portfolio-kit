@@ -85,7 +85,7 @@ export interface WritingCopy {
         log: string;
         reading: string;
         answered: string;
-        answeredFromPiece: string;
+        answeredFromPiece: (kind: 'article' | 'post') => string;
         asksFirst: string;
         chips: { sum: string; biz: string; more: string };
         bizQuestion: string;
@@ -206,7 +206,7 @@ export const WRITING: Localized<WritingCopy> = {
             log: 'השיחה על הקטע',
             reading: 'הסוכן קורא את הקטע…',
             answered: 'הסוכן ענה',
-            answeredFromPiece: 'הסוכן ענה · מתוך הקטע הזה',
+            answeredFromPiece: (kind) => `הסוכן ענה · מתוך ${kind === 'post' ? 'הפוסט' : 'המאמר'}`,
             asksFirst: 'הסוכן שואל לפני שהוא עונה',
             chips: {
                 sum: 'סכם לי בשלוש נקודות',
@@ -326,7 +326,7 @@ export const WRITING: Localized<WritingCopy> = {
             log: 'The conversation about this piece',
             reading: 'The agent is reading the piece…',
             answered: 'The agent answered',
-            answeredFromPiece: 'The agent answered · from this piece',
+            answeredFromPiece: (kind) => `The agent answered · from this ${kind}`,
             asksFirst: 'The agent asks before it answers',
             chips: {
                 sum: 'Sum it up in three points',
