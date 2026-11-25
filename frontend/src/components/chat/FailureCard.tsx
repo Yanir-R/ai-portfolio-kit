@@ -28,44 +28,65 @@ export const ContactActions: React.FC<ActionsProps> = ({ lead, question, onRetry
     const { openContact } = useSiteDialogs();
     const cls = (own: Lead) => (lead === own ? 'btn' : 'btn line');
 
-    return (
-        <div className="lim-acts">
-            {lead === 'retry' && onRetry && (
-                <button type="button" className="btn" onClick={onRetry}>
+    // A failed send is transient: "try again" leads on its own line, and the
+    // ways to reach Yanir sit together in one quieter row under it.
+    const routes = lead === 'retry' && onRetry;
+
+    const callButton = (
+        <button
+            type="button"
+            className={cls('call')}
+            onClick={() => openContact({ kind: 'call', topic: question || undefined })}
+        >
+            {routes ? errors.callShort : errors.call}
+        </button>
+    );
+    const mailButton = (
+        <button
+            type="button"
+            className={cls('mail')}
+            onClick={() =>
+                openContact({
+                    kind: 'mail',
+                    topic: question || undefined,
+                    message: question || undefined,
+                })
+            }
+        >
+            {routes ? errors.mailShort : errors.mail}
+        </button>
+    );
+    const whatsappButton = FEATURES.whatsapp && (
+        <button
+            type="button"
+            className={`btn line wa${routes ? ' icon' : ''}`}
+            aria-label={errors.whatsapp}
+            onClick={() => openContact({ kind: 'whatsapp', topic: question || undefined })}
+        >
+            <WhatsAppIcon />
+            <span>{errors.whatsapp}</span>
+        </button>
+    );
+
+    if (routes) {
+        return (
+            <div className="lim-acts">
+                <button type="button" className="btn lim-retry" onClick={onRetry}>
                     {errors.retry}
                 </button>
-            )}
-            <button
-                type="button"
-                className={cls('call')}
-                onClick={() => openContact({ kind: 'call', topic: question || undefined })}
-            >
-                {errors.call}
-            </button>
-            <button
-                type="button"
-                className={cls('mail')}
-                onClick={() =>
-                    openContact({
-                        kind: 'mail',
-                        topic: question || undefined,
-                        message: question || undefined,
-                    })
-                }
-            >
-                {errors.mail}
-            </button>
-            {FEATURES.whatsapp && (
-                <button
-                    type="button"
-                    className="btn line wa"
-                    aria-label={errors.whatsapp}
-                    onClick={() => openContact({ kind: 'whatsapp', topic: question || undefined })}
-                >
-                    <WhatsAppIcon />
-                    <span>{errors.whatsapp}</span>
-                </button>
-            )}
+                <div className="lim-routes">
+                    {callButton}
+                    {mailButton}
+                    {whatsappButton}
+                </div>
+            </div>
+        );
+    }
+    return (
+        <div className="lim-acts">
+            {callButton}
+            {mailButton}
+            {whatsappButton}
         </div>
     );
 };

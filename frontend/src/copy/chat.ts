@@ -96,6 +96,9 @@ export interface ChatCopy {
         retry: string;
         call: string;
         mail: string;
+        /** Shorter labels for the row under a primary "try again". */
+        callShort: string;
+        mailShort: string;
         whatsapp: string;
     };
     compare: {
@@ -312,11 +315,13 @@ export const CHAT: Localized<ChatCopy> = {
             wait: 'רגע, יותר מדי הודעות בבת אחת. אפשר לשאול שוב בעוד {t}, או לדבר איתי ישירות.',
             waitWords: { half: 'חצי דקה', one: 'דקה', two: 'שתי דקות' },
             dailyTitle: 'מכאן אני ממשיך אישית',
-            daily: 'הסוכן ענה היום על כל מה שהוא יכול, ואת השאר עדיף שנעשה יחד: 20 דקות שיחה, ואגיד לכם בכנות אם סוכן שווה את זה אצלכם.',
+            daily: 'הסוכן ענה היום על כל מה שהוא יכול, ואת השאר עדיף שנעשה יחד: שיחה של 20 עד 30 דקות, ואגיד לכם בכנות אם סוכן שווה את זה אצלכם.',
             closed: 'השאלות לסוכן נגמרו להיום. אני זמין ישירות:',
             direct: 'אני זמין ישירות:',
             retry: 'נסו שוב',
-            call: 'קבעו שיחת אבחון, 20 דקות',
+            call: 'קבעו שיחת אבחון',
+            callShort: 'קבעו שיחה',
+            mailShort: 'מייל',
             mail: 'כתבו לי במייל',
             whatsapp: 'וואטסאפ',
         },
@@ -617,11 +622,13 @@ export const CHAT: Localized<ChatCopy> = {
             wait: 'Too many messages at once. You can ask again in {t}, or talk to me directly.',
             waitWords: { half: 'half a minute', one: 'a minute', two: 'two minutes' },
             dailyTitle: "I'll take it from here",
-            daily: "The agent has answered all it can for today, and the rest is better done together: a 20-minute call, and I'll tell you honestly whether an agent is worth it for you.",
+            daily: "The agent has answered all it can for today, and the rest is better done together: a 20 to 30 minute call, and I'll tell you honestly whether an agent is worth it for you.",
             closed: "The agent is done for today. I'm available directly:",
             direct: "I'm available directly:",
             retry: 'Try again',
-            call: 'Book a 20-minute call',
+            call: 'Book a discovery call',
+            callShort: 'Book a call',
+            mailShort: 'Email',
             mail: 'Email me',
             whatsapp: 'WhatsApp',
         },

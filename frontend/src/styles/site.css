@@ -9074,11 +9074,14 @@ video.w-v {
     display: block;
     margin-bottom: 4px;
 }
-.lim-acts {
+.lim-acts,
+.lim-routes {
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
     gap: 8px;
+}
+.lim-acts {
     margin-top: 10px;
 }
 .lim-acts .btn {
@@ -9093,12 +9096,15 @@ video.w-v {
     line-height: 1.2;
     white-space: nowrap;
 }
-.lim-acts .btn.wa {
-    width: 48px;
-    padding: 0;
+.lim-acts .btn.wa,
+.lim-acts .btn.wa:hover {
     background: #fff;
     color: #0e7c4a;
     box-shadow: 3px 3px 0 var(--btn);
+}
+.lim-acts .btn.wa {
+    width: 48px;
+    padding: 0;
 }
 .lim-acts .btn.wa::after {
     content: none;
@@ -9128,13 +9134,24 @@ video.w-v {
         flex-direction: column;
     }
     .lim-acts .btn,
-    .lim-acts .btn.wa {
+    .lim-acts .btn.wa:not(.icon) {
         width: 100%;
+    }
+    .lim-acts .wa:not(.icon) span {
+        display: inline;
+    }
+    .lim-routes {
+        flex-wrap: nowrap;
+    }
+    .lim-routes .btn:not(.wa) {
+        flex: 1;
+        min-width: 0;
+    }
+    .lim-routes .btn.wa.icon {
+        flex: none;
+        width: 48px;
     }
     .m.lim {
         max-width: 100%;
-    }
-    .lim-acts .wa span {
-        display: inline;
     }
 }
