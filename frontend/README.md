@@ -103,6 +103,8 @@ Error: Production build is missing backendUrl and url.
 
 `public/og-image.png` (1200x630) backs `og:image` and `twitter:image`, and `twitter:card` is `summary_large_image`. The source is `tools/og-image.html`; regenerate the PNG with the headless-Chrome command in that file's header whenever the headline changes. `npm run check:preview-copy` fails CI if the standfirst duplicated into `index.html` and `tools/og-image.html` drifts from the page's own copy.
 
+Every post, article and project page has its own card instead: `seo/share.mts` decides what each one says (kind, title with its last clause highlighted, a line on the page, and the page's image or a verbatim `share_quote` from `backend/docs/writing-index.json`), and `npm run build` ends with `scripts/share-cards.mjs`, which draws them with Chromium into `dist/share/` at the paths the pages' `og:image` names. Run `npx playwright install chromium` once before building locally. A title that does not fit even at the smallest size fails the build.
+
 ## Deployment
 
 Pushing to `main` runs `verify` (typecheck, lint, format, preview-copy check, build, `npm audit`) and then deploys to Cloudflare Pages via `wrangler pages deploy`. Pull requests run `verify` only.

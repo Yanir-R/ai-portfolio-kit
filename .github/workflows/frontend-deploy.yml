@@ -63,6 +63,13 @@ jobs:
         # only symptom shows up in someone else's Slack.
         run: npm run check:preview-copy
 
+      # The build ends by drawing every page's link-preview card with
+      # Chromium (scripts/share-cards.mjs), so a card that does not fit fails
+      # the pull request rather than the deploy.
+      - name: Install Chromium for the link-preview cards
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npx playwright install --with-deps chromium
+
       - name: Build
         working-directory: ${{ env.FRONTEND_DIR }}
         # Compile check only — this output is never deployed.
@@ -112,6 +119,10 @@ jobs:
       # it. The one exception is the business WhatsApp number: it is printed on
       # the page but kept out of the public repository, so it comes from the
       # WHATSAPP_NUMBER repository variable. Unset, the WhatsApp routes are off.
+      - name: Install Chromium for the link-preview cards
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npx playwright install --with-deps chromium
+
       - name: Build
         working-directory: ${{ env.FRONTEND_DIR }}
         env:

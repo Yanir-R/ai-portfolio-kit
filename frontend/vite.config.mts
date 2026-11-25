@@ -310,6 +310,13 @@ const emitDiscoveryFiles = (siteUrl: string, backendUrl: string, avatarUrl: stri
             mkdirSync(path.dirname(out), { recursive: true });
             writeFileSync(out, renderPage(indexHtml, page, siteUrl));
         }
+        // The list of link-preview cards to draw. scripts/share-cards.mjs reads
+        // it after this build, draws each card into dist/share and deletes it.
+        mkdirSync(path.join(dir, 'share'), { recursive: true });
+        writeFileSync(
+            path.join(dir, 'share', 'cards.json'),
+            JSON.stringify(pages.flatMap((p) => (p.share ? [p.share] : [])))
+        );
         // One 404 page per language. Pages serves the nearest 404.html with a
         // 404 status, so /en/anything gets the English one. See renderNotFound.
         writeFileSync(path.join(dir, '404.html'), renderNotFound(indexHtml, 'he'));
