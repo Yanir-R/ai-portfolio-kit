@@ -42,7 +42,7 @@ AUTO_REPLY = {
         "subject": "קיבלתי את ההודעה שלכם",
         "title": "קיבלתי את ההודעה",
         "lines": [
-            "שלום, תודה שכתבתם. ההודעה הגיעה אליי, ואני חוזר אליכם אישית במייל הזה.",
+            "שלום, תודה שכתבתם. ההודעה הגיעה אליי, ואני חוזר אליכם במייל הזה.",
             "אם נוח לכם יותר לדבר, אפשר לקבוע כבר עכשיו שיחת אבחון של 20 עד 30 דקות.",
         ],
         "button": "קביעת שיחת אבחון",
@@ -54,7 +54,7 @@ AUTO_REPLY = {
         "subject": "I got your message",
         "title": "I got your message",
         "lines": [
-            "Hi, thanks for writing. Your message reached me, and I'll get back to you personally at this address.",
+            "Hi, thanks for writing. Your message reached me, and I'll get back to you at this address.",
             "If you'd rather talk, you can book a 20 to 30 minute discovery call now.",
         ],
         "button": "Book a discovery call",

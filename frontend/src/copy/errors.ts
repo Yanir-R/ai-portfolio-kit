@@ -43,7 +43,7 @@ export const ERRORS: Localized<ErrorsCopy> = {
             home: 'לעמוד הבית',
             blog: 'לבלוג',
             projects: 'לפרויקטים',
-            talk: 'לדבר עם יניר',
+            talk: 'בואו נדבר',
         },
         loadFailed: {
             title: 'הדף לא נטען.',
@@ -68,7 +68,7 @@ export const ERRORS: Localized<ErrorsCopy> = {
             home: 'Home',
             blog: 'Blog',
             projects: 'Projects',
-            talk: 'Talk to Yanir',
+            talk: "Let's talk",
         },
         loadFailed: {
             title: 'The page did not load.',

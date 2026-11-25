@@ -150,67 +150,67 @@ const SITE_HE: Process = {
     name: 'הצ׳אט באתר',
     steps: [
         {
-            person: ['שולחים ליניר שאלה', 'במייל או בוואטסאפ'],
+            person: ['שולחים לי שאלה', 'במייל או בוואטסאפ'],
             agent: ['שואלים כאן', 'בכל שעה, בעברית או באנגלית'],
             byAgent: false,
         },
         {
-            person: ['יניר רואה אותה', 'כשהוא מתפנה, לפעמים רק למחרת'],
+            person: ['אני רואה אותה', 'כשאני מתפנה, לפעמים רק למחרת'],
             agent: ['בודק את הפנייה', 'אדם ולא רובוט, ובתוך המכסה היומית'],
             byAgent: true,
         },
         {
-            person: ['מחפש בחומרים שלו', 'פרויקטים, מאמרים, קורות חיים'],
+            person: ['אני מחפש בחומרים שלי', 'פרויקטים, מאמרים, קורות חיים'],
             agent: ['בוחר מה לקרוא', 'רק מסמכים שקשורים לשאלה'],
             byAgent: true,
         },
         {
-            person: ['כותב תשובה', 'מאפס, בכל פעם'],
+            person: ['אני כותב תשובה', 'מאפס, בכל פעם'],
             agent: ['קורא ומנסח', 'פנייה אחת למודל, כמה שניות'],
             byAgent: true,
         },
         {
             person: ['אתם מקבלים תשובה', 'אחרי יום, ואז עוד שאלה'],
-            agent: ['אתם ויניר מדברים', 'על הפרויקט שלכם, לא על שאלות חוזרות'],
+            agent: ['אנחנו מדברים', 'על הפרויקט שלכם, לא על שאלות חוזרות'],
             byAgent: false,
         },
     ],
-    today: 'כל שאלה מחכה ליניר, גם כזו שהתשובה עליה כבר כתובה.',
-    withAgent: 'הסוכן עונה על מה שכבר כתוב. מה שהוא לא מצא, הוא אומר, ומפנה ליניר.',
+    today: 'כל שאלה מחכה לי, גם כזו שהתשובה עליה כבר כתובה.',
+    withAgent: 'הסוכן עונה על מה שכבר כתוב. מה שהוא לא מצא, הוא אומר, ומפנה אליי.',
 };
 
 const SITE_EN: Process = {
     name: "The site's chat",
     steps: [
         {
-            person: ['You send Yanir a question', 'By email or WhatsApp'],
+            person: ['You send me a question', 'By email or WhatsApp'],
             agent: ['Ask here', 'Any hour, in Hebrew or English'],
             byAgent: false,
         },
         {
-            person: ['Yanir sees it', "When he's free, sometimes only the next day"],
+            person: ['I see it', "When I'm free, sometimes only the next day"],
             agent: ['Checks the request', 'A person, not a bot, and within the daily quota'],
             byAgent: true,
         },
         {
-            person: ['Searches his materials', 'Projects, articles, CV'],
+            person: ['I search my materials', 'Projects, articles, CV'],
             agent: ['Chooses what to read', 'Only documents related to the question'],
             byAgent: true,
         },
         {
-            person: ['Writes an answer', 'From scratch, every time'],
+            person: ['I write an answer', 'From scratch, every time'],
             agent: ['Reads and writes', 'One call to the model, a few seconds'],
             byAgent: true,
         },
         {
             person: ['You get an answer', 'A day later, and then another question'],
-            agent: ['You and Yanir talk', 'About your project, not about repeat questions'],
+            agent: ['We talk', 'About your project, not about repeat questions'],
             byAgent: false,
         },
     ],
-    today: 'Every question waits for Yanir, even one whose answer is already written.',
+    today: 'Every question waits for me, even one whose answer is already written.',
     withAgent:
-        "The agent answers what's already written. What it didn't find, it says, and points you to Yanir.",
+        "The agent answers what's already written. What it didn't find, it says, and points you to me.",
 };
 
 export const CHAT: Localized<ChatCopy> = {
@@ -469,13 +469,13 @@ export const CHAT: Localized<ChatCopy> = {
             },
             ready: {
                 title: 'תשובה מוכנה: המסלול הקצר',
-                cap: 'יניר כתב אותה מראש, והמודל לא הופעל.',
+                cap: 'כתבתי אותה מראש, והמודל לא הופעל.',
                 skipped: 'דילוג',
                 skipNote: 'לא נדרש לתשובה מוכנה',
                 who: 'מוכן',
                 done: 'תשובה מוכנה מראש',
                 note: 'בלי AI, ובלי לגעת במכסה',
-                sum: 'הגיעה מיד, מתוכן שיניר כתב. לא כל שאלה צריכה AI.',
+                sum: 'הגיעה מיד, מתוכן שכתבתי. לא כל שאלה צריכה AI.',
             },
             fromAnswer: 'נוצר מהתשובה הזו',
             fromChat: 'נוצר מהשיחה הזו',
@@ -491,7 +491,7 @@ export const CHAT: Localized<ChatCopy> = {
             noDocs: 'שום מסמך לא עוסק בזה במיוחד',
             modelNote: 'פנייה אחת למודל, והתשובה נכתבה רק מהמסמכים האלה',
             sumH: 'התשובה הזו:',
-            sumFrom: (n) => `נכתבה מתוך ${n} מסמכים של יניר. המודל לא ראה שום דבר אחר.`,
+            sumFrom: (n) => `נכתבה מתוך ${n} מסמכים שכתבתי. המודל לא ראה שום דבר אחר.`,
             sumDeclined: 'הסוכן אמר שהוא לא יודע, במקום להמציא.',
             trail: (n, sec) => `קרא ${n} מסמכים · ${sec} שניות`,
             trailNone: (sec) => `לא נמצא מסמך מתאים · ${sec} שניות`,
@@ -777,13 +777,13 @@ export const CHAT: Localized<ChatCopy> = {
             },
             ready: {
                 title: 'Ready answer: the short path',
-                cap: 'Yanir wrote it ahead of time, and the model was not called.',
+                cap: 'I wrote it ahead of time, and the model was not called.',
                 skipped: 'Skipped',
                 skipNote: 'Not needed for a ready answer',
                 who: 'Ready',
                 done: 'Answer prepared in advance',
                 note: 'No AI, and no quota used',
-                sum: 'It arrived at once, from content Yanir wrote. Not every question needs AI.',
+                sum: 'It arrived at once, from content I wrote. Not every question needs AI.',
             },
             fromAnswer: 'Made from this answer',
             fromChat: 'Made from this chat',
@@ -801,7 +801,7 @@ export const CHAT: Localized<ChatCopy> = {
                 'One call to the model, and the answer was written only from these documents',
             sumH: 'This answer:',
             sumFrom: (n) =>
-                `was written from ${n} of Yanir's documents. The model saw nothing else.`,
+                `was written from ${n} of my documents. The model saw nothing else.`,
             sumDeclined: "The agent said it doesn't know, instead of making something up.",
             trail: (n, sec) => `Read ${n} documents · ${sec} seconds`,
             trailNone: (sec) => `No matching document found · ${sec} seconds`,
