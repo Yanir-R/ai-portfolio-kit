@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "composite": true,
+        "noEmit": true,
         "skipLibCheck": true,
         "module": "ESNext",
         "moduleResolution": "bundler",
@@ -8,5 +8,11 @@
         "lib": ["ES2022"],
         "types": ["node"]
     },
-    "include": ["vite.config.mts", "site.config.ts", "seo"]
+    "include": [
+        "vite.config.mts",
+        "site.config.ts",
+        "seo",
+        "src/copy/routes.ts",
+        "src/i18n/lang.ts"
+    ]
 }

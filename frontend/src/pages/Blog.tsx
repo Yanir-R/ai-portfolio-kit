@@ -1,288 +1,504 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router';
-import { SeriesCard, TopicChips } from '@/components/writing/WritingBlocks';
-import { stripWritingMetadata, writingService } from '@/services/writingService';
-import { sourceLabel, WritingIndex, WRITING_KIND_LABEL, WRITING_KIND_STYLE } from '@/types/writing';
-import { formatIsoDate } from '@/utils/date';
+import React, { useMemo, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import { WRITING } from '@/copy/writing';
+import { Arrow } from '@/components/site/Arrow';
+import HowPanel from '@/components/writing/HowPanel';
+import PostArticle from '@/components/writing/PostArticle';
+import SidePanel from '@/components/writing/SidePanel';
+import { Cover, EntryTitle, PlayMark, Tag, useVideoLabel } from '@/components/writing/parts';
+import { useWritingIndexState } from '@/hooks/useWritingIndex';
+import { useLang } from '@/i18n/useLang';
+import { sourceLabel, WritingEntry, WritingIndex, WritingSeries } from '@/types/writing';
+import { formatDate } from '@/utils/date';
+import {
+    isEnglishTitle,
+    longVersionOf,
+    readMinutes,
+    searchTextOf,
+    summaryOf,
+} from '@/utils/writing';
 
 /*
- * The writing index.
- *
- * A dated list rather than a grid of cards. These pieces were published in two
- * places and two lengths, and the thing a reader needs first is when it was
- * written and how long it is - not a thumbnail. Date, kind, title, one line.
- *
- * Articles and posts share the list on purpose. Separating them into sections
- * would ask the reader to care about where something was published before they
- * know whether it interests them, and the `kind` chip already answers that for
- * anyone who does.
+ * The blog: a search and topic index beside three sections (articles, the
+ * series, and posts by year). Filters live in the address, so a chat card can
+ * link to "everything on memory" and the link can be shared. A post opens in
+ * a panel over the list (Back closes it); an article opens its own page.
  */
-const Blog: React.FC = () => {
-    const [index, setIndex] = useState<WritingIndex | null>(null);
-    const [params, setParams] = useSearchParams();
-    const [query, setQuery] = useState('');
-    const [showAllTopics, setShowAllTopics] = useState(false);
-    const topicId = params.get('topic');
-    const seriesId = params.get('series');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        let cancelled = false;
+type Kind = WritingEntry['kind'];
+const PARAM = { topic: 'topic', kind: 'kind', series: 'series', read: 'read' } as const;
 
-        const fetchWriting = async () => {
-            try {
-                const data = await writingService.getIndex();
-                if (!cancelled) setIndex(data);
-            } catch (err) {
-                if (!cancelled) {
-                    setError(err instanceof Error ? err.message : 'The request failed.');
-                }
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        };
+const byDate = (a: WritingEntry, b: WritingEntry) => b.date.localeCompare(a.date);
 
-        fetchWriting();
-
-        return () => {
-            cancelled = true;
-        };
-    }, []);
-
-    const topic = index?.overview.topics.find((t) => t.id === topicId);
-    const series = index?.overview.series.find((s) => s.id === seriesId);
-
-    /*
-     * Filtered by the topic or series in the address, so a chat card can link
-     * to "everything on memory" and the link can be shared. The search reads
-     * the full text, not just the titles, because a reader looking for "MCP"
-     * means the posts that discuss it.
-     */
-    const entries = useMemo(() => {
-        if (!index) return [];
-        let list = index.entries;
-        if (topic) list = list.filter((e) => e.topics?.includes(topic.id));
-        if (series) {
-            const order = series.parts.map((p) => p.slug);
-            list = list
-                .filter((e) => order.includes(e.slug))
-                .sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
-        }
-        const needle = query.trim().toLowerCase();
-        if (needle) {
-            list = list.filter((e) =>
-                [e.title, e.summary ?? '', e.summary_he ?? '', stripWritingMetadata(e.content)]
-                    .join('\n')
-                    .toLowerCase()
-                    .includes(needle)
-            );
-        }
-        return list;
-    }, [index, topic, series, query]);
-
-    const clearFilter = () => setParams({});
-
+/** The index beside the list: search, topics ranked by how much was written, and a kind switch. */
+const Filters: React.FC<{
+    index: WritingIndex;
+    query: string;
+    onQuery: (q: string) => void;
+    topic: string;
+    kind: string;
+    onToggle: (param: 'topic' | 'kind', value: string) => void;
+    shown: number;
+    onClear: () => void;
+}> = ({ index, query, onQuery, topic, kind, onToggle, shown, onClear }) => {
+    const { lang, t } = useLang();
+    const copy = t(WRITING);
+    const max = Math.max(1, ...index.overview.topics.map((tp) => tp.count));
+    const counts = (k: Kind) => index.entries.filter((e) => e.kind === k).length;
+    const filtered = !!(query || topic || kind);
     return (
-        <div className="px-4 pt-8 pb-16 mx-auto max-w-3xl sm:pt-12">
-            <header className="max-w-2xl">
-                <p className="label">Blog</p>
-                <h1 className="text-balance mt-3 text-2xl font-semibold tracking-tight sm:text-3xl text-content">
-                    Things I worked out in public.
-                </h1>
-                <p className="mt-3 leading-relaxed text-muted">
-                    Published on LinkedIn, Medium and my workplace's blog, reproduced here in full
-                    with a link to each original. Every piece is also part of what the assistant on
-                    the home page answers from, so you can read it here or ask about it there.
-                </p>
-            </header>
-
-            {loading && (
-                <p className="mt-10 font-mono text-sm text-muted" role="status">
-                    Loading<span className="animate-blink">…</span>
-                </p>
-            )}
-
-            {error && (
-                <div className="mt-10 max-w-xl">
-                    <h2 className="text-lg font-semibold tracking-tight text-content">
-                        The writing list could not load.
-                    </h2>
-                    <p className="mt-2 leading-relaxed text-muted">
-                        The backend did not respond. Reload, or ask the assistant on the home page
-                        about any of it.
-                    </p>
-                    <p className="mt-2 font-mono text-xs break-words text-muted/70">{error}</p>
-                </div>
-            )}
-
-            {index && (
-                <div className="mt-8">
-                    <label className="block">
-                        <span className="sr-only">Search the blog</span>
+        <aside className="w-idx" aria-label={copy.blog.searchLabel}>
+            <div className="w-find">
+                <form onSubmit={(e) => e.preventDefault()}>
+                    <span className="fx">
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#0C1A44"
+                            strokeWidth="2.6"
+                            strokeLinecap="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="11" cy="11" r="7" />
+                            <path d="M20 20l-3.6-3.6" />
+                        </svg>
                         <input
+                            id="q"
                             type="search"
-                            dir="auto"
+                            autoComplete="off"
+                            spellCheck={false}
                             value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Search the blog"
-                            className="py-2 px-3 w-full text-base rounded border transition-colors bg-ink-700 text-content placeholder-muted border-border focus:outline-none focus:border-caution focus-visible:ring-2 focus-visible:ring-caution/60"
+                            onChange={(e) => onQuery(e.target.value)}
+                            aria-label={copy.blog.searchLabel}
+                            placeholder={copy.blog.searchLabel}
                         />
-                    </label>
-                    {/* Four first, so on a phone the chips do not push the
-                        first post below the fold; the rest behind a toggle.
-                        A topic picked from the address is always shown. */}
-                    <div className="mt-4">
-                        <TopicChips
-                            index={index}
-                            lang="en"
-                            ids={
-                                showAllTopics
-                                    ? undefined
-                                    : index.overview.topics
-                                          .filter((t, i) => i < 4 || t.id === topicId)
-                                          .map((t) => t.id)
-                            }
-                        />
-                        {index.overview.topics.length > 4 && (
+                        {query && (
                             <button
                                 type="button"
-                                onClick={() => setShowAllTopics((open) => !open)}
-                                aria-expanded={showAllTopics}
-                                className="mt-2 font-mono text-xs underline rounded transition-colors text-muted underline-offset-4 decoration-border hover:text-content focus:outline-none focus-visible:ring-2 focus-visible:ring-caution"
+                                id="qx"
+                                aria-label={copy.blog.clearSearch}
+                                onClick={() => onQuery('')}
                             >
-                                {showAllTopics
-                                    ? 'Fewer topics'
-                                    : `${index.overview.topics.length - 4} more topics`}
+                                ✕
                             </button>
                         )}
-                    </div>
-                    {(topic || series) && (
-                        <p className="flex flex-wrap gap-x-3 gap-y-1 items-baseline mt-4 font-mono text-xs text-muted">
-                            <span>
-                                Showing:{' '}
-                                <span className="text-content">
-                                    {topic ? topic.en : series?.title}
-                                </span>{' '}
-                                ({entries.length})
-                            </span>
-                            <button
-                                type="button"
-                                onClick={clearFilter}
-                                className="underline rounded transition-colors underline-offset-4 decoration-border hover:text-content focus:outline-none focus-visible:ring-2 focus-visible:ring-caution"
-                            >
-                                Show everything
-                            </button>
-                        </p>
-                    )}
-                    {series && (
-                        <SeriesCard
-                            series={series}
-                            lang="en"
-                            className="p-4 mt-5 rounded border border-border bg-ink-800"
-                        />
-                    )}
-                    {!topic && !series && !query && index.overview.series[0] && (
-                        <SeriesCard
-                            series={index.overview.series[0]}
-                            lang="en"
-                            className="p-4 mt-6 rounded border border-border bg-ink-800"
-                        />
-                    )}
-                </div>
-            )}
+                    </span>
+                </form>
+            </div>
+            <h2>{copy.blog.topicsTitle}</h2>
+            <div className="tl">
+                {index.overview.topics.map((tp) => (
+                    <button
+                        key={tp.id}
+                        type="button"
+                        aria-pressed={topic === tp.id}
+                        style={
+                            {
+                                '--w': `${Math.round((tp.count / max) * 100)}%`,
+                            } as React.CSSProperties
+                        }
+                        onClick={() => onToggle('topic', tp.id)}
+                    >
+                        <span>{tp[lang]}</span>
+                        <b>{tp.count}</b>
+                        <i />
+                    </button>
+                ))}
+            </div>
+            <div className="kd">
+                {(['article', 'post'] as const).map((k) => (
+                    <button
+                        key={k}
+                        type="button"
+                        aria-pressed={kind === k}
+                        onClick={() => onToggle('kind', k)}
+                    >
+                        {copy.blog.kinds[k]} <b>{counts(k)}</b>
+                    </button>
+                ))}
+            </div>
+            <p className="st">
+                <b aria-live="polite">
+                    {filtered
+                        ? copy.blog.showing(shown, index.entries.length)
+                        : copy.blog.all(index.entries.length)}
+                </b>
+                {filtered && (
+                    <button type="button" id="clr" onClick={onClear}>
+                        {copy.blog.clear}
+                    </button>
+                )}
+            </p>
+        </aside>
+    );
+};
 
-            {!loading && !error && index && entries.length === 0 && (
-                <div className="mt-10 leading-relaxed text-muted">
-                    {query ? (
-                        <p>
-                            Nothing here mentions “{query}”.{' '}
-                            <Link
-                                to="/"
-                                className="underline transition-colors text-content hover:text-signal underline-offset-4 decoration-border"
-                            >
-                                Ask the assistant about it
-                            </Link>
-                            .
-                        </p>
-                    ) : (
-                        <p>Nothing published yet.</p>
-                    )}
-                </div>
-            )}
+const ArticleCard: React.FC<{ entry: WritingEntry; index: WritingIndex }> = ({ entry, index }) => {
+    const { lang, t, to } = useLang();
+    const copy = t(WRITING);
+    return (
+        <article className="w-art">
+            <Cover entry={entry} />
+            <div className="mt">
+                <Tag tone="a">{copy.tags.article}</Tag>
+                <Tag tone="n">{sourceLabel(entry.source, lang)}</Tag>
+                {isEnglishTitle(entry) && lang === 'he' && <Tag tone="n">{copy.tags.english}</Tag>}
+                <time dateTime={entry.date}>{formatDate(entry.date, lang)}</time>
+            </div>
+            <EntryTitle entry={entry} as="h3" />
+            {summaryOf(entry, lang) && <p>{summaryOf(entry, lang)}</p>}
+            <TopicTags entry={entry} index={index} className="tp" />
+            <div className="ft">
+                <span className="rd">{copy.readMinutes(readMinutes(entry))}</span>
+                <Link className="w-out" to={to(`/blog/${entry.slug}`)}>
+                    <Arrow>{copy.read}</Arrow>
+                </Link>
+            </div>
+        </article>
+    );
+};
 
-            {!loading && !error && entries.length > 0 && (
-                <ul className="mt-10 border-t border-border">
-                    {entries.map((entry) => (
-                        <li key={entry.slug} className="border-b border-border">
-                            <Link
-                                to={`/blog/${entry.slug}`}
-                                className="grid gap-1.5 py-5 transition-colors duration-200 group sm:grid-cols-[7.5rem_1fr] sm:gap-x-5"
-                            >
-                                {/* Date and kind both live in the meta column, so
-                                    the badge starts at the same x on every row.
-                                    Inline after the title its position would be
-                                    decided by where the title happened to stop,
-                                    and a chip that moves per row reads as an
-                                    accident rather than a column.
-
-                                    Stacked rather than side by side because the
-                                    date and the chip together are wider than the
-                                    7.5rem column; on mobile the grid collapses
-                                    and they sit on one line, where there is room. */}
-                                <div className="flex gap-2.5 items-center sm:flex-col sm:gap-1.5 sm:items-start">
-                                    {/* A minimum width only while the two sit on
-                                        one row: "6 Apr 2026" is narrower than
-                                        "24 Jun 2026", which would nudge the
-                                        badge a few pixels per card. Released
-                                        from `sm`, where they stack and the
-                                        date's width stops mattering. */}
-                                    <time
-                                        dateTime={entry.date}
-                                        className="min-w-[5.5rem] font-mono text-xs whitespace-nowrap sm:min-w-0 text-muted"
-                                    >
-                                        {formatIsoDate(entry.date, 'short')}
-                                    </time>
-                                    <span
-                                        className={`rounded border px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider ${
-                                            WRITING_KIND_STYLE[entry.kind] ??
-                                            'text-muted border-border'
-                                        }`}
-                                    >
-                                        {WRITING_KIND_LABEL[entry.kind] ?? entry.kind}
-                                    </span>
-                                </div>
-
-                                <div className="min-w-0">
-                                    <h2
-                                        dir="auto"
-                                        className="text-lg font-semibold leading-snug transition-colors duration-200 text-content group-hover:text-signal"
-                                    >
-                                        {entry.title}
-                                    </h2>
-
-                                    {entry.summary && (
-                                        <p
-                                            dir="auto"
-                                            className="mt-1.5 text-sm leading-relaxed text-muted"
-                                        >
-                                            {entry.summary}
-                                        </p>
-                                    )}
-
-                                    <p className="mt-2 font-mono text-[0.68rem] text-muted/70">
-                                        {sourceLabel(entry.source, 'en')}
-                                        {entry.series && ` · ${entry.series.label}`}
-                                        {entry.media_items?.some((m) => m.kind !== 'image') &&
-                                            ' · video'}
-                                    </p>
-                                </div>
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
+const TopicTags: React.FC<{
+    entry: WritingEntry;
+    index: WritingIndex;
+    className: string;
+    children?: React.ReactNode;
+}> = ({ entry, index, className, children }) => {
+    const { lang } = useLang();
+    return (
+        <div className={className}>
+            {children}
+            {(entry.topics ?? []).flatMap((id) =>
+                index.overview.topics
+                    .filter((tp) => tp.id === id)
+                    .map((tp) => (
+                        <Tag key={tp.id} tone="i">
+                            {tp[lang]}
+                        </Tag>
+                    ))
             )}
         </div>
+    );
+};
+
+/** A series: its header and video, then each part as a small card. */
+const SeriesBlock: React.FC<{
+    series: WritingSeries;
+    parts: WritingEntry[];
+    onRead: (slug: string) => void;
+}> = ({ series, parts, onRead }) => {
+    const { lang, t } = useLang();
+    const copy = t(WRITING);
+    const videoLabel = useVideoLabel();
+    const [playing, setPlaying] = useState(false);
+    const video = series.video;
+    const label = (slug: string) => {
+        const part = series.parts.find((p) => p.slug === slug);
+        return part ? (lang === 'he' ? part.label_he : part.label) : '';
+    };
+    return (
+        <div className="w-ser">
+            <div className="sh">
+                <div className="hd">
+                    <Tag tone="a">{copy.tags.series}</Tag>
+                    <Tag tone="n">{copy.posts(series.count)}</Tag>
+                    {parts[0] && <Tag tone="n">{sourceLabel(parts[0].source, lang)}</Tag>}
+                    <b>{lang === 'he' ? series.title_he : series.title}</b>
+                    <p>
+                        {lang === 'he' ? series.summary_he : series.summary}{' '}
+                        {(series.links ?? []).map((href) => (
+                            <React.Fragment key={href}>
+                                {' '}
+                                <a className="w-out" href={href} target="_blank" rel="noopener">
+                                    {href.replace(/^https:\/\//, '')} ↗
+                                </a>
+                            </React.Fragment>
+                        ))}
+                    </p>
+                </div>
+                {video &&
+                    (playing ? (
+                        <video
+                            className="w-v"
+                            src={video.src}
+                            poster={video.poster}
+                            controls
+                            autoPlay
+                            playsInline
+                        />
+                    ) : (
+                        <button
+                            type="button"
+                            className="w-vid"
+                            aria-label={`${copy.blog.series.playLabel}: ${lang === 'he' ? series.title_he : series.title}`}
+                            onClick={() => setPlaying(true)}
+                        >
+                            <img src={video.poster} alt="" loading="lazy" />
+                            <PlayMark
+                                label={`${copy.blog.series.watch} · ${videoLabel(video).split(' · ')[1] ?? ''}`}
+                            />
+                        </button>
+                    ))}
+            </div>
+            <div className="g">
+                {parts.map((entry) => (
+                    <a
+                        key={entry.slug}
+                        className="w-ep"
+                        href={`?${PARAM.read}=${entry.slug}`}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            onRead(entry.slug);
+                        }}
+                    >
+                        <Cover entry={entry} />
+                        <span className="k">
+                            <Tag tone="a">{label(entry.slug)}</Tag>
+                            <time dateTime={entry.date}>{formatDate(entry.date, lang)}</time>
+                        </span>
+                        <EntryTitle entry={entry} />
+                        {summaryOf(entry, lang) && <p>{summaryOf(entry, lang)}</p>}
+                    </a>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const PostRow: React.FC<{
+    entry: WritingEntry;
+    index: WritingIndex;
+    onRead: (slug: string) => void;
+}> = ({ entry, index, onRead }) => {
+    const { lang, t, to } = useLang();
+    const copy = t(WRITING);
+    const long = longVersionOf(entry, index);
+    const hasCover = !!(entry.media_items?.length || entry.media?.length);
+    const read = (e: React.MouseEvent) => {
+        e.preventDefault();
+        onRead(entry.slug);
+    };
+    const href = `?${PARAM.read}=${entry.slug}`;
+    return (
+        <div className={hasCover ? 'w-row hi' : 'w-row'}>
+            <time dateTime={entry.date}>{formatDate(entry.date, lang)}</time>
+            <div>
+                <a className="w-lnk" href={href} onClick={read}>
+                    <EntryTitle entry={entry} />
+                </a>
+                {summaryOf(entry, lang) && <p>{summaryOf(entry, lang)}</p>}
+                <TopicTags entry={entry} index={index} className="tg2">
+                    <Tag tone="n">{sourceLabel(entry.source, lang)}</Tag>
+                    {long && (
+                        <span className="rel">
+                            {copy.blog.shortOf}{' '}
+                            <Link to={to(`/blog/${long.slug}`)}>{long.title}</Link>
+                        </span>
+                    )}
+                </TopicTags>
+            </div>
+            {hasCover && <Cover entry={entry} />}
+            <a className="w-out" href={href} onClick={read}>
+                <Arrow>{copy.read}</Arrow>
+            </a>
+        </div>
+    );
+};
+
+const Blog: React.FC = () => {
+    const { t, to } = useLang();
+    const copy = t(WRITING);
+    const navigate = useNavigate();
+    const { index, failed } = useWritingIndexState();
+    const [params, setParams] = useSearchParams();
+    const [query, setQuery] = useState('');
+    const [howOpen, setHowOpen] = useState(false);
+    const topic = params.get(PARAM.topic) ?? '';
+    const kind = params.get(PARAM.kind) ?? '';
+    const seriesId = params.get(PARAM.series) ?? '';
+    const reading = params.get(PARAM.read) ?? '';
+
+    const setParam = (name: string, value: string, push = false) => {
+        const next = new URLSearchParams(params);
+        if (value) next.set(name, value);
+        else next.delete(name);
+        setParams(next, { replace: !push, preventScrollReset: true });
+    };
+    const toggle = (name: 'topic' | 'kind', value: string) =>
+        setParam(name, params.get(name) === value ? '' : value);
+    const clear = () => {
+        setQuery('');
+        setParams({}, { replace: true, preventScrollReset: true });
+    };
+
+    const shown = useMemo(() => {
+        if (!index) return [];
+        const needle = query.trim().toLowerCase();
+        const series = index.overview.series.find((s) => s.id === seriesId);
+        return [...index.entries]
+            .sort(byDate)
+            .filter(
+                (e) =>
+                    (!kind || e.kind === kind) &&
+                    (!topic || e.topics?.includes(topic)) &&
+                    (!series || series.parts.some((p) => p.slug === e.slug)) &&
+                    (!needle || searchTextOf(e).includes(needle))
+            );
+    }, [index, query, kind, topic, seriesId]);
+
+    if (!index)
+        return failed ? (
+            <div className="w-hero">
+                <div>
+                    <span className="tagline">{copy.blog.tagline}</span>
+                    <h1>{copy.blog.failed.title}</h1>
+                </div>
+                <p>{copy.blog.failed.text}</p>
+            </div>
+        ) : (
+            <p className="state-note" role="status">
+                {copy.blog.loading}
+            </p>
+        );
+
+    const inSeries = new Set(index.overview.series.flatMap((s) => s.parts.map((p) => p.slug)));
+    const articles = shown.filter((e) => e.kind === 'article');
+    const seriesShown = index.overview.series
+        .map((s) => ({
+            series: s,
+            parts: shown.filter((e) => s.parts.some((p) => p.slug === e.slug)),
+        }))
+        .filter((s) => s.parts.length > 0);
+    const posts = shown.filter((e) => e.kind === 'post' && !inSeries.has(e.slug));
+    const years = [...new Set(posts.map((e) => e.date.slice(0, 4)))];
+    const openPost = (slug: string) => setParam(PARAM.read, slug, true);
+    const reader = reading ? index.bySlug[reading] : undefined;
+    const q = query.trim();
+
+    return (
+        <>
+            <div className="w-hero">
+                <div>
+                    <span className="tagline">{copy.blog.tagline}</span>
+                    <h1>
+                        {copy.blog.title} <em>{copy.blog.em}</em>
+                    </h1>
+                </div>
+                <p>
+                    {copy.blog.lead}{' '}
+                    <button type="button" className="hw" onClick={() => setHowOpen(true)}>
+                        {copy.blog.how}
+                    </button>
+                </p>
+            </div>
+            <div className="w-lay">
+                <Filters
+                    index={index}
+                    query={query}
+                    onQuery={setQuery}
+                    topic={topic}
+                    kind={kind}
+                    onToggle={toggle}
+                    shown={shown.length}
+                    onClear={clear}
+                />
+                <div className="w-main">
+                    {articles.length > 0 && (
+                        <div id="sec-a">
+                            <div className="w-sec">
+                                <h2>{copy.blog.articles.title}</h2>
+                                <span>{copy.blog.articles.note}</span>
+                            </div>
+                            <div className="w-arts">
+                                {articles.map((entry) => (
+                                    <ArticleCard key={entry.slug} entry={entry} index={index} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {seriesShown.length > 0 && (
+                        <div id="sec-s">
+                            <div className="w-sec">
+                                <h2>{copy.blog.series.title}</h2>
+                                <span>{copy.blog.series.note}</span>
+                            </div>
+                            {seriesShown.map(({ series, parts }) => (
+                                <SeriesBlock
+                                    key={series.id}
+                                    series={series}
+                                    parts={parts}
+                                    onRead={openPost}
+                                />
+                            ))}
+                        </div>
+                    )}
+                    {posts.length > 0 && (
+                        <div id="sec-p">
+                            <div className="w-sec">
+                                <h2>{copy.blog.postsSection.title}</h2>
+                                <span>{copy.blog.postsSection.note}</span>
+                            </div>
+                            <div className="w-list">
+                                {years.map((year) => (
+                                    <React.Fragment key={year}>
+                                        <div className="w-yr">{year}</div>
+                                        {posts
+                                            .filter((e) => e.date.startsWith(year))
+                                            .map((entry) => (
+                                                <PostRow
+                                                    key={entry.slug}
+                                                    entry={entry}
+                                                    index={index}
+                                                    onRead={openPost}
+                                                />
+                                            ))}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {shown.length === 0 && (
+                        <div className="w-none">
+                            <h3>
+                                {q ? copy.blog.none.searchTitle(q) : copy.blog.none.filterTitle}
+                            </h3>
+                            <p>{q ? copy.blog.none.searchText : copy.blog.none.filterText}</p>
+                            <div className="r">
+                                <button
+                                    type="button"
+                                    className="go"
+                                    onClick={() =>
+                                        navigate(to('/'), { state: { ask: q || undefined } })
+                                    }
+                                >
+                                    {q ? copy.blog.none.askAbout(q) : copy.blog.none.ask}
+                                </button>
+                                <button type="button" className="lk" onClick={clear}>
+                                    {copy.blog.none.clear}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {reader && (
+                <SidePanel
+                    label={copy.panel.label}
+                    closeLabel={copy.panel.close}
+                    onClose={() => setParam(PARAM.read, '')}
+                    header={
+                        <Link to={to(`/blog/${reader.slug}`)}>
+                            <Arrow>{copy.panel.full}</Arrow>
+                        </Link>
+                    }
+                >
+                    <PostArticle key={reader.slug} entry={reader} index={index} />
+                </SidePanel>
+            )}
+            {howOpen && <HowPanel onClose={() => setHowOpen(false)} />}
+        </>
     );
 };
 

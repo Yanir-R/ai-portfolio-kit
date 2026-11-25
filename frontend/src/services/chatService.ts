@@ -38,6 +38,31 @@ export const shownSlugs = (history: ChatMessage[]): string[] => {
     return [...new Set(slugs)].slice(-40);
 };
 
+/*
+ * Why a send failed, as a code rather than a sentence: the panel words it in
+ * the page's language. `retryAfter` is the backend's own Retry-After, so a
+ * visitor is told the real wait rather than "a moment".
+ */
+export type ChatFailure =
+    { code: 'too_long' } | { code: 'rate_limited'; retryAfter?: number } | { code: 'failed' };
+
+const toChatFailure = (error: unknown): ChatFailure => {
+    console.error('Chat request failed:', error);
+    if (axios.isAxiosError(error)) {
+        if (error.response?.status === 422) return { code: 'too_long' };
+        if (error.response?.status === 429) {
+            const retryAfter = Number(error.response.headers?.['retry-after']);
+            return {
+                code: 'rate_limited',
+                retryAfter: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
+            };
+        }
+    }
+    return { code: 'failed' };
+};
+
+export type ChatResult = Awaited<ReturnType<typeof chatService.sendMessage>>;
+
 export const chatService = {
     /** Whether the backend has content to ground its answers in. */
     checkKnowledge: async () => {
@@ -81,7 +106,7 @@ export const chatService = {
             }
 
             return {
-                success: true,
+                success: true as const,
                 response: response.data.response,
                 is_email_collection: response.data.is_email_collection || false,
                 email_collected: response.data.email_collected || false,
@@ -94,32 +119,7 @@ export const chatService = {
                 language: response.data.language ?? null,
             };
         } catch (error) {
-            let errorMessage = 'Failed to get response from server';
-
-            if (axios.isAxiosError(error)) {
-                if (error.response?.status === 404) {
-                    errorMessage =
-                        "I couldn't find any content in the available files to answer your question.";
-                } else if (error.response?.status === 422) {
-                    errorMessage = 'That message was too long to send. Try a shorter one.';
-                } else if (error.response?.status === 429) {
-                    // The backend already computed exactly how long the window has
-                    // left and returned it as Retry-After. Telling the visitor "a
-                    // moment" while holding the real number helps nobody.
-                    const retryAfter = Number(error.response.headers?.['retry-after']);
-                    errorMessage =
-                        Number.isFinite(retryAfter) && retryAfter > 0
-                            ? `Too many messages just now. Try again in ${retryAfter} second${retryAfter === 1 ? '' : 's'}.`
-                            : 'Too many messages just now. Give it a moment and try again.';
-                } else if (error.response?.data?.detail) {
-                    errorMessage = error.response.data.detail;
-                }
-            }
-
-            return {
-                success: false,
-                error: errorMessage,
-            };
+            return { success: false as const, error: toChatFailure(error) };
         }
     },
 };

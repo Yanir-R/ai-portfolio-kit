@@ -44,17 +44,3 @@ export interface ProjectsResponse {
 export interface ProjectResponse {
     project: Project;
 }
-
-/**
- * Shared so the card and the detail page cannot disagree about what a status
- * looks like: one project's chip means the same thing wherever it appears.
- */
-export const STATUS_STYLES: Record<string, string> = {
-    production: 'text-signal border-signal/40',
-    completed: 'text-signal border-signal/40',
-    'in-development': 'text-caution border-caution/40',
-    paused: 'text-caution border-caution/40',
-    planning: 'text-muted border-border',
-};
-
-export const DEFAULT_STATUS_STYLE = 'text-muted border-border';

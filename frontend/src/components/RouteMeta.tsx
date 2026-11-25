@@ -1,24 +1,21 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router';
+import { HOME_TITLE, pageTitle, Section, SECTION_TITLE } from '@/copy/routes';
+import { langFromPath, stripLangPrefix } from '@/i18n/lang';
 
 /*
  * Keeps the tab title in step with client-side navigation.
  *
  * A first load already has the right title: every route is served its own
  * prerendered HTML (seo/prerender.mts). Navigating inside the app does not
- * reload the document, though, so without this the tab would keep the title
- * of whichever page the visitor landed on.
- *
- * Detail pages get their section's title here. A page that knows its own
- * title once its data arrives may set document.title itself; this runs on
- * route change only, so it does not overwrite that.
+ * reload the document, so without this the tab would keep the title of the
+ * page the visitor landed on. Detail pages get their section's title.
  */
-const HOME_TITLE = 'יניר רוט | סוכני AI לעסקים';
-
 const titleFor = (pathname: string) => {
-    const section = pathname.split('/')[1];
-    const name = { about: 'About', projects: 'Projects', blog: 'Blog' }[section];
-    return name ? `${name} | Yanir Rot` : HOME_TITLE;
+    const lang = langFromPath(pathname);
+    const section = stripLangPrefix(pathname).split('/')[1] as Section;
+    const name = SECTION_TITLE[lang][section];
+    return name ? pageTitle(name, lang) : HOME_TITLE[lang];
 };
 
 const RouteMeta: React.FC = () => {

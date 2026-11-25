@@ -1,0 +1,26 @@
+/*
+ * English pages are left-to-right. Logical properties in site.css flip by
+ * themselves; what is left is the few arrows drawn with `content`, which point
+ * the way the reader goes.
+ */
+[dir='ltr'] .btn::after {
+    content: '→';
+}
+[dir='ltr'] .btn:hover::after {
+    transform: translateX(4px);
+}
+[dir='ltr'] .stg b::after {
+    content: ' →';
+}
+
+@media (max-width: 640px) {
+    [dir='ltr'] .nav .btn.sm {
+        font-size: 0.78rem;
+        padding: 7px 9px;
+        white-space: nowrap;
+    }
+    [dir='ltr'] .nav .lang b,
+    [dir='ltr'] .nav .lang a {
+        padding: 6px 8px;
+    }
+}

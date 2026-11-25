@@ -1,6 +1,6 @@
 I work on the half of AI engineering that starts after the demo works.
 
-Since Sep 2026 I have been building PersonaKit (https://personakit.me) as its creator and lead developer: accountable, source-linked, user-controlled AI memory.
+Since Sep 2026 I have been building [PersonaKit](https://personakit.me) as its creator and lead developer: accountable, source-linked, user-controlled AI memory.
 
 Before that, from Aug 2025 to Sep 2026, I was the founding engineer, and first employee, at Stealth, building a multi-agent system that investigated production incidents: agents reading Kubernetes, AWS and observability telemetry, then writing up what actually broke. I came in on the chat frontend and ended up owning whether the pipeline was right: where a citation comes from, why a model would fake one, what a single question costs.
 
@@ -10,4 +10,4 @@ I tend to leave systems behind rather than patches, and I don't ship a fix until
 
 From 2018 to 2025 it was frontend and full-stack work: a sports betting platform at 500K daily users, finance applications for Israeli enterprises, automation testing before that. It is why I'm comfortable anywhere between a React component and a Helm chart.
 
-The question I keep circling: how far can you trust a system that writes its own reasons? Most of what I build outside work is some attempt to answer it. Hermes is one: a self-hosted agent that runs all day, keeps its memory in an Obsidian vault, and reaches me over Telegram. This site is another, and it will tell you when it doesn't know something rather than fill the gap.
+The question I keep circling: how far can you trust a system that writes its own reasons? Most of what I build outside work is some attempt to answer it. Hermes is one: I run the open-source Hermes Agent (by Nous Research) all day on my own infrastructure, with parts I built around it; it keeps its memory in an Obsidian vault, and reaches me over Telegram. This site is another, and it will tell you when it doesn't know something rather than fill the gap.

@@ -7,7 +7,7 @@
  * that claims more than the pages do is the kind of mismatch search engines
  * penalise and assistants repeat.
  *
- * House rules that bear on this file (from Yanir, not style preferences):
+ * House rules that bear on this file:
  *   - never "engineer" as his own title: he has no degree, so "developer";
  *     past job titles such as Stealth's "Founding Engineer" stay as they were
  *   - PersonaKit: "creator and lead developer", open source, linked to
@@ -60,10 +60,11 @@ export const PERSON = {
 } as const;
 
 /**
- * The home page's share card and search snippet, approved by Yanir on
- * 2026-11-24. index.html repeats these strings (it cannot import this file)
- * and tools/og-card.html draws them onto og-image.png;
- * `npm run check:preview-copy` asserts all three still agree.
+ * The home page's share card and search snippet, Hebrew at / and English at
+ * /en. index.html repeats the Hebrew strings (it cannot import this file),
+ * tools/og-card.html draws them onto og-image.png and og-image-en.png, and
+ * src/copy/routes.ts repeats the titles; `npm run check:preview-copy` asserts
+ * they all still agree.
  */
 export const HOME_SHARE = {
     title: 'יניר רוט | סוכני AI לעסקים',
@@ -105,7 +106,7 @@ export const siteGraph = (siteUrl: string) => {
             {
                 // The freelance offer as a service, so a search for "AI agent
                 // developer Israel" can match it to a provider with an area.
-                // No price: Yanir does not publish a rate.
+                // No price: there is no published rate.
                 '@type': 'ProfessionalService',
                 '@id': `${siteUrl}/#service`,
                 name: `${PERSON.name} - ${PERSON.tagline}`,

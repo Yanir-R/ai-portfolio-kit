@@ -116,14 +116,14 @@ const TRAINING_CRAWLERS = [
  *                       front of the chat. Its api.js is fetched at runtime by
  *                       services/turnstile.ts rather than bundled, so the host
  *                       has to be named here or the check never loads.
- *   frame-src           challenges.cloudflare.com only. Turnstile renders its
- *                       challenge in an iframe from the same host as its script,
- *                       and without this directive the frame would fall back to
- *                       default-src 'self' and be refused. Nothing else on the
- *                       site embeds a frame.
+ *   frame-src           challenges.cloudflare.com and cal.com. Turnstile renders
+ *                       its challenge in an iframe from the same host as its
+ *                       script, and the contact window embeds the booking page.
+ *                       Without this directive both frames would fall back to
+ *                       default-src 'self' and be refused.
  *   style-src           'unsafe-inline' is required because components set a
- *                       `style` attribute - NavBar passes `--eat-x` that way,
- *                       and a style attribute counts as an inline style as far
+ *                       `style` attribute (custom properties such as `--w` on
+ *                       the blog's topic bars), and a style attribute counts as an inline style as far
  *                       as CSP is concerned.
  *   img-src             'self' data: https:. Broader than the rest of this
  *                       policy, and deliberately. Project and writing images
@@ -159,6 +159,9 @@ const CF_ANALYTICS_REPORTING = 'https://cloudflareinsights.com';
 // from it, so it is named in script-src and in frame-src.
 const TURNSTILE_ORIGIN = 'https://challenges.cloudflare.com';
 
+// The booking page, embedded in the contact window.
+const BOOKING_ORIGIN = 'https://cal.com';
+
 const emitSecurityHeaders = (backendUrl: string, avatarUrl: string) => {
     const originOf = (u: string) => {
         try {
@@ -181,7 +184,7 @@ const emitSecurityHeaders = (backendUrl: string, avatarUrl: string) => {
         "frame-ancestors 'none'",
         "object-src 'none'",
         `script-src 'self' ${CF_ANALYTICS_SCRIPT} ${TURNSTILE_ORIGIN}`,
-        `frame-src ${TURNSTILE_ORIGIN}`,
+        `frame-src ${TURNSTILE_ORIGIN} ${BOOKING_ORIGIN}`,
         "style-src 'self' 'unsafe-inline'",
         "font-src 'self'",
         `img-src ${imgSrc}`,
@@ -198,6 +201,10 @@ const emitSecurityHeaders = (backendUrl: string, avatarUrl: string) => {
         '  Referrer-Policy: strict-origin-when-cross-origin',
         '  Cross-Origin-Opener-Policy: same-origin',
         '  Permissions-Policy: accelerometer=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()',
+        '',
+        // Built assets carry a content hash in their name, so a cached copy is never stale.
+        '/assets/*',
+        '  Cache-Control: public, max-age=31536000, immutable',
         '',
     ].join('\n');
 };
@@ -378,6 +385,8 @@ export default defineConfig(({ mode, command }) => {
         define: {
             'import.meta.env.VITE_BACKEND_URL': JSON.stringify(resolvedBackendUrl),
             'import.meta.env.VITE_AVATAR_URL': JSON.stringify(avatarUrl),
+            // The one build value kept out of the repository: see constants/links.ts.
+            'import.meta.env.VITE_WHATSAPP_NUMBER': JSON.stringify(env.VITE_WHATSAPP_NUMBER || ''),
         },
     };
 });

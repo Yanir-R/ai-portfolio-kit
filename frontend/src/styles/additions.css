@@ -1,0 +1,130 @@
+/*
+ * Parts the design files did not draw, in the same tokens: the booking
+ * calendar inside the contact window, the CV as readable text, and plain
+ * states (loading, empty, failed). Kept apart from site.css so that file
+ * stays a faithful port of the design.
+ */
+
+.talk-cal {
+    width: 100%;
+    height: min(560px, 62vh);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+}
+
+.cv-doc {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    padding: 20px 24px;
+}
+.cv-note {
+    margin: 0;
+    color: var(--muted);
+}
+
+.state-note {
+    padding: 48px 0;
+    color: var(--muted);
+}
+
+/* The "all posts" link beside the latest posts' lede. */
+#posts .head .all {
+    color: var(--link);
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* A model answer is Markdown: its paragraphs sit tight inside the bubble. */
+.m.ai p {
+    margin: 0;
+}
+.m.ai p + p,
+.m.ai ul,
+.m.ai ol {
+    margin-top: 0.5em;
+}
+.m.ai ul,
+.m.ai ol {
+    padding-inline-start: 1.2em;
+}
+
+/* A project's stack, between its write-up and its links. */
+.w-stack {
+    margin-top: 22px;
+}
+.w-stack .mt {
+    margin: 8px 0 0;
+}
+
+/* The projects grid directly under its title, with room for the lead. */
+.w-hero + .w-arts {
+    margin-top: 28px;
+}
+/* A card shows the start of the overview; the page has the rest. */
+.w-arts.proj .w-art > p {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+/* A write-up that opens with a heading starts at the top of its box. */
+.w-body > h2:first-child,
+.w-body > h3:first-child {
+    margin-top: 0;
+}
+/* On a narrow screen the actions under a piece wrap instead of overflowing. */
+.w-end .ac {
+    flex-wrap: wrap;
+}
+/* A line of about a post's length on the about page. */
+.w-post.about .w-body p {
+    max-width: 65ch;
+}
+/* A sheet's call to action stays on one line, arrow included. */
+#vis .btn {
+    white-space: nowrap;
+}
+@media (max-width: 480px) {
+    #vis .btn {
+        font-size: 0.85rem;
+    }
+}
+
+/* The English offer for visitors from abroad, above the top bar. */
+.lang-offer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 8px 16px;
+    background: var(--ink);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+.lang-offer .x {
+    background: none;
+    border: 0;
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+.lang-offer .x:focus-visible {
+    outline: 3px solid var(--btn);
+    outline-offset: 2px;
+}
+@media (max-width: 480px) {
+    .lang-offer {
+        flex-wrap: nowrap;
+        gap: 8px;
+        font-size: 0.85rem;
+        padding-inline: 12px;
+    }
+    .lang-offer .btn {
+        white-space: nowrap;
+    }
+}

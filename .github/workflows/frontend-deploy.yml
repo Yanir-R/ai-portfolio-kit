@@ -107,13 +107,15 @@ jobs:
       # runners and nothing is uploaded between them. The result is the same
       # bundle, because every build value is committed rather than injected.
       #
-      # No VITE_* variables are set here, on purpose. Build values come from
-      # frontend/site.config.ts, and Vite inlines them, so config that lives in
-      # the repository ships with the commit that changed it. An override here
-      # would take precedence over the file and reintroduce the split where a
-      # value changed after a deploy has no effect until the next build.
+      # Build values come from frontend/site.config.ts, and Vite inlines them, so
+      # config that lives in the repository ships with the commit that changed
+      # it. The one exception is the business WhatsApp number: it is printed on
+      # the page but kept out of the public repository, so it comes from the
+      # WHATSAPP_NUMBER repository variable. Unset, the WhatsApp routes are off.
       - name: Build
         working-directory: ${{ env.FRONTEND_DIR }}
+        env:
+          VITE_WHATSAPP_NUMBER: ${{ vars.WHATSAPP_NUMBER }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
