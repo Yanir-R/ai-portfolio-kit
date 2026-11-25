@@ -28,7 +28,7 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
         legal: {
             title: '56,607 קבצים עברו לענן',
             tab: 'ארכיון המסמכים',
-            cap: 'כך נראתה ההעברה ב־TrinityLegal. שם המשרד נשאר אצלי.',
+            cap: 'כך נראתה ההעברה ב־Trinity Legal. שם המשרד נשאר אצלי.',
         },
         price: {
             title: 'איך מגיעים למחיר',
@@ -53,7 +53,7 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
         read: {
             title: 'מה קרה מאחורי התשובה',
             tab: 'מאחורי התשובה',
-            cap: 'לשאלה הזו אין שרטוט מוכן, אז הגיליון מראה את הקבלה של התשובה: מה נמדד בזמן שהיא נכתבה.',
+            cap: 'על מה התשובה נשענת, ומה נמדד בזמן שהיא נכתבה.',
         },
         ask: {
             title: 'את זה כדאי לשאול את יניר',
@@ -80,7 +80,7 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
         legal: {
             title: '56,607 files moved to the cloud',
             tab: 'The document archive',
-            cap: "This is what the migration looked like at TrinityLegal. The office's name stays with me.",
+            cap: "This is what the migration looked like at Trinity Legal. The office's name stays with me.",
         },
         price: {
             title: 'How the price is set',
@@ -105,7 +105,7 @@ export const SHEET_HEADS: Localized<Record<SheetKey, SheetHead>> = {
         read: {
             title: 'What happened behind the answer',
             tab: 'Behind the answer',
-            cap: "There's no ready diagram for this question, so the sheet shows the answer's breakdown: what was measured while it was written.",
+            cap: 'What the answer rests on, and what was measured while it was written.',
         },
         ask: {
             title: 'This one is worth asking Yanir',
@@ -161,29 +161,38 @@ export interface SheetCopy {
     };
     why: { points: Point[] };
     read: {
-        viewLabel: string;
-        tech: string;
-        plain: string;
-        model: string;
+        leans: (n: number) => string;
+        leansNone: string;
+        readN: (n: number) => string;
+        ofRead: (read: number, library: number) => string;
+        ofLibrary: (library: number) => string;
+        usedTag: string;
+        readNotUsed: string;
+        alwaysSent: string;
+        /** Yanir's notes by file, in words: the backend names them by file name. */
+        profileTitles: Record<string, string>;
+        profileOther: string;
+        kinds: Record<string, string>;
+        more: string;
+        declined: [string, string];
+        handoff: [string, string];
+        measures: string;
         latency: string;
         language: string;
         languages: Record<'he' | 'en', string>;
+        convo: string;
+        first: string;
+        nth: (n: number, before: number) => string;
         finish: string;
-        finishOk: string;
+        finishWords: Record<string, string>;
+        finishOther: string;
         tokens: string;
         tokensNote: string;
-        tokenParts: [string, string, string];
-        docsOf: (n: number, of: number) => string;
-        chosen: Record<string, string>;
-        kinds: Record<string, string>;
-        before: string;
-        plainDocs: (n: number, of: number) => string;
-        plainDocsNote: string;
-        plainTime: string;
-        plainOnce: string;
-        plainOnceNote: string;
+        tokenParts: [string, string, string, string];
+        cachedMost: string;
+        cachedSome: string;
+        model: string;
         secondsShort: string;
-        seconds: string;
     };
     ask: { what: string; whatText: string; orCall: string; topic: string };
     letter: {
@@ -249,7 +258,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 { title: 'בהתאמה אישית', text: 'מתוך ישיבות אפיון עם עורכי הדין' },
                 { title: 'בפיילוט', text: 'עם לקוחות פעילים' },
             ],
-            cta: 'יש לכם ארכיון כזה? נדבר 20 דקות',
+            cta: 'יש לכם ארכיון כזה? קבעו שיחת אבחון',
             topic: 'ארכיון מסמכים',
         },
         price: {
@@ -301,7 +310,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 },
             ],
             wires: ['בודק את', 'מזין זיכרון אל'],
-            cta: 'רוצים סוכן כזה אצלכם? נדבר 20 דקות',
+            cta: 'רוצים סוכן כזה אצלכם? קבעו שיחת אבחון',
             topic: 'סוכנים',
         },
         why: {
@@ -324,35 +333,51 @@ export const SHEETS: Localized<SheetCopy> = {
             ],
         },
         read: {
-            viewLabel: 'סגנון התצוגה',
-            tech: 'טכני',
-            plain: 'בפשטות',
-            model: 'מודל',
+            leans: (n) => (n === 1 ? 'התשובה נשענת על מסמך אחד' : `התשובה נשענת על ${n} מסמכים`),
+            leansNone: 'התשובה לא נשענת על אף מסמך',
+            readN: (n) => (n === 1 ? 'נקרא מסמך אחד' : `נקראו ${n} מסמכים`),
+            ofRead: (read, library) =>
+                `${read === 1 ? 'מתוך מסמך אחד שנקרא' : `מתוך ${read} שנקראו`}, מתוך ${library} בספרייה`,
+            ofLibrary: (library) => `מתוך ${library} בספרייה`,
+            usedTag: 'שימש בתשובה',
+            readNotUsed: 'נקראו ולא שימשו:',
+            alwaysSent: 'נשלח עם כל שאלה:',
+            profileTitles: {
+                'about-me': 'אודות יניר',
+                resume: 'קורות החיים',
+                'work-with-me': 'איך עובדים איתי',
+            },
+            profileOther: 'מה שיניר כתב על עצמו',
+            kinds: { profile: 'פרופיל', project: 'פרויקט', writing: 'כתיבה' },
+            more: 'מה עוד קרה',
+            declined: ['הסוכן אמר שאין לו תשובה', 'הוא לא מצא את זה במה שיניר כתב, ולא ניחש.'],
+            handoff: [
+                'הוצע המשך אישי עם יניר',
+                'אחרי כמה שאלות, הסוכן הציע להמשיך ישירות עם יניר.',
+            ],
+            measures: 'המדידות',
             latency: 'זמן תגובה',
             language: 'שפה שזוהתה',
             languages: { he: 'עברית', en: 'אנגלית' },
+            convo: 'המשך שיחה',
+            first: 'שאלה ראשונה',
+            nth: (n, before) =>
+                before === 1 ? `שאלה ${n}, עם הקודמת` : `שאלה ${n}, עם ${before} הקודמות`,
             finish: 'סיום',
-            finishOk: 'תקין',
+            finishWords: { STOP: 'התשובה הושלמה', MAX_TOKENS: 'נעצרה באורך המרבי' },
+            finishOther: 'נעצרה לפני הסוף',
             tokens: 'טוקנים',
             tokensNote: 'כמה טקסט המודל קרא וכתב בשביל התשובה הזו',
-            tokenParts: ['קלט: השאלה והמסמכים', 'חשיבה של המודל', 'התשובה עצמה'],
-            docsOf: (n, of) => `${n} מתוך ${of} מסמכים הונחו מול המודל`,
-            chosen: {
-                narrowed: 'נבחרו לפי השאלה',
-                closest: 'הקרובים ביותר לשאלה',
-                unmatched: 'שום מסמך לא התאים, נשלח רק הפרופיל',
-                conversational: 'לא נשאלה שאלה, נשלח רק הפרופיל',
-                unfocused: 'כל המסמכים נשלחו',
-            },
-            kinds: { profile: 'פרופיל', project: 'פרויקט', writing: 'כתיבה' },
-            before: 'לפני המודל: בדיקת הבוט עברה, והשאלה בתוך המכסה היומית. כל המספרים כאן נמדדו בזמן שהתשובה נכתבה.',
-            plainDocs: (n, of) => `${n} מתוך ${of}`,
-            plainDocsNote: 'מסמכים שיניר כתב הונחו מול המודל. הוא לא ראה שום דבר אחר.',
-            plainTime: 'מהשאלה עד התשובה',
-            plainOnce: 'פעם אחת',
-            plainOnceNote: 'המודל נשאל, וענה',
+            tokenParts: [
+                'קלט חדש: השאלה והמסמכים',
+                'קלט שכבר נקרא קודם ונשמר',
+                'חשיבה של המודל',
+                'התשובה עצמה',
+            ],
+            cachedMost: 'רוב הקלט כבר נקרא קודם ונשמר, ולכן התשובה מהירה וזולה יותר.',
+            cachedSome: 'חלק מהקלט כבר נקרא קודם ונשמר, ולכן התשובה מהירה וזולה יותר.',
+            model: 'מודל',
             secondsShort: 'שנ׳',
-            seconds: 'שניות',
         },
         ask: {
             what: 'מה קורה עכשיו?',
@@ -438,7 +463,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 { title: 'Custom built', text: 'From working sessions with the lawyers' },
                 { title: 'In pilot', text: 'With active clients' },
             ],
-            cta: "Have an archive like this? Let's talk for 20 minutes",
+            cta: 'Have an archive like this? Book a diagnostic call',
             topic: 'Document archive',
         },
         price: {
@@ -491,7 +516,7 @@ export const SHEETS: Localized<SheetCopy> = {
                 },
             ],
             wires: ['reviews', 'feeds memory to'],
-            cta: "Want an agent like this? Let's talk for 20 minutes",
+            cta: 'Want an agent like this? Book a diagnostic call',
             topic: 'Agents',
         },
         why: {
@@ -514,40 +539,62 @@ export const SHEETS: Localized<SheetCopy> = {
             ],
         },
         read: {
-            viewLabel: 'Display style',
-            tech: 'Technical',
-            plain: 'Simple',
-            model: 'Model',
+            leans: (n) =>
+                n === 1 ? 'The answer rests on one document' : `The answer rests on ${n} documents`,
+            leansNone: 'The answer rests on no document',
+            readN: (n) => (n === 1 ? 'One document was read' : `${n} documents were read`),
+            ofRead: (read, library) =>
+                `out of ${read === 1 ? 'the one' : read} read, out of ${library} in the library`,
+            ofLibrary: (library) => `out of ${library} in the library`,
+            usedTag: 'Used in the answer',
+            readNotUsed: 'Read but not used:',
+            alwaysSent: 'Sent with every question:',
+            profileTitles: {
+                'about-me': 'About Yanir',
+                resume: 'The resume',
+                'work-with-me': 'How to work with me',
+            },
+            profileOther: 'What Yanir wrote about himself',
+            kinds: { profile: 'Profile', project: 'Project', writing: 'Writing' },
+            more: 'What else happened',
+            declined: [
+                'The agent said it has no answer',
+                'It did not find this in what Yanir wrote, and did not guess.',
+            ],
+            handoff: [
+                'Continuing with Yanir was offered',
+                'After a few questions, the agent offered to continue directly with Yanir.',
+            ],
+            measures: 'Measurements',
             latency: 'Response time',
             language: 'Detected language',
             languages: { he: 'Hebrew', en: 'English' },
+            convo: 'Conversation',
+            first: 'First question',
+            nth: (n, before) =>
+                before === 1
+                    ? `Question ${n}, with the one before`
+                    : `Question ${n}, with the ${before} before`,
             finish: 'Finish',
-            finishOk: 'OK',
+            finishWords: {
+                STOP: 'The answer is complete',
+                MAX_TOKENS: 'Stopped at the length limit',
+            },
+            finishOther: 'Stopped before the end',
             tokens: 'tokens',
             tokensNote: 'How much text the model read and wrote for this answer',
             tokenParts: [
-                'Input: the question and the documents',
+                'New input: the question and the documents',
+                'Input read before and kept',
                 "The model's reasoning",
                 'The answer itself',
             ],
-            docsOf: (n, of) => `${n} of ${of} documents were put in front of the model`,
-            chosen: {
-                narrowed: 'Chosen by the question',
-                closest: 'The closest to the question',
-                unmatched: 'No document matched, only the profile was sent',
-                conversational: 'No question was asked, only the profile was sent',
-                unfocused: 'Every document was sent',
-            },
-            kinds: { profile: 'Profile', project: 'Project', writing: 'Writing' },
-            before: 'Before the model: the bot check passed, and the question is within the daily quota. Every number here was measured while the answer was written.',
-            plainDocs: (n, of) => `${n} of ${of}`,
-            plainDocsNote:
-                'documents Yanir wrote were put in front of the model. It saw nothing else.',
-            plainTime: 'From question to answer',
-            plainOnce: 'Once',
-            plainOnceNote: 'The model was asked, and answered',
+            cachedMost:
+                'Most of the input was read before and kept, so the answer is faster and cheaper.',
+            cachedSome:
+                'Part of the input was read before and kept, so the answer is faster and cheaper.',
+            model: 'Model',
             secondsShort: 's',
-            seconds: 'seconds',
         },
         ask: {
             what: 'What happens now?',
@@ -643,7 +690,7 @@ export const MAP_NODES: MapNode[] = [
     },
     {
         id: 'legal',
-        name: { he: 'TrinityLegal', en: 'TrinityLegal' },
+        name: { he: 'Trinity Legal', en: 'Trinity Legal' },
         text: {
             he: 'ניהול מסמכים ותיקים למשרדי עורכי דין. 56,607 קבצים.',
             en: 'Document and case management for law offices. 56,607 files.',
@@ -705,3 +752,9 @@ export const PERSONAKIT_LINKS: Localized<{ site: string; docs: string }> = {
     he: { site: 'personakit.me ↗︎', docs: 'התיעוד ↗︎' },
     en: { site: 'personakit.me ↗︎', docs: 'The docs ↗︎' },
 };
+
+/** A source's title as a visitor reads it: Yanir's notes go by name, never by file. */
+export const sourceTitle = (
+    s: { kind: string; slug: string; title: string },
+    read: { profileTitles: Record<string, string>; profileOther: string }
+) => (s.kind === 'profile' ? (read.profileTitles[s.slug] ?? read.profileOther) : s.title);

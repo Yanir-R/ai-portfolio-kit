@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CHAT } from '@/copy/chat';
-import { SHEET_HEADS, SHEETS, SheetKey } from '@/content/sheets';
-import { Entry, GREETING_ID, HomeChat } from '@/chat/useHomeChat';
+import { SHEET_HEADS, SHEETS, SheetKey, sourceTitle } from '@/content/sheets';
+import { AnswerRecord, Entry, GREETING_ID, HomeChat } from '@/chat/useHomeChat';
 import Markdown from '@/components/Markdown';
 import WritingBlocks from '@/components/writing/WritingBlocks';
 import { useSiteDialogs } from '@/components/site/SiteDialogs';
@@ -55,14 +55,96 @@ const SheetThumb: React.FC<{ map?: boolean }> = ({ map }) =>
         </svg>
     );
 
-const ArtCard: React.FC<{ sheet: SheetKey; onOpen: (sheet: SheetKey) => void }> = ({
-    sheet,
-    onOpen,
-}) => {
+type OnSheet = (sheet: SheetKey, record?: AnswerRecord | null) => void;
+
+/** The drawing made for an answer; it reopens with that answer's own figures. */
+/** A small receipt: the link to what happened behind one answer. */
+const ReceiptIcon: React.FC = () => (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <path
+            d="M3.5 1.5h9v13l-1.5-1-1.5 1-1.5-1-1.5 1-1.5-1-1.5 1z M5.5 5h5 M5.5 8h5 M5.5 11h3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+
+/** Six small dots: the first `lit` done, and the last one when the handoff was offered. */
+const Dots: React.FC<{ lit: number; last?: boolean }> = ({ lit, last }) => (
+    <span className="td" aria-hidden="true">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+            <i key={i} className={i < lit || (i === 5 && last) ? 'a' : undefined} />
+        ))}
+    </span>
+);
+
+/** The phone's waiting bubble: stations one to five as they light, and how long it has been. */
+const Working: React.FC<{ plan: { stage: number; elapsed: number } }> = ({ plan }) => {
+    const { t } = useLang();
+    const copy = t(CHAT);
+    const stations = copy.trace.stations.slice(0, 5);
+    // Stations two and three complete as the request goes; four is the model.
+    const current = Math.min(plan.stage + 1, 3);
+    return (
+        <div className="m y ai wait pwork">
+            <span className="src ag">{copy.phone.working(Math.max(1, plan.elapsed))}</span>
+            <ol>
+                {stations.map(([title], i) => (
+                    <li
+                        key={title}
+                        className={i < current ? 'done' : i === current ? 'now' : undefined}
+                    >
+                        <i aria-hidden="true" />
+                        <b>{title}</b>
+                        {i === current && <em>{copy.trace.now}</em>}
+                    </li>
+                ))}
+            </ol>
+            {/* Read out when the station changes, not every second. */}
+            <p aria-live="polite">{stations[current][1]}</p>
+        </div>
+    );
+};
+
+/**
+ * Beside the chat, the waiting bubble names only the station at work; the
+ * full list lights up in the panel next to it.
+ */
+const WorkingLine: React.FC<{ plan: { stage: number; elapsed: number } }> = ({ plan }) => {
+    const { t } = useLang();
+    const copy = t(CHAT);
+    const [title, sub] = copy.trace.stations[Math.min(plan.stage + 1, 3)];
+    return (
+        <div className="m y ai wait dwork">
+            <span className="src ag">{copy.phone.working(Math.max(1, plan.elapsed))}</span>
+            {/* Read out when the station changes, not every second. */}
+            <p aria-live="polite">
+                <i aria-hidden="true" />
+                <b>{title}</b>
+                <span>{sub}</span>
+            </p>
+        </div>
+    );
+};
+
+const ArtCard: React.FC<{
+    sheet: SheetKey;
+    record?: AnswerRecord | null;
+    onOpen: OnSheet;
+    /** Its drawing is the one shown beside the chat right now. */
+    shown?: boolean;
+}> = ({ sheet, record, onOpen, shown }) => {
     const { t } = useLang();
     const art = t(CHAT).art;
     return (
-        <button type="button" className="art" onClick={() => onOpen(sheet)}>
+        <button
+            type="button"
+            className={shown ? 'art on' : 'art'}
+            aria-current={shown || undefined}
+            onClick={() => onOpen(sheet, record)}
+        >
             <span className="th">
                 <SheetThumb map={sheet === 'map'} />
             </span>
@@ -70,8 +152,8 @@ const ArtCard: React.FC<{ sheet: SheetKey; onOpen: (sheet: SheetKey) => void }> 
                 <b>{t(SHEET_HEADS)[sheet].title}</b>
                 <span className="s">
                     {art.diagram}
-                    <span className="vd"> · {art.opensSide}</span>
-                    <span className="vm"> · {art.opensBelow}</span>
+                    <span className="vd"> · {shown ? art.shownSide : art.opensSide}</span>
+                    <span className="vm"> · {shown ? art.shownBelow : art.opensBelow}</span>
                 </span>
             </span>
             <span className="o">
@@ -88,7 +170,7 @@ const ArtCard: React.FC<{ sheet: SheetKey; onOpen: (sheet: SheetKey) => void }> 
 const EntryView: React.FC<{
     entry: Entry;
     chat: HomeChat;
-    onSheet: (sheet: SheetKey) => void;
+    onSheet: OnSheet;
     engage?: () => void;
     /** The visitor chose to keep asking: the offer folds and the input takes focus. */
     onKeep: () => void;
@@ -96,6 +178,12 @@ const EntryView: React.FC<{
     const { t } = useLang();
     const copy = t(CHAT);
     const { openContact } = useSiteDialogs();
+    // Beside the chat, the card whose drawing is in the panel is marked.
+    const isShown = (sheet: SheetKey, record?: AnswerRecord | null) =>
+        !engage &&
+        chat.plan.kind === 'sheet' &&
+        chat.plan.key === sheet &&
+        (chat.sheets.find((s) => s.key === sheet)?.record ?? null) === (record ?? null);
 
     switch (entry.kind) {
         case 'user':
@@ -122,6 +210,10 @@ const EntryView: React.FC<{
                 </div>
             );
         case 'working':
+            // On a phone the stations live here, in the waiting bubble; beside
+            // the chat, only the one at work.
+            if (chat.plan.kind === 'running')
+                return engage ? <Working plan={chat.plan} /> : <WorkingLine plan={chat.plan} />;
             return (
                 <div className="m y ai wait">
                     <span className="src ag">{copy.working}</span>
@@ -134,7 +226,13 @@ const EntryView: React.FC<{
                     {entry.tag === 'ready' && <span className="src">{copy.readyTag}</span>}
                     {entry.tag === 'sent' && <span className="src ok">{copy.sentTag}</span>}
                     {engage && entry.id === GREETING_ID ? copy.phone.greeting : entry.text}
-                    {entry.sheet && <ArtCard sheet={entry.sheet} onOpen={onSheet} />}
+                    {entry.sheet && (
+                        <ArtCard
+                            sheet={entry.sheet}
+                            onOpen={onSheet}
+                            shown={isShown(entry.sheet)}
+                        />
+                    )}
                 </div>
             );
         case 'answer': {
@@ -162,7 +260,14 @@ const EntryView: React.FC<{
                             {copy.book}
                         </button>
                     )}
-                    {entry.sheet && <ArtCard sheet={entry.sheet} onOpen={onSheet} />}
+                    {entry.sheet && (
+                        <ArtCard
+                            sheet={entry.sheet}
+                            record={record}
+                            onOpen={onSheet}
+                            shown={isShown(entry.sheet, record)}
+                        />
+                    )}
                     {record && (
                         <div className="rc">
                             <u>{copy.sources}</u>
@@ -170,12 +275,34 @@ const EntryView: React.FC<{
                                 otherwise what it was sent. */}
                             {(record.used ?? record.sources).length ? (
                                 (record.used ?? record.sources).map((s) => (
-                                    <span key={`${s.kind}-${s.slug}`}>{s.title}</span>
+                                    <span key={`${s.kind}-${s.slug}`}>
+                                        {sourceTitle(s, t(SHEETS).read)}
+                                    </span>
                                 ))
                             ) : (
                                 <span>{record.used ? copy.fromNotes : copy.noSource}</span>
                             )}
                         </div>
+                    )}
+                    {/* Every answer the model wrote ends with its stations and the
+                        way to its receipt; a ready answer has neither. */}
+                    {record && !entry.fromIndex && (
+                        <button
+                            type="button"
+                            className="ptrail"
+                            onClick={() => onSheet('read', record)}
+                        >
+                            <Dots lit={5} last={record.handoff} />
+                            <span>
+                                {record.sources.length
+                                    ? copy.plan.trail(record.sources.length, record.seconds)
+                                    : copy.plan.trailNone(record.seconds)}
+                            </span>
+                            <u>
+                                <ReceiptIcon />
+                                {copy.behind}
+                            </u>
+                        </button>
                     )}
                 </div>
             );
@@ -244,6 +371,12 @@ const EntryView: React.FC<{
  * How the chat behaves on a phone, where it opens as a full-screen layer.
  * Absent on wider screens, where it stays a panel beside the drawing.
  */
+/** On a computer, once a question is asked: the chat at full height, and the way back. */
+export interface ChatSize {
+    grown: boolean;
+    toggle: () => void;
+}
+
 export interface PhoneLayer {
     /** The chat is open as the full-screen layer. */
     full: boolean;
@@ -251,7 +384,9 @@ export interface PhoneLayer {
     engage: () => void;
     close: () => void;
     /** A diagram card under an answer was tapped. */
-    showSheet: (sheet: SheetKey) => void;
+    showSheet: OnSheet;
+    /** The teaser row was tapped: the six stations, in the sheet. */
+    showHow: () => void;
 }
 
 /** The latest question that got no answer, carried into the contact window. */
@@ -280,8 +415,10 @@ const AgentChat: React.FC<{
     rootRef?: React.RefObject<HTMLDivElement | null>;
     /** The "continue" entry on the page, where focus goes back on close. */
     resumeRef?: React.RefObject<HTMLButtonElement | null>;
+    /** Set on a computer once the chat can grow (see HeroSection). */
+    size?: ChatSize;
     children?: React.ReactNode;
-}> = ({ chat, turnstileRef, phone, rootRef, resumeRef, children }) => {
+}> = ({ chat, turnstileRef, phone, rootRef, resumeRef, size, children }) => {
     const { t } = useLang();
     const copy = t(CHAT);
     const logRef = useRef<HTMLDivElement>(null);
@@ -302,6 +439,17 @@ const AgentChat: React.FC<{
             // An offer that fits shows whole, so every route to Yanir is in view
             // and the end of the answer fills what room is left above it. One
             // taller than the pane starts at its title instead.
+            // At full height a new answer is read from its first line, at the top of the log.
+            const last = chat.entries[chat.entries.length - 1];
+            const answers = log.querySelectorAll<HTMLElement>('.m.y.ai');
+            if (size?.grown && last?.kind === 'answer' && answers.length) {
+                const top =
+                    answers[answers.length - 1].getBoundingClientRect().top -
+                    log.getBoundingClientRect().top +
+                    log.scrollTop -
+                    8;
+                return void (log.scrollTop = Math.min(end, Math.max(0, top)));
+            }
             if (!hand || hand.offsetHeight <= log.clientHeight) return void (log.scrollTop = end);
             const above = hand.getBoundingClientRect().top - log.getBoundingClientRect().top;
             log.scrollTop = Math.min(end, log.scrollTop + above - 12);
@@ -309,6 +457,8 @@ const AgentChat: React.FC<{
         toEnd();
         const frame = requestAnimationFrame(toEnd);
         return () => cancelAnimationFrame(frame);
+        // Only a new entry moves the log; growing or shrinking leaves it where it is.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chat.entries]);
 
     useEffect(() => {
@@ -403,7 +553,13 @@ const AgentChat: React.FC<{
             aria-modal={full ? true : undefined}
         >
             <LayerHeader onClose={full ? phone?.close : undefined}>
-                <span className="kk">{copy.step1}</span>
+                {size && live ? (
+                    <button type="button" className="btn sm line sz" onClick={size.toggle}>
+                        {size.grown ? copy.smaller : copy.larger}
+                    </button>
+                ) : (
+                    <span className="kk">{copy.step1}</span>
+                )}
             </LayerHeader>
             {phone && !full && live && (
                 <button type="button" className="resume" ref={resumeRef} onClick={phone.engage}>
@@ -428,16 +584,12 @@ const AgentChat: React.FC<{
                 ))}
             </div>
             {phone && !live && (
-                <div className="tz">
-                    <span className="td" aria-hidden="true">
-                        <i />
-                        <i className="a" />
-                        <i className="a" />
-                        <i className="a" />
-                        <i />
+                <button type="button" className="tz" onClick={phone.showHow}>
+                    <Dots lit={0} />
+                    <span>
+                        {copy.phone.teaser} <u>{copy.phone.howLink}</u>
                     </span>
-                    <span>{copy.phone.teaser}</span>
-                </div>
+                </button>
             )}
             <div
                 className="qr one"

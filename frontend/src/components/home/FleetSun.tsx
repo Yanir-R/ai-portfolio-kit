@@ -26,6 +26,9 @@ const TIP_EDGE = 120;
 const TOUCH_TIP_MS = 2600;
 // A finger has to travel this far sideways for a swipe to change the group.
 const SWIPE_PX = 40;
+// A group's list shows whole up to this many rows; a longer one opens on its first rows.
+const ROLES_SHORT = 4;
+const ROLES_FIRST = 3;
 
 const polar = (r: number, a: number) => [C + r * Math.cos(a), C + r * Math.sin(a)] as const;
 const f = (n: number) => n.toFixed(1);
@@ -140,6 +143,23 @@ const FleetSun: React.FC = () => {
     // Steps the phone's group card, looping at both ends.
     const step = (by: 1 | -1) => pickRay(ORDER[(pos + by + ORDER.length) % ORDER.length]);
     const rtl = lang === 'he';
+    // The group lead first, then each agent; the direct reports have no lead.
+    const roles = (index: number) =>
+        index === DIRECT_RAY
+            ? FLEET_DIRECT.agents.map((line) => ({ cls: 'dir', line }))
+            : [
+                  { cls: 'lead', line: FLEET_GROUPS[index].lead },
+                  ...FLEET_GROUPS[index].agents.map((line) => ({ cls: 'sub', line })),
+              ];
+    const shownRoles = roles(ORDER[pos]);
+    // A long list opens on its first rows; the rest wait for a tap, until the group changes.
+    const [openAt, setOpenAt] = useState<number | null>(null);
+    const long = shownRoles.length > ROLES_SHORT;
+    const visibleRoles = long && openAt !== pos ? shownRoles.slice(0, ROLES_FIRST) : shownRoles;
+    const rolesHead =
+        ORDER[pos] === DIRECT_RAY
+            ? ui.directHead(shownRoles.length)
+            : ui.rolesHead(shownRoles.length - 1);
     const pickLayer = (id: FleetLayer) =>
         setPick((p) => (p?.kind === 'layer' && p.id === id ? null : { kind: 'layer', id }));
 
@@ -228,6 +248,18 @@ const FleetSun: React.FC = () => {
                     </text>
                 </svg>
                 {phone && (
+                    // On a phone the number tiles become this key: what each marker is, and how many.
+                    <ul className="fkey" aria-label={ui.keyLabel}>
+                        {FLEET_LAYERS.map((l) => (
+                            <li key={l.id}>
+                                <i className={`k-${l.id}`} aria-hidden="true" />
+                                <b>{l.count}</b>
+                                <span>{l.label[lang]}</span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                {phone && (
                     <div
                         className="fpick"
                         role="group"
@@ -294,6 +326,30 @@ const FleetSun: React.FC = () => {
                                 </p>
                             ))}
                         </div>
+                        {/* Who does what in the group shown: the same lines the drawing
+                            shows on hover on a computer, which a phone has no way to reach. */}
+                        <div className="fp-roles">
+                            <small>{rolesHead}</small>
+                            <ul id="fp-roles-list">
+                                {visibleRoles.map((role, i) => (
+                                    <li key={`${pos}-${i}`} className={role.cls}>
+                                        <i aria-hidden="true" />
+                                        <span>{role.line[lang]}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                            {long && openAt !== pos && (
+                                <button
+                                    type="button"
+                                    className="fp-more"
+                                    aria-expanded={false}
+                                    aria-controls="fp-roles-list"
+                                    onClick={() => setOpenAt(pos)}
+                                >
+                                    {ui.moreAgents(shownRoles.length - ROLES_FIRST)}
+                                </button>
+                            )}
+                        </div>
                         <div className="fp-dots" aria-hidden="true">
                             {ORDER.map((index, i) => (
                                 <i key={index} className={i === pos ? 'on' : undefined} />
@@ -302,47 +358,49 @@ const FleetSun: React.FC = () => {
                     </div>
                 )}
             </div>
-            <div className="fside">
-                <div className="fnums" role="group" aria-label={ui.filterLabel}>
-                    {FLEET_LAYERS.map((l) => (
-                        <button
-                            key={l.id}
-                            type="button"
-                            data-f={l.id}
-                            aria-pressed={layer === l.id}
-                            onClick={() => pickLayer(l.id)}
-                        >
-                            <b>{l.count}</b>
-                            <span>{l.label[lang]}</span>
-                        </button>
-                    ))}
+            {!phone && (
+                <div className="fside">
+                    <div className="fnums" role="group" aria-label={ui.filterLabel}>
+                        {FLEET_LAYERS.map((l) => (
+                            <button
+                                key={l.id}
+                                type="button"
+                                data-f={l.id}
+                                aria-pressed={layer === l.id}
+                                onClick={() => pickLayer(l.id)}
+                            >
+                                <b>{l.count}</b>
+                                <span>{l.label[lang]}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="fcard" aria-live="polite">
+                        {card ? (
+                            <>
+                                <span className="k">{ui.shown}</span>
+                                <b>{card.title[lang]}</b>
+                                <dl className="wh">
+                                    <dt>{ui.whyDone}</dt>
+                                    <dd>{card.why[lang]}</dd>
+                                    <dt>{ui.howHelps}</dt>
+                                    <dd>{card.helps[lang]}</dd>
+                                    <dt>{ui.whatSolved}</dt>
+                                    <dd>{card.solved[lang]}</dd>
+                                </dl>
+                            </>
+                        ) : (
+                            <>
+                                <span className="k">
+                                    {ray === DIRECT_RAY ? ui.aroundCentre : ui.group}
+                                </span>
+                                <b>{groupOf(ray!).name[lang]}</b>
+                                <p className="why">{groupOf(ray!).why[lang]}</p>
+                                <p className="hint">{ui.hint}</p>
+                            </>
+                        )}
+                    </div>
                 </div>
-                <div className="fcard" aria-live="polite">
-                    {card ? (
-                        <>
-                            <span className="k">{ui.shown}</span>
-                            <b>{card.title[lang]}</b>
-                            <dl className="wh">
-                                <dt>{ui.whyDone}</dt>
-                                <dd>{card.why[lang]}</dd>
-                                <dt>{ui.howHelps}</dt>
-                                <dd>{card.helps[lang]}</dd>
-                                <dt>{ui.whatSolved}</dt>
-                                <dd>{card.solved[lang]}</dd>
-                            </dl>
-                        </>
-                    ) : (
-                        <>
-                            <span className="k">
-                                {ray === DIRECT_RAY ? ui.aroundCentre : ui.group}
-                            </span>
-                            <b>{groupOf(ray!).name[lang]}</b>
-                            <p className="why">{groupOf(ray!).why[lang]}</p>
-                            <p className="hint">{ui.hint}</p>
-                        </>
-                    )}
-                </div>
-            </div>
+            )}
         </div>
     );
 };

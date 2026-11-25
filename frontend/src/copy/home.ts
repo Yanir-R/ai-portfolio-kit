@@ -29,8 +29,18 @@ export interface HomeCopy {
     };
     proof: SectionHead & {
         evidenceLabel: string;
-        promises: { title: string; text: string; evidence: string }[];
+        promises: {
+            title: string;
+            text: string;
+            evidence: string;
+            /** Under the proof: the project page where the whole story is told. */
+            story?: { label: string; href: string };
+        }[];
+        /** Phones: after the promises, one band with the way to book. */
+        band: string;
         alsoTitle: string;
+        /** Under the cards: the way to every project. */
+        allProjects: string;
         also: { tag: string; title: string; text: string; href?: string; open?: boolean }[];
     };
     fleet: SectionHead & {
@@ -124,28 +134,35 @@ export const HOME: Localized<HomeCopy> = {
             tagline: 'איך אני עובד',
             title: 'שלוש הבטחות.',
             em: 'והוכחה לכל אחת.',
-            text: 'מה אני מבטיח לפני שמכניסים סוכן לעסק, ואיפה זה כבר קרה. שמות הלקוחות נשארים אצלי.',
-            evidenceLabel: 'איפה זה קרה',
+            text: 'מה אני מבטיח לפני שמכניסים סוכן לעסק, ואיפה זה קורה היום. שמות הלקוחות נשארים אצלי.',
+            evidenceLabel: 'איפה זה קורה',
             promises: [
                 {
                     title: 'קודם מבינים, אחר כך בונים',
                     text: 'מתחילים מהתהליך ומהנתונים שלכם. AI נכנס רק כשהבסיס יציב ואמין.',
                     evidence:
-                        'את TrinityLegal בניתי ללקוח, משרד עורכי דין, מתוך ישיבות אפיון איתם. 56,607 קבצים כבר בענן, והשלב הבא יצא לדרך: שילוב AI בעבודה השוטפת של המשרד.',
+                        'ב־Trinity Legal, מערכת שבניתי למשרד עורכי דין מתוך ישיבות אפיון איתם. 56,607 קבצים כבר בענן, ועכשיו מתחיל השלב הבא: שילוב AI בעבודה השוטפת של המשרד.',
+                    story: {
+                        label: 'לסיפור המלא של Trinity Legal',
+                        href: '/projects/trinity-legal',
+                    },
                 },
                 {
                     title: 'הסוכן שואל לפני שהוא פועל',
                     text: 'פעולה שאי אפשר לבטל לא יוצאת בלי אישור של בן אדם.',
                     evidence:
-                        'אצלי, כל הודעה שסוכן רוצה לשלוח מחכה לאישור שלי. האישור תקף רק לנמען הזה ולנוסח הזה.',
+                        'אצלי, כל הודעה שסוכן רוצה לשלוח מחכה לאישור שלי. האישור תקף רק לאותו נמען ולאותו נוסח.',
                 },
                 {
                     title: 'רואים מה הסוכן קרא',
-                    text: 'לא קופסה שחורה. לכל תשובה יש פירוט: מה הסוכן קיבל לקרוא, וכמה זמן זה לקח.',
-                    evidence: 'באתר הזה, מתחת לכל תשובה של הסוכן. נסו אותו בראש העמוד.',
+                    text: 'לא קופסה שחורה. לכל תשובה יש פירוט: על אילו מסמכים היא נשענת, וכמה זמן זה לקח.',
+                    evidence:
+                        'באתר הזה: מתחת לכל תשובה של הסוכן יש קישור ״מאחורי התשובה״. נסו אותו בראש העמוד.',
                 },
             ],
-            alsoTitle: 'ועוד ארבע מערכות שבניתי',
+            band: 'רוצים שזה יעבוד כך גם אצלכם?',
+            alsoTitle: 'ועוד שלוש מערכות שבניתי',
+            allProjects: 'לכל הפרויקטים',
             also: [
                 {
                     tag: 'רץ אצלי כל יום',
@@ -158,12 +175,6 @@ export const HOME: Localized<HomeCopy> = {
                     title: 'PersonaKit ↗︎',
                     text: 'זיכרון לסוכני AI שאפשר לקרוא, לבדוק ולתקן. מורידים ומשתמשים: personakit.me',
                     open: true,
-                },
-                {
-                    tag: 'פול־סטאק',
-                    title: 'TrinityCRM',
-                    text: 'CRM שנבנה סביב עסק אחד: תורים, לקוחות ותזכורות. מוכן לחיבור סוכן.',
-                    href: '/projects/trinity-crm',
                 },
                 {
                     tag: 'סוכן בודק סוכן',
@@ -230,7 +241,7 @@ export const HOME: Localized<HomeCopy> = {
                 {
                     year: '2026',
                     label: 'Trinity',
-                    text: 'סוכנים ומערכות לעסקים: TrinityLegal בפיילוט עם לקוחות, יותר מ־40 סוכנים שרצים אצלי כל יום, ו־PersonaKit בקוד פתוח.',
+                    text: 'סוכנים ומערכות לעסקים: Trinity Legal בפיילוט עם לקוחות, יותר מ־40 סוכנים שרצים אצלי כל יום, ו־PersonaKit בקוד פתוח.',
                 },
             ],
         },
@@ -353,29 +364,35 @@ export const HOME: Localized<HomeCopy> = {
             tagline: 'How I work',
             title: 'Three promises.',
             em: 'And proof for each.',
-            text: 'What I promise before an agent goes into a business, and where it has already happened. Client names stay with me.',
-            evidenceLabel: 'Where it happened',
+            text: 'What I promise before an agent goes into a business, and where it happens today. Client names stay with me.',
+            evidenceLabel: 'Where it happens',
             promises: [
                 {
                     title: 'Understand first, build second',
                     text: 'We start from your process and your data. AI comes in only when the foundation is stable and reliable.',
                     evidence:
-                        "I built TrinityLegal for a client, a law office, out of working sessions with the lawyers. 56,607 files are already in the cloud, and the next stage is under way: bringing AI into the office's daily work.",
+                        "At Trinity Legal, a system I built for a law office out of working sessions with the lawyers. 56,607 files are already in the cloud, and now the next stage begins: bringing AI into the office's daily work.",
+                    story: {
+                        label: 'The full Trinity Legal story',
+                        href: '/projects/trinity-legal',
+                    },
                 },
                 {
                     title: 'The agent asks before it acts',
                     text: "An action that can't be undone does not go out without a person's approval.",
                     evidence:
-                        'In my own setup, every message an agent wants to send waits for my approval. The approval holds only for that recipient and that wording.',
+                        'In my own setup, every message an agent wants to send waits for my approval. The approval holds only for that same recipient and that same wording.',
                 },
                 {
                     title: 'You see what the agent read',
-                    text: 'Not a black box. Every answer comes with a breakdown: what the agent was given to read, and how long it took.',
+                    text: 'Not a black box. Every answer comes with a breakdown: which documents it rests on, and how long it took.',
                     evidence:
-                        'On this site, under every answer the agent gives. Try it at the top of the page.',
+                        'On this site: under every answer the agent gives there is a "Behind the answer" link. Try it at the top of the page.',
                 },
             ],
-            alsoTitle: 'And four more systems I built',
+            band: 'Want it to work like this for you?',
+            alsoTitle: 'And three more systems I built',
+            allProjects: 'All projects',
             also: [
                 {
                     tag: 'Runs for me every day',
@@ -388,12 +405,6 @@ export const HOME: Localized<HomeCopy> = {
                     title: 'PersonaKit ↗︎',
                     text: 'Memory for AI agents that you can read, check and correct. Download and use: personakit.me',
                     open: true,
-                },
-                {
-                    tag: 'Full-stack',
-                    title: 'TrinityCRM',
-                    text: 'A CRM built around one business: appointments, customers and reminders. Ready for an agent.',
-                    href: '/projects/trinity-crm',
                 },
                 {
                     tag: 'Agent reviews agent',
@@ -460,7 +471,7 @@ export const HOME: Localized<HomeCopy> = {
                 {
                     year: '2026',
                     label: 'Trinity',
-                    text: 'Agents and systems for businesses: TrinityLegal in a pilot with clients, more than 40 agents that run for me every day, and PersonaKit as open source.',
+                    text: 'Agents and systems for businesses: Trinity Legal in a pilot with clients, more than 40 agents that run for me every day, and PersonaKit as open source.',
                 },
             ],
         },

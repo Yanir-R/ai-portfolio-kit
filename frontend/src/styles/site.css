@@ -1465,7 +1465,8 @@ footer {
 .plan .vflow.live li.go::before,
 .plan.showmap .mode,
 .plan.showmap .sum,
-.plan.showmap .vflow {
+.plan.showmap .vflow,
+.plan.showmap .atr {
     display: none;
 }
 .plan.showmap .map {
@@ -1669,6 +1670,7 @@ footer {
 .plan.showvis .mode,
 .plan.showvis .sum,
 .plan.showvis .vflow,
+.plan.showvis .atr,
 .vis {
     display: none;
 }
@@ -2441,42 +2443,14 @@ footer {
     fill: var(--ink);
     stroke: var(--ink);
 }
-.v-tg {
-    display: inline-flex;
-    align-self: flex-start;
-    box-shadow: inset 0 0 0 1.5px var(--ink);
-    overflow: hidden;
-}
-.v-tg button,
 .v-tr em {
     font-weight: 800;
     font-size: 0.84rem;
 }
-.v-tg button {
-    padding: 3px 12px;
-    color: var(--ink);
-}
 .talk .th button:hover,
-.v-tg button[aria-pressed='true'],
 .v-tr li.hd {
     background: var(--ink);
     color: #fff;
-}
-.v-plain {
-    display: none;
-    flex-direction: column;
-    gap: 14px;
-}
-.v-tech,
-.vis[data-view='plain'] .v-plain {
-    display: flex;
-}
-.vis[data-view='plain'] .v-tech {
-    display: none;
-}
-.v-tech {
-    flex-direction: column;
-    gap: 12px;
 }
 .v-tr {
     list-style: none;
@@ -3006,7 +2980,7 @@ footer {
 .v-kv {
     margin: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     border: 2px solid var(--ink);
     border-radius: 8px;
     background: #fff;
@@ -3042,7 +3016,8 @@ footer {
     margin: 0;
     font-weight: 800;
     font-size: 0.95rem;
-    white-space: nowrap;
+    /* A long value (the conversation, the finish) wraps inside its cell. */
+    overflow-wrap: anywhere;
     text-align: start;
     unicode-bidi: plaintext;
 }
@@ -5165,17 +5140,6 @@ footer a {
         outline: 3px solid var(--btn);
         outline-offset: 2px;
     }
-    .nav.open a.l {
-        display: block;
-        order: 9;
-        flex-basis: 100%;
-        padding: 13px 4px;
-        border-top: 1.5px solid var(--line);
-        font-weight: 700;
-    }
-    .nav.open a.l:last-of-type {
-        border-bottom: 1.5px solid var(--line);
-    }
 }
 @media (max-width: 640px) {
     .art {
@@ -5289,6 +5253,73 @@ footer a {
         font-weight: 700;
         color: var(--act-text);
     }
+    .fp-roles {
+        padding-top: var(--sp-2);
+        border-top: 1.5px dashed var(--line);
+        display: flex;
+        flex-direction: column;
+    }
+    .fp-roles small {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: var(--muted);
+        line-height: 1.3;
+        margin-bottom: 4px;
+    }
+    .fp-roles ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .fp-roles li {
+        display: grid;
+        grid-template-columns: 18px minmax(0, 1fr);
+        column-gap: var(--sp-2);
+        align-items: baseline;
+        padding: 6px 0;
+    }
+    .fp-roles li + li {
+        border-top: 1px solid var(--grid);
+    }
+    .fp-roles i {
+        justify-self: center;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: var(--coral);
+        box-shadow: 0 0 0 1.5px var(--ink);
+    }
+    .fp-roles .lead i {
+        width: 16px;
+        height: 16px;
+        transform: translateY(2px);
+    }
+    .fp-roles .lead span {
+        font-weight: 800;
+    }
+    .fp-roles .dir i {
+        background: var(--tint);
+        box-shadow: none;
+        border: 1.5px dashed var(--ink);
+    }
+    .fp-roles span {
+        font-size: 0.95rem;
+        line-height: 1.35;
+    }
+    .fp-more {
+        align-self: flex-start;
+        min-height: 44px;
+        padding: 0;
+        border: 0;
+        background: none;
+        font: inherit;
+        font-weight: 800;
+        font-size: 0.9rem;
+        color: var(--blue);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        cursor: pointer;
+    }
     .fp-dots {
         display: flex;
         justify-content: center;
@@ -5303,9 +5334,54 @@ footer a {
     .fp-dots i.on {
         background: var(--ink);
     }
-    /* Its content moved into the group card; the number tiles stay. */
-    .fside .fcard {
-        display: none;
+    .fkey {
+        list-style: none;
+        margin: var(--sp-2) 6px 0;
+        padding: 10px 12px;
+        background: var(--bg);
+        border-radius: 8px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--sp-2) var(--sp-3);
+    }
+    .fkey li {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+    .fkey b {
+        font-weight: 800;
+        color: var(--ink);
+    }
+    .fkey span {
+        color: var(--muted);
+    }
+    .fkey i {
+        flex: none;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        box-sizing: border-box;
+        border: 2px solid var(--ink);
+    }
+    .fkey i.k-head {
+        width: 18px;
+        height: 18px;
+        background: var(--ink);
+    }
+    .fkey i.k-lead {
+        background: var(--ink);
+    }
+    .fkey i.k-sub {
+        background: #fff;
+    }
+    .fkey i.k-dir {
+        width: 14px;
+        height: 14px;
+        background: var(--tint);
+        border: 1.5px dashed var(--ink);
     }
     /* Single agents are not tap targets here: a tap lands on its group. */
     #sun .ag.sub,
@@ -7754,7 +7830,9 @@ video.w-v {
         justify-content: center;
     }
 }
-@media (max-width: 380px) {
+/* On a phone the hero's button and the menu's foot carry booking; the bar
+   keeps the name, the language and the menu. */
+@media (max-width: 640px) {
     .nav .btn.sm {
         display: none;
     }
@@ -8901,20 +8979,33 @@ video.w-v {
         color: var(--muted);
         font-size: 0.86rem;
         line-height: 1.45;
+        min-height: 44px;
+        border: 0;
+        font-family: inherit;
+        text-align: start;
+        cursor: pointer;
     }
-    .chat.phone .tz .td {
+    .chat.phone .tz u {
+        color: var(--link);
+        font-weight: 800;
+        text-underline-offset: 3px;
+    }
+    .chat.phone .tz .td,
+    .ptrail .td {
         display: inline-flex;
         gap: 4px;
         flex: none;
     }
-    .chat.phone .tz .td i {
+    .chat.phone .tz .td i,
+    .ptrail .td i {
         width: 9px;
         height: 9px;
         border-radius: 50%;
         background: var(--paper);
         box-shadow: 0 0 0 1.5px var(--ink);
     }
-    .chat.phone .tz .td i.a {
+    .chat.phone .tz .td i.a,
+    .ptrail .td i.a {
         background: var(--btn);
     }
 
@@ -8923,6 +9014,10 @@ video.w-v {
     html.chat-open body {
         overflow: hidden;
         overscroll-behavior: none;
+    }
+    /* A list scrolled to its end does not hand the drag on to the page. */
+    html.chat-open * {
+        overscroll-behavior: contain;
     }
     /*
      * A layer never scrolls or pans sideways: nothing in it is wider than
@@ -9887,5 +9982,872 @@ video.w-v {
     .chat-layer .w-dock .snd {
         min-height: 48px;
         font-size: max(16px, 1em);
+    }
+}
+
+/*
+ * The home chat on a computer (2026-11-25, option A). Once a question is
+ * asked the panel leaves the first-screen fit: the chat and the drawing grow
+ * to the screen's height, 16px from its edges, and each scrolls inside. The
+ * headline above scrolls away with the page. Phones and narrow windows are
+ * untouched (GROW_QUERY in useMediaQuery.ts).
+ */
+@media (min-width: 901px) and (min-height: 620px) {
+    #top.grown {
+        height: auto;
+        min-height: 0;
+        max-height: none;
+    }
+    #top.grown .duo {
+        flex: none;
+        height: calc(100svh - 32px);
+        transition: height 0.2s ease-out;
+    }
+    #top .chat .sz {
+        min-height: 32px;
+        padding: 4px 12px;
+        font-size: 0.85rem;
+    }
+    /* Answers take the log's width; posts and projects under them are one line each. */
+    #top .chat .m.y {
+        max-width: none;
+    }
+    #top .chat .w-card {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-2);
+        padding: 8px 12px;
+    }
+    #top .chat .w-card > :is(.w-imgw, p, .w-q, .w-old),
+    #top .chat .w-card .mt > :not(:first-child) {
+        display: none;
+    }
+    #top .chat .w-card .mt {
+        flex: none;
+        margin: 0;
+    }
+    #top .chat .w-card > :is(b, .w-en, [lang]) {
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #top .chat .w-card .w-out {
+        flex: none;
+        margin: 0;
+    }
+}
+@media (min-width: 901px) and (min-height: 620px) and (prefers-reduced-motion: reduce) {
+    #top.grown .duo {
+        transition: none;
+    }
+}
+
+/* The receipt of one answer: what it rests on, what else happened, the measurements. */
+.rx {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+.rx h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+.rx-hd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+}
+.rx-hd b {
+    font-size: 1.05rem;
+}
+.rx-hd span,
+.rx-rest,
+.rx-ev span,
+.rx-model {
+    color: var(--muted);
+    font-size: 0.86rem;
+    line-height: 1.4;
+}
+.rx-rest,
+.rx-cache,
+.rx-model {
+    margin: 0;
+}
+.v-src li b {
+    flex: 1;
+    min-width: 0;
+}
+.v-src li.used {
+    box-shadow: 3px 3px 0 var(--coral);
+}
+.v-src li em {
+    flex: none;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 1px 8px;
+    border-radius: 4px;
+    background: #fff3cf;
+    color: #6b4a00;
+}
+.rx-ev {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+.rx-ev li {
+    display: grid;
+    grid-template-columns: 12px minmax(0, 1fr);
+    column-gap: 10px;
+}
+.rx-ev li::before {
+    content: '';
+    grid-row: span 2;
+    width: 12px;
+    height: 12px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: var(--coral);
+    box-shadow: inset 0 0 0 2px var(--ink);
+}
+.rx-cache {
+    margin-top: var(--sp-2);
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #6b4a00;
+}
+.rx-model {
+    padding-top: var(--sp-2);
+    border-top: 1.5px dashed var(--line);
+}
+.rx-model span {
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+}
+.v-tok .t1 {
+    --c: repeating-linear-gradient(-45deg, var(--ink) 0 3px, #8d9bc7 3px 6px);
+}
+.v-tok li.t1 {
+    border-inline-start-color: #8d9bc7;
+}
+.v-tok .t2 {
+    --c: var(--blue);
+}
+.v-tok .t3 {
+    --c: var(--coral);
+}
+.v-tok li.t3 {
+    border-inline-start-color: var(--coral);
+}
+.v-kv div:nth-child(3) {
+    border-inline-start: 0;
+}
+.v-kv div:nth-child(n + 3) {
+    border-top: 1.5px solid var(--grid);
+}
+@container (min-width: 520px) {
+    .v-kv {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .v-kv div:nth-child(n + 3) {
+        border-top: 0;
+    }
+    .v-kv div:nth-child(3) {
+        border-inline-start: 1.5px solid var(--grid);
+    }
+}
+
+/* The full-screen menu on narrow screens: the phone chat's layer, for places. */
+.pmenu {
+    position: fixed;
+    left: var(--vv-left, 0px);
+    top: var(--vv-top, 0px);
+    width: var(--vv-w, 100%);
+    height: var(--vv-h, 100dvh);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    outline: none;
+    animation: layer-in 0.18s ease-out;
+}
+.pm-hd {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 10px var(--sp-pad);
+    padding-top: max(10px, env(safe-area-inset-top));
+    border-bottom: 2px solid var(--line);
+}
+.pm-hd .logo {
+    margin-inline-end: auto;
+}
+.pm-x {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: var(--ink);
+    color: #fff;
+    cursor: pointer;
+}
+.pm-x svg {
+    width: 20px;
+    height: 20px;
+}
+.pm-x:focus-visible,
+.pm-rows a:focus-visible {
+    outline: 3px solid var(--btn);
+    outline-offset: -3px;
+}
+.pm-rows {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.pm-rows li + li {
+    border-top: 2px solid var(--line);
+}
+.pm-rows li:last-child {
+    border-bottom: 2px solid var(--line);
+}
+.pm-rows a {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    min-height: 64px;
+    padding: 10px var(--sp-pad);
+    color: var(--ink);
+    text-decoration: none;
+}
+.pm-rows li.here a {
+    background: var(--paper);
+    box-shadow: inset 6px 0 0 var(--coral);
+}
+[dir='rtl'] .pm-rows li.here a {
+    box-shadow: inset -6px 0 0 var(--coral);
+}
+.pm-tx {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.pm-tx b {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 1.05;
+}
+.pm-tx em {
+    font-family: var(--body);
+    font-style: normal;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #fff3cf;
+    color: #6b4a00;
+}
+.pm-tx small {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.3;
+}
+.pm-ch {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-top: 2.4px solid var(--muted);
+    border-inline-end: 2.4px solid var(--muted);
+    transform: rotate(45deg);
+}
+[dir='rtl'] .pm-ch {
+    transform: rotate(-45deg);
+}
+.pm-ft {
+    display: flex;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-pad);
+    padding-bottom: max(var(--sp-3), env(safe-area-inset-bottom));
+    background: var(--paper);
+    border-top: 2px solid var(--ink);
+}
+.pm-ft .btn {
+    min-height: 52px;
+    justify-content: center;
+}
+.pm-ft .btn:not(.wa) {
+    flex: 1;
+}
+.pm-ft .btn.wa {
+    flex: none;
+    width: 52px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+}
+.pm-ft .btn.wa .wi {
+    display: block;
+    width: 26px;
+    height: 26px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .pmenu {
+        animation: none;
+    }
+}
+/* Under the systems on the home page: the way to every project. */
+.proj-all {
+    display: inline-block;
+    margin-top: var(--sp-card);
+    font-weight: 800;
+    color: var(--link);
+}
+.proj-all:hover {
+    text-decoration: underline;
+}
+
+/* The six stations behind an answer: waiting, at work, done. */
+.atr {
+    list-style: none;
+    margin: 0;
+    padding: 14px 18px 8px;
+    display: flex;
+    flex-direction: column;
+}
+.atr li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    column-gap: 14px;
+    align-items: start;
+    padding: 9px 0;
+}
+/* The line into a station, from the dot above it. */
+.atr li + li::before {
+    content: '';
+    position: absolute;
+    top: -9px;
+    height: 18px;
+    inset-inline-start: 13px;
+    border-inline-start: 2px dashed var(--line);
+}
+.atr li.done::before,
+.atr li.now::before {
+    border-inline-start-style: solid;
+    border-inline-start-color: var(--ink);
+}
+.atr .pt {
+    position: relative;
+    z-index: 1;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    border: 2px solid var(--line);
+    background: var(--paper);
+}
+.atr .done .pt {
+    border-color: var(--ink);
+    background: var(--ink)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.6 2.6L12 5.6' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+        center / 16px no-repeat;
+}
+.atr .now .pt {
+    border-color: var(--ink);
+    background: var(--coral);
+    box-shadow:
+        0 0 0 4px #fff3cf,
+        0 0 0 6px var(--coral);
+    animation: atr-ring 1.6s ease-in-out infinite;
+}
+.atr .tx {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.atr .tx b {
+    font-weight: 800;
+    font-size: 1rem;
+    line-height: 1.3;
+    color: var(--ink);
+}
+.atr .tx span {
+    font-size: 0.86rem;
+    line-height: 1.35;
+    color: var(--muted);
+}
+.atr .wait .tx b,
+.atr .skip .tx b {
+    color: #636f93;
+}
+.atr .wait .tx span,
+.atr .skip .tx span {
+    color: #636f93;
+}
+.atr .bar {
+    display: block;
+    position: relative;
+    height: 4px;
+    margin-top: 6px;
+    border-radius: 2px;
+    background: #fff3cf;
+    overflow: hidden;
+}
+.atr .bar::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    width: 35%;
+    border-radius: 2px;
+    background: var(--coral);
+    animation: atr-bar 1.2s ease-in-out infinite;
+}
+.atr .side {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 2px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: var(--ink);
+    white-space: nowrap;
+}
+.atr .side em {
+    font-style: normal;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--coral);
+    color: var(--ink);
+}
+.atr .side time {
+    font-variant-numeric: tabular-nums;
+}
+@keyframes atr-ring {
+    50% {
+        box-shadow:
+            0 0 0 5px #fff3cf,
+            0 0 0 7px var(--coral);
+    }
+}
+@keyframes atr-bar {
+    from {
+        inset-inline-start: -35%;
+    }
+    to {
+        inset-inline-start: 100%;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .atr .now .pt,
+    .atr .bar::after {
+        animation: none;
+    }
+    .atr .bar::after {
+        inset-inline-start: 0;
+        width: 100%;
+        opacity: 0.6;
+    }
+}
+
+/* Under an answer, one quiet row with its stations and the way to its receipt. */
+.ptrail {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--bg);
+    font: inherit;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: start;
+    cursor: pointer;
+}
+.ptrail {
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+.ptrail > span:not(.td) {
+    flex: 1 1 auto;
+    white-space: nowrap;
+}
+.ptrail u {
+    margin-inline-start: auto;
+}
+.ptrail .td i {
+    width: 8px;
+    height: 8px;
+}
+.ptrail u {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: none;
+    font-weight: 800;
+    color: var(--ink);
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+}
+/* Phones: the waiting bubble lists stations one to five as they light. */
+.pwork ol {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.pwork li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #636f93;
+}
+.pwork li b {
+    font-weight: 600;
+}
+.pwork li i {
+    flex: none;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+}
+.pwork li.done {
+    color: var(--ink);
+}
+.pwork li.done i {
+    border-color: var(--ink);
+    background: var(--coral);
+}
+.pwork li.now {
+    color: var(--ink);
+}
+.pwork li.now b {
+    font-weight: 800;
+}
+.pwork li.now i {
+    border-color: var(--ink);
+    background: var(--coral);
+    box-shadow: 0 0 0 3px #fff3cf;
+    animation: atr-ring 1.6s ease-in-out infinite;
+}
+.pwork li em {
+    font-style: normal;
+    font-weight: 800;
+    font-size: 0.72rem;
+    padding: 1px 7px;
+    border-radius: 4px;
+    background: #fff3cf;
+    color: #6b4a00;
+}
+.pwork p {
+    margin: 8px 0 0;
+    font-size: 0.84rem;
+    color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+    .pwork li.now i {
+        animation: none;
+    }
+}
+
+/* The six dots of the quiet row, on every screen. */
+.ptrail .td {
+    display: inline-flex;
+    gap: 4px;
+    flex: none;
+}
+.ptrail .td i {
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 0 0 1.5px var(--ink);
+}
+.ptrail .td i.a {
+    background: var(--btn);
+}
+.ptrail:hover u,
+.ptrail:focus-visible u {
+    text-decoration-style: solid;
+}
+
+/* Beside the chat: the waiting bubble names only the station at work. */
+.dwork p {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    column-gap: 8px;
+    row-gap: 2px;
+    margin: 8px 0 0;
+}
+.dwork p i {
+    flex: none;
+    align-self: center;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    border: 1.5px solid var(--ink);
+    background: var(--coral);
+    box-shadow: 0 0 0 3px #fff3cf;
+    animation: atr-ring 1.6s ease-in-out infinite;
+}
+.dwork p b {
+    font-weight: 800;
+}
+.dwork p span {
+    font-size: 0.86rem;
+    color: #636f93;
+}
+@media (prefers-reduced-motion: reduce) {
+    .dwork p i {
+        animation: none;
+    }
+}
+
+/* The drawing card whose drawing is the one in the panel right now. */
+.art.on {
+    box-shadow: 4px 4px 0 var(--btn);
+}
+[dir='rtl'] .art.on {
+    box-shadow: -4px 4px 0 var(--btn);
+}
+.art.on .s .vd,
+.art.on .s .vm {
+    color: var(--ink);
+}
+
+/* At the top of a receipt: back to the drawing of the same answer. */
+.plan .bk.top {
+    margin: 0 14px 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* The path row on a drawing: its figures keep together and wrap as a whole. */
+.trail {
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+.trail > span:not(.td) {
+    white-space: nowrap;
+}
+
+/*
+ * The grown panel uses its whole height (usePanelFill.ts sets the figures):
+ * a drawing's graphics grow by --fz, the gaps between its blocks widen to
+ * --fg, and the stations' rows spread by --ag. Without those, the plain
+ * layout stands, as on a short screen.
+ */
+@media (min-width: 901px) and (min-height: 620px) {
+    #top.grown .plan,
+    #top.grown .plan .vis {
+        position: relative;
+    }
+    #top.grown .plan.showvis .vis {
+        gap: var(--fg, 14px);
+    }
+    #top.grown .plan.showvis .vis .btn {
+        margin-top: 0;
+    }
+    #top.grown .v-new,
+    #top.grown .v-old {
+        width: calc(150px * var(--fz, 1));
+    }
+    #top.grown .pile,
+    #top.grown .cells,
+    #top.grown .v-wire {
+        zoom: var(--fz, 1);
+    }
+    #top.grown .atr > li + li {
+        margin-top: var(--ag, 0px);
+    }
+    #top.grown .atr > li + li::before {
+        top: calc(-9px - var(--ag, 0px));
+        height: calc(18px + var(--ag, 0px));
+    }
+    #top.grown .plan:not(.showvis, .showmap, .showcmp) .sum {
+        margin-top: var(--sp-3) !important;
+    }
+}
+
+/* Home proof: three systems in one even row; the parts below are phones only. */
+.mini {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.pr h3 .pn,
+.pband,
+.mini .ch {
+    display: none;
+}
+.pr .ev .story {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: -10px;
+    font-weight: 800;
+    color: var(--link);
+}
+.pr .ev .story:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+@media (max-width: 900px) {
+    .mini {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 640px) {
+    /* Promise cards: compact, numbered. */
+    .pr .top {
+        padding: var(--sp-3) var(--sp-3) var(--sp-2);
+        gap: 4px;
+    }
+    .pr h3 {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-2);
+        font-size: 1.5rem;
+        line-height: 1.1;
+    }
+    .pr h3 .pn {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid var(--ink);
+        background: var(--btn);
+        font-family: inherit;
+        font-style: normal;
+        font-size: 0.9rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .pr p {
+        font-size: 0.95rem;
+    }
+    .pr .ev {
+        padding: 10px var(--sp-3);
+        font-size: 0.92rem;
+    }
+    /* After the promises: the way to book. */
+    .pband {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--sp-3);
+        margin-top: var(--sp-3);
+        padding: 12px var(--sp-3);
+        border-radius: 8px;
+        background: #0c1a44;
+    }
+    .pband {
+        flex-wrap: wrap;
+        row-gap: var(--sp-2);
+    }
+    .pband p {
+        flex: 1 1 140px;
+        margin: 0;
+        color: #fff;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+    .pband .btn {
+        flex: none;
+        min-height: 44px;
+    }
+    /* The systems: one box, a row each, the whole row a link. */
+    .also2 {
+        margin-top: var(--sp-4);
+    }
+    .mini {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        background: var(--paper);
+        overflow: hidden;
+    }
+    .mini a {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: var(--sp-3);
+        align-items: center;
+        border: 0;
+        border-radius: 0;
+        padding: 12px var(--sp-3);
+    }
+    .mini a + a {
+        border-top: 1.5px solid var(--line);
+    }
+    .mini a:hover {
+        transform: none;
+        background: var(--bg);
+    }
+    .mini a > :not(.ch) {
+        grid-column: 1;
+        justify-self: start;
+    }
+    .mini .ch {
+        display: block;
+        grid-column: 2;
+        grid-row: 1 / span 3;
+        width: 10px;
+        height: 10px;
+        border-top: 2.4px solid var(--muted);
+        border-inline-end: 2.4px solid var(--muted);
+        transform: rotate(45deg);
+    }
+    [dir='rtl'] .mini .ch {
+        transform: rotate(-45deg);
+    }
+    .mini b {
+        font-size: 1.05rem;
+    }
+    .mini span {
+        font-size: 0.9rem;
+    }
+    .proj-all {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        margin-top: var(--sp-2);
     }
 }

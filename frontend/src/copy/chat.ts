@@ -41,6 +41,9 @@ export interface ChatCopy {
     who: string;
     whoNote: string;
     step1: string;
+    /** On a computer: the chat back to its first-screen size, or out to the screen's height. */
+    smaller: string;
+    larger: string;
     greeting: string;
     startHint: string;
     starters: Starter[];
@@ -69,6 +72,8 @@ export interface ChatCopy {
     noSource: string;
     /** The answer drew on Yanir's own notes, not on a project or post. */
     fromNotes: string;
+    /** The link under an answer to its receipt. */
+    behind: string;
     readyTag: string;
     sentTag: string;
     asking: string;
@@ -146,12 +151,24 @@ export interface ChatCopy {
         another: string;
     };
     /** The sheet card under an answer. */
-    art: { diagram: string; opensSide: string; opensBelow: string; open: string };
+    art: {
+        diagram: string;
+        opensSide: string;
+        opensBelow: string;
+        /** The card's sub-line while its drawing is the one beside the chat. */
+        shownSide: string;
+        shownBelow: string;
+        open: string;
+    };
     /** The phone layout: the chat as a full-screen layer, the diagram as a sheet over it. */
     phone: {
         /** The greeting without "on the left": on a phone the drawing is a sheet. */
         greeting: string;
         teaser: string;
+        /** The link at the end of the teaser row: opens the six stations. */
+        howLink: string;
+        /** On the waiting bubble: what is happening, and for how long. */
+        working: (seconds: number) => string;
         resume: string;
         close: string;
         backToChat: string;
@@ -159,11 +176,29 @@ export interface ChatCopy {
     };
     book: string;
     processes: Record<ProcessId, Process>;
-    /** The site's own chat, drawn with the same stations. */
-    site: Process;
+    /** The six stations of the site's own chat, lit as an answer is made. */
+    trace: {
+        stations: [string, string][];
+        now: string;
+        start: string;
+        foot: {
+            before: string;
+            waiting: string;
+            after: (seconds: number, docs: number) => [string, string, string];
+            declined: string;
+            ready: string;
+        };
+    };
     plan: {
         step2: string;
-        base: { title: string; cap: string; sumH: string; sumT: string };
+        base: {
+            title: string;
+            cap: string;
+            /** The same on a phone's sheet, where the chat is not beside it. */
+            capPhone: string;
+            sumH: string;
+            sumT: string;
+        };
         running: { title: string; cap: string };
         lit: { kicker: string; title: string; cap: string };
         ready: {
@@ -177,6 +212,7 @@ export interface ChatCopy {
             sum: string;
         };
         fromAnswer: string;
+        about: (question: string) => string;
         fromChat: string;
         today: string;
         withAgent: string;
@@ -196,75 +232,10 @@ export interface ChatCopy {
         trailNone: (sec: number) => string;
         trailOpen: string;
         back: string;
+        /** At the top of a receipt whose answer has a drawing: back to that drawing. */
+        backToDrawing: string;
     };
 }
-
-const SITE_HE: Process = {
-    name: 'הצ׳אט באתר',
-    steps: [
-        {
-            person: ['שולחים ליניר שאלה', 'במייל או בוואטסאפ'],
-            agent: ['שואלים כאן', 'בכל שעה, בעברית או באנגלית'],
-            byAgent: false,
-        },
-        {
-            person: ['יניר רואה אותה', 'כשהוא מתפנה, לפעמים רק למחרת'],
-            agent: ['בודק את הפנייה', 'אדם ולא רובוט, ובתוך המכסה היומית'],
-            byAgent: true,
-        },
-        {
-            person: ['מחפש בחומרים שלו', 'פרויקטים, מאמרים, קורות חיים'],
-            agent: ['בוחר מה לקרוא', 'רק מסמכים שקשורים לשאלה'],
-            byAgent: true,
-        },
-        {
-            person: ['כותב תשובה', 'מאפס, בכל פעם'],
-            agent: ['קורא ומנסח', 'פנייה אחת למודל, כמה שניות'],
-            byAgent: true,
-        },
-        {
-            person: ['אתם מקבלים תשובה', 'אחרי יום, ואז עוד שאלה'],
-            agent: ['אתם ויניר מדברים', 'על הפרויקט שלכם, לא על שאלות חוזרות'],
-            byAgent: false,
-        },
-    ],
-    today: 'כל שאלה מחכה ליניר, גם כזו שהתשובה עליה כבר כתובה.',
-    withAgent: 'הסוכן עונה על מה שכבר כתוב. מה שהוא לא מצא, הוא אומר, ומפנה ליניר.',
-};
-
-const SITE_EN: Process = {
-    name: "The site's chat",
-    steps: [
-        {
-            person: ['You send Yanir a question', 'By email or WhatsApp'],
-            agent: ['Ask here', 'Any hour, in Hebrew or English'],
-            byAgent: false,
-        },
-        {
-            person: ['Yanir sees it', "When he's free, sometimes only the next day"],
-            agent: ['Checks the request', 'A person, not a bot, and within the daily quota'],
-            byAgent: true,
-        },
-        {
-            person: ['Searches his materials', 'Projects, articles, CV'],
-            agent: ['Chooses what to read', 'Only documents related to the question'],
-            byAgent: true,
-        },
-        {
-            person: ['Writes an answer', 'From scratch, every time'],
-            agent: ['Reads and writes', 'One call to the model, a few seconds'],
-            byAgent: true,
-        },
-        {
-            person: ['You get an answer', 'A day later, and then another question'],
-            agent: ['You and Yanir talk', 'About your project, not about repeat questions'],
-            byAgent: false,
-        },
-    ],
-    today: 'Every question waits for Yanir, even one whose answer is already written.',
-    withAgent:
-        "The agent answers what's already written. What it didn't find, it says, and points you to Yanir.",
-};
 
 export const CHAT: Localized<ChatCopy> = {
     he: {
@@ -272,6 +243,8 @@ export const CHAT: Localized<ChatCopy> = {
         who: 'הסוכן של יניר',
         whoNote: 'עונה בשמו, רק מתוך מה שיניר כתב',
         step1: '1 · שואלים כאן',
+        smaller: 'הקטנה',
+        larger: 'הגדלה',
         greeting:
             'שלום, אני הסוכן של יניר, ועונה כאן בשמו. שאלו אותי על העבודה שלו, או על מה שסוכן יכול לעשות אצלכם. משמאל תראו איך הגעתי לכל תשובה.',
         startHint: 'אפשר להתחיל מכאן, או לכתוב שאלה משלכם',
@@ -327,6 +300,7 @@ export const CHAT: Localized<ChatCopy> = {
         sources: 'מקורות',
         noSource: 'לא נמצא מסמך מתאים',
         fromNotes: 'מתוך מה שיניר כתב על עצמו',
+        behind: 'מאחורי התשובה',
         readyTag: 'תשובה מוכנה · בלי AI',
         sentTag: 'נשלח ✓ · בלי AI',
         asking: 'שואלים על:',
@@ -389,12 +363,16 @@ export const CHAT: Localized<ChatCopy> = {
             diagram: 'שרטוט לתשובה הזו',
             opensSide: 'נפתח משמאל',
             opensBelow: 'נפתח למטה',
+            shownSide: 'מוצג משמאל',
+            shownBelow: 'מוצג למטה',
             open: 'פתחו',
         },
         phone: {
             greeting:
                 'שלום, אני הסוכן של יניר, ועונה כאן בשמו. שאלו אותי על העבודה שלו, או על מה שסוכן יכול לעשות אצלכם.',
-            teaser: 'לכל תשובה מצורף שרטוט, ורואים איך הסוכן הגיע אליה.',
+            teaser: 'כל שאלה עוברת שש תחנות, ותראו אותן נדלקות.',
+            howLink: 'איך הסוכן עונה',
+            working: (n) => `הסוכן עובד על התשובה · ${n} שנ׳`,
             resume: 'המשך השיחה',
             close: 'סגירת השיחה',
             backToChat: 'חזרה לשיחה',
@@ -531,12 +509,35 @@ export const CHAT: Localized<ChatCopy> = {
                 withAgent: 'הידע נשאר בארגון, והמומחים נשאלים רק מה שחדש.',
             },
         },
-        site: SITE_HE,
+        trace: {
+            stations: [
+                ['שואלים כאן', 'בכל שעה, בעברית או באנגלית'],
+                ['בודק את הפנייה', 'מוודא שאפשר לענות עליה'],
+                ['בוחר מה לקרוא', 'רק מסמכים שקשורים לשאלה, וזוכר את המשך השיחה'],
+                ['קורא ומנסח', 'פנייה אחת למודל, בדרך כלל כמה שניות'],
+                ['בודק את התשובה', 'קישורים רק לאתרים מוכרים, ואומר כשאין לו תשובה'],
+                ['אתם ויניר מדברים', 'כשזה נשמע כמו פרויקט, הסוכן מציע לעבור ליניר'],
+            ],
+            now: 'עכשיו',
+            start: 'מתחילים כאן',
+            foot: {
+                before: 'כל תחנה נדלקת כשהיא קורית.',
+                waiting: 'הסוכן קורא את המסמכים שנבחרו וכותב תשובה.',
+                after: (sec, docs) => [
+                    sec === 1 ? 'שנייה אחת' : `${sec} שניות`,
+                    ' משאלה לתשובה, מתוך ',
+                    docs === 1 ? 'מסמך אחד.' : `${docs} מסמכים.`,
+                ],
+                declined: 'הסוכן אמר שאין לו תשובה, במקום לנחש.',
+                ready: 'תשובה מוכנה שיניר כתב מראש. המודל לא הופעל.',
+            },
+        },
         plan: {
             step2: '2 · רואים כאן איך הוא ענה',
             base: {
                 title: 'איך הסוכן עונה',
-                cap: 'כל שאלה עוברת את חמש התחנות האלה. שאלו משהו מימין, והן יידלקו אחת אחת.',
+                cap: 'כל שאלה עוברת את שש התחנות האלה. שאלו משהו מימין, והן יידלקו אחת אחת.',
+                capPhone: 'כל שאלה עוברת את שש התחנות האלה. שאלו משהו, והן יידלקו אחת אחת.',
                 sumH: 'למה זה כאן:',
                 sumT: 'כך נראה סוכן שאפשר לבדוק. רואים מה הוא קרא, וכמה זמן זה לקח.',
             },
@@ -544,7 +545,7 @@ export const CHAT: Localized<ChatCopy> = {
             lit: {
                 kicker: 'המסלול של התשובה',
                 title: 'מאחורי התשובה הזו',
-                cap: 'חמש התחנות שהתשובה עברה, עם מה שנקרא וכמה זמן זה לקח.',
+                cap: 'שש התחנות שהתשובה עברה, עם מה שנקרא וכמה זמן זה לקח.',
             },
             ready: {
                 title: 'תשובה מוכנה: המסלול הקצר',
@@ -557,6 +558,7 @@ export const CHAT: Localized<ChatCopy> = {
                 sum: 'הגיעה מיד, מתוכן שיניר כתב. לא כל שאלה צריכה AI.',
             },
             fromAnswer: 'נוצר מהתשובה הזו',
+            about: (q) => `על השאלה: ״${q}״`,
             fromChat: 'נוצר מהשיחה הזו',
             today: 'היום',
             withAgent: 'עם סוכן',
@@ -572,10 +574,11 @@ export const CHAT: Localized<ChatCopy> = {
             sumH: 'התשובה הזו:',
             sumFrom: (n) => `נכתבה מתוך ${n} מסמכים של יניר. המודל לא ראה שום דבר אחר.`,
             sumDeclined: 'הסוכן אמר שהוא לא יודע, במקום להמציא.',
-            trail: (n, sec) => `קרא ${n} מסמכים · ${sec} שניות`,
+            trail: (n, sec) => `קרא ${n === 1 ? 'מסמך אחד' : `${n} מסמכים`} · ${sec} שניות`,
             trailNone: (sec) => `לא נמצא מסמך מתאים · ${sec} שניות`,
-            trailOpen: 'איך הגעתי לתשובה',
+            trailOpen: 'שש התחנות בדרך לתשובה',
             back: 'חזרה לשרטוט של התשובה',
+            backToDrawing: 'חזרה לשרטוט',
         },
     },
     en: {
@@ -583,6 +586,8 @@ export const CHAT: Localized<ChatCopy> = {
         who: "Yanir's agent",
         whoNote: 'Answers for him, only from what Yanir wrote',
         step1: '1 · Ask here',
+        smaller: 'Smaller',
+        larger: 'Larger',
         greeting:
             "Hi, I'm Yanir's agent, and I answer here on his behalf. Ask me about his work, or about what an agent could do for you. On the right you'll see how I got to each answer.",
         startHint: 'You can start here, or type your own question',
@@ -649,6 +654,7 @@ export const CHAT: Localized<ChatCopy> = {
         sources: 'Sources',
         noSource: 'No matching document found',
         fromNotes: 'From what Yanir wrote about himself',
+        behind: 'Behind the answer',
         readyTag: 'Ready answer · no AI',
         sentTag: 'Sent ✓ · no AI',
         asking: 'Asking about:',
@@ -716,12 +722,16 @@ export const CHAT: Localized<ChatCopy> = {
             diagram: 'A diagram for this answer',
             opensSide: 'opens on the right',
             opensBelow: 'opens below',
+            shownSide: 'shown on the right',
+            shownBelow: 'shown below',
             open: 'Open',
         },
         phone: {
             greeting:
                 "Hi, I'm Yanir's agent, and I answer here on his behalf. Ask me about his work, or about what an agent could do for you.",
-            teaser: 'Every answer comes with a diagram of how the agent got there.',
+            teaser: "Every question goes through six stations, and you'll see them light up.",
+            howLink: 'How the agent answers',
+            working: (n) => `The agent is working on the answer · ${n} s`,
             resume: 'Continue the conversation',
             close: 'Close the chat',
             backToChat: 'Back to the chat',
@@ -868,20 +878,53 @@ export const CHAT: Localized<ChatCopy> = {
                     "The knowledge stays in the organization, and the experts are asked only what's new.",
             },
         },
-        site: SITE_EN,
+        trace: {
+            stations: [
+                ['Ask here', 'Any hour, in Hebrew or English'],
+                ['Checks the request', 'Makes sure it can be answered'],
+                [
+                    'Chooses what to read',
+                    'Only documents related to the question, and it remembers the conversation',
+                ],
+                ['Reads and writes', 'One call to the model, usually a few seconds'],
+                [
+                    'Checks the answer',
+                    'Links only to known sites, and it says when it has no answer',
+                ],
+                [
+                    'You and Yanir talk',
+                    'When it sounds like a project, the agent offers to move to Yanir',
+                ],
+            ],
+            now: 'Now',
+            start: 'Start here',
+            foot: {
+                before: 'Each station lights up as it happens.',
+                waiting: 'The agent is reading the chosen documents and writing an answer.',
+                after: (sec, docs) => [
+                    sec === 1 ? 'One second' : `${sec} seconds`,
+                    ' from question to answer, from ',
+                    docs === 1 ? 'one document.' : `${docs} documents.`,
+                ],
+                declined: 'The agent said it has no answer, instead of guessing.',
+                ready: 'A ready answer Yanir wrote in advance. The model was not called.',
+            },
+        },
         plan: {
             step2: '2 · See here how it answered',
             base: {
                 title: 'How the agent answers',
-                cap: 'Every question goes through these five stops. Ask something on the left, and they light up one by one.',
+                cap: 'Every question goes through these six stations. Ask something on the left, and they light up one by one.',
+                capPhone:
+                    'Every question goes through these six stations. Ask something, and they light up one by one.',
                 sumH: 'Why this is here:',
                 sumT: 'This is what an agent you can check looks like. You see what it read, and how long it took.',
             },
-            running: { title: 'Behind this answer', cap: 'Each stop lights up as it happens.' },
+            running: { title: 'Behind this answer', cap: 'Each station lights up as it happens.' },
             lit: {
                 kicker: "The answer's path",
                 title: 'Behind this answer',
-                cap: 'The five stops the answer went through, with what was read and how long it took.',
+                cap: 'The six stations the answer went through, with what was read and how long it took.',
             },
             ready: {
                 title: 'Ready answer: the short path',
@@ -894,6 +937,7 @@ export const CHAT: Localized<ChatCopy> = {
                 sum: 'It arrived at once, from content Yanir wrote. Not every question needs AI.',
             },
             fromAnswer: 'Made from this answer',
+            about: (q) => `About the question: "${q}"`,
             fromChat: 'Made from this chat',
             today: 'Today',
             withAgent: 'With an agent',
@@ -911,10 +955,11 @@ export const CHAT: Localized<ChatCopy> = {
             sumFrom: (n) =>
                 `was written from ${n} of Yanir's documents. The model saw nothing else.`,
             sumDeclined: "The agent said it doesn't know, instead of making something up.",
-            trail: (n, sec) => `Read ${n} documents · ${sec} seconds`,
+            trail: (n, sec) => `Read ${n} document${n === 1 ? '' : 's'} · ${sec} seconds`,
             trailNone: (sec) => `No matching document found · ${sec} seconds`,
-            trailOpen: 'How I got to the answer',
+            trailOpen: 'The six stations to the answer',
             back: "Back to the answer's diagram",
+            backToDrawing: 'Back to the drawing',
         },
     },
 };

@@ -52,6 +52,8 @@ export interface AnswerTrace {
     thinking_tokens?: number | null;
     output_tokens?: number | null;
     total_tokens?: number | null;
+    /** The part of `prompt_tokens` the model served from its cache. */
+    cached_tokens?: number | null;
     finish_reason?: string | null;
     latency_ms?: number | null;
     context?: ContextCount[] | null;

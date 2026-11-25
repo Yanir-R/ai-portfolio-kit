@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { useKeyboardFit } from '@/hooks/useKeyboardFit';
+import { KEYBOARD_COVER_PX, SETTLE_READS_MS, useKeyboardFit } from '@/hooks/useKeyboardFit';
 
 /*
  * A full-screen layer on a phone, shared by the home chat and the chat on a
@@ -35,6 +35,49 @@ export const trapTab = (event: KeyboardEvent, box: HTMLElement) => {
         event.preventDefault();
         first.focus();
     }
+};
+
+/** Whether a drag that starts on `target` has something inside `box` to scroll. */
+const canScroll = (target: EventTarget | null, box: HTMLElement) => {
+    for (let el = target as HTMLElement | null; el && el !== document.body; el = el.parentElement) {
+        // Text fields keep their own drags: moving the caret, selecting.
+        if (el.matches('input, textarea')) return true;
+        const { overflowY } = getComputedStyle(el);
+        if (/(auto|scroll)/.test(overflowY) && el.scrollHeight > el.clientHeight + 1) return true;
+        if (el === box) return false;
+    }
+    return false;
+};
+
+/*
+ * Holds the page still under a layer. On iOS `overflow: hidden` is not
+ * enough: with the keyboard up the browser still pans the page under a drag,
+ * and the layer, which follows the visible viewport, shakes as it chases it.
+ * So the body is pinned where it was, and a drag on any part of the screen
+ * with nothing to scroll is refused. Returns the undo.
+ */
+const holdPage = () => {
+    const root = document.documentElement;
+    const body = document.body;
+    const y = window.scrollY;
+    const address = () => location.pathname + location.search + location.hash;
+    const at = address();
+    const before = { position: body.style.position, top: body.style.top, width: body.style.width };
+    body.style.position = 'fixed';
+    body.style.top = `${-y}px`;
+    body.style.width = '100%';
+    return () => {
+        body.style.position = before.position;
+        body.style.top = before.top;
+        body.style.width = before.width;
+        // Back exactly where the visitor was, without the page's smooth
+        // scrolling; unless the layer closed by going somewhere else.
+        if (address() !== at) return;
+        const behaviour = root.style.scrollBehavior;
+        root.style.scrollBehavior = 'auto';
+        window.scrollTo(0, y);
+        root.style.scrollBehavior = behaviour;
+    };
 };
 
 type LayerState = Record<string, unknown>;
@@ -93,8 +136,15 @@ export const useLayerChrome = (
         if (!open || !box) return;
         const root = document.documentElement;
         root.classList.add('chat-open');
+        const release = holdPage();
+        const onTouchMove = (event: TouchEvent) => {
+            if (event.cancelable && !canScroll(event.target, box)) event.preventDefault();
+        };
+        document.addEventListener('touchmove', onTouchMove, { passive: false });
         if (!box.contains(document.activeElement)) box.focus({ preventScroll: true });
         return () => {
+            document.removeEventListener('touchmove', onTouchMove);
+            release();
             root.classList.remove('chat-open');
             // Back on the page, at the entry that reopens the layer.
             requestAnimationFrame(() => returnRef.current?.focus({ preventScroll: true }));
@@ -132,15 +182,28 @@ export const useLogFollowsViewport = (
         const vv = window.visualViewport;
         const log = logRef.current;
         if (!enabled || !vv || !log) return;
+        /*
+         * Short only while a keyboard takes the room. A layer that has just
+         * opened can read the viewport mid-change (iOS hides or shows its
+         * toolbars as the page locks) and not be told when it settles, so a
+         * short screen with no keyboard never hides the suggestions, and the
+         * reading is taken again once the opening has settled.
+         */
+        const measure = () =>
+            setShort(vv.height < shortPx && window.innerHeight - vv.height > KEYBOARD_COVER_PX);
         const onResize = () => {
-            setShort(vv.height < shortPx);
+            measure();
             // A frame later, once the layer has taken the new height.
             requestAnimationFrame(() => (log.scrollTop = log.scrollHeight));
         };
         onResize();
+        const settle = SETTLE_READS_MS.map((ms) => window.setTimeout(measure, ms));
         vv.addEventListener('resize', onResize);
+        vv.addEventListener('scroll', measure);
         return () => {
+            settle.forEach((timer) => window.clearTimeout(timer));
             vv.removeEventListener('resize', onResize);
+            vv.removeEventListener('scroll', measure);
             setShort(false);
         };
     }, [enabled, logRef, shortPx]);

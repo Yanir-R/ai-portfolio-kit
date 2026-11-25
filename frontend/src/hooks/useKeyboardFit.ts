@@ -3,7 +3,9 @@ import React, { useEffect } from 'react';
 /** Under this visible height a phone's keyboard is taken to be open. */
 const KEYBOARD_VIEW_PX = 520;
 /** Or when this much of the layout height is hidden (iOS keeps innerHeight). */
-const KEYBOARD_COVER_PX = 120;
+export const KEYBOARD_COVER_PX = 120;
+/** When a just-opened window reads the visible height again, after the browser's own changes. */
+export const SETTLE_READS_MS = [120, 400];
 /** Wait for the keyboard's slide before centring the field. */
 const SETTLE_MS = 320;
 /** A growing field (`data-grow`) stops at this many lines and scrolls inside. */
@@ -156,16 +158,32 @@ export const useKeyboardFit = (
             if (centring) timer = window.setTimeout(centre, SETTLE_MS);
         };
 
+        // Viewport events can come many times a frame while iOS pans; the
+        // window moves once per frame, to the latest reading.
+        let frame = 0;
+        const follow = () => {
+            if (frame) return;
+            frame = requestAnimationFrame(() => {
+                frame = 0;
+                fit();
+            });
+        };
+
         fit();
-        vv.addEventListener('resize', fit);
-        vv.addEventListener('scroll', fit);
+        // A window that has just opened can read the viewport mid-change and
+        // not be told when it settles (iOS toolbars): read it again then.
+        const settleReads = SETTLE_READS_MS.map((ms) => window.setTimeout(fit, ms));
+        vv.addEventListener('resize', follow);
+        vv.addEventListener('scroll', follow);
         box.addEventListener('focusin', onFocus);
         box.addEventListener('input', onInput);
         watchForms();
         return () => {
             window.clearTimeout(timer);
-            vv.removeEventListener('resize', fit);
-            vv.removeEventListener('scroll', fit);
+            cancelAnimationFrame(frame);
+            settleReads.forEach((read) => window.clearTimeout(read));
+            vv.removeEventListener('resize', follow);
+            vv.removeEventListener('scroll', follow);
             box.removeEventListener('focusin', onFocus);
             box.removeEventListener('input', onInput);
             resized.disconnect();

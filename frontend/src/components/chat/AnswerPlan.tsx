@@ -1,21 +1,34 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CHAT } from '@/copy/chat';
 import { SHEET_HEADS } from '@/content/sheets';
-import { AnswerRecord, HomeChat } from '@/chat/useHomeChat';
-import ProcessFlow, { StationState } from '@/components/chat/ProcessFlow';
+import { HomeChat } from '@/chat/useHomeChat';
+import ProcessFlow from '@/components/chat/ProcessFlow';
+import AnswerTrace, { TraceStation } from '@/components/chat/AnswerTrace';
 import SystemsMap from '@/components/chat/SystemsMap';
 import { SheetBody } from '@/components/chat/sheets/Sheets';
-import { Arrow } from '@/components/site/Arrow';
+import { ARROW, Arrow } from '@/components/site/Arrow';
 import { REDUCED_MOTION_QUERY, STACKED_QUERY } from '@/hooks/useMediaQuery';
+import { usePanelFill } from '@/hooks/usePanelFill';
 import { useLang } from '@/i18n/useLang';
 
-// The station that calls the model; the ones before it are instant.
+// The station that calls the model; the ones before it complete as the request goes.
 const MODEL_STATION = 3;
-const LAST_STATION = 4;
+const STATIONS = 6;
+// A step shorter than this shows no time: it was not something to wait for.
+const SHOWN_FROM_MS = 1000;
+
+/** "9 seconds from question to answer, from 3 documents.", the figures in bold. */
+const AfterLine: React.FC<{ parts: [string, string, string] }> = ({ parts }) => (
+    <>
+        <b>{parts[0]}</b>
+        {parts[1]}
+        <b>{parts[2]}</b>
+    </>
+);
 
 /*
  * The drawing beside the chat. Everything on it follows from `chat.plan`:
- * the five stations of the site's own chat (lit as a request runs, then with
+ * the six stations of the site's own chat (lit as a request runs, then with
  * the figures the backend measured), or a sheet made for the answer, or the
  * visitor's process today and with an agent. A sheet opened earlier is
  * reopened from the card under the answer that made it.
@@ -30,18 +43,11 @@ const AnswerPlan: React.FC<{
     /** The second copy on the page: no element ids, which the live one owns. */
     idless?: boolean;
 }> = ({ chat, onClose, idless }) => {
-    const { t } = useLang();
+    const { t, lang } = useLang();
     const copy = t(CHAT);
     const heads = t(SHEET_HEADS);
     const plan = chat.plan;
     const ref = useRef<HTMLDivElement>(null);
-    // The view belongs to the sheet it was chosen on; a new sheet starts in the technical one.
-    const [chosen, setChosen] = useState<{ plan: typeof plan; view: 'tech' | 'plain' } | null>(
-        null
-    );
-    const view = chosen?.plan === plan ? chosen.view : 'tech';
-    const setView = (next: 'tech' | 'plain') => setChosen({ plan, view: next });
-
     // On a stacked layout a newly opened drawing is scrolled to, since it opens below the chat.
     useEffect(() => {
         if (onClose) return;
@@ -52,73 +58,56 @@ const AnswerPlan: React.FC<{
         ref.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
     }, [plan, onClose]);
 
-    const docsNote = (record: AnswerRecord) =>
-        record.sources.length ? (
-            <>
-                {copy.plan.docsOf(
-                    record.sources.length,
-                    Math.max(record.available, record.sources.length)
-                )}
-                <span className="docs">
-                    {record.sources.map((s) => (
-                        <i key={`${s.kind}-${s.slug}`}>{s.title}</i>
-                    ))}
-                </span>
-            </>
-        ) : (
-            copy.plan.noDocs
-        );
+    usePanelFill(ref, plan);
 
     const id = (name: string) => (idless ? undefined : name);
+    const trace = copy.trace;
     const seconds = (n: number) => `${n} ${copy.secondsShort}`;
-    const instant = { state: 'done' as const, go: true, time: copy.plan.instant };
+    const waiting = (): TraceStation[] =>
+        Array.from({ length: STATIONS }, () => ({ state: 'wait' as const }));
 
-    let stations: StationState[] | undefined;
+    // Each station as the current plan has it; the footer says the same in words.
+    const stations = waiting();
+    let foot: React.ReactNode = trace.foot.before;
     if (plan.kind === 'running') {
-        stations = [{ state: 'done' }];
-        if (plan.stage >= 1) stations[1] = { ...instant, note: copy.plan.checked };
-        if (plan.stage >= 2) stations[2] = { ...instant };
+        stations[0] = { state: 'done' };
+        if (plan.stage >= 1) stations[1] = { state: 'done' };
+        if (plan.stage >= 2) stations[2] = { state: 'done' };
         if (plan.stage >= MODEL_STATION)
             stations[MODEL_STATION] = {
-                state: 'act',
-                go: true,
-                time: seconds(Math.max(1, plan.elapsed)),
+                state: 'now',
+                tag: trace.now,
+                time: seconds(plan.elapsed),
+                bar: true,
             };
+        foot = trace.foot.waiting;
     } else if (plan.kind === 'lit') {
-        stations = [
-            { state: 'done' },
-            { ...instant, note: copy.plan.checked },
-            { ...instant, note: docsNote(plan.record) },
-            {
-                state: 'done',
-                go: true,
-                time: seconds(plan.record.seconds),
-                note: copy.plan.modelNote,
-            },
-            { state: 'done', go: true },
-        ];
+        const record = plan.record;
+        const ms = record.trace?.latency_ms ?? record.seconds * 1000;
+        for (let i = 0; i < 5; i++) stations[i] = { state: 'done' };
+        if (ms >= SHOWN_FROM_MS) stations[MODEL_STATION].time = seconds(record.seconds);
+        if (record.handoff || chat.handoffOffered) stations[5] = { state: 'done' };
+        foot = record.declined ? (
+            trace.foot.declined
+        ) : (
+            <AfterLine parts={trace.foot.after(record.seconds, record.sources.length)} />
+        );
     } else if (plan.kind === 'ready') {
-        const skip = {
-            state: 'skip' as const,
-            who: copy.plan.ready.skipped,
-            note: copy.plan.ready.skipNote,
-        };
-        stations = [{ state: 'done' }, skip, skip, skip];
-        stations[LAST_STATION] = {
-            state: 'ready',
-            go: true,
-            who: copy.plan.ready.who,
-            title: copy.plan.ready.done,
-            note: copy.plan.ready.note,
-            time: copy.plan.instant,
-        };
+        stations[0] = { state: 'done' };
+        for (let i = 1; i < 5; i++) stations[i] = { state: 'skip', note: copy.plan.ready.skipNote };
+        foot = trace.foot.ready;
+    } else {
+        // Before any question: the first station is where to start.
+        stations[0] = { state: 'now', tag: trace.start };
     }
 
     // Header, caption and summary for the current view.
     let kicker = copy.plan.step2;
     let title = copy.plan.base.title;
-    let cap = copy.plan.base.cap;
-    let sum: [string, string] = [copy.plan.base.sumH, copy.plan.base.sumT];
+    let cap = onClose ? copy.plan.base.capPhone : copy.plan.base.cap;
+    // The phone's sheet, opened before any question, says why the stations are shown.
+    const sum: [string, React.ReactNode] =
+        plan.kind === 'base' && onClose ? [copy.plan.base.sumH, copy.plan.base.sumT] : ['', foot];
     let mode = '';
     const current = plan.kind === 'sheet' ? chat.sheets.find((s) => s.key === plan.key) : undefined;
 
@@ -134,16 +123,15 @@ const AnswerPlan: React.FC<{
             title = copy.plan.running.title;
             cap = copy.plan.running.cap;
         }
-        const n = plan.record.sources.length;
-        sum = [copy.plan.sumH, plan.record.declined ? copy.plan.sumDeclined : copy.plan.sumFrom(n)];
     } else if (plan.kind === 'ready') {
         title = copy.plan.ready.title;
         cap = copy.plan.ready.cap;
-        sum = [copy.plan.sumH, copy.plan.ready.sum];
     } else if (plan.kind === 'sheet') {
         kicker = copy.plan.fromAnswer;
         title = heads[plan.key].title;
         cap = heads[plan.key].cap;
+        // The receipt names the question it is about.
+        if (plan.key === 'read' && current?.record) cap = copy.plan.about(current.record.question);
         mode = plan.key === 'map' ? 'showmap' : 'showvis';
     } else if (plan.kind === 'cmp') {
         kicker = copy.plan.fromChat;
@@ -153,6 +141,15 @@ const AnswerPlan: React.FC<{
     }
 
     const record = current?.record;
+    // Beside the chat, a receipt whose answer also made a drawing leads back to it.
+    const drawing =
+        !onClose && plan.kind === 'sheet' && plan.key === 'read' && record
+            ? chat.entries.find((e) => e.kind === 'answer' && e.record === record)
+            : undefined;
+    const drawingKey =
+        drawing?.kind === 'answer' && drawing.sheet && drawing.sheet !== 'read'
+            ? drawing.sheet
+            : undefined;
 
     return (
         <div className={mode ? `plan ${mode}` : 'plan'} id={id('plan')} ref={ref}>
@@ -172,17 +169,27 @@ const AnswerPlan: React.FC<{
                     </button>
                 )}
             </div>
+            {drawingKey && (
+                <button
+                    type="button"
+                    className="bk top"
+                    onClick={() => chat.openSheet(drawingKey, record)}
+                >
+                    {/* Back the way the reader came: the arrow points against the text. */}
+                    <span aria-hidden="true">{ARROW[lang === 'he' ? 'en' : 'he']}</span>{' '}
+                    {copy.plan.backToDrawing}
+                </button>
+            )}
             <div className="cap" id={id('cap')}>
                 {cap}
             </div>
             {plan.kind === 'sheet' && record && (
                 <button type="button" className="trail" onClick={() => chat.showPath(plan.key)}>
                     <span className="td">
-                        <i />
-                        <i className="a" />
-                        <i className="a" />
-                        <i className="a" />
-                        <i />
+                        {/* Five stations always run; the sixth only when Yanir was offered. */}
+                        {[0, 1, 2, 3, 4, 5].map((i) => (
+                            <i key={i} className={i < 5 || record.handoff ? 'a' : undefined} />
+                        ))}
                     </span>
                     <span>
                         {record.sources.length
@@ -194,7 +201,7 @@ const AnswerPlan: React.FC<{
                     </b>
                 </button>
             )}
-            <ProcessFlow process={copy.site} mode="agent" stations={stations} id={id('flow')} />
+            <AnswerTrace stations={stations} id={id('flow')} />
             <div className="cmp" id={id('cmp')} aria-live="polite">
                 {plan.kind === 'cmp' && (
                     <>
@@ -218,26 +225,19 @@ const AnswerPlan: React.FC<{
             <div className="map" id={id('map')}>
                 {plan.kind === 'sheet' && plan.key === 'map' && <SystemsMap />}
             </div>
-            <div
-                className="vis"
-                id={id('vis')}
-                aria-live="polite"
-                data-view={view === 'plain' ? 'plain' : undefined}
-            >
+            <div className="vis" id={id('vis')} aria-live="polite">
                 {plan.kind === 'sheet' && plan.key !== 'map' && (
                     <SheetBody
                         key={plan.key}
                         sheet={plan.key}
                         record={record}
                         letter={current?.letter}
-                        view={view}
-                        onView={setView}
                         onMailChat={chat.mailFromChat}
                     />
                 )}
             </div>
             <div className="sum">
-                <b id={id('sum-h')}>{sum[0]}</b>
+                {sum[0] && <b id={id('sum-h')}>{sum[0]}</b>}
                 <span id={id('sum-t')}>{sum[1]}</span>
             </div>
             {plan.kind === 'lit' && plan.back && (

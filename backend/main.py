@@ -410,16 +410,24 @@ def _cited_sections(selection: Selection, used: Optional[Tuple[str, ...]]) -> Li
     """The sent projects and pieces of writing the model says its answer drew on.
 
     Matched by title against what was actually sent, so a title the model
-    invents or misremembers matches nothing. In corpus order.
+    invents or misremembers matches nothing. In the model's own order, so the
+    first is the one the answer leans on most (the site picks its drawing by
+    it); a title named twice counts once.
     """
-    wanted = {" ".join(title.casefold().split()) for title in used or ()}
-    return [
-        section
+    def norm(title: str) -> str:
+        return " ".join(title.casefold().split())
+
+    sent = {
+        norm(section.title): section
         for section in selection.knowledge.sections
-        if section.source in ("writing", "project")
-        and section.slug
-        and " ".join(section.title.casefold().split()) in wanted
-    ]
+        if section.source in ("writing", "project") and section.slug
+    }
+    cited: List[Section] = []
+    for title in used or ():
+        section = sent.get(norm(title))
+        if section is not None and section not in cited:
+            cited.append(section)
+    return cited
 
 
 def _used_slugs(selection: Selection, used: Optional[Tuple[str, ...]]) -> Set[str]:
