@@ -8546,6 +8546,29 @@ video.w-v {
     #top .chat.phone:not(.full):not(.live) .log > :first-child {
         margin-top: 0;
     }
+    /* Spare height is spread between the starters, never left as one empty band. */
+    #top .chat.phone:not(.full):not(.live) .log {
+        justify-content: space-between;
+    }
+    #top .chat.phone:not(.full):not(.live) .m.st0 {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    #top .chat.phone:not(.full):not(.live) .stg {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+    /* The starters take the slack first, up to about 16px more padding each. */
+    #top .chat.phone:not(.full):not(.live) .stg button:not(:nth-child(n + 4)) {
+        flex: 1 1 auto;
+        max-height: 92px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
     #top .chat.phone:not(.full).live {
         min-height: 0;
     }
