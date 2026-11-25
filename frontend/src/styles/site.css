@@ -5722,6 +5722,13 @@ html.panel .w-post {
     margin: 0 0 0.9em;
     white-space: pre-wrap;
 }
+/* Images inside a post's text are drawn at up to 1200px; keep them inside the column. */
+.w-body img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+}
 .w-body h2 {
     font-size: 1.45rem;
     margin: 1.3em 0 0.4em;
@@ -6495,7 +6502,9 @@ html.panel .w-post {
 }
 .w-pn a b {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    /* Three lines: on a phone a title of a short sentence needs them, and a cut
+       without an ellipsis (mixed-direction text drops it) would hide words. */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -7508,9 +7517,6 @@ video.w-v {
         width: 28px;
         height: 28px;
     }
-    .stg button:nth-child(n + 3) {
-        display: none;
-    }
     .nav .btn.sm {
         font-size: 0.78rem;
         padding: 7px 9px;
@@ -7672,9 +7678,6 @@ video.w-v {
         padding-top: 10px;
         padding-bottom: 6px;
     }
-    #top .chat:not(.live) .log > .m.y:first-child {
-        display: none;
-    }
     #top .chat:not(.live) .ph small {
         display: none;
     }
@@ -7703,9 +7706,24 @@ video.w-v {
         font-size: clamp(1.8rem, 5.6vh, 2.8rem);
     }
 }
+@media (max-width: 640px) and (max-height: 880px) {
+    #top h1 {
+        font-size: clamp(1.9rem, 5.4vh, 2.9rem);
+    }
+    #top .chat.phone:not(.full) .stg button {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+    #top:lang(en) h1 {
+        font-size: clamp(1.7rem, 4.4vh, 2.5rem);
+    }
+}
 @media (max-width: 640px) and (max-height: 760px) {
-    #top .chat:not(.live) .stg button span {
-        display: none;
+    #top h1 {
+        font-size: clamp(1.7rem, 4.9vh, 2.6rem);
+    }
+    #top:lang(en) h1 {
+        font-size: clamp(1.6rem, 4.2vh, 2.3rem);
     }
 }
 
@@ -8558,67 +8576,406 @@ video.w-v {
 }
 
 /*
- * Booking without needless scrolling or empty bands (2026-11-25). On a wide
- * screen the name and email share a row, so the details step fits the
- * window. On a phone the calendar fills the frame, and a picked day's times
- * open under it instead of replacing it.
+ * Phone chat (design change, 2026-11-25). The card fills the rest of the first
+ * screen; once the visitor starts it opens as a full-screen layer where only
+ * the conversation scrolls and the chips and input stay pinned above the
+ * keyboard; an answer's drawing rises over it as a sheet. Desktop and tablet
+ * keep the panel beside the drawing.
  */
-@media (min-width: 641px) {
-    .talk .bk-form {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        column-gap: 14px;
-    }
-    .talk .bk-form > label:has(textarea),
-    .talk .bk-form > .bk-foot,
-    .talk .bk-form > .fine {
-        grid-column: 1 / -1;
-    }
+.chat .x,
+.plan .x,
+.chat .resume,
+.chat .tz,
+.art .o-up,
+.psheet {
+    display: none;
 }
 @media (max-width: 640px) {
-    .talk .tb > .bk-two {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-    }
-    .talk .tb > .bk-two:not(.has-day) {
-        flex: 1;
-    }
-    .talk .bk-two .bk-cal {
-        display: flex;
-        flex-direction: column;
-    }
-    .talk .bk-two:not(.has-day) .bk-cal {
-        flex: 1;
-    }
-    .talk .bk-two:not(.has-day) .bk-cal .cg {
-        flex: 1;
-        grid-auto-rows: minmax(36px, 56px);
-        align-content: space-evenly;
-    }
-    .talk .bk-two.has-day .bk-pick.only-phone {
+    .art .o-side,
+    .chat .art .s .vm {
         display: none;
     }
-    .talk .bk-sl .only-wide {
+    .art .o-up {
+        display: inline;
+    }
+
+    /* On the page */
+    #top .chat.phone:not(.full) {
+        min-height: max(240px, calc(100svh - var(--fill-top, 0px) - 4px));
+    }
+    #top .chat.phone:not(.full):not(.live) .log {
+        flex: 1;
+    }
+    #top .chat.phone:not(.full):not(.live) .log > :first-child {
+        margin-top: 0;
+    }
+    /* Spare height is spread between the starters, never left as one empty band. */
+    #top .chat.phone:not(.full):not(.live) .log {
+        justify-content: space-between;
+    }
+    #top .chat.phone:not(.full):not(.live) .m.st0 {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    #top .chat.phone:not(.full):not(.live) .stg {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+    /* The starters take the slack first, up to about 16px more padding each. */
+    #top .chat.phone:not(.full):not(.live) .stg button:not(:nth-child(n + 4)) {
+        flex: 1 1 auto;
+        max-height: 92px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    #top .chat.phone:not(.full).live {
+        min-height: 0;
+    }
+    /* The card has to fit the first screen: the lead line and the fourth starter wait for wider screens. */
+    #top .hero-top p,
+    #top .tagline,
+    #top .chat.phone .stg button:nth-child(n + 4) {
+        display: none;
+    }
+    #top .chat.phone:not(.full).live .log,
+    #top .chat.phone:not(.full).live .qr {
+        display: none;
+    }
+    .chat.phone .resume {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin: 14px;
+        padding: 16px;
+        min-height: 44px;
+        text-align: start;
+        background: var(--tint);
+        border: 2px solid var(--ink);
+        border-radius: 10px;
+        box-shadow: 3px 3px 0 var(--btn);
+        font: inherit;
+        color: var(--ink);
+        cursor: pointer;
+    }
+    .chat.phone .resume small {
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+    .chat.phone .resume span {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .chat.phone .resume b {
+        font-size: 1.05rem;
+        font-weight: 800;
+    }
+    .chat.phone .tz {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 14px 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: var(--tint);
+        color: var(--muted);
+        font-size: 0.86rem;
+        line-height: 1.45;
+    }
+    .chat.phone .tz .td {
+        display: inline-flex;
+        gap: 4px;
+        flex: none;
+    }
+    .chat.phone .tz .td i {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--paper);
+        box-shadow: 0 0 0 1.5px var(--ink);
+    }
+    .chat.phone .tz .td i.a {
+        background: var(--btn);
+    }
+
+    /* The full-screen layer */
+    html.chat-open,
+    html.chat-open body {
+        overflow: hidden;
+    }
+    #top .chat.full {
+        position: fixed;
+        inset-inline: 0;
+        top: var(--vv-top, 0px);
+        height: var(--vv-h, 100dvh);
+        min-height: 0;
+        z-index: 1000;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        outline: none;
+        animation: layer-in 0.18s ease-out;
+    }
+    #top .chat.full .ph {
+        flex-wrap: nowrap;
+        padding: 10px 16px;
+        padding-top: max(10px, env(safe-area-inset-top));
+    }
+    #top .chat.full .who2 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        position: relative;
+        padding-inline-start: 18px;
+    }
+    #top .chat.full .who2 .dot {
+        position: absolute;
+        inset-inline-start: 0;
+        top: 0.45em;
+    }
+    #top .chat.full .who2 small {
         display: block;
     }
-}
-@media (min-width: 641px) {
-    .talk .tb > .bk-form {
-        row-gap: 10px;
+    #top .chat.full .ph .kk {
+        display: none;
     }
-}
-/* On a phone the details form fills the frame: the message box takes the spare height. */
-@media (max-width: 640px) {
-    .talk .tb > .bk-form {
+    .chat.full .ph .x,
+    .psheet .plan .x {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 44px;
+        height: 44px;
+        margin-inline-start: auto;
+        padding: 0;
+        background: #fff;
+        color: var(--ink);
+        border: 2px solid var(--ink);
+        border-radius: 10px;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    #top .chat.full .log {
         flex: 1;
-        grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+        height: auto;
+        min-height: 0;
+        overflow-y: auto;
+        padding-top: 14px;
     }
-    .talk .tb > .bk-form > label:has(textarea) {
-        grid-template-rows: auto minmax(0, 1fr);
+    #top .chat.full .qr.one {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding-inline: 16px;
     }
-    .talk .tb > .bk-form textarea {
-        height: 100%;
-        min-height: 72px;
-        resize: none;
+    #top .chat.full .qr.one::-webkit-scrollbar {
+        display: none;
     }
+    #top .chat.full .qr.one button {
+        flex: none;
+        white-space: nowrap;
+        min-height: 40px;
+    }
+    #top .chat.full .qr.one:empty {
+        display: none;
+    }
+    #top .chat.full .qr.one::before {
+        display: none;
+    }
+    #top .chat.full .inp {
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+    #top .chat.full .inp input,
+    #top .chat.full .inp .btn {
+        min-height: 48px;
+    }
+
+    /* The drawing's sheet */
+    .psheet {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1010;
+    }
+    .psheet[hidden] {
+        display: none;
+    }
+    .psheet .scrim {
+        position: absolute;
+        inset: 0;
+        background: rgba(12, 26, 68, 0.5);
+        animation: scrim-in 0.2s ease-out;
+    }
+    .psheet .panel {
+        position: absolute;
+        inset-inline: 0;
+        bottom: 0;
+        height: 76%;
+        display: flex;
+        flex-direction: column;
+        background: var(--paper);
+        border-top: 2px solid var(--ink);
+        border-radius: 18px 18px 0 0;
+        box-shadow: 0 -5px 0 var(--btn);
+        outline: none;
+        transition: transform 0.12s ease-out;
+        animation: sheet-in 0.24s ease-out;
+    }
+    .psheet .grab {
+        flex: none;
+        width: 44px;
+        height: 5px;
+        margin: 8px auto 2px;
+        border-radius: 3px;
+        background: #c9d2ea;
+    }
+    .psheet .plan {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+    .psheet .plan .ph {
+        flex-wrap: nowrap;
+        padding: 8px 16px 12px;
+    }
+    .psheet .plan .sf {
+        position: sticky;
+        bottom: 0;
+        margin-top: auto;
+        padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+        background: var(--paper);
+        border-top: 1.5px solid var(--line);
+    }
+    .psheet .plan .sf .btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 48px;
+    }
+    [dir] .psheet .plan .sf .btn::after {
+        content: none;
+    }
+}
+@keyframes layer-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+@keyframes sheet-in {
+    from {
+        transform: translateY(100%);
+    }
+}
+@keyframes scrim-in {
+    from {
+        opacity: 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    #top .chat.full,
+    .psheet .panel,
+    .psheet .scrim {
+        animation: none;
+        transition: none;
+    }
+}
+
+/*
+ * When the card does not fit the first screen, HeroSection raises data-fit
+ * one step at a time until the input is in view: first the hint, then the
+ * third starter, the greeting, the teaser, and last the starters' subtitles.
+ */
+@media (max-width: 640px) {
+    #top .chat.phone:not(.full)[data-fit='1'] .m.st0 > small,
+    #top .chat.phone:not(.full)[data-fit='2'] .m.st0 > small,
+    #top .chat.phone:not(.full)[data-fit='3'] .m.st0 > small,
+    #top .chat.phone:not(.full)[data-fit='4'] .m.st0 > small,
+    #top .chat.phone:not(.full)[data-fit='5'] .m.st0 > small {
+        display: none;
+    }
+    #top .chat.phone:not(.full)[data-fit='2'] .stg button:nth-child(n + 3),
+    #top .chat.phone:not(.full)[data-fit='3'] .stg button:nth-child(n + 3),
+    #top .chat.phone:not(.full)[data-fit='4'] .stg button:nth-child(n + 3),
+    #top .chat.phone:not(.full)[data-fit='5'] .stg button:nth-child(n + 3) {
+        display: none;
+    }
+    #top .chat.phone:not(.full)[data-fit='3'] .log > .m.y:first-child,
+    #top .chat.phone:not(.full)[data-fit='4'] .log > .m.y:first-child,
+    #top .chat.phone:not(.full)[data-fit='5'] .log > .m.y:first-child {
+        display: none;
+    }
+    #top .chat.phone:not(.full)[data-fit='4'] .tz,
+    #top .chat.phone:not(.full)[data-fit='5'] .tz {
+        display: none;
+    }
+    #top .chat.phone:not(.full)[data-fit='5'] .stg button span {
+        display: none;
+    }
+}
+
+/* Phone: the chat card's input is a button that opens the full-screen layer. */
+.inp-tap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    text-align: start;
+    cursor: text;
+}
+.inp-tap span {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--muted);
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Holds the keyboard open while the layer is drawn: invisible, at the top of
+   the screen, so focusing it moves nothing. */
+.chat .keys {
+    position: fixed;
+    top: 0;
+    inset-inline-start: 0;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    font-size: 16px;
+    pointer-events: none;
+}
+/* iOS zooms the page into any field under 16px. */
+@media (pointer: coarse) {
+    input,
+    textarea,
+    select {
+        font-size: max(16px, 1em);
+    }
+}
+.chat .qr.one[hidden] {
+    display: none;
 }

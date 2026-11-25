@@ -1,6 +1,12 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
+// react-markdown hands each component its syntax-tree `node`; spreading that
+// onto a DOM element would print node="[object Object]" into the page.
+type Props<T extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<T> & {
+    node?: unknown;
+};
+
 /*
  * Renders the markdown the backend serves: write-ups, posts and the CV.
  *
@@ -16,12 +22,12 @@ import ReactMarkdown from 'react-markdown';
  * the bullets stay on one side), images load lazily.
  */
 const COMPONENTS = {
-    a: (props: React.ComponentProps<'a'>) => (
+    a: ({ node: _node, ...props }: Props<'a'>) => (
         <a target="_blank" rel="noopener noreferrer" {...props} />
     ),
-    p: (props: React.ComponentProps<'p'>) => <p dir="auto" {...props} />,
-    img: (props: React.ComponentProps<'img'>) => <img loading="lazy" {...props} />,
-    table: (props: React.ComponentProps<'table'>) => (
+    p: ({ node: _node, ...props }: Props<'p'>) => <p dir="auto" {...props} />,
+    img: ({ node: _node, ...props }: Props<'img'>) => <img loading="lazy" {...props} />,
+    table: ({ node: _node, ...props }: Props<'table'>) => (
         <div className="md-table">
             <table {...props} />
         </div>

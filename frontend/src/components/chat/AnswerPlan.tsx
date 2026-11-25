@@ -19,8 +19,17 @@ const LAST_STATION = 4;
  * the figures the backend measured), or a sheet made for the answer, or the
  * visitor's process today and with an agent. A sheet opened earlier is
  * reopened from the card under the answer that made it.
+ *
+ * On a phone it is drawn twice: the static explainer under the chat on the
+ * page, and the live drawing inside the sheet that rises over the open chat
+ * (`onClose` set), with its own close button and a way back to the chat.
  */
-const AnswerPlan: React.FC<{ chat: HomeChat }> = ({ chat }) => {
+const AnswerPlan: React.FC<{
+    chat: HomeChat;
+    onClose?: () => void;
+    /** The second copy on the page: no element ids, which the live one owns. */
+    idless?: boolean;
+}> = ({ chat, onClose, idless }) => {
     const { t } = useLang();
     const copy = t(CHAT);
     const heads = t(SHEET_HEADS);
@@ -35,12 +44,13 @@ const AnswerPlan: React.FC<{ chat: HomeChat }> = ({ chat }) => {
 
     // On a stacked layout a newly opened drawing is scrolled to, since it opens below the chat.
     useEffect(() => {
+        if (onClose) return;
         const opened =
             plan.kind === 'sheet' || plan.kind === 'cmp' || (plan.kind === 'lit' && plan.back);
         if (!opened || !window.matchMedia(STACKED_QUERY).matches) return;
         const smooth = !window.matchMedia(REDUCED_MOTION_QUERY).matches;
         ref.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
-    }, [plan]);
+    }, [plan, onClose]);
 
     const docsNote = (record: AnswerRecord) =>
         record.sources.length ? (
@@ -59,6 +69,7 @@ const AnswerPlan: React.FC<{ chat: HomeChat }> = ({ chat }) => {
             copy.plan.noDocs
         );
 
+    const id = (name: string) => (idless ? undefined : name);
     const seconds = (n: number) => `${n} ${copy.secondsShort}`;
     const instant = { state: 'done' as const, go: true, time: copy.plan.instant };
 
@@ -144,14 +155,24 @@ const AnswerPlan: React.FC<{ chat: HomeChat }> = ({ chat }) => {
     const record = current?.record;
 
     return (
-        <div className={mode ? `plan ${mode}` : 'plan'} id="plan" ref={ref}>
+        <div className={mode ? `plan ${mode}` : 'plan'} id={id('plan')} ref={ref}>
             <div className="ph">
                 <div className="pt">
-                    <small id="pt-k">{kicker}</small>
-                    <b id="pt-h">{title}</b>
+                    <small id={id('pt-k')}>{kicker}</small>
+                    <b id={id('pt-h')}>{title}</b>
                 </div>
+                {onClose && (
+                    <button
+                        type="button"
+                        className="x"
+                        aria-label={copy.phone.closeSheet}
+                        onClick={onClose}
+                    >
+                        ✕
+                    </button>
+                )}
             </div>
-            <div className="cap" id="cap">
+            <div className="cap" id={id('cap')}>
                 {cap}
             </div>
             {plan.kind === 'sheet' && record && (
@@ -173,8 +194,8 @@ const AnswerPlan: React.FC<{ chat: HomeChat }> = ({ chat }) => {
                     </b>
                 </button>
             )}
-            <ProcessFlow process={copy.site} mode="agent" stations={stations} id="flow" />
-            <div className="cmp" id="cmp" aria-live="polite">
+            <ProcessFlow process={copy.site} mode="agent" stations={stations} id={id('flow')} />
+            <div className="cmp" id={id('cmp')} aria-live="polite">
                 {plan.kind === 'cmp' && (
                     <>
                         <div className="cc">
@@ -194,12 +215,12 @@ const AnswerPlan: React.FC<{ chat: HomeChat }> = ({ chat }) => {
                     </>
                 )}
             </div>
-            <div className="map" id="map">
+            <div className="map" id={id('map')}>
                 {plan.kind === 'sheet' && plan.key === 'map' && <SystemsMap />}
             </div>
             <div
                 className="vis"
-                id="vis"
+                id={id('vis')}
                 aria-live="polite"
                 data-view={view === 'plain' ? 'plain' : undefined}
             >
@@ -216,13 +237,20 @@ const AnswerPlan: React.FC<{ chat: HomeChat }> = ({ chat }) => {
                 )}
             </div>
             <div className="sum">
-                <b id="sum-h">{sum[0]}</b>
-                <span id="sum-t">{sum[1]}</span>
+                <b id={id('sum-h')}>{sum[0]}</b>
+                <span id={id('sum-t')}>{sum[1]}</span>
             </div>
             {plan.kind === 'lit' && plan.back && (
                 <button type="button" className="bk" onClick={() => chat.showSheet(plan.back!)}>
                     <Arrow>{copy.plan.back}</Arrow>
                 </button>
+            )}
+            {onClose && (
+                <div className="sf">
+                    <button type="button" className="btn" onClick={onClose}>
+                        {copy.phone.backToChat}
+                    </button>
+                </div>
             )}
         </div>
     );

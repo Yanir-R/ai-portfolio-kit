@@ -29,10 +29,18 @@ const countryOf = async (): Promise<string | null> => {
     }
 };
 
+/** Whether the browser lists Hebrew among its languages ("iw" is Hebrew's old code). */
+const readsHebrew = (): boolean =>
+    (navigator.languages?.length ? navigator.languages : [navigator.language]).some((l) =>
+        /^(he|iw)\b/i.test(l)
+    );
+
 /**
  * Whether to offer English on a Hebrew page: only to a visitor from outside
- * Israel who has not answered before. Never a redirect, so search engines and
- * shared links always get the page they asked for.
+ * Israel, whose browser does not list Hebrew, and who has not answered
+ * before (closing the bar or opening the English site both count). Never a
+ * redirect, so search engines and shared links always get the page they
+ * asked for.
  */
 export const useLangOffer = (lang: Lang): { show: boolean; dismiss: () => void } => {
     const [show, setShow] = useState(false);
@@ -42,7 +50,7 @@ export const useLangOffer = (lang: Lang): { show: boolean; dismiss: () => void }
             remember();
             return;
         }
-        if (answered()) return;
+        if (answered() || readsHebrew()) return;
         let cancelled = false;
         countryOf().then((country) => {
             if (!cancelled && country && country !== HOME_COUNTRY) setShow(true);
