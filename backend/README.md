@@ -111,8 +111,8 @@ The chat and contact endpoints are unauthenticated and cost quota or money per c
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `RATE_LIMIT_CHAT_PER_IP_PER_DAY` | 10 | one abuser cannot deny service to others |
-| `RATE_LIMIT_CHAT_GLOBAL_PER_DAY` | 12 | caps upstream calls regardless of source address |
+| `RATE_LIMIT_CHAT_PER_IP_PER_DAY` | 20 | one abuser cannot deny service to others |
+| `RATE_LIMIT_CHAT_GLOBAL_PER_DAY` | 300 | caps upstream calls regardless of source address |
 | `RATE_LIMIT_CHAT_WINDOW_SECONDS` | 86400 | the chat window is a day, not a minute |
 | `RATE_LIMIT_CONTACT_PER_IP_PER_MINUTE` | 3 | |
 | `RATE_LIMIT_CONTACT_GLOBAL_PER_MINUTE` | 15 | |

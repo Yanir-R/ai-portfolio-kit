@@ -89,6 +89,24 @@ def test_replies_without_a_model_call_do_not_spend_the_chat_budget(
     assert second.status_code == 429
 
 
+def test_the_recent_writing_list_does_not_spend_the_chat_budget(
+    client, chat_budget, monkeypatch
+):
+    """The "what did you write lately" reply is a list from the index, not an
+    answer from the model, so a run of them must leave the budget untouched."""
+    _stub_model(monkeypatch)
+
+    for _ in range(3):
+        listed = client.post(
+            "/chat-with-files", json={"message": "What did you post recently on LinkedIn?"}
+        )
+        assert listed.status_code == 200
+        assert listed.json()["blocks"][0]["ref"] == "recent"
+
+    answered = client.post("/chat-with-files", json={"message": "What is ReelSensei?"})
+    assert answered.status_code == 200
+
+
 def test_an_address_left_in_chat_spends_the_contact_budget(
     client, chat_budget, monkeypatch
 ):

@@ -9287,3 +9287,104 @@ video.w-v {
         padding-bottom: 12px;
     }
 }
+
+/*
+ * A send that got no answer (components/chat/FailureCard.tsx). The card sits in
+ * the log as the agent's message; the strip replaces the input row when the
+ * agent cannot answer at all. Every button in a row shares one height and one
+ * text line, whichever variant it is, so a row reads as one set.
+ */
+.m.lim {
+    background: #fff1c9;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    max-width: 94%;
+}
+.m.lim p {
+    margin: 0;
+}
+.lim-t {
+    display: block;
+    margin-bottom: 4px;
+}
+.lim-acts,
+.lim-routes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+}
+.lim-acts {
+    margin-top: 10px;
+}
+.lim-acts .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 14px;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.lim-acts .btn.wa,
+.lim-acts .btn.wa:hover {
+    background: #fff;
+    color: #0e7c4a;
+    box-shadow: 3px 3px 0 var(--btn);
+}
+.lim-acts .btn.wa {
+    width: 48px;
+    padding: 0;
+}
+.lim-acts .btn.wa::after {
+    content: none;
+}
+.lim-acts .wa span {
+    display: none;
+}
+.lim-acts .wa .wi {
+    display: block;
+    width: 24px;
+    height: 24px;
+}
+.lim-strip {
+    border-top: 2px solid var(--ink);
+    background: #fff1c9;
+    padding: 12px;
+}
+.lim-strip > b {
+    display: block;
+    color: var(--ink);
+}
+.lim-strip .lim-acts {
+    margin-top: 8px;
+}
+@media (max-width: 640px) {
+    .lim-acts {
+        flex-direction: column;
+    }
+    .lim-acts .btn,
+    .lim-acts .btn.wa:not(.icon) {
+        width: 100%;
+    }
+    .lim-acts .wa:not(.icon) span {
+        display: inline;
+    }
+    .lim-routes {
+        flex-wrap: nowrap;
+    }
+    .lim-routes .btn:not(.wa) {
+        flex: 1;
+        min-width: 0;
+    }
+    .lim-routes .btn.wa.icon {
+        flex: none;
+        width: 48px;
+    }
+    .m.lim {
+        max-width: 100%;
+    }
+}

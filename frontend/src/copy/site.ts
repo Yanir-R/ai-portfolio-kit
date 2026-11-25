@@ -202,7 +202,7 @@ export interface BookingCopy {
 
 export const CONTACT: Localized<ContactCopy> = {
     he: {
-        title: 'לדבר עם יניר',
+        title: 'בואו נדבר',
         close: 'סגירה',
         topic: 'הנושא:',
         pref: 'מסלול מועדף:',
@@ -264,14 +264,14 @@ export const CONTACT: Localized<ContactCopy> = {
             emailPlaceholder: 'name@company.co.il',
             message: 'ההודעה',
             messagePlaceholder: 'במשפט או שניים: מה אתם צריכים',
-            send: 'שלחו ליניר',
+            send: 'שלחו לי',
             sending: 'שולח…',
-            sent: 'נשלח ✓ ההודעה אצל יניר, והוא עונה ממנה למייל שלכם.',
+            sent: 'נשלח ✓ ההודעה אצלי, ואני עונה ממנה למייל שלכם.',
             failed: 'ההודעה לא נשלחה. בדקו את המייל ונסו שוב.',
-            fine: 'ההודעה מגיעה לתיבה של יניר, והוא עונה ממנה למייל שלכם. אפשר גם פשוט לכתוב את המייל בצ׳אט.',
+            fine: 'ההודעה מגיעה ישר אליי, ואני עונה ממנה למייל שלכם. אפשר גם פשוט לכתוב את המייל בצ׳אט.',
         },
         whatsapp: {
-            text: 'הודעה במילים שלכם, ויניר חוזר אליכם אישית.',
+            text: 'הודעה במילים שלכם, ואני חוזר אליכם.',
             steps: [
                 'כותבים לי במילים שלכם.',
                 'מיד מגיעה הודעה אוטומטית עם קישור לשיחה.',
@@ -284,7 +284,7 @@ export const CONTACT: Localized<ContactCopy> = {
         },
     },
     en: {
-        title: 'Talk to Yanir',
+        title: "Let's talk",
         close: 'Close',
         topic: 'Subject:',
         pref: 'Preferred route:',
@@ -347,14 +347,14 @@ export const CONTACT: Localized<ContactCopy> = {
             emailPlaceholder: 'name@company.com',
             message: 'The message',
             messagePlaceholder: 'In a sentence or two: what you need',
-            send: 'Send to Yanir',
+            send: 'Send it to me',
             sending: 'Sending…',
-            sent: 'Sent ✓ The message is in Yanir’s inbox, and he replies from it to your email.',
+            sent: 'Sent ✓ I have your message, and I reply from it to your email.',
             failed: 'The message did not go out. Check the address and try again.',
-            fine: 'The message reaches Yanir’s inbox, and he replies from it to your email. You can also just type your email in the chat.',
+            fine: 'The message comes straight to me, and I reply from it to your email. You can also just type your email in the chat.',
         },
         whatsapp: {
-            text: 'A message in your own words, and Yanir gets back to you personally.',
+            text: 'A message in your own words, and I get back to you.',
             steps: [
                 'Write to me in your own words.',
                 'An automatic note arrives at once, with a booking link.',
