@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CONTACT, ContactKind } from '@/copy/site';
 import { FEATURES, whatsappUrl } from '@/constants/links';
+import QrCode from '@/components/site/QrCode';
 import BookingFlow from '@/components/site/BookingFlow';
 import { useLang } from '@/i18n/useLang';
 import { useTurnstile } from '@/hooks/useTurnstile';
@@ -31,6 +32,7 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
     const note = [request.topic, request.pref, request.message].filter(Boolean).join(' · ');
     // Once the call is booked there is nothing left to choose between.
     const [booked, setBooked] = useState(false);
+    const waLink = whatsappUrl(copy.whatsapp.first(request.topic));
 
     useEffect(() => {
         const dialog = ref.current;
@@ -98,21 +100,30 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
                 {!booked && <p>{copy.call.text}</p>}
                 <BookingFlow topic={note || undefined} onBooked={() => setBooked(true)} />
             </div>
-            <div className="tb" role="tabpanel" hidden={kind !== 'mail'}>
+            <div className="tb mail" role="tabpanel" hidden={kind !== 'mail'}>
                 <p>{copy.mail.text}</p>
                 <MailForm initial={request.message ?? request.topic ?? ''} topic={request.topic} />
             </div>
-            <div className="tb" role="tabpanel" hidden={kind !== 'whatsapp'}>
-                <p>{copy.whatsapp.text}</p>
-                <a
-                    className="btn"
-                    href={whatsappUrl(copy.whatsapp.first(request.topic))}
-                    target="_blank"
-                    rel="noopener"
-                >
-                    {copy.whatsapp.open}
-                </a>
-                <p className="fine">{copy.whatsapp.fine}</p>
+            <div className="tb wa" role="tabpanel" hidden={kind !== 'whatsapp'}>
+                <div className="wa-main">
+                    <p>{copy.whatsapp.text}</p>
+                    <ol className="wa-steps">
+                        {copy.whatsapp.steps.map((step, i) => (
+                            <li key={step}>
+                                <span aria-hidden="true">{i + 1}</span>
+                                {step}
+                            </li>
+                        ))}
+                    </ol>
+                    <a className="btn" href={waLink} target="_blank" rel="noopener">
+                        {copy.whatsapp.open}
+                    </a>
+                </div>
+                {/* On a computer the chat usually lives on the phone: scan to open it there. */}
+                <figure className="wa-qr">
+                    <QrCode value={waLink} label={copy.whatsapp.scan} />
+                    <figcaption>{copy.whatsapp.scan}</figcaption>
+                </figure>
             </div>
         </dialog>
     );

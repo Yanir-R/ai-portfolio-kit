@@ -8396,3 +8396,109 @@ video.w-v {
         height: min(640px, calc(100dvh - 32px));
     }
 }
+
+/*
+ * The email and WhatsApp tabs fill the window's fixed height instead of
+ * leaving its lower half empty: the message box grows, and Send sits at the
+ * foot; WhatsApp shows the steps beside a QR code for the phone.
+ */
+.talk .tb[hidden][hidden] {
+    display: none;
+}
+.talk .tb.mail .v-form {
+    flex: 1;
+    gap: 18px;
+}
+.talk .tb.mail .v-form label {
+    gap: 8px;
+}
+.talk .tb.mail .v-form label:has(textarea) {
+    flex: 1;
+}
+.talk .tb.mail .v-form textarea {
+    flex: 1;
+    min-height: 120px;
+    resize: none;
+}
+.talk .tb.wa {
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
+}
+.talk .wa-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.talk .wa-main > p {
+    color: var(--muted);
+    font-size: 0.98rem;
+    margin: 0;
+}
+.talk .wa-main .btn {
+    align-self: flex-start;
+}
+.talk .wa-steps {
+    list-style: none;
+    margin: 0;
+    padding: 16px;
+    display: grid;
+    gap: 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+}
+.talk .wa-steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+.talk .wa-steps li span {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+.talk .wa-qr {
+    flex: none;
+    width: 220px;
+    margin: 0;
+    padding: 14px 14px 12px;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 4px 4px 0 var(--btn);
+    text-align: center;
+}
+.talk .wa-qr .qr {
+    display: block;
+    width: 100%;
+    height: auto;
+    color: var(--ink);
+}
+.talk .wa-qr figcaption {
+    margin-top: 8px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--muted);
+    line-height: 1.35;
+}
+@media (max-width: 640px) {
+    .talk .tb.wa {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    /* Already on the phone: the button opens the chat, a code has nothing to add. */
+    .talk .wa-qr {
+        display: none;
+    }
+}
