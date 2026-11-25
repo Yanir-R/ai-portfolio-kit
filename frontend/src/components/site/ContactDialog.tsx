@@ -97,10 +97,13 @@ const ContactDialog: React.FC<Props> = ({ request, onChange, onClose }) => {
                     </>
                 )}
                 {kind === 'mail' && (
-                    <MailForm
-                        initial={request.message ?? request.topic ?? ''}
-                        topic={request.topic}
-                    />
+                    <>
+                        <p>{copy.mail.text}</p>
+                        <MailForm
+                            initial={request.message ?? request.topic ?? ''}
+                            topic={request.topic}
+                        />
+                    </>
                 )}
                 {kind === 'whatsapp' && (
                     <>
