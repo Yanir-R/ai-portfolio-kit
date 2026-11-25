@@ -15,7 +15,7 @@ from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
 from pydantic import BaseModel, Field
-from typing import Dict, Iterable, Literal, Optional, Tuple
+from typing import Dict, Iterable, List, Literal, NamedTuple, Optional, Tuple
 import json
 import logging
 import re
@@ -291,6 +291,16 @@ class ModelReply(BaseModel):
             "fully either way, and do not mention this field."
         )
     )
+    used: List[str] = Field(
+        default_factory=list,
+        description=(
+            "The titles, exactly as written after \"Project / \" or \"Writing / \" "
+            "in the PROFILE, of the projects and pieces of writing whose full text "
+            "this answer actually draws on and mentions. Only ones the visitor "
+            "would want to open next because they show what the answer says. "
+            "Empty when the answer rests on Yanir's notes alone, which is often."
+        ),
+    )
 
 
 # Off switch for structured output, in one place. With it off the model answers
@@ -326,8 +336,23 @@ def _parse_handoff(value: object) -> Optional[Handoff]:
     )
 
 
-def _parse_reply(text: str) -> Tuple[str, Optional[bool], Optional[Handoff]]:
-    """The answer text, the declined flag and the handoff from the reply.
+class ParsedReply(NamedTuple):
+    text: str
+    declined: Optional[bool] = None
+    handoff: Optional[Handoff] = None
+    # Titles the model says the answer drew on; checked against what it was
+    # actually sent before anything is shown (see main._writing_blocks).
+    used: Tuple[str, ...] = ()
+
+
+def _parse_used(value: object) -> Tuple[str, ...]:
+    if not isinstance(value, list):
+        return ()
+    return tuple(title.strip() for title in value if isinstance(title, str) and title.strip())
+
+
+def _parse_reply(text: str) -> ParsedReply:
+    """The answer text, the declined flag, the handoff and the used titles.
 
     Deterministic in every case: valid JSON gives every field it carries, and
     a missing or malformed handoff only drops the handoff; text that is not
@@ -337,25 +362,26 @@ def _parse_reply(text: str) -> Tuple[str, Optional[bool], Optional[Handoff]]:
     """
     stripped = text.strip()
     if not stripped.startswith("{"):
-        return stripped, None, None
+        return ParsedReply(stripped)
     try:
         reply = json.loads(stripped)
     except ValueError:
         reply = None
     if isinstance(reply, dict) and isinstance(reply.get("answer"), str):
         declined = reply.get("declined")
-        return (
+        return ParsedReply(
             reply["answer"].strip(),
             declined if isinstance(declined, bool) else None,
             _parse_handoff(reply.get("handoff")),
+            _parse_used(reply.get("used")),
         )
     match = _ANSWER_FIELD_RE.search(stripped)
     if not match:
-        return "", None, None
+        return ParsedReply("")
     try:
-        return json.loads(f'"{match.group(1)}"').strip(), None, None
+        return ParsedReply(json.loads(f'"{match.group(1)}"').strip())
     except ValueError:
-        return "", None, None
+        return ParsedReply("")
 
 
 # One client per API key for the life of the process.
@@ -452,6 +478,8 @@ class Answer:
     # The model's read of whether to offer a direct talk (see Handoff). None
     # when it was not asked or the reply did not carry one.
     handoff: Optional[Handoff] = None
+    # Titles the model says the answer drew on (see ModelReply.used).
+    used: Tuple[str, ...] = ()
     # True when a model was called but the text is the site's own copy
     # (an empty or truncated reply), so it is not replayed as something the
     # model said.
@@ -562,7 +590,7 @@ def get_gemini_response(
             latency_ms = int((time.monotonic() - call_started) * 1000)
             usage = _read_usage(model_id, response)
 
-            text, declined, handoff = _parse_reply(response.text or "")
+            text, declined, handoff, used = _parse_reply(response.text or "")
             if not text:
                 return Answer(
                     text=EMPTY_RESPONSE_MESSAGE,
@@ -597,6 +625,7 @@ def get_gemini_response(
                 latency_ms=latency_ms,
                 declined=declined,
                 handoff=handoff,
+                used=used,
                 **usage,
             )
 

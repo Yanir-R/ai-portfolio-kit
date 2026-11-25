@@ -137,8 +137,16 @@ def client(monkeypatch):
     monkeypatch.setattr(
         main, "chat_limiter", SlidingWindowLimiter(per_key_limit=50, global_limit=50)
     )
+    # The model cites every piece it was sent, so these tests see what search
+    # chose; test_related_cards.py covers the model citing fewer.
     monkeypatch.setattr(
-        main, "get_gemini_response", lambda *a, **k: Answer(text="An answer.", model="test")
+        main,
+        "get_gemini_response",
+        lambda key, question, knowledge, *a, **k: Answer(
+            text="An answer.",
+            model="test",
+            used=tuple(s.title for s in knowledge.sections if s.source == "writing"),
+        ),
     )
     return TestClient(main.app)
 

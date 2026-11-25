@@ -70,6 +70,8 @@ export interface ChatCopy {
     secondsShort: string;
     sources: string;
     noSource: string;
+    /** The answer drew on Yanir's own notes, not on a project or post. */
+    fromNotes: string;
     readyTag: string;
     sentTag: string;
     asking: string;
@@ -329,6 +331,7 @@ export const CHAT: Localized<ChatCopy> = {
         secondsShort: 'שנ׳',
         sources: 'מקורות',
         noSource: 'לא נמצא מסמך מתאים',
+        fromNotes: 'מתוך מה שיניר כתב על עצמו',
         readyTag: 'תשובה מוכנה · בלי AI',
         sentTag: 'נשלח ✓ · בלי AI',
         asking: 'שואלים על:',
@@ -652,6 +655,7 @@ export const CHAT: Localized<ChatCopy> = {
         secondsShort: 's',
         sources: 'Sources',
         noSource: 'No matching document found',
+        fromNotes: 'From what Yanir wrote about himself',
         readyTag: 'Ready answer · no AI',
         sentTag: 'Sent ✓ · no AI',
         asking: 'Asking about:',

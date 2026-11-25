@@ -9,7 +9,8 @@ import { AnswerTrace } from '@/types/chat';
  *   1. A question picked from the starters carries its own drawing.
  *   2. Nothing in Yanir's material matched: the "ask Yanir" sheet.
  *   3. A question about price or a map, by its words.
- *   4. The documents the answer was given, by the most specific one.
+ *   4. The documents the answer drew on, by the most specific one: the
+ *      model's own list when it gave one, else what it was sent.
  *   5. Otherwise the answer's own receipt: what was read and measured.
  */
 const BY_WORDS: [RegExp, SheetKey][] = [
@@ -34,7 +35,8 @@ const NO_SHEET_OUTCOMES = new Set(['conversational']);
 export const sheetFor = (
     question: string,
     trace: AnswerTrace | null | undefined,
-    picked?: SheetKey
+    picked?: SheetKey,
+    used?: { slug: string }[] | null
 ): SheetKey | undefined => {
     if (picked) return picked;
     if (!trace) return undefined;
@@ -42,7 +44,7 @@ export const sheetFor = (
     if (trace.context_outcome && NO_SHEET_OUTCOMES.has(trace.context_outcome)) return undefined;
     const byWords = BY_WORDS.find(([re]) => re.test(question));
     if (byWords) return byWords[1];
-    const slugs = new Set((trace.sources ?? []).map((s) => s.slug));
+    const slugs = new Set((used ?? trace.sources ?? []).map((s) => s.slug));
     const bySource = BY_SOURCE.find(([slug]) => slugs.has(slug));
     if (bySource) return bySource[1];
     return 'read';
