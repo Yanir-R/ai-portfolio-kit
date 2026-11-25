@@ -79,6 +79,9 @@ export interface WritingCopy {
         /** The phone layer's text button that drops the piece (its X is the layer's own). */
         removeShort: string;
         removeContextLong: (kind: 'article' | 'post') => string;
+        /** Lines in the log where the questions stop or start being about the piece. */
+        contextOff: (kind: 'article' | 'post') => string;
+        contextOn: (kind: 'article' | 'post') => string;
         log: string;
         reading: string;
         answered: string;
@@ -196,6 +199,9 @@ export const WRITING: Localized<WritingCopy> = {
             book: 'קבעו שיחה',
             removeContext: 'הסרת ההקשר',
             removeShort: 'הסרה',
+            contextOff: (kind) =>
+                `מכאן השאלות כלליות, לא על ${kind === 'post' ? 'הפוסט' : 'המאמר'}.`,
+            contextOn: (kind) => `מכאן השאלות שוב על ${kind === 'post' ? 'הפוסט' : 'המאמר'}.`,
             removeContextLong: (kind) => `לשאול בלי הקשר ל${kind === 'post' ? 'פוסט' : 'מאמר'}`,
             log: 'השיחה על הקטע',
             reading: 'הסוכן קורא את הקטע…',
@@ -314,6 +320,8 @@ export const WRITING: Localized<WritingCopy> = {
             book: 'Book a call',
             removeContext: 'Remove the context',
             removeShort: 'Remove',
+            contextOff: (kind) => `From here the questions are general, not about this ${kind}.`,
+            contextOn: (kind) => `From here the questions are about this ${kind} again.`,
             removeContextLong: (kind) => `Ask without this ${kind}`,
             log: 'The conversation about this piece',
             reading: 'The agent is reading the piece…',

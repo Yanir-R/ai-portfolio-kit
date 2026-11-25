@@ -25,6 +25,8 @@ type Turn =
     | { id: number; kind: 'q'; text: string }
     | { id: number; kind: 'wait' }
     | { id: number; kind: 'pick' }
+    /** A muted line in the log: the questions turned general, or back to the piece. */
+    | { id: number; kind: 'note'; text: string }
     | {
           id: number;
           kind: 'answer';
@@ -46,6 +48,9 @@ type Turn =
 
 /** Turns before an id is given to them. */
 type NewTurn = Turn extends infer T ? (T extends Turn ? Omit<T, 'id'> : never) : never;
+
+// Keys for the log's turns, unique across every dock on the page.
+let nextTurnId = 1;
 
 type Chip = 'sum' | 'biz' | 'more';
 const CHIPS: Chip[] = ['sum', 'biz', 'more'];
@@ -81,7 +86,6 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
     const errors = t(CHAT).errors;
     const { containerRef: turnstileRef, getToken, reset: resetToken } = useTurnstile();
     const logRef = useRef<HTMLDivElement>(null);
-    const nextId = useRef(1);
     const [turns, setTurns] = useState<Turn[]>([]);
     const [chips, setChips] = useState<Chip[]>(CHIPS);
     const [withContext, setWithContext] = useState(true);
@@ -106,7 +110,7 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
     const add = (...items: NewTurn[]) =>
         setTurns((prev) => [
             ...prev.filter((turn) => turn.kind !== 'wait' && turn.kind !== 'pick'),
-            ...items.map((item) => ({ ...item, id: nextId.current++ }) as Turn),
+            ...items.map((item) => ({ ...item, id: nextTurnId++ }) as Turn),
         ]);
 
     const history = (): ChatMessage[] =>
@@ -159,10 +163,25 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
         void ask(copy.chips[chip]);
     };
 
+    // The piece's starters left when its context was dropped, for when it returns.
+    const [keptChips, setKeptChips] = useState<Chip[]>([]);
     const removeContext = () => {
         setWithContext(false);
+        setKeptChips(chips);
         setChips([]);
+        add({ kind: 'note', text: copy.contextOff(entry.kind) });
     };
+    // Reopening the layer from the piece asks about the piece again; the
+    // conversation so far stays, and its history still goes with each question.
+    const [wasActive, setWasActive] = useState(active);
+    if (active !== wasActive) {
+        setWasActive(active);
+        if (active && layer && !withContext) {
+            setWithContext(true);
+            setChips(keptChips);
+            add({ kind: 'note', text: copy.contextOn(entry.kind) });
+        }
+    }
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -221,6 +240,12 @@ const AskDock: React.FC<Props> = ({ entry, layer = false, active = false }) => {
                             <div key={turn.id} className="q" dir="auto">
                                 {turn.text}
                             </div>
+                        );
+                    if (turn.kind === 'note')
+                        return (
+                            <p key={turn.id} className="note" dir="auto">
+                                {turn.text}
+                            </p>
                         );
                     if (turn.kind === 'wait')
                         return (
