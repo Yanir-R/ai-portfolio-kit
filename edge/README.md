@@ -77,6 +77,10 @@ per-request proof that a browser running the site sent the message.
 - **Header:** the frontend sends the token in `X-Turnstile-Token`. The Worker
   verifies it against Turnstile's `siteverify` with `TURNSTILE_SECRET_KEY`, and
   removes the header before forwarding to the backend.
+- **Responses:** the backend's reply reaches the visitor as the backend sent
+  it, CORS and `Retry-After` included, minus one header: Google Cloud's
+  `x-cloud-trace-context`, an internal request id that names the platform
+  behind the Worker and tells a visitor nothing.
 - **Keys:** the public site key lives in `frontend/src/constants/turnstile.ts`.
   The secret key is a Worker secret, set with `wrangler secret put` and never
   committed.

@@ -575,10 +575,10 @@ app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 # it. Setting the variable is the last step, not the first.
 ORIGIN_SHARED_SECRET = os.getenv("ORIGIN_SHARED_SECRET", "").strip()
 
-# Paths that must stay reachable without the header. Cloud Run's own health
-# probing and any uptime check call these, and they neither cost quota nor
-# disclose anything.
-_UNGUARDED_PATHS = frozenset({"/", "/health"})
+# The one path that stays reachable without the header, for Cloud Run's own
+# health probing and any uptime check. It costs no quota and answers a bare
+# status, nothing about the service behind it.
+_UNGUARDED_PATHS = frozenset({"/health"})
 
 
 @app.middleware("http")
@@ -642,8 +642,12 @@ async def cache_read_only_content(request: Request, call_next):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
+    # The site sends no cookies and no auth headers of its own, so there is
+    # nothing for a browser to attach credentials to. Saying so keeps a future
+    # cookie from becoming readable cross-origin by accident.
+    allow_credentials=False,
+    # Every route is GET or POST; a preflight lists only what the site uses.
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
     # Response headers are not readable by cross-origin JavaScript unless they
     # are exposed. Without this the frontend can see the 429 status but not the
@@ -655,12 +659,9 @@ app.add_middleware(
 @app.get("/")
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "service": "backend",
-        "message": "FastAPI is running",
-        "timestamp": datetime.datetime.now().isoformat()
-    }
+    # A bare status: a probe needs nothing more, and an anonymous caller should
+    # learn nothing about what runs here.
+    return {"status": "ok"}
 
 @app.get("/api/chat/status")
 async def chat_status():
