@@ -30,7 +30,7 @@ https://www.linkedin.com/feed/update/urn:li:activity:7446855414308069376/
 /writing/three-nothings-card.jpg
 
 ## Summary
-The short version of the three-meanings-of-nothing piece: one empty response, three different root causes, and an agent that treats them as one will chase ghosts.
+One empty response, three different root causes, and an agent that treats them as one will chase ghosts.
 
 ## Related
 three-meanings-of-nothing

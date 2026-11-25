@@ -256,7 +256,8 @@
 }
 @keyframes w-in {
     0% {
-        transform: translateX(-100%);
+        transform: translateX(var(--w-from, -100%));
+        opacity: 0.6;
     }
     to {
         transform: none;
@@ -5831,7 +5832,7 @@ footer a {
     z-index: 50;
     display: flex;
     justify-content: flex-end;
-    animation: w-fade 0.18s ease-out;
+    animation: w-fade 0.3s ease-out;
 }
 .w-side[hidden] {
     display: none;
@@ -5843,7 +5844,7 @@ footer a {
     border-inline-start: 2px solid var(--ink);
     display: flex;
     flex-direction: column;
-    animation: w-in 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
+    animation: w-in 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .w-side .hd {
     flex: none;
@@ -10911,5 +10912,37 @@ video.w-v {
         align-items: center;
         min-height: 44px;
         margin-top: var(--sp-2);
+    }
+}
+
+/*
+ * Side panel motion (2026-11-25). The panel slides in from its own edge (the
+ * left in Hebrew, the right in English) with a soft ease and a slight fade,
+ * and on close slides back out while the dimming fades, before it is removed.
+ */
+[dir='ltr'] .w-side {
+    --w-from: 100%;
+}
+.w-side.out {
+    animation: w-fade-out 0.26s ease-in forwards;
+}
+.w-side.out .in {
+    animation: w-out 0.26s cubic-bezier(0.4, 0, 0.9, 0.6) forwards;
+}
+@keyframes w-out {
+    to {
+        transform: translateX(var(--w-from, -100%));
+        opacity: 0.6;
+    }
+}
+@keyframes w-fade-out {
+    to {
+        opacity: 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .w-side.out,
+    .w-side.out .in {
+        animation: none;
     }
 }

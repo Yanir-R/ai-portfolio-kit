@@ -60,6 +60,10 @@ export interface WritingCopy {
         /** A LinkedIn post: the mark on the control names the source, so the line gives only the date. */
         publishedOn: (date: string) => string;
         originalLinkedIn: string;
+        /** A piece written for a company's blog: who it was written for, then the date. */
+        publishedCompany: (date: string) => string;
+        /** On an article, the short version of it that went out on LinkedIn. */
+        shortOnLinkedIn: string;
         previous: string;
         next: string;
         previousInSeries: string;
@@ -179,6 +183,8 @@ export const WRITING: Localized<WritingCopy> = {
             original: 'לפוסט המקורי ↗︎',
             publishedOn: (date) => `פורסם במקור ב־${date}`,
             originalLinkedIn: 'לפוסט המקורי בלינקדאין ↗︎',
+            publishedCompany: (date) => `נכתב לבלוג של חברה שעבדתי בה, ${date}`,
+            shortOnLinkedIn: 'גרסה קצרה פורסמה בלינקדאין ↗︎',
             previous: 'הקודם',
             next: 'הבא',
             previousInSeries: 'הקודם בסדרה',
@@ -301,6 +307,8 @@ export const WRITING: Localized<WritingCopy> = {
             original: 'The original post ↗︎',
             publishedOn: (date) => `Originally published ${date}`,
             originalLinkedIn: 'The original post on LinkedIn ↗︎',
+            publishedCompany: (date) => `Written for the blog of a company I worked at, ${date}`,
+            shortOnLinkedIn: 'A short version went out on LinkedIn ↗︎',
             previous: 'Previous',
             next: 'Next',
             previousInSeries: 'Previous in the series',

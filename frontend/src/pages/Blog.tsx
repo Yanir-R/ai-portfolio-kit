@@ -496,6 +496,7 @@ const Blog: React.FC = () => {
                     label={copy.panel.label}
                     closeLabel={copy.panel.close}
                     onClose={() => setParam(PARAM.read, '')}
+                    pageScrolls
                     header={
                         <Link to={to(`/blog/${reader.slug}`)}>
                             <Arrow>{copy.panel.full}</Arrow>

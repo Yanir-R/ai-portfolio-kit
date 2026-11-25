@@ -39,6 +39,9 @@ const ScrollOnNavigate: React.FC = () => {
     // address by an earlier click (the hero's "book a call" leads to #brief)
     // would otherwise send the page to that section on every refresh.
     const reloaded = useRef(isReload());
+    // A change to the query alone (a blog filter, a post opened in the side
+    // panel) keeps the reader where they were; a new page starts at the top.
+    const lastPath = useRef(pathname);
 
     useEffect(() => {
         if (reloaded.current) {
@@ -61,6 +64,9 @@ const ScrollOnNavigate: React.FC = () => {
             document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView();
             return;
         }
+        const samePage = lastPath.current === pathname;
+        lastPath.current = pathname;
+        if (samePage) return;
         window.scrollTo(0, 0);
     }, [pathname, search, hash, navigate, openCv, openContact]);
 
