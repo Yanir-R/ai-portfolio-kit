@@ -12,6 +12,7 @@ import {
     llmsTxt,
 } from './seo/prerender.mjs';
 import { siteGraph } from './seo/facts.mjs';
+import { versionedPublic } from './seo/versioned.mjs';
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -427,6 +428,12 @@ export default defineConfig(({ mode, command }) => {
                                         null,
                                         2
                                     ).replace(/</g, '\\u003c')}\n</script>`
+                            )
+                            // The home card by content, so a redrawn card is a new
+                            // address to LinkedIn and WhatsApp; see seo/versioned.mts.
+                            .replaceAll(
+                                '%VITE_SITE_URL%/og-image.png',
+                                `%VITE_SITE_URL%${versionedPublic('/og-image.png')}`
                             )
                             .replaceAll('%VITE_SITE_URL%', resolvedSiteUrl),
                 },

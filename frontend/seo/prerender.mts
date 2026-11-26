@@ -49,6 +49,7 @@ import {
     writingCard,
     type ShareCard,
 } from './share.mjs';
+import { versionedCard, versionedPublic } from './versioned.mjs';
 
 // Section headings that are metadata rather than prose, per docs_helper.py.
 // PROJECT_METADATA_SECTIONS and WRITING_SECTIONS there; keep in step.
@@ -114,7 +115,12 @@ const twins = (route: string): Record<Lang, string> => ({
 
 const DIR: Record<Lang, 'rtl' | 'ltr'> = { he: 'rtl', en: 'ltr' };
 
-const SHARE_CARD: Record<Lang, string> = { he: '/og-image.png', en: '/og-image-en.png' };
+// The home card in each language, linked by content so a redrawn card is
+// fetched again; see versioned.mts.
+const SHARE_CARD: Record<Lang, string> = {
+    he: versionedPublic('/og-image.png'),
+    en: versionedPublic('/og-image-en.png'),
+};
 
 // Copy the prerendered pages need beyond the documents themselves.
 const COPY = {
@@ -354,7 +360,7 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                 page(route, {
                     title: w.title,
                     description,
-                    image: `/${share.file}`,
+                    image: versionedCard(`/${share.file}`, share, share.image),
                     card: true,
                     share,
                     ogType: 'article',
@@ -487,7 +493,7 @@ export const buildPages = (docsRoot: string, siteUrl: string): Page[] => {
                 page(route, {
                     title: p.title,
                     description,
-                    image: `/${share.file}`,
+                    image: versionedCard(`/${share.file}`, share, share.image),
                     card: true,
                     share,
                     ogType: 'article',

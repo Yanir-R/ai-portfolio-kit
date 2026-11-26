@@ -17,6 +17,8 @@
  *   - no email address here: see the comment in index.html
  */
 
+import { versionedPublic } from './versioned.mjs';
+
 export const PERSON = {
     name: 'Yanir Rot',
     nameHe: 'יניר רוט',
@@ -107,7 +109,7 @@ export const siteGraph = (siteUrl: string) => {
                 name: PERSON.name,
                 alternateName: PERSON.nameHe,
                 url: `${siteUrl}/`,
-                image: `${siteUrl}/og-image.png`,
+                image: `${siteUrl}${versionedPublic('/og-image.png')}`,
                 jobTitle: PERSON.jobTitle,
                 description: PERSON.description,
                 knowsAbout: PERSON.knowsAbout,
@@ -124,7 +126,7 @@ export const siteGraph = (siteUrl: string) => {
                 name: `${PERSON.name} - ${PERSON.tagline}`,
                 alternateName: `${PERSON.nameHe} - ${PERSON.taglineHe}`,
                 url: `${siteUrl}/`,
-                image: `${siteUrl}/og-image.png`,
+                image: `${siteUrl}${versionedPublic('/og-image.png')}`,
                 founder: { '@id': person },
                 areaServed: { '@type': 'Country', name: 'Israel' },
                 availableLanguage: ['Hebrew', 'English'],
